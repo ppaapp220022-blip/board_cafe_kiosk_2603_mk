@@ -1,12 +1,16 @@
 package org.example.board_cafe_kiosk_2603.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.example.board_cafe_kiosk_2603.dto.admin.MacroMessageResponseDTO;
+import org.example.board_cafe_kiosk_2603.service.admin.macro.MacroMessageService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Admin 관리자 페이지 컨트롤러
@@ -18,7 +22,9 @@ import java.util.*;
 @Log4j2
 @Controller
 @RequestMapping("/admin")
+@RequiredArgsConstructor
 public class AdminController {
+    private final MacroMessageService macroMessageService;
 
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
@@ -187,27 +193,34 @@ public class AdminController {
     @GetMapping("/macro")
     public String getAllMacro(Model model) {
         log.info("--- AdminController getAllMacro get ---");
-        // 화면 확인을 위한 더미 데이터 (추후 DB 연동)
-        // 화면 확인을 위한 더미 데이터 (추후 DB 연동)
-        List<String> macroMassage = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            String massage = "Macro Massage Test " + i;
-            macroMassage.add(massage);
-        }
+        List<MacroMessageResponseDTO> macroList = macroMessageService.getAllActiveMessages();
 
-        model.addAttribute("macroMassages", macroMassage);
+        // direction별로 그룹핑 (예: "STAFF_TO_TABLE" -> 리스트, "CUSTOMER_TO_STAFF" -> 리스트)
+        Map<String, List<MacroMessageResponseDTO>> macroGroups = macroList.stream()
+                .collect(Collectors.groupingBy(MacroMessageResponseDTO::getDirection));
 
-        // 중요: 사이드바 하이라이트를 위해 'pointManagement' 전달
-        model.addAttribute("activePage", "macroMassage");
-
+        model.addAttribute("macroGroups", macroGroups);
         return "admin/macro";
     }
 
     // 패키지 요금 정책
     @GetMapping("/package")
-    public String addPackage() {
+    public String addPackage(Model model) {
         log.info("--- AdminController addPackage post ---");
+
+        // 중요: 사이드바 하이라이트를 위해 'pointManagement' 전달
+        model.addAttribute("activePage", "packageManagement");
         return "admin/package";
+    }
+
+    // 패키지 요금 정책
+    @GetMapping("/staff")
+    public String getAllStaff(Model model) {
+        log.info("--- AdminController getAllStaff post ---");
+
+        // 중요: 사이드바 하이라이트를 위해 'pointManagement' 전달
+        model.addAttribute("activePage", "staffManagement");
+        return "admin/staff";
     }
 
 }

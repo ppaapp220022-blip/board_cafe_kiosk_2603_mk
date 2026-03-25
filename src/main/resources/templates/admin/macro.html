@@ -8,145 +8,88 @@
   <title>Macro Management</title>
   <th:block layout:fragment="head-extra">
     <style>
-      .page-title {
-        font-size: 28px;
-        font-weight: 700;
-        margin-bottom: 24px;
+      .page-title { font-size: 28px; font-weight: 700; margin-bottom: 24px; }
+      .table-container { background: white; border-radius: 15px; padding: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
+      .macro-massage-table { width: 100%; border-collapse: collapse; }
+      .macro-massage-table th { text-align: left; padding: 15px 20px; border-bottom: 2px solid #f8f9fa; color: #666; font-size: 13px; font-weight: 600; }
+      .macro-massage-table td { padding: 18px 20px; border-bottom: 1px solid #f8f9fa; font-size: 15px; }
+      .macro-massage-table tr:hover { background-color: #f8fbff; }
+      .messageText { font-weight: 600; color: #333; }
+
+      /* 탭 버튼 스타일 */
+      .tabs {
+        display: flex; gap: 10px; margin-bottom: 30px;
+        background: white; padding: 8px; border-radius: 12px;
+        width: fit-content; box-shadow: var(--card-shadow);
       }
 
-      /* 테이블 영역 */
-      .table-container {
-        background: white;
-        border-radius: 15px;
-        padding: 10px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      .tab-btn {
+        padding: 10px 25px; border-radius: 8px; border: none;
+        cursor: pointer; font-weight: 600; background: transparent;
+        color: #666; transition: 0.2s;
       }
-
-      .macro-massage-table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-
-      .macro-massage-table th {
-        text-align: left;
-        padding: 15px 20px;
-        border-bottom: 2px solid var(--bg-light);
-        color: var(--text-gray);
-        font-size: 13px;
-        font-weight: 600;
-      }
-
-      .macro-massage-table td {
-        padding: 18px 20px;
-        border-bottom: 1px solid var(--bg-light);
-        font-size: 15px;
-      }
-
-      .macro-massage-table tr:last-child td {
-        border-bottom: none;
-      }
-
-      .macro-massage-table tr:hover {
-        background-color: #f8fbff;
-      }
-
-      .phone-num {
-        font-weight: 600;
-        color: var(--text-dark);
-      }
-
-      .balance-text {
-        font-weight: 700;
-        color: var(--primary-blue);
-      }
-
-      .update-date {
-        color: var(--text-gray);
-        font-size: 13px;
-      }
-
-      .history-btn {
-        padding: 8px 16px;
-        border-radius: 8px;
-        border: 1px solid var(--primary-blue);
-        background: transparent;
-        color: var(--primary-blue);
-        font-size: 12px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: 0.2s;
-      }
-
-      .history-btn:hover {
+      .tab-btn.active {
         background: var(--primary-blue);
-        color: white;
-      }
+        color: white; }
     </style>
   </th:block>
 </head>
 
 <body>
-<!--
-  ※ Controller 작성 가이드 (MacroController.java)
-  -------------------------------------------------
-  @GetMapping("/macros")
-  public String macros(Model model) {
-      model.addAttribute("activePage", "macroSettings");
-      model.addAttribute("isAdmin", true);
-      // 카테고리별로 그룹핑해서 Map<String, List<MacroDto>> 로 전달하거나
-      // 카테고리 목록과 전체 리스트를 별도 전달
-      model.addAttribute("macroGroups", macroService.findAllGrouped()); // Map<String, List<MacroDto>>
-      return "pages/macro";
-  }
-
-  @PostMapping("/macros")
-  public String addMacro(@RequestParam String category,
-                         @RequestParam String message) {
-      macroService.save(category, message);
-      return "redirect:/macros";
-  }
-
-  @PostMapping("/macros/{id}/delete")
-  public String deleteMacro(@PathVariable Long id) {
-      macroService.delete(id);
-      return "redirect:/macros";
-  }
-
-  MacroDto 필드:
-    - Long   id       : PK
-    - String category : 카테고리 ("order" | "service" 등)
-    - String message  : 메시지 내용
-    - String iconClass: 아이콘 CSS 클래스 (bg-blue, bg-green 등)
-
-  macroGroups 구조 예시 (Map):
-    "Order Status"   → [MacroDto, MacroDto, ...]
-    "Service Request"→ [MacroDto, ...]
--->
 <th:block layout:fragment="content">
   <h1 class="page-title">💬 매크로 메시지 확인</h1>
 
+  <div class="tabs">
+    <button th:each="entry, stat : ${macroGroups}"
+            class="tab-btn"
+            th:classappend="${stat.first} ? 'active' : ''"
+            th:onclick="'openTab(event, \'content-' + ${stat.index} + '\')'"
+            th:text="${entry.key == 'ETC' ? '기타' : entry.key}">탭이름</button>
+  </div>
+
   <div class="table-container">
-    <table class="macro-massage-table">
-      <thead>
-      <tr>
-        <th>내용</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr th:each="massage : ${macroMassages}">
-        <td class="phone-num" th:text="${massage}"></td>
-      </tr>
-      <tr th:if="${#lists.isEmpty(macroMassages)}">
-        <td colspan="4" style="text-align: center; color: #aaa; padding: 40px;">등록된 메크로 메세지 내역이 없습니다.</td>
-      </tr>
-      </tbody>
-    </table>
+    <div th:each="entry, stat : ${macroGroups}"
+         th:id="'content-' + ${stat.index}"
+         class="tab-content"
+         th:style="${stat.first} ? 'display: block' : 'display: none'">
+
+      <table class="macro-massage-table">
+        <thead>
+        <tr><th th:text="|메시지 목록|">내용</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="macro : ${entry.value}">
+          <td class="messageText" th:text="${macro.messageText}">메시지 내용</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div th:if="${#maps.isEmpty(macroGroups)}" style="text-align: center; color: #aaa; padding: 40px;">
+      등록된 매크로 메시지 내역이 없습니다.
+    </div>
   </div>
 </th:block>
 
 <th:block layout:fragment="scripts">
   <script>
+    function openTab(evt, contentId) {
+      // 1. 모든 컨텐츠 숨기기
+      const contents = document.getElementsByClassName("tab-content");
+      for (let i = 0; i < contents.length; i++) {
+        contents[i].style.display = "none";
+      }
 
+      // 2. 모든 버튼 활성화 해제
+      const btns = document.getElementsByClassName("tab-btn");
+      for (let i = 0; i < btns.length; i++) {
+        btns[i].classList.remove("active");
+      }
+
+      // 3. 선택된 컨텐츠 보이기 및 버튼 활성화
+      document.getElementById(contentId).style.display = "block";
+      evt.currentTarget.classList.add("active");
+    }
   </script>
 </th:block>
 </body>

@@ -211,7 +211,7 @@ CREATE TABLE `orders`
     `ordered_at`     TIMESTAMP                                                                                NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '주문 생성 일시',
     PRIMARY KEY (`id`),
     CONSTRAINT `fk_orders_table` FOREIGN KEY (`table_id`) REFERENCES `cafe_table` (`id`),
-    CONSTRAINT `fk_orders_package` FOREIGN KEY (`package_id`) REFERENCES `package` (`id`)
+    CONSTRAINT `fk_orders_package` FOREIGN KEY (`package_id`) REFERENCES cafe_package (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='주문 헤더.';
 
@@ -367,7 +367,7 @@ VALUES ('커피/음료', 'DRINK'),
        ('파티 게임', 'GAME');
 
 -- 4. 패키지 요금
-INSERT INTO `package` (`name`, `type`, `duration_minutes`, `base_price`, `extra_price_per_min`)
+INSERT INTO cafe_package (`name`, `type`, `duration_minutes`, `base_price`, `extra_price_per_min`)
 VALUES ('평일 1시간 권', 'HOURLY', 60, 3000, 50.00),
        ('평일 무제한 권', 'FREE', NULL, 15000, 0.00),
        ('주말 3시간 패키지', 'FIXED_TIME', 180, 8000, 70.00);

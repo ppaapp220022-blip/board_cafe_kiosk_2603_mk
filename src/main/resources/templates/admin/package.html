@@ -8,131 +8,80 @@
   <title>Macro Management</title>
   <th:block layout:fragment="head-extra">
     <style>
+      /* 🎨 전체 레이아웃 및 타이틀 */
       .page-title { font-size: 28px; font-weight: 700; margin-bottom: 24px; color: var(--text-dark); }
       .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
 
-      /* 테이블 스타일 */
+      /* 📱 iOS 스타일 탭 컨테이너 */
+      .tab-container {
+        display: inline-flex;
+        background: #F2F2F7; /* 연한 그레이 배경 */
+        padding: 4px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+        box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+      }
+
+      .tab-item {
+        padding: 8px 20px;
+        border-radius: 9px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+        background: transparent;
+        color: #8E8E93; /* 비활성 글자색 */
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      /* 활성화된 탭: 흰색 배경 + 그림자 + 파란 글씨 */
+      .tab-item.active {
+        background: #007bff; color: white;
+      }
+
+      .tab-count {
+        font-size: 11px;
+        background: rgba(142, 142, 147, 0.15);
+        padding: 2px 7px;
+        border-radius: 10px;
+        font-weight: 700;
+      }
+
+      .tab-item.active .tab-count {
+        background: rgba(0, 122, 255, 0.1);
+        color: #007AFF;
+      }
+
+      /* 📦 테이블 컨테이너 */
       .table-container {
         background: white;
         border-radius: 15px;
         padding: 10px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        overflow-x: auto;
       }
+
       .macro-massage-table { width: 100%; border-collapse: collapse; }
       .macro-massage-table th {
         text-align: left; padding: 15px 20px;
-        border-bottom: 2px solid var(--bg-light);
-        color: var(--text-gray); font-size: 13px; font-weight: 600;
-        white-space: nowrap;
+        border-bottom: 2px solid #F2F2F7;
+        color: #8E8E93; font-size: 13px; font-weight: 600;
       }
       .macro-massage-table td {
-        padding: 18px 20px; border-bottom: 1px solid var(--bg-light);
-        font-size: 15px; color: var(--text-dark); vertical-align: middle;
+        padding: 18px 20px; border-bottom: 1px solid #F2F2F7;
+        font-size: 15px; color: #1C1C1E;
       }
-
-      /* 🍏 상태 배지 스타일 (눈에 확 띄게 수정) */
-      .status-badge {
-        display: inline-flex;
-        padding: 6px 12px;
-        border-radius: 8px; /* 약간 각진 부드러운 사각형 */
-        font-size: 12px;
-        font-weight: 700;
-      }
-      .status-active {
-        background-color: #34C759; /* iOS Success Green */
-        color: white;
-        box-shadow: 0 2px 4px rgba(52, 199, 89, 0.2);
-      }
-      .status-inactive {
-        background-color: #8E8E93; /* iOS Gray */
-        color: white;
-      }
-
-      /* 비활성화 행 스타일 */
-      tr.is-disabled {
-        background-color: #F9F9F9;
-        opacity: 0.6;
-      }
+      .macro-massage-table tr:hover { background-color: #F8FBFF; }
 
       /* 버튼 스타일 */
       .btn-primary {
-        padding: 10px 20px; border-radius: 8px;
-        background: var(--primary-blue); color: white;
-        border: none; font-size: 14px; font-weight: 600; cursor: pointer;
+        padding: 10px 20px; border-radius: 10px;
+        background: #007AFF; color: white; border: none;
+        font-weight: 600; cursor: pointer; transition: 0.2s;
       }
-      .btn-text {
-        padding: 8px 16px; border-radius: 8px;
-        border: 1px solid #E5E5EA; background: white;
-        font-size: 12px; font-weight: 600; cursor: pointer;
-      }
-      .btn-text.text-danger {
-        color: #FF3B30; border-color: #FF3B30;
-      }
-      .btn-text.text-active {
-        color: #007AFF; border-color: #007AFF;
-      }
-
-      /* 모달 스타일 생략 (기존 스타일 유지) */
-      .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; z-index: 9999; }
-      .modal-content { background: white; border-radius: 24px; padding: 28px; width: 90%; max-width: 400px; animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-      @keyframes modalPop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-      .form-group { margin-bottom: 20px; }
-      .form-group label { display: block; font-size: 13px; font-weight: 600; color: #8E8E93; margin-bottom: 8px; }
-      .form-group input { width: 100%; height: 48px; padding: 0 16px; background: #F2F2F7; border: 2px solid transparent; border-radius: 12px; font-size: 16px; box-sizing: border-box; outline: none; }
-      .form-group input:focus { background: white; border-color: #007AFF; }
-      .form-row { display: flex; gap: 12px; }
-      /* 4. 음료 포함 여부 (세그먼트 컨트롤 - 수직/수평 완전 중앙 정렬) */
-      .toggle-group {
-        display: flex;
-        background: #F2F2F7;
-        padding: 3px;
-        border-radius: 12px;
-        gap: 0;
-        height: 46px; /* 높이 고정 */
-        align-items: stretch;
-        box-sizing: border-box;
-      }
-
-      .radio-label {
-        flex: 1;
-        display: flex;
-        position: relative;
-        cursor: pointer;
-        margin: 0 !important;
-        padding: 0 !important;
-        -webkit-tap-highlight-color: transparent;
-      }
-
-      /* 실제 라디오 인풋 숨기기 */
-      .radio-label input[type="radio"] {
-        position: absolute;
-        opacity: 0;
-        width: 0;
-        height: 0;
-      }
-
-      /* 글자가 담긴 span을 중앙으로 정렬 */
-      .radio-label span {
-        flex: 1;
-        display: flex;
-        align-items: center;    /* 수직 중앙 */
-        justify-content: center; /* 수평 중앙 */
-        font-size: 14px;
-        font-weight: 600;
-        color: #8E8E93;
-        border-radius: 9px;
-        transition: all 0.2s ease;
-        height: 100%;           /* 부모 높이 꽉 채우기 */
-        line-height: 1;         /* 줄간격 때문에 쏠리는 현상 방지 */
-      }
-
-      /* 선택되었을 때 흰색 배경과 파란 글씨 */
-      .radio-label input:checked + span {
-        background-color: #FFFFFF;
-        color: #007AFF;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      }
+      .btn-primary:hover { background: #0051FF; transform: translateY(-1px); }
     </style>
   </th:block>
 </head>
@@ -141,139 +90,64 @@
 <th:block layout:fragment="content">
   <div class="header-container">
     <h1 class="page-title">⚡ 요금 정책</h1>
-    <button class="btn btn-primary" onclick="openPolicyModal()">+ 새 정책 추가</button>
+  </div>
+
+  <div class="tab-container">
+    <div th:each="entry, stat : ${macroGroups}"
+         class="tab-item"
+         th:classappend="${stat.first} ? 'active' : ''"
+         th:onclick="'filterTab(this, \'tab-' + ${stat.index} + '\')'">
+      <span th:text="${entry.key == 'ETC' ? '기타' : entry.key}">카테고리</span>
+      <span class="tab-count" th:text="${#lists.size(entry.value)}">0</span>
+    </div>
   </div>
 
   <div class="table-container">
-    <table class="macro-massage-table">
-      <thead>
-      <tr>
-        <th>정책 명칭</th>
-        <th>이용 시간</th>
-        <th>금액</th>
-        <th>음료 포함</th>
-        <th>상태</th> <th style="text-align: right;">관리</th>
-      </tr>
-      </thead>
-      <tbody id="policyTableBody">
-      <tr>
-        <td class="policy-name">프리미엄 2시간 코스</td>
-        <td>120분</td>
-        <td>12,000원</td>
-        <td><span class="text-include">포함</span></td>
-        <td><span class="status-badge status-active">적용 중</span></td>
-        <td style="text-align: right;">
-          <button class="btn-text text-danger" onclick="toggleStatus(this)">비활성화</button>
-        </td>
-      </tr>
-      <tr class="is-disabled">
-        <td class="policy-name">굿모닝 얼리버드</td>
-        <td>60분</td>
-        <td>4,000원</td>
-        <td><span>미포함</span></td>
-        <td><span class="status-badge status-inactive">비활성</span></td>
-        <td style="text-align: right;">
-          <button class="btn-text text-active" onclick="toggleStatus(this)">활성화</button>
-        </td>
-      </tr>
-      </tbody>
-    </table>
-  </div>
+    <div th:each="entry, stat : ${macroGroups}"
+         th:id="'tab-' + ${stat.index}"
+         class="tab-content"
+         th:style="${stat.first} ? 'display: block' : 'display: none'">
 
-  <div id="policyModal" class="modal-overlay" onclick="closePolicyModal(event)">
-    <div class="modal-content" onclick="event.stopPropagation()">
-      <div class="modal-header"><h3 style="margin-bottom: 24px; text-align: center;">새 정책 추가</h3></div>
-      <form id="policyForm">
-        <div class="form-group">
-          <label>정책 명칭</label>
-          <input type="text" id="policyName" placeholder="예: 평일 2시간 패키지">
-        </div>
-        <div class="form-row">
-          <div class="form-group" style="flex:1">
-            <label>이용 시간 (분)</label>
-            <input type="number" id="baseTime" value="60">
-          </div>
-          <div class="form-group" style="flex:1">
-            <label>금액 (원)</label>
-            <input type="number" id="basePrice" value="5000">
-          </div>
-        </div>
-        <div class="toggle-group">
-          <label class="radio-label">
-            <input type="radio" name="includeDrink" value="true" checked>
-            <span>포함</span>
-          </label>
-          <label class="radio-label">
-            <input type="radio" name="includeDrink" value="false">
-            <span>미포함</span>
-          </label>
-        </div>
-      </form>
-      <div style="display: flex; gap: 10px; margin-top: 24px;">
-        <button class="btn-text" style="flex:1" onclick="closePolicyModal()">취소</button>
-        <button class="btn-primary" style="flex:1.5" onclick="savePolicy()">정책 저장</button>
-      </div>
+      <table class="macro-massage-table">
+        <thead>
+        <tr>
+          <th>번호</th>
+          <th>메시지 내용</th>
+          <th style="text-align: right;">관리</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="macro, mStat : ${entry.value}">
+          <td th:text="${mStat.count}" style="color: #8E8E93; width: 60px;">1</td>
+          <td class="messageText" th:text="${macro.messageText}">메시지 내용이 출력됩니다.</td>
+          <td style="text-align: right;">
+            <button class="btn-primary" style="padding: 6px 12px; font-size: 12px; background: #F2F2F7; color: #007AFF;">수정</button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div th:if="${#maps.isEmpty(macroGroups)}" style="text-align: center; color: #8E8E93; padding: 60px;">
+      <p style="font-size: 40px; margin-bottom: 10px;">empty</p>
+      <p>등록된 매크로 메시지가 없습니다.</p>
     </div>
   </div>
 </th:block>
 
 <th:block layout:fragment="scripts">
   <script>
-    const tableBody = document.getElementById('policyTableBody');
+    function filterTab(element, contentId) {
+      // 1. 모든 탭 아이템에서 active 제거
+      document.querySelectorAll('.tab-item').forEach(tab => tab.classList.remove('active'));
+      // 2. 클릭한 탭에 active 추가
+      element.classList.add('active');
 
-    function openPolicyModal() { document.getElementById('policyModal').style.display = 'flex'; }
-    function closePolicyModal() { document.getElementById('policyModal').style.display = 'none'; document.getElementById('policyForm').reset(); }
-
-    function savePolicy() {
-      const name = document.getElementById('policyName').value;
-      const time = document.getElementById('baseTime').value;
-      const price = document.getElementById('basePrice').value;
-      const includeDrink = document.querySelector('input[name="includeDrink"]:checked').value === "true";
-
-      if(!name || !time || !price) { alert("입력값을 확인해주세요."); return; }
-
-      const newRow = document.createElement('tr');
-      newRow.innerHTML = `
-        <td class="policy-name">${name}</td>
-        <td>${time}분</td>
-        <td>${Number(price).toLocaleString()}원</td>
-        <td><span class="${includeDrink ? 'text-include' : ''}">${includeDrink ? '포함' : '미포함'}</span></td>
-        <td><span class="status-badge status-active">적용 중</span></td>
-        <td style="text-align: right;">
-          <button class="btn-text text-danger" onclick="toggleStatus(this)">비활성화</button>
-        </td>
-      `;
-      tableBody.prepend(newRow);
-      sortTable();
-      closePolicyModal();
+      // 3. 모든 컨텐츠 숨기기
+      document.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
+      // 4. 선택한 컨텐츠만 보이기
+      document.getElementById(contentId).style.display = 'block';
     }
-
-    function toggleStatus(btn) {
-      const row = btn.closest('tr');
-      const statusCell = row.cells[4];
-      const isDisabling = !row.classList.contains('is-disabled');
-
-      if (isDisabling) {
-        row.classList.add('is-disabled');
-        statusCell.innerHTML = '<span class="status-badge status-inactive">비활성</span>';
-        btn.textContent = "활성화";
-        btn.className = "btn-text text-active";
-      } else {
-        row.classList.remove('is-disabled');
-        statusCell.innerHTML = '<span class="status-badge status-active">적용 중</span>';
-        btn.textContent = "비활성화";
-        btn.className = "btn-text text-danger";
-      }
-      sortTable();
-    }
-
-    function sortTable() {
-      const rows = Array.from(tableBody.querySelectorAll('tr'));
-      rows.sort((a, b) => a.classList.contains('is-disabled') - b.classList.contains('is-disabled'));
-      rows.forEach(row => tableBody.appendChild(row));
-    }
-
-    window.onload = sortTable;
   </script>
 </th:block>
 </body>
