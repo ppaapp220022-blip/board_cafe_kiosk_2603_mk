@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.board_cafe_kiosk_2603.mapper.kiosk.TableSessionMapper">
+
+    <resultMap id="TableSessionResultMap" type="org.example.board_cafe_kiosk_2603.domain.kiosk.TableSession">
+        <id     property="id"              column="id"/>
+        <result property="tableId"         column="table_id"/>
+        <result property="packageId"       column="package_id"/>
+        <result property="initialGuestCnt" column="initial_guest_cnt"/>
+        <result property="checkInTime"     column="check_in_time"/>
+        <result property="checkOutTime"    column="check_out_time"/>
+        <result property="isActive"        column="is_active"/>
+        <result property="totalAmount"     column="total_amount"/>
+    </resultMap>
+
+    <!-- 세션 생성 (체크인) -->
+    <insert id="insert" parameterType="org.example.board_cafe_kiosk_2603.domain.kiosk.TableSession"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO table_session (table_id, package_id, initial_guest_cnt)
+        VALUES (#{tableId}, #{packageId}, #{initialGuestCnt})
+    </insert>
+
+    <!-- 활성 세션 조회 (테이블 ID로) -->
+    <select id="findActiveByTableId" parameterType="int" resultMap="TableSessionResultMap">
+        SELECT id, table_id, package_id, initial_guest_cnt,
+               check_in_time, check_out_time, is_active, total_amount
+        FROM table_session
+        WHERE table_id = #{tableId}
+          AND is_active = TRUE
+        ORDER BY check_in_time DESC
+        LIMIT 1
+    </select>
+
+    <!-- 세션 ID로 단건 조회 -->
+    <select id="findById" parameterType="long" resultMap="TableSessionResultMap">
+        SELECT id, table_id, package_id, initial_guest_cnt,
+               check_in_time, check_out_time, is_active, total_amount
+        FROM table_session
+        WHERE id = #{id}
+    </select>
+
+    <!-- 체크아웃 — is_active=false, check_out_time 설정, total_amount 확정 -->
+    <update id="checkOut" parameterType="org.example.board_cafe_kiosk_2603.domain.kiosk.TableSession">
+        UPDATE table_session
+        SET is_active      = FALSE,
+            check_out_time = CURRENT_TIMESTAMP,
+            total_amount   = #{totalAmount}
+        WHERE id = #{id}
+    </update>
+
+    <!-- total_amount 증분 업데이트 (주문 추가 시) -->
+    <update id="updateTotalAmount">
+        UPDATE table_session
+        SET total_amount = #{totalAmount}
+        WHERE id = #{id}
+    </update>
+
+</mapper>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.board_cafe_kiosk_2603.mapper.admin.PointMapper">
+
+    <!-- ===== point 테이블 ===== -->
+
+    <resultMap id="PointResultMap" type="org.example.board_cafe_kiosk_2603.domain.admin.Point">
+        <id     property="id"        column="id"/>
+        <result property="phone"     column="phone"/>
+        <result property="balance"   column="balance"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <resultMap id="PointHistoryResultMap" type="org.example.board_cafe_kiosk_2603.domain.admin.PointHistory">
+        <id     property="id"           column="id"/>
+        <result property="pointId"      column="point_id"/>
+        <result property="orderId"      column="order_id"/>
+        <result property="type"         column="type"/>
+        <result property="amount"       column="amount"/>
+        <result property="balanceAfter" column="balance_after"/>
+        <result property="createdAt"    column="created_at"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="PointResultMap">
+        SELECT id, phone, balance, updated_at
+        FROM point
+        ORDER BY updated_at DESC
+    </select>
+
+    <select id="findByPhone" parameterType="String" resultMap="PointResultMap">
+        SELECT id, phone, balance, updated_at
+        FROM point
+        WHERE phone = #{phone}
+    </select>
+
+    <insert id="insert" parameterType="org.example.board_cafe_kiosk_2603.domain.admin.Point"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO point (phone, balance)
+        VALUES (#{phone}, #{balance})
+    </insert>
+
+    <update id="updateBalance" parameterType="org.example.board_cafe_kiosk_2603.domain.admin.Point">
+        UPDATE point
+        SET balance = #{balance}
+        WHERE id = #{id}
+    </update>
+
+    <select id="sumTotalBalance" resultType="int">
+        SELECT COALESCE(SUM(balance), 0)
+        FROM point
+    </select>
+
+    <select id="countAll" resultType="int">
+        SELECT COUNT(*)
+        FROM point
+    </select>
+
+    <!-- ===== point_history 테이블 ===== -->
+
+    <select id="findHistoryByPointId" parameterType="int" resultMap="PointHistoryResultMap">
+        SELECT id, point_id, order_id, type, amount, balance_after, created_at
+        FROM point_history
+        WHERE point_id = #{pointId}
+        ORDER BY created_at DESC
+    </select>
+
+    <insert id="insertHistory" parameterType="org.example.board_cafe_kiosk_2603.domain.admin.PointHistory"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO point_history (point_id, order_id, type, amount, balance_after)
+        VALUES (#{pointId}, #{orderId}, #{type}, #{amount}, #{balanceAfter})
+    </insert>
+
+</mapper>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <title>Member Login - Board Game Cafe</title>
@@ -175,8 +175,12 @@
   </div>
 </div>
 
-<script>
+<script th:inline="javascript">
   lucide.createIcons();
+
+  // 서버에서 주입된 값 (세션 기반이므로 URL 파라미터보다 신뢰도 높음)
+  const TABLE_NUMBER = /*[[${tableNumber}]]*/ 1;
+  const PARTY_SIZE   = /*[[${partySize}]]*/ 1;
 
   let rawNumber = "";
 
@@ -217,22 +221,62 @@
     }
   }
 
-  // 확인 버튼 - 전화번호를 폼에 담아서 POST 전송
   function identifyMember() {
-    if (rawNumber.length >= 10) {
-      const formatted = rawNumber.slice(0, 3) + "-"
-      + rawNumber.slice(3, 7) + "-" + rawNumber.slice(7);
-      document.getElementById('phone-input').value = formatted;
-      document.getElementById('phone-form').submit();
-    }
+    if (rawNumber.length < 10) return;
+
+    const btn = document.getElementById('next-button');
+    btn.disabled = true;
+    btn.innerHTML = '<i data-lucide="loader" style="width:20px;"></i> 조회 중...';
+    lucide.createIcons();
+
+    // 전화번호 포맷 (010-XXXX-XXXX)
+    const formatted = rawNumber.slice(0,3) + '-' + rawNumber.slice(3,7) + '-' + rawNumber.slice(7);
+
+    fetch(`/kiosk/point/lookup?phone=${encodeURIComponent(formatted)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.exists) {
+          showToast(`환영합니다! 현재 포인트: ${data.balance.toLocaleString()}P`, 'success');
+          setTimeout(() => location.href = `/kiosk/package_selection?tableNumber=${TABLE_NUMBER}&size=${PARTY_SIZE}`, 1800);
+        } else {
+          showToast('신규 회원으로 등록되었습니다! 포인트 적립이 시작됩니다.', 'info');
+          setTimeout(() => location.href = `/kiosk/package_selection?tableNumber=${TABLE_NUMBER}&size=${PARTY_SIZE}`, 1800);
+        }
+      })
+      .catch(() => {
+        showToast('오류가 발생했습니다. 다시 시도해주세요.', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="check-circle" style="width:20px;"></i> 확인 및 조회';
+        lucide.createIcons();
+      });
   }
 
-  // 적립없이 계속 버튼 - phone 빈값으로 POST 전송
   function skipStep() {
-    if (confirm("포인트 적립을 포기하시겠습니까?")) {
-      document.getElementById('phone-input').value = "";
-      document.getElementById('phone-form').submit();
-    }
+    // 포인트 조회 없이 패키지 선택으로 바로 이동
+    location.href = `/kiosk/package_selection?tableNumber=${TABLE_NUMBER}&size=${PARTY_SIZE}`;
+  }
+
+  function getTableNumber() {
+    return TABLE_NUMBER;
+  }
+
+  function getPartySize() {
+    return PARTY_SIZE;
+  }
+
+  function showToast(message, type) {
+    const colors = { success: '#2e7d32', info: '#1565c0', error: '#c62828' };
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+      position:fixed; bottom:40px; left:50%; transform:translateX(-50%);
+      background:${colors[type] || '#333'}; color:white;
+      padding:16px 28px; border-radius:14px; font-size:1rem; font-weight:600;
+      z-index:9999; box-shadow:0 8px 24px rgba(0,0,0,0.2);
+      animation: fadeIn 0.3s ease;
+    `;
+    toast.innerText = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2500);
   }
 </script>
 </body>

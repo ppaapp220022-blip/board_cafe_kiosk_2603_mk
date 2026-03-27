@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.board_cafe_kiosk_2603.mapper.kiosk.TossPaymentMapper">
+
+    <resultMap id="TossPaymentResultMap" type="TossPayment">
+        <id     property="id"           column="id"/>
+        <result property="paymentId"    column="payment_id"/>
+        <result property="paymentKey"   column="payment_key"/>
+        <result property="orderIdToss"  column="order_id_toss"/>
+        <result property="method"       column="method"/>
+        <result property="rawResponse"  column="raw_response"/>
+        <result property="approvedAt"   column="approved_at"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="TossPayment">
+        <selectKey keyProperty="id" resultType="int" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO toss_payment (payment_id, payment_key, order_id_toss, method, raw_response, approved_at)
+        VALUES (#{paymentId}, #{paymentKey}, #{orderIdToss}, #{method}, #{rawResponse}, #{approvedAt})
+    </insert>
+
+    <select id="findByPaymentKey" parameterType="String" resultMap="TossPaymentResultMap">
+        SELECT id, payment_id, payment_key, order_id_toss, method, raw_response, approved_at
+        FROM toss_payment
+        WHERE payment_key = #{paymentKey}
+    </select>
+
+    <select id="findByOrderIdToss" parameterType="String" resultMap="TossPaymentResultMap">
+        SELECT id, payment_id, payment_key, order_id_toss, method, raw_response, approved_at
+        FROM toss_payment
+        WHERE order_id_toss = #{orderIdToss}
+    </select>
+
+</mapper>

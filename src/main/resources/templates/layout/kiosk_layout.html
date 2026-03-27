@@ -299,6 +299,11 @@
       border-radius: 20px;
     }
 
+    .quantity-control.disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
     .qty-btn {
       width: 30px;
       height: 30px;
@@ -356,6 +361,32 @@
 
     .add-to-cart-btn:active {
       transform: scale(0.95);
+    }
+
+    .stock-badge {
+      font-size: 0.8rem;
+      color: #888;
+      margin-top: 6px;
+      margin-bottom: 2px;
+    }
+
+    .stock-badge.low {
+      color: #ff9800;
+      font-weight: 600;
+    }
+
+    .sold-out-label {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      background: #e0e0e0;
+      color: #999;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-align: center;
+      cursor: not-allowed;
     }
 
     /* --- 모달 (서비스 호출) --- */
@@ -563,8 +594,7 @@
 
       <button class="icon-btn cart" onclick="navigateCart()" title="장바구니">
         <i data-lucide="shopping-cart"></i>
-        <span class="cart-badge" id="cart-badge" th:if="${cartCount} and ${cartCount} > 0"
-              th:text="${cartCount}" style="display: none;">0</span>
+        <span class="cart-badge" id="cart-badge" th:text="${cartCount}" style="display: none;">0</span>
       </button>
     </div>
   </div>
@@ -572,23 +602,37 @@
   <div class="content">
     <div class="menu-grid" id="menu-grid">
       <th:block th:each="item : ${menuItems}">
-        <div class="menu-item" th:data-name="${item.itemName}" th:data-price="${item.price}">
+        <div class="menu-item" th:data-name="${item.menuName}" th:data-price="${item.menuPrice}">
           <div class="menu-emoji" th:text="${item.emoji}">☕</div>
-          <div class="menu-name" th:text="${item.itemName}">상품명</div>
-          <div class="menu-price" th:classappend="${item.price == 0 ? 'free' : ''}"
-               th:text="${item.price == 0 ? 'FREE' : '₩' + #numbers.formatInteger(item.price, 1, 'COMMA')}">
+          <div class="menu-name" th:text="${item.menuName}">상품명</div>
+          <div class="menu-price" th:classappend="${item.menuPrice == 0 ? 'free' : ''}"
+               th:text="${item.menuPrice == 0 ? 'FREE' : '₩' + #numbers.formatInteger(item.menuPrice, 1, 'COMMA')}">
             ₩5,000
           </div>
 
-          <div class="quantity-control">
-            <button class="qty-btn minus" onclick="decreaseQty(this)"><i data-lucide="minus"></i></button>
-            <span class="qty-number">0</span>
-            <button class="qty-btn plus" onclick="increaseQty(this)"><i data-lucide="plus"></i></button>
+          <!-- 게임 재고 뱃지 (stock >= 0 인 경우만 표시) -->
+          <div th:if="${item.stock >= 0}"
+               class="stock-badge"
+               th:classappend="${item.stock > 0 and item.stock <= 2 ? 'low' : ''}">
+            <span th:if="${item.stock > 0}" th:text="'남은 수량: ' + ${item.stock} + '개'"></span>
+            <span th:if="${item.stock == 0}">품절</span>
           </div>
 
-          <button class="add-to-cart-btn" onclick="addItemToCart(this)" th:if="${item.price > 0}">
+          <div class="quantity-control" th:classappend="${item.stock == 0 ? 'disabled' : ''}">
+            <button class="qty-btn minus" onclick="decreaseQty(this)" th:disabled="${item.stock == 0}"><i data-lucide="minus"></i></button>
+            <span class="qty-number">0</span>
+            <button class="qty-btn plus" onclick="increaseQty(this)" th:disabled="${item.stock == 0}"><i data-lucide="plus"></i></button>
+          </div>
+
+            <!-- stock=-1: 음료·음식(무제한) | stock>0: 게임 대여 가능 | stock=0: 품절 -->
+          <button class="add-to-cart-btn"
+                  onclick="addItemToCart(this)"
+                  th:if="${item.stock == -1 or item.stock > 0}">
             장바구니에 추가
           </button>
+          <div class="sold-out-label" th:if="${item.stock == 0}">
+            품절
+          </div>
         </div>
       </th:block>
     </div>
@@ -647,7 +691,15 @@
     }
   });
 
-  const tableNumber = document.querySelector('.table-info').textContent.replace('Table #', '');
+  const tableNumber = document.querySelector('.table-info').textContent.replace('Table #', '').trim();
+
+  // ===== 페이지 로드 시 장바구니 뱃지 초기화 =====
+  document.addEventListener('DOMContentLoaded', function () {
+    fetch(`/kiosk/cart/items?tableNumber=${tableNumber}`)
+      .then(res => res.json())
+      .then(data => { if (data.success) updateCartBadge(data.cartCount); })
+      .catch(() => {});
+  });
 
   // ===== 메뉴 네비게이션 =====
   function navigateMenu(menu) {
@@ -683,41 +735,36 @@
     }
   }
 
-  // ===== 장바구니 추가 =====
   function addItemToCart(btn) {
     const menuItem = btn.closest('.menu-item');
-    const itemName = menuItem.getAttribute('data-name');
-    const price = parseInt(menuItem.getAttribute('data-price'));
-    const quantity = parseInt(menuItem.querySelector('.qty-number').innerText);
+    const menuName  = menuItem.getAttribute('data-name');
+    const menuPrice = parseInt(menuItem.getAttribute('data-price'));
+    const quantity  = parseInt(menuItem.querySelector('.qty-number').innerText);
 
     if (quantity === 0) {
       showToast('수량을 선택해주세요.');
       return;
     }
 
-    const payload = {
-      itemName: itemName,
-      price: price,
-      quantity: quantity
-    };
-
-    fetch('/api/cart/add', {
+    fetch(`/kiosk/cart/add?tableNumber=${tableNumber}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({ menuName, menuPrice, quantity })
     })
-            .then(response => response.json())
-            .then(data => {
-              if (data.success) {
-                showToast(`${itemName} x${quantity}이(가) 장바구니에 추가되었습니다.`);
-                menuItem.querySelector('.qty-number').innerText = '0';
-                updateCartBadge(data.cartCount);
-              }
-            })
-            .catch(error => {
-              console.error('Error:', error);
-              showToast('장바구니 추가에 실패했습니다.');
-            });
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          showToast(`${menuName} x${quantity}이(가) 장바구니에 추가되었습니다.`);
+          menuItem.querySelector('.qty-number').innerText = '0';
+          updateCartBadge(data.cartCount);
+        } else {
+          showToast(data.message || '장바구니 추가에 실패했습니다.');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showToast('장바구니 추가에 실패했습니다.');
+      });
   }
 
   // ===== 장바구니 배지 업데이트 =====

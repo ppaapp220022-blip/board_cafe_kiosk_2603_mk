@@ -4,15 +4,11 @@
   <meta charset="UTF-8">
   <title>정산 - Board Game Cafe</title>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://js.tosspayments.com/v1/payment"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      margin: 0;
       font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       display: flex;
       align-items: center;
@@ -22,37 +18,23 @@
       background-color: #f4f6f8;
     }
 
-    /* 중앙 정렬 컨테이너 */
     .container {
       width: 100%;
       max-width: 700px;
       padding: 20px;
       box-sizing: border-box;
-      max-height: 90vh;
+      max-height: 95vh;
       overflow-y: auto;
     }
 
-    .container::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    .container::-webkit-scrollbar-track {
-      background: #f1f1f1;
-      border-radius: 10px;
-    }
-
-    .container::-webkit-scrollbar-thumb {
-      background: #c1c1c1;
-      border-radius: 10px;
-    }
-
-    .container::-webkit-scrollbar-thumb:hover {
-      background: #888;
-    }
+    .container::-webkit-scrollbar { width: 8px; }
+    .container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+    .container::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 10px; }
+    .container::-webkit-scrollbar-thumb:hover { background: #888; }
 
     .page-title {
-      font-size: 2.5rem;
-      margin: 0 0 30px 0;
+      font-size: 2rem;
+      margin: 0 0 24px 0;
       color: #111;
       text-align: center;
       font-weight: 700;
@@ -61,8 +43,8 @@
     .card {
       background: white;
       border-radius: 24px;
-      padding: 30px;
-      margin-bottom: 20px;
+      padding: 28px;
+      margin-bottom: 16px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     }
 
@@ -70,124 +52,218 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 1.3rem;
+      font-size: 1.2rem;
       font-weight: bold;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
       color: #333;
     }
 
-    .card-header i {
-      width: 28px;
-      height: 28px;
-      color: #007bff;
-    }
+    .card-header i { width: 26px; height: 26px; color: #007bff; }
 
+    /* 주문 내역 */
     .order-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 15px 0;
+      padding: 13px 0;
       border-bottom: 1px solid #f0f0f0;
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       color: #333;
     }
 
-    .order-item:last-child {
-      border-bottom: none;
-    }
+    .order-item:last-child { border-bottom: none; }
+    .order-qty { color: #888; font-size: 0.95rem; margin-left: 6px; }
+    .price { color: #007bff; font-weight: bold; }
 
-    .order-qty {
-      color: #888;
-      font-size: 1rem;
-      margin-right: 10px;
-    }
-
-    .price {
-      color: #007bff;
-      font-weight: bold;
-    }
-
-    .summary-row {
+    .summary-divider {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #eaeaea;
       display: flex;
       justify-content: space-between;
-      margin-bottom: 15px;
-      color: #333;
-      font-size: 1.2rem;
+      color: #888;
+      font-size: 1.1rem;
     }
 
-    .summary-row.subtotal {
-      margin-top: 20px;
-      padding-top: 20px;
-      border-top: 1px solid #eaeaea;
+    /* 세션 정보 */
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 1.05rem;
+      color: #333;
+    }
+
+    .info-row:last-child { margin-bottom: 0; }
+
+    .info-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       color: #888;
     }
 
-    .final-amount {
-      background: #eef6ff;
+    .info-label i { width: 18px; height: 18px; }
+
+    /* 포인트 카드 */
+    .point-card {
+      background: linear-gradient(135deg, #fff8e1 0%, #fff3cd 100%);
+      border: 1px solid #ffe082;
+      border-radius: 20px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+    }
+
+    .point-card-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border: 2px solid #d0e4ff;
-      padding: 30px;
-      border-radius: 24px;
+      margin-bottom: 14px;
     }
 
-    .final-amount span {
-      font-size: 1.5rem;
-      color: #111;
+    .point-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.1rem;
       font-weight: bold;
+      color: #e65100;
     }
 
-    .final-amount .total {
-      font-size: 3.2rem;
+    .point-card-title i { width: 22px; height: 22px; }
+
+    .point-balance-badge {
+      background: #ff9800;
+      color: white;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .point-input-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .point-input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 2px solid #ffe082;
+      border-radius: 12px;
+      font-size: 1rem;
+      background: white;
+      color: #333;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .point-input:focus { border-color: #ff9800; }
+
+    .point-apply-btn {
+      padding: 12px 20px;
+      background: #ff9800;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    .point-apply-btn:hover { background: #f57c00; }
+
+    .point-reset-btn {
+      padding: 12px 16px;
+      background: #f0f2f5;
+      color: #888;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .point-reset-btn:hover { background: #e0e2e7; }
+
+    .point-applied-msg {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: #e65100;
+      font-weight: 600;
+      display: none;
+    }
+
+    .no-point-msg {
+      font-size: 0.95rem;
+      color: #888;
+      text-align: center;
+      padding: 8px 0;
+    }
+
+    /* 최종 금액 */
+    .amount-breakdown {
+      margin-bottom: 16px;
+    }
+
+    .amount-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      font-size: 1.05rem;
+      color: #555;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .amount-row:last-child { border-bottom: none; }
+    .amount-row.discount { color: #f44336; }
+    .amount-row.discount span:last-child { font-weight: 700; }
+
+    .final-box {
+      background: #eef6ff;
+      border: 2px solid #d0e4ff;
+      border-radius: 20px;
+      padding: 24px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .final-box-label { font-size: 1.3rem; font-weight: bold; color: #333; }
+
+    .final-box-amount {
+      font-size: 2.8rem;
       font-weight: 800;
       color: #007bff;
-      display: flex;
-      align-items: center;
-      gap: 10px;
     }
 
-    .final-amount i {
-      width: 36px;
-      height: 36px;
-    }
-
+    /* 현금 안내 */
     .cash-notice {
       background: #fff8e1;
       border: 1px solid #ffe082;
       color: #d84315;
-      padding: 20px;
+      padding: 18px 20px;
       border-radius: 16px;
       display: flex;
       align-items: flex-start;
-      gap: 15px;
+      gap: 14px;
     }
 
-    .cash-notice i {
-      width: 24px;
-      height: 24px;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
+    .cash-notice i { width: 22px; height: 22px; flex-shrink: 0; margin-top: 2px; }
+    .cash-notice h3 { margin: 0 0 4px 0; font-weight: 600; font-size: 0.95rem; }
+    .cash-notice p { margin: 0; font-size: 0.85rem; color: #888; }
 
-    .cash-notice-content h3 {
-      margin: 0 0 5px 0;
-      font-weight: 600;
-      font-size: 1rem;
-    }
-
-    .cash-notice-content p {
-      margin: 0;
-      font-size: 0.9rem;
-      color: #888;
-    }
-
-    /* 결제 수단 선택 */
+    /* 결제 수단 */
     .payment-methods {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 15px;
-      margin-bottom: 20px;
+      gap: 14px;
     }
 
     .payment-method {
@@ -199,159 +275,149 @@
       transition: all 0.2s;
     }
 
-    .payment-method:hover {
-      border-color: #007bff;
-      background: #eef6ff;
-    }
+    .payment-method:hover { border-color: #007bff; background: #eef6ff; }
+    .payment-method.active { border-color: #007bff; background: #eef6ff; }
+    .payment-method i { width: 30px; height: 30px; color: #007bff; margin-bottom: 10px; }
+    .payment-method-name { font-weight: 600; color: #333; font-size: 0.95rem; }
 
-    .payment-method.active {
-      border-color: #007bff;
-      background: #eef6ff;
-    }
+    /* 버튼 */
+    .button-group { display: flex; gap: 14px; margin-top: 4px; }
 
-    .payment-method i {
-      width: 32px;
-      height: 32px;
-      color: #007bff;
-      margin-bottom: 10px;
-    }
-
-    .payment-method-name {
-      font-weight: 600;
-      color: #333;
-      font-size: 1rem;
-    }
-
-    /* 하단 결제 버튼 */
-    .button-group {
-      display: flex;
-      gap: 15px;
-      margin-top: 20px;
-    }
-
-    .pay-btn, .back-link-btn {
+    .pay-btn, .back-btn {
       flex: 1;
-      padding: 25px;
+      padding: 22px;
       border: none;
       border-radius: 20px;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       font-weight: bold;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 15px;
+      gap: 12px;
       transition: all 0.2s ease;
     }
 
     .pay-btn {
       background: #007bff;
       color: white;
-      box-shadow: 0 10px 25px rgba(0, 123, 255, 0.3);
+      box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3);
     }
 
-    .pay-btn:hover {
-      background: #0056b3;
-      box-shadow: 0 12px 30px rgba(0, 123, 255, 0.4);
+    .pay-btn:hover { background: #0056b3; box-shadow: 0 10px 25px rgba(0, 123, 255, 0.4); }
+    .pay-btn:active { transform: scale(0.98); }
+    .pay-btn:disabled { background: #b0c9f0; box-shadow: none; cursor: not-allowed; }
+    .pay-btn i, .back-btn i { width: 24px; height: 24px; }
+
+    .back-btn { background: #f0f2f5; color: #888; }
+    .back-btn:hover { background: #e0e2e7; color: #555; }
+
+    /* 토스트 */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: #333;
+      color: white;
+      padding: 14px 22px;
+      border-radius: 12px;
+      z-index: 2000;
+      font-size: 0.95rem;
+      animation: slideInUp 0.3s ease;
     }
 
-    .pay-btn:active {
-      transform: scale(0.98);
-    }
-
-    .pay-btn i {
-      width: 28px;
-      height: 28px;
-    }
-
-    .back-link-btn {
-      background: #f0f2f5;
-      color: #888;
-    }
-
-    .back-link-btn:hover {
-      background: #e0e2e7;
-      color: #555;
-    }
-
-    .back-link-btn i {
-      width: 24px;
-      height: 24px;
-    }
-
-    .empty-cart-notice {
-      text-align: center;
-      padding: 60px 20px;
-      color: #888;
-    }
-
-    .empty-cart-notice i {
-      width: 80px;
-      height: 80px;
-      margin-bottom: 20px;
-      opacity: 0.3;
-    }
-
-    .empty-cart-notice h2 {
-      font-size: 1.5rem;
-      margin-bottom: 10px;
-      color: #333;
+    @keyframes slideInUp {
+      from { transform: translateY(80px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
     }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <h1 class="page-title">Final Checkout</h1>
+  <h1 class="page-title">🧾 정산하기</h1>
 
-  <!-- 주문 내역 카드 -->
+  <!-- 주문 내역 -->
   <div class="card" id="order-summary">
-    <div class="card-header"><i data-lucide="shopping-bag"></i> Order Summary</div>
-    <!-- 동적 콘텐츠 -->
+    <div class="card-header"><i data-lucide="shopping-bag"></i> 주문 내역</div>
   </div>
 
-  <!-- 세션 정보 카드 -->
-  <div class="card" id="session-info">
-    <div class="card-header"><i data-lucide="file-text"></i> Session Details</div>
-    <div class="summary-row">
-            <span style="color:#888; display:flex; align-items:center; gap:8px;">
-                <i data-lucide="clock" style="width:20px; height:20px;"></i> Total Usage Time
-            </span>
-      <span th:text="${sessionHours} + 'h ' + ${sessionMinutes} + 'm'">0h 45m</span>
-    </div>
-    <div class="summary-row">
-            <span style="color:#888; display:flex; align-items:center; gap:8px;">
-                <i data-lucide="users" style="width:20px; height:20px;"></i> Party Size
-            </span>
-      <span th:text="${partySize} + ' people'">2 people</span>
-    </div>
-  </div>
-
-  <!-- 최종 금액 카드 -->
+  <!-- 세션 정보 -->
   <div class="card">
-    <div class="final-amount">
-      <span>Final Amount</span>
-      <div class="total">
-        <i data-lucide="dollar-sign"></i>
-        <span id="final-total">₩0</span>
+    <div class="card-header"><i data-lucide="clock"></i> 이용 정보</div>
+    <div class="info-row">
+      <span class="info-label"><i data-lucide="timer"></i> 이용 시간</span>
+      <span th:text="${sessionHours} + '시간 ' + ${sessionMinutes} + '분'">0시간 0분</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label"><i data-lucide="users"></i> 인원</span>
+      <span th:text="${partySize} + '명'">2명</span>
+    </div>
+  </div>
+
+  <!-- 포인트 사용 (전화번호 등록된 경우만 표시) -->
+  <div class="point-card" id="point-section"
+       th:if="${customerPhone != null and customerPhone != ''}">
+    <div class="point-card-header">
+      <div class="point-card-title">
+        <i data-lucide="star"></i> 포인트 사용
+      </div>
+      <span class="point-balance-badge"
+            th:text="'보유 ' + ${pointBalance} + 'P'">보유 0P</span>
+    </div>
+    <div class="point-input-row">
+      <input type="number" class="point-input" id="point-input"
+             th:placeholder="'최대 ' + ${pointBalance} + 'P 사용 가능'"
+             min="0" th:max="${pointBalance}"/>
+      <button class="point-apply-btn" onclick="applyPoint()">적용</button>
+      <button class="point-reset-btn" onclick="resetPoint()">취소</button>
+    </div>
+    <div class="point-applied-msg" id="point-applied-msg">
+      ✅ <span id="point-applied-amount">0</span>P 사용 적용됨
+    </div>
+  </div>
+
+  <!-- 포인트 미등록 안내 -->
+  <div class="point-card" th:if="${customerPhone == null or customerPhone == ''}">
+    <div class="point-card-title" style="margin-bottom: 8px;">
+      <i data-lucide="star"></i> 포인트
+    </div>
+    <p class="no-point-msg">전화번호를 등록하면 포인트를 적립하고 사용할 수 있어요.</p>
+  </div>
+
+  <!-- 금액 상세 -->
+  <div class="card" id="amount-card">
+    <div class="card-header"><i data-lucide="receipt"></i> 결제 금액</div>
+    <div class="amount-breakdown">
+      <div class="amount-row">
+        <span>상품 합계</span>
+        <span id="subtotal-amount">₩0</span>
+      </div>
+      <div class="amount-row discount" id="point-discount-row" style="display:none;">
+        <span>포인트 할인</span>
+        <span id="point-discount-amount">-₩0</span>
       </div>
     </div>
+    <div class="final-box">
+      <span class="final-box-label">최종 결제 금액</span>
+      <span class="final-box-amount" id="final-total">₩0</span>
+    </div>
   </div>
 
-  <!-- 현금 결제 안내 -->
+  <!-- 현금 안내 -->
   <div class="card">
     <div class="cash-notice">
       <i data-lucide="banknote"></i>
-      <div class="cash-notice-content">
+      <div>
         <h3>현금 결제 안내</h3>
         <p>현금 결제는 카운터 직원에게 직접 요청해 주세요.</p>
       </div>
     </div>
   </div>
 
-  <!-- 결제 수단 선택 -->
+  <!-- 결제 수단 -->
   <div class="card">
-    <div class="card-header"><i data-lucide="credit-card"></i> Payment Method</div>
+    <div class="card-header"><i data-lucide="credit-card"></i> 결제 수단</div>
     <div class="payment-methods">
       <div class="payment-method active" onclick="selectPaymentMethod('CARD', this)">
         <i data-lucide="credit-card"></i>
@@ -361,200 +427,291 @@
         <i data-lucide="smartphone"></i>
         <div class="payment-method-name">모바일 결제</div>
       </div>
+      <div class="payment-method" onclick="selectPaymentMethod('TOSS', this)"
+           style="grid-column: span 2;">
+        <img src="https://static.tosspayments.com/icons/brandpay/logo_brandpay_compact_blue.svg"
+             alt="토스페이먼츠" style="height:28px; margin-bottom:8px;"
+             onerror="this.style.display='none'; this.nextElementSibling.style.fontSize='1.2rem';">
+        <div class="payment-method-name">토스페이먼츠</div>
+      </div>
     </div>
   </div>
 
-  <!-- 결제 버튼 -->
+  <!-- 버튼 -->
   <div class="button-group">
     <button class="pay-btn" id="pay-btn" onclick="processPayment()">
-      <i data-lucide="credit-card"></i> Pay with Card
+      <i data-lucide="credit-card"></i>
+      <span id="pay-btn-label">카드로 결제하기</span>
     </button>
-    <button class="back-link-btn" onclick="history.back()">
-      <i data-lucide="arrow-left"></i> Go Back
+    <button class="back-btn" onclick="history.back()">
+      <i data-lucide="arrow-left"></i> 돌아가기
     </button>
   </div>
 </div>
 
 <script>
-  lucide.createIcons({
-    attrs: { 'stroke-width': 2.5 }
-  });
+  lucide.createIcons({ attrs: { 'stroke-width': 2.5 } });
 
-  const tableNumber = document.querySelector('html').getAttribute('data-table') || '5';
+  const tableNumber    = /*[[${tableNumber}]]*/ '1';
+  const pointBalance   = /*[[${pointBalance}]]*/ 0;
+  const tossClientKey  = 'test_ck_YOUR_CLIENT_KEY_HERE'; // TODO: 실제 클라이언트 키로 교체
+  let subtotalPrice    = 0;
+  let appliedPoint     = 0;
   let selectedPaymentMethod = 'CARD';
 
   // ===== 페이지 로드 =====
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', () => {
     loadCheckoutData();
   });
 
-  // ===== 정산 데이터 로드 =====
+  // ===== 장바구니 데이터 로드 =====
   function loadCheckoutData() {
-    fetch('/api/cart')
-            .then(response => response.json())
-            .then(data => {
-              if (data.success) {
-                renderCheckout(data.cartItems, data.totalPrice);
-              }
-            })
-            .catch(error => {
-              console.error('Error loading checkout:', error);
-              showErrorPage();
-            });
+    fetch(`/kiosk/cart/items?tableNumber=${tableNumber}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) renderCheckout(data.cartItems, data.totalPrice);
+        else showErrorPage();
+      })
+      .catch(() => showErrorPage());
   }
 
-  // ===== 정산 페이지 렌더링 =====
+  // ===== 주문 내역 렌더링 =====
   function renderCheckout(cartItems, totalPrice) {
+    subtotalPrice = totalPrice;
+
     if (cartItems.length === 0) {
       document.getElementById('order-summary').innerHTML = `
-        <div class="empty-cart-notice">
-          <i data-lucide="shopping-cart"></i>
-          <h2>장바구니가 비어있습니다</h2>
+        <div style="text-align:center; padding:50px 20px; color:#888;">
+          <i data-lucide="shopping-cart" style="width:60px;height:60px;opacity:0.3;margin-bottom:16px;"></i>
+          <h2 style="font-size:1.3rem;color:#333;margin-bottom:8px;">장바구니가 비어있습니다</h2>
           <p>메뉴에서 상품을 추가해주세요.</p>
-        </div>
-      `;
+        </div>`;
       document.getElementById('pay-btn').disabled = true;
       lucide.createIcons();
       return;
     }
 
-    // 주문 내역 렌더링
-    const orderSummary = cartItems.map(item => `
+    const rows = cartItems.map(item => `
       <div class="order-item">
         <div>
-          <span>${item.itemName}</span>
+          <span>${item.menuName}</span>
           <span class="order-qty">x${item.quantity}</span>
         </div>
-        <div class="price">₩${(item.price * item.quantity).toLocaleString()}</div>
-      </div>
-    `).join('');
+        <div class="price">₩${(item.menuPrice * item.quantity).toLocaleString()}</div>
+      </div>`).join('');
 
     document.getElementById('order-summary').innerHTML = `
-      <div class="card-header"><i data-lucide="shopping-bag"></i> Order Summary</div>
-      ${orderSummary}
-      <div class="summary-row subtotal">
-        <span>Subtotal</span>
+      <div class="card-header"><i data-lucide="shopping-bag"></i> 주문 내역</div>
+      ${rows}
+      <div class="summary-divider">
+        <span>소계</span>
         <span>₩${totalPrice.toLocaleString()}</span>
-      </div>
-    `;
+      </div>`;
 
-    // 최종 금액 업데이트
-    document.getElementById('final-total').innerText = `₩${totalPrice.toLocaleString()}`;
-
+    updateAmounts();
     lucide.createIcons();
   }
 
-  // ===== 결제 수단 선택 =====
-  function selectPaymentMethod(method, element) {
-    selectedPaymentMethod = method;
+  // ===== 금액 업데이트 =====
+  function updateAmounts() {
+    const finalAmount = Math.max(subtotalPrice - appliedPoint, 0);
 
-    // 모든 결제 수단 비활성화
-    document.querySelectorAll('.payment-method').forEach(el => {
-      el.classList.remove('active');
-    });
+    document.getElementById('subtotal-amount').innerText = `₩${subtotalPrice.toLocaleString()}`;
+    document.getElementById('final-total').innerText     = `₩${finalAmount.toLocaleString()}`;
 
-    // 선택된 것만 활성화
-    element.classList.add('active');
-
-    // 버튼 텍스트 업데이트
-    const payBtn = document.getElementById('pay-btn');
-    if (method === 'CARD') {
-      payBtn.innerHTML = '<i data-lucide="credit-card"></i> Pay with Card';
+    const discountRow = document.getElementById('point-discount-row');
+    if (appliedPoint > 0) {
+      discountRow.style.display = 'flex';
+      document.getElementById('point-discount-amount').innerText = `-₩${appliedPoint.toLocaleString()}`;
     } else {
-      payBtn.innerHTML = '<i data-lucide="smartphone"></i> Pay with Mobile';
+      discountRow.style.display = 'none';
     }
-    lucide.createIcons();
   }
 
-  // ===== 결제 처리 =====
-  function processPayment() {
-    const totalPrice = document.getElementById('final-total').innerText;
+  // ===== 포인트 적용 =====
+  function applyPoint() {
+    const input = document.getElementById('point-input');
+    const val   = parseInt(input.value) || 0;
 
-    if (!confirm(`${totalPrice}를 ${selectedPaymentMethod === 'CARD' ? '카드' : '모바일'}로 결제하시겠습니까?`)) {
+    if (val <= 0) {
+      showToast('1P 이상 입력해주세요.');
+      return;
+    }
+    if (val > pointBalance) {
+      showToast(`보유 포인트(${pointBalance}P)를 초과할 수 없습니다.`);
+      input.value = pointBalance;
+      return;
+    }
+    if (val > subtotalPrice) {
+      showToast('결제 금액을 초과하여 사용할 수 없습니다.');
+      input.value = subtotalPrice;
       return;
     }
 
+    appliedPoint = val;
+    document.getElementById('point-applied-amount').innerText = val.toLocaleString();
+    document.getElementById('point-applied-msg').style.display = 'block';
+    input.disabled = true;
+    updateAmounts();
+    showToast(`${val.toLocaleString()}P 적용되었습니다.`);
+  }
+
+  // ===== 포인트 취소 =====
+  function resetPoint() {
+    appliedPoint = 0;
+    const input  = document.getElementById('point-input');
+    input.value  = '';
+    input.disabled = false;
+    document.getElementById('point-applied-msg').style.display = 'none';
+    updateAmounts();
+  }
+
+  // ===== 결제 수단 선택 =====
+  function selectPaymentMethod(method, el) {
+    selectedPaymentMethod = method;
+    document.querySelectorAll('.payment-method').forEach(e => e.classList.remove('active'));
+    el.classList.add('active');
+
+    const label = document.getElementById('pay-btn-label');
+    if (method === 'CARD')         label.innerText = '카드로 결제하기';
+    else if (method === 'MOBILE')  label.innerText = '모바일로 결제하기';
+    else if (method === 'TOSS')    label.innerText = '토스페이먼츠로 결제하기';
+  }
+
+  // ===== 결제 처리 (수단 분기) =====
+  function processPayment() {
+    if (subtotalPrice === 0) { showToast('장바구니가 비어있습니다.'); return; }
+    if (selectedPaymentMethod === 'TOSS') processTossPayment();
+    else processDirectPayment();
+  }
+
+  // ===== 카드 / 모바일 직접 결제 =====
+  function processDirectPayment() {
+    const finalAmount = Math.max(subtotalPrice - appliedPoint, 0);
+    const methodLabel = selectedPaymentMethod === 'CARD' ? '카드' : '모바일';
+
+    if (!confirm(`₩${finalAmount.toLocaleString()}을 ${methodLabel}로 결제하시겠습니까?`)) return;
+
     const payBtn = document.getElementById('pay-btn');
     payBtn.disabled = true;
-    payBtn.innerText = '결제 처리 중...';
+    document.getElementById('pay-btn-label').innerText = '결제 처리 중...';
 
-    fetch('/api/checkout/pay', {
+    fetch(`/kiosk/checkout/pay?tableNumber=${tableNumber}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        paymentMethod: selectedPaymentMethod,
-        amount: parseInt(totalPrice.replace(/₩|,/g, ''))
-      })
+      body: JSON.stringify({ paymentMethod: selectedPaymentMethod, pointUsed: appliedPoint })
     })
-            .then(response => response.json())
-            .then(data => {
-              if (data.success) {
-                showSuccessPage(data.orderId, totalPrice);
-              } else {
-                showToast('결제에 실패했습니다. 다시 시도해주세요.');
-                payBtn.disabled = false;
-                payBtn.innerHTML = '<i data-lucide="credit-card"></i> Pay with Card';
-              }
-            })
-            .catch(error => {
-              console.error('Payment error:', error);
-              showToast('결제 처리에 오류가 발생했습니다.');
-              payBtn.disabled = false;
-              payBtn.innerHTML = '<i data-lucide="credit-card"></i> Pay with Card';
-            });
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        showSuccessPage(data.orderId, data.finalAmount, data.earnedPoints || 0);
+      } else {
+        showToast(data.message || '결제에 실패했습니다. 다시 시도해주세요.');
+        payBtn.disabled = false;
+        document.getElementById('pay-btn-label').innerText = `${methodLabel}로 결제하기`;
+      }
+    })
+    .catch(() => {
+      showToast('결제 처리 중 오류가 발생했습니다.');
+      payBtn.disabled = false;
+      document.getElementById('pay-btn-label').innerText = `${methodLabel}로 결제하기`;
+    });
   }
 
-  // ===== 결제 성공 페이지 =====
-  function showSuccessPage(orderId, amount) {
+  // ===== 토스페이먼츠 결제 =====
+  async function processTossPayment() {
+    const payBtn = document.getElementById('pay-btn');
+    payBtn.disabled = true;
+    document.getElementById('pay-btn-label').innerText = '결제창 준비 중...';
+
+    try {
+      // 1. 백엔드에서 orderId / amount 발급
+      const prepRes  = await fetch(`/kiosk/toss/prepare?tableNumber=${tableNumber}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pointUsed: appliedPoint })
+      });
+      const prepData = await prepRes.json();
+
+      if (!prepData.success) {
+        showToast(prepData.message || '결제 준비에 실패했습니다.');
+        payBtn.disabled = false;
+        document.getElementById('pay-btn-label').innerText = '토스페이먼츠로 결제하기';
+        return;
+      }
+
+      // 2. 토스 SDK 결제창 호출
+      const tossPayments = TossPayments(tossClientKey);
+      await tossPayments.requestPayment('카드', {
+        amount:       prepData.amount,
+        orderId:      prepData.orderIdToss,
+        orderName:    prepData.orderName,
+        customerName: `Table #${tableNumber}`,
+        successUrl:   `${window.location.origin}/kiosk/toss/success?tableNumber=${tableNumber}`,
+        failUrl:      `${window.location.origin}/kiosk/toss/fail?tableNumber=${tableNumber}`
+      });
+
+    } catch (err) {
+      // 사용자가 결제창을 직접 닫은 경우 조용히 복원
+      if (err.code !== 'USER_CANCEL') {
+        showToast(err.message || '토스 결제 중 오류가 발생했습니다.');
+      }
+      payBtn.disabled = false;
+      document.getElementById('pay-btn-label').innerText = '토스페이먼츠로 결제하기';
+    }
+  }
+
+  // ===== 결제 완료 화면 =====
+  function showSuccessPage(orderId, finalAmount, earnedPoints) {
+    const pointMsg = earnedPoints > 0
+      ? `<div style="background:rgba(255,255,255,0.2);padding:12px 24px;border-radius:14px;margin-bottom:20px;">
+           🎁 <strong>${earnedPoints.toLocaleString()}P</strong> 적립 완료!
+         </div>`
+      : '';
+
     document.body.innerHTML = `
-      <div style="display: flex; align-items: center; justify-content: center; height: 100vh; flex-direction: column; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; text-align: center;">
-        <i data-lucide="check-circle" style="width: 120px; height: 120px; margin-bottom: 30px;"></i>
-        <h1 style="font-size: 2.5rem; margin: 0 0 20px 0; font-weight: 700;">결제 완료</h1>
-        <p style="font-size: 1.2rem; margin: 0 0 10px 0; opacity: 0.9;">주문이 완료되었습니다.</p>
-        <p style="font-size: 1.3rem; margin: 0 0 30px 0; font-weight: bold; opacity: 0.8;">주문번호: ${orderId}</p>
-        <p style="font-size: 1.5rem; margin: 0 0 50px 0; font-weight: bold;">${amount}</p>
-        <p style="font-size: 1rem; margin: 0; opacity: 0.8;">이용해주셔서 감사합니다!</p>
-        <p style="font-size: 0.95rem; margin: 20px 0 0 0; opacity: 0.7;">3초 후 메인 화면으로 이동합니다...</p>
-      </div>
-    `;
-
+      <div style="display:flex;align-items:center;justify-content:center;height:100vh;
+                  flex-direction:column;background:linear-gradient(135deg,#007bff,#0056b3);
+                  color:white;text-align:center;padding:20px;">
+        <i data-lucide="circle-check-big" style="width:110px;height:110px;margin-bottom:28px;"></i>
+        <h1 style="font-size:2.4rem;font-weight:800;margin:0 0 12px 0;">결제 완료!</h1>
+        <p style="font-size:2rem;font-weight:700;margin:0 0 20px 0;">
+          ₩${finalAmount.toLocaleString()}
+        </p>
+        ${pointMsg}
+        <p style="font-size:0.9rem;opacity:0.7;margin:0 0 6px 0;">주문번호: #${orderId}</p>
+        <p style="font-size:1rem;opacity:0.85;">이용해주셔서 감사합니다 😊</p>
+        <p style="font-size:0.9rem;opacity:0.65;margin-top:24px;">3초 후 메인 화면으로 이동합니다...</p>
+      </div>`;
     lucide.createIcons();
-    setTimeout(() => {
-      window.location.href = `/kiosk/drinks?tableNumber=${tableNumber}`;
-    }, 3000);
+    localStorage.removeItem('returnUrl');
+    setTimeout(() => { window.location.href = `/kiosk/screensaver?tableNumber=${tableNumber}`; }, 3000);
   }
 
-  // ===== 에러 페이지 =====
+  // ===== 오류 화면 =====
   function showErrorPage() {
     document.body.innerHTML = `
-      <div style="display: flex; align-items: center; justify-content: center; height: 100vh; flex-direction: column; background: #f4f6f8; text-align: center;">
-        <i data-lucide="alert-circle" style="width: 100px; height: 100px; color: #f44336; margin-bottom: 20px;"></i>
-        <h1 style="font-size: 2rem; margin: 0 0 10px 0; color: #333;">오류가 발생했습니다</h1>
-        <p style="color: #888; margin: 0 0 30px 0;">장바구니 정보를 불러올 수 없습니다.</p>
-        <button onclick="history.back()" style="padding: 15px 30px; background: #007bff; color: white; border: none; border-radius: 12px; font-size: 1rem; cursor: pointer;">돌아가기</button>
-      </div>
-    `;
+      <div style="display:flex;align-items:center;justify-content:center;height:100vh;
+                  flex-direction:column;background:#f4f6f8;text-align:center;">
+        <i data-lucide="alert-circle" style="width:90px;height:90px;color:#f44336;margin-bottom:20px;"></i>
+        <h1 style="font-size:1.8rem;color:#333;margin:0 0 10px 0;">오류가 발생했습니다</h1>
+        <p style="color:#888;margin:0 0 28px 0;">장바구니 정보를 불러올 수 없습니다.</p>
+        <button onclick="history.back()"
+          style="padding:14px 28px;background:#007bff;color:white;border:none;
+                 border-radius:12px;font-size:1rem;cursor:pointer;font-weight:600;">
+          돌아가기
+        </button>
+      </div>`;
     lucide.createIcons();
   }
 
-  // ===== 토스트 알림 =====
+  // ===== 토스트 =====
   function showToast(message) {
     const toast = document.createElement('div');
-    toast.style.cssText = `
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      background: #333;
-      color: white;
-      padding: 15px 25px;
-      border-radius: 12px;
-      z-index: 2000;
-      animation: slideInUp 0.3s ease;
-    `;
+    toast.className = 'toast';
     toast.innerText = message;
     document.body.appendChild(toast);
-
-    setTimeout(() => toast.remove(), 2000);
+    setTimeout(() => toast.remove(), 2500);
   }
 </script>
 </body>

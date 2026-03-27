@@ -372,6 +372,7 @@
 </head>
 <body onclick="resetActivityTimer()">
 
+
 <div class="timer-banner">
     <i data-lucide="clock"></i>
     장바구니가 <span id="timer-display">05:00</span> 후 초기화됩니다
@@ -394,7 +395,7 @@
         <span id="total-amount">₩0</span>
     </div>
     <div class="button-group">
-        <button class="order-btn" id="checkout-btn" onclick="proceedToCheckout()">정산하기</button>
+        <button class="order-btn" id="checkout-btn" onclick="proceedToCheckout()">주문하기</button>
         <button class="clear-btn" onclick="clearCart()">장바구니 비우기</button>
     </div>
 </div>
@@ -412,7 +413,7 @@
         attrs: { 'stroke-width': 2.5 }
     });
 
-    const tableNumber = document.querySelector('.table-info').textContent.replace('Table #', '');
+    const tableNumber = document.querySelector('.table-info').textContent.replace('Table #', '').trim();
     let remainingTime = 300;
     const timerDisplay = document.getElementById('timer-display');
     const warningModal = document.getElementById('warning-modal');
@@ -426,7 +427,7 @@
 
     // ===== 장바구니 로드 =====
     function loadCart() {
-        fetch('/api/cart')
+        fetch(`/kiosk/cart/items?tableNumber=${tableNumber}`)
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -459,22 +460,22 @@
         document.getElementById('checkout-btn').disabled = false;
 
         cartContent.innerHTML = cartItems.map(item => `
-      <div class="cart-item" data-name="${item.itemName}" data-price="${item.price}">
+      <div class="cart-item" data-name="${item.menuName}" data-price="${item.menuPrice}">
         <div class="item-info">
-          <h3>${item.itemName}</h3>
-          <div class="item-price">₩${item.price.toLocaleString()}</div>
-          <div class="item-subtotal">수량: ${item.quantity}개 → ₩${(item.price * item.quantity).toLocaleString()}</div>
+          <h3>${item.menuName}</h3>
+          <div class="item-price">${item.menuPrice === 0 ? 'FREE' : '₩' + item.menuPrice.toLocaleString()}</div>
+          <div class="item-subtotal">수량: ${item.quantity}개 → ${item.menuPrice === 0 ? 'FREE' : '₩' + (item.menuPrice * item.quantity).toLocaleString()}</div>
         </div>
         <div class="quantity-control">
-          <button class="qty-btn minus" onclick="updateQuantity('${item.itemName}', ${item.price}, -1)">
+          <button class="qty-btn minus" onclick="updateQuantity('${item.menuName}', ${item.menuPrice}, -1)">
             <i data-lucide="minus"></i>
           </button>
           <span class="qty-number">${item.quantity}</span>
-          <button class="qty-btn plus" onclick="updateQuantity('${item.itemName}', ${item.price}, 1)">
+          <button class="qty-btn plus" onclick="updateQuantity('${item.menuName}', ${item.menuPrice}, 1)">
             <i data-lucide="plus"></i>
           </button>
         </div>
-        <button class="delete-btn" onclick="deleteItem('${item.itemName}', ${item.price})" title="삭제">
+        <button class="delete-btn" onclick="deleteItem('${item.menuName}', ${item.menuPrice})" title="삭제">
           <i data-lucide="trash-2"></i>
         </button>
       </div>
@@ -485,21 +486,17 @@
     }
 
     // ===== 수량 업데이트 =====
-    function updateQuantity(itemName, price, delta) {
+    function updateQuantity(menuName, menuPrice, delta) {
         const cartItem = document.querySelector(
-            `.cart-item[data-name="${itemName}"][data-price="${price}"]`
+            `.cart-item[data-name="${menuName}"][data-price="${menuPrice}"]`
         );
         const currentQty = parseInt(cartItem.querySelector('.qty-number').innerText);
         const newQty = currentQty + delta;
 
-        fetch('/api/cart/update', {
+        fetch(`/kiosk/cart/update?tableNumber=${tableNumber}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                itemName: itemName,
-                price: price,
-                quantity: newQty
-            })
+            body: JSON.stringify({ menuName: menuName, menuPrice: menuPrice, quantity: newQty })
         })
             .then(response => response.json())
             .then(data => {
@@ -515,17 +512,13 @@
     }
 
     // ===== 상품 삭제 =====
-    function deleteItem(itemName, price) {
-        if (!confirm(`${itemName}을(를) 삭제하시겠습니까?`)) return;
+    function deleteItem(menuName, menuPrice) {
+        if (!confirm(`${menuName}을(를) 삭제하시겠습니까?`)) return;
 
-        fetch('/api/cart/update', {
+        fetch(`/kiosk/cart/update?tableNumber=${tableNumber}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                itemName: itemName,
-                price: price,
-                quantity: 0
-            })
+            body: JSON.stringify({ menuName: menuName, menuPrice: menuPrice, quantity: 0 })
         })
             .then(response => response.json())
             .then(data => {
@@ -549,7 +542,7 @@
     function clearCart() {
         if (!confirm('장바구니를 비우시겠습니까?')) return;
 
-        fetch('/api/cart', { method: 'DELETE' })
+        fetch(`/kiosk/cart/clear?tableNumber=${tableNumber}`, { method: 'DELETE' })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -579,7 +572,7 @@
         }
         if (remainingTime <= 0) {
             clearInterval(timerInterval);
-            window.location.href = `/kiosk/drinks?tableNumber=${tableNumber}`;
+            window.location.href = `/kiosk/games?tableNumber=${tableNumber}`;
         }
     }
 

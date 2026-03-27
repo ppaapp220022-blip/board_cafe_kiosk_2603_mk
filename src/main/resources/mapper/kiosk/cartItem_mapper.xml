@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.board_cafe_kiosk_2603.mapper.kiosk.CartItemMapper">
+
+    <resultMap id="CartItemResultMap" type="org.example.board_cafe_kiosk_2603.domain.kiosk.CartItem">
+        <id     property="id"        column="id"/>
+        <result property="cartId"    column="cart_id"/>
+        <result property="menuId"    column="menu_id"/>
+        <result property="quantity"  column="quantity"/>
+        <result property="menuName"  column="menu_name"/>
+        <result property="menuPrice" column="menu_price"/>
+    </resultMap>
+
+    <!-- 장바구니 항목 목록 조회 (menu JOIN) -->
+    <select id="findByCartId" parameterType="int" resultMap="CartItemResultMap">
+        SELECT ci.id,
+               ci.cart_id,
+               ci.menu_id,
+               ci.quantity,
+               m.name  AS menu_name,
+               m.price AS menu_price
+        FROM cart_item ci
+                 JOIN menu m ON ci.menu_id = m.id
+        WHERE ci.cart_id = #{cartId}
+    </select>
+
+    <select id="findByCartIdAndMenuId" resultMap="CartItemResultMap">
+        SELECT id, cart_id, menu_id, quantity
+        FROM cart_item
+        WHERE cart_id = #{cartId}
+          AND menu_id = #{menuId}
+    </select>
+
+    <!-- name + price 로 menu_id 조회 -->
+    <select id="findMenuIdByNameAndPrice" resultType="java.lang.Integer">
+        SELECT id
+        FROM menu
+        WHERE name       = #{name}
+          AND price      = #{price}
+          AND is_deleted = FALSE
+        LIMIT 1
+    </select>
+
+    <insert id="insert" parameterType="org.example.board_cafe_kiosk_2603.domain.kiosk.CartItem"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO cart_item (cart_id, menu_id, quantity)
+        VALUES (#{cartId}, #{menuId}, #{quantity})
+    </insert>
+
+    <update id="updateQuantity">
+        UPDATE cart_item
+        SET quantity = #{quantity}
+        WHERE cart_id = #{cartId}
+          AND menu_id = #{menuId}
+    </update>
+
+    <delete id="deleteByCartIdAndMenuId">
+        DELETE FROM cart_item
+        WHERE cart_id = #{cartId}
+          AND menu_id = #{menuId}
+    </delete>
+
+    <delete id="deleteAllByCartId" parameterType="int">
+        DELETE FROM cart_item
+        WHERE cart_id = #{cartId}
+    </delete>
+
+</mapper>

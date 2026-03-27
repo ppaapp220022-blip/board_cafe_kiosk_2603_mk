@@ -1,9 +1,9 @@
 package org.example.board_cafe_kiosk_2603.domain.admin;
 
-
 import lombok.*;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
+
 
 @Getter
 @ToString
@@ -17,5 +17,5 @@ public class PointHistory {
     private String type;         // 이력 유형 ('EARN', 'USE')
     private int amount;          // 변동 포인트
     private int balanceAfter;    // 처리 직후 잔액 스냅샷
-    private Timestamp createdAt; // 이력 생성 일시
+    private LocalDateTime createdAt; // 이력 생성 일시
 }

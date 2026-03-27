@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <title>Package Selection - Board Game Cafe</title>
@@ -10,224 +10,172 @@
       font-family: 'Pretendard', sans-serif;
       background-color: #f0f2f5;
       display: flex; align-items: center; justify-content: center;
-      height: 100vh; overflow: hidden;
+      min-height: 100vh; overflow-y: auto;
     }
-
     .container {
-      text-align: center;
-      width: 100%;
-      max-width: 1000px;
-      padding: 20px;
+      text-align: center; width: 100%;
+      max-width: 1000px; padding: 30px 20px;
     }
-
     .icon-header {
       width: 60px; height: 60px;
-      background-color: #007bff;
-      border-radius: 50%;
+      background-color: #007bff; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 15px;
-      color: white;
+      margin: 0 auto 15px; color: white;
     }
-
     h1 { font-size: 2rem; margin: 10px 0; color: #111; }
     .subtitle { color: #666; margin-bottom: 20px; font-size: 1rem; }
 
-    /* 정책 안내 섹션 */
     .policy-wrapper {
-      display: grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap: 15px;
-      margin-bottom: 25px;
+      display: grid; grid-template-columns: 1.2fr 1fr;
+      gap: 15px; margin-bottom: 25px;
     }
-
     .policy-card {
-      background-color: #fff;
-      border: 1px solid #e1e4e8;
-      border-radius: 12px;
-      padding: 15px;
-      text-align: left;
-      font-size: 0.85rem;
+      background-color: #fff; border: 1px solid #e1e4e8;
+      border-radius: 12px; padding: 15px; text-align: left; font-size: 0.85rem;
     }
-
-    .policy-card.warning {
-      background-color: #fff4f4;
-      border-color: #ffcfcf;
-      color: #d63031;
-    }
-
-    .policy-card.payment-info {
-      background-color: #f8f9fa;
-      border-left: 5px solid #333;
-    }
-
+    .policy-card.warning { background-color: #fff4f4; border-color: #ffcfcf; color: #d63031; }
+    .policy-card.payment-info { background-color: #f8f9fa; border-left: 5px solid #333; }
     .policy-card strong { display: block; margin-bottom: 5px; font-size: 0.95rem; }
     .policy-card ul { margin: 0; padding-left: 18px; line-height: 1.6; }
 
     .grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-      margin-bottom: 30px;
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 15px; margin-bottom: 30px;
     }
-
     .package-card {
-      background: white;
-      border-radius: 20px;
-      padding: 20px 15px;
-      cursor: pointer;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-      transition: all 0.2s ease;
-      border: 3px solid transparent;
-      display: flex;
-      flex-direction: column;
-      position: relative;
+      background: white; border-radius: 20px; padding: 20px 15px;
+      cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      transition: all 0.2s ease; border: 3px solid transparent;
+      display: flex; flex-direction: column;
     }
-
-    .package-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    }
-
-    .package-card.selected {
-      border-color: #007bff;
-      background-color: #f0f7ff;
-    }
-
+    .package-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+    .package-card.selected { border-color: #007bff; background-color: #f0f7ff; }
     .pkg-name { font-size: 1.1rem; font-weight: bold; color: #333; margin-bottom: 8px; }
     .pkg-time { font-size: 1.6rem; font-weight: 800; color: #007bff; margin-bottom: 5px; }
+    .pkg-type { font-size: 0.75rem; color: #999; margin-bottom: 5px; letter-spacing: 0.5px; }
     .pkg-desc { font-size: 0.85rem; color: #888; min-height: 34px; line-height: 1.4; }
-    .pkg-price { font-size: 1.2rem; font-weight: bold; color: #111; margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; }
+    .pkg-price {
+      font-size: 1.2rem; font-weight: bold; color: #111;
+      margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;
+    }
     .pkg-unit { font-size: 0.8rem; font-weight: normal; color: #888; margin-left: 4px; }
+    .pkg-extra { font-size: 0.75rem; color: #ff9800; margin-top: 4px; }
 
     .submit-btn {
-      width: 100%;
-      padding: 22px;
-      background-color: #e2e4e7;
-      color: #a0a3a7;
-      border: none;
-      border-radius: 15px;
-      font-size: 1.2rem;
-      font-weight: bold;
-      cursor: not-allowed;
+      width: 100%; padding: 22px;
+      background-color: #e2e4e7; color: #a0a3a7;
+      border: none; border-radius: 15px;
+      font-size: 1.2rem; font-weight: bold; cursor: not-allowed;
       transition: all 0.3s ease;
     }
-
     .submit-btn.active {
-      background-color: #007bff;
-      color: white;
-      cursor: pointer;
+      background-color: #007bff; color: white; cursor: pointer;
       box-shadow: 0 10px 20px rgba(0,123,255,0.2);
     }
+    .empty-msg { color: #aaa; padding: 40px; font-size: 1rem; }
   </style>
 </head>
 <body>
 
 <div class="container">
   <div class="icon-header">
-    <i data-lucide="layout-grid" style="width: 30px; height: 30px;"></i>
+    <i data-lucide="layout-grid" style="width:30px;height:30px;"></i>
   </div>
   <h1>Package Selection</h1>
-  <p class="subtitle">이용하실 요금제를 선택해 주세요. (1인 1패키지 선택 필수)</p>
-
-  <!-- 폼 추가: packageId를 서버로 POST 전송 -->
-  <form id="package-form" action="/kiosk/package_selection" method="post">
-    <input type="hidden" id="package-id-input" name="packageId" value="">
-  </form>
+  <p class="subtitle">이용하실 요금제를 선택해 주세요.</p>
 
   <div class="policy-wrapper">
     <div class="policy-card warning">
-      <strong><i data-lucide="alert-triangle" style="width:14px; vertical-align: middle;"></i> 이용 시간 및 환불 정책</strong>
+      <strong><i data-lucide="alert-triangle" style="width:14px;vertical-align:middle;"></i> 이용 시간 및 환불 정책</strong>
       <ul>
-        <li>초과 요금: 10분당 1,000원 추가 (10분 단위 올림 계산)</li>
+        <li>초과 요금은 분당 추가 금액이 적용됩니다.</li>
         <li>모든 요금제는 <b>1인당 금액</b>이며, 입장 시 1회 선택 가능합니다.</li>
         <li>퇴실 시 남은 시간에 대한 부분 환불은 제공되지 않습니다.</li>
       </ul>
     </div>
-
     <div class="policy-card payment-info">
-      <strong><i data-lucide="credit-card" style="width:14px; vertical-align: middle;"></i> 결제 안내 (후불제)</strong>
+      <strong><i data-lucide="credit-card" style="width:14px;vertical-align:middle;"></i> 결제 안내 (후불제)</strong>
       <ul>
         <li>선택하신 패키지 및 추가 메뉴 비용은 <b>퇴실 시 일괄 결제</b>합니다.</li>
         <li>보드카페 규정상 1인 1음료 혹은 1음식 주문이 필수입니다.</li>
-        <li>음료 포함 패키지는 1인 주문 원칙이 자동 적용됩니다.</li>
       </ul>
     </div>
   </div>
 
+  <!-- 패키지 카드 목록 (Thymeleaf) -->
   <div class="grid">
-    <!-- packageId는 DB의 cafe_package.id 값 -->
-    <div class="package-card" onclick="selectPackage('평일 1시간 권', 1, this)">
-      <div class="pkg-name">평일 1시간 권</div>
-      <div class="pkg-time">1시간</div>
-      <div class="pkg-desc">음료/음식 별도 주문 필수</div>
-      <div class="pkg-price">3,000원<span class="pkg-unit">(1인)</span></div>
-    </div>
-
-    <div class="package-card" onclick="selectPackage('무제한 권', 2, this)">
-      <div class="pkg-name">무제한 권</div>
-      <div class="pkg-time">Free</div>
-      <div class="pkg-desc">종일 이용 가능<br>(음료 미포함)</div>
-      <div class="pkg-price">15,000원<span class="pkg-unit">(1인)</span></div>
-    </div>
-
-    <div class="package-card" onclick="selectPackage('1시간 패키지', 3, this)">
-      <div class="pkg-name">1시간 패키지</div>
-      <div class="pkg-time">1시간</div>
-      <div class="pkg-desc">음료 미포함<br>(별도 주문 필요)</div>
-      <div class="pkg-price">5,000원<span class="pkg-unit">(1인)</span></div>
-    </div>
-
-    <div class="package-card" onclick="selectPackage('2시간 패키지', 4, this)">
-      <div class="pkg-name">2시간 패키지</div>
-      <div class="pkg-time">2시간</div>
-      <div class="pkg-desc">음료 미포함<br>(별도 주문 필요)</div>
-      <div class="pkg-price">8,000원<span class="pkg-unit">(1인)</span></div>
-    </div>
-
-    <div class="package-card" onclick="selectPackage('3시간 패키지', 5, this)">
-      <div class="pkg-name">3시간 패키지</div>
-      <div class="pkg-time">3시간</div>
-      <div class="pkg-desc">음료 미포함<br>(별도 주문 필요)</div>
-      <div class="pkg-price">11,000원<span class="pkg-unit">(1인)</span></div>
-    </div>
-
-    <div class="package-card" onclick="selectPackage('종일 자유이용권', 6, this)">
-      <div class="pkg-name">종일 자유이용권</div>
-      <div class="pkg-time">Free</div>
-      <div class="pkg-desc">종일 이용 가능<br>(음료 미포함)</div>
-      <div class="pkg-price">15,000원<span class="pkg-unit">(1인)</span></div>
-    </div>
+    <th:block th:if="${not #lists.isEmpty(packageList)}">
+      <div th:each="pkg : ${packageList}"
+           class="package-card"
+           th:data-id="${pkg.id}"
+           th:data-name="${pkg.name}"
+           th:data-price="${pkg.basePrice}"
+           onclick="selectPackage(this)">
+        <div class="pkg-name"  th:text="${pkg.name}">패키지명</div>
+        <div class="pkg-time"  th:text="${pkg.displayTime}">1시간</div>
+        <div class="pkg-type"  th:text="${pkg.type}">HOURLY</div>
+        <div class="pkg-desc"
+             th:text="${pkg.extraPricePerMin != null and pkg.extraPricePerMin > 0}
+                       ? '초과 시 분당 ' + ${pkg.extraPricePerMin} + '원'
+                       : '초과 요금 없음'">초과 요금 없음</div>
+        <div class="pkg-price">
+          <span th:text="${#numbers.formatInteger(pkg.basePrice, 0, 'COMMA') + '원'}">0원</span>
+          <span class="pkg-unit">(1인)</span>
+        </div>
+      </div>
+    </th:block>
+    <th:block th:if="${#lists.isEmpty(packageList)}">
+      <div class="empty-msg" style="grid-column:1/-1;">등록된 패키지가 없습니다.</div>
+    </th:block>
   </div>
 
-  <button id="next-button" class="submit-btn" onclick="completeSelection()">패키지를 선택해 주세요</button>
+  <button id="next-button" class="submit-btn" onclick="completeSelection()">
+    패키지를 선택해 주세요
+  </button>
 </div>
 
-<script>
+<script th:inline="javascript">
   lucide.createIcons();
 
+  const TABLE_NUMBER = /*[[${tableNumber}]]*/ 1;
+  const PARTY_SIZE   = /*[[${partySize}]]*/ 1;
+
+  let selectedPackageId   = null;
   let selectedPackageName = "";
-  const urlParams = new URLSearchParams(window.location.search);
-  const partySize = urlParams.get('size') || 1;
+  let selectedPackagePrice = 0;
 
-  function selectPackage(name, packageId, element) {
-    // 선택된 카드 하이라이트
-    const cards = document.querySelectorAll('.package-card');
-    cards.forEach(card => card.classList.remove('selected'));
-    element.classList.add('selected');
+  function selectPackage(el) {
+    document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
 
-    // hidden input에 packageId 저장
-    document.getElementById('package-id-input').value = packageId;
+    selectedPackageId    = parseInt(el.dataset.id);
+    selectedPackageName  = el.dataset.name;
+    selectedPackagePrice = parseInt(el.dataset.price);
 
-    const nextBtn = document.getElementById('next-button');
-    nextBtn.classList.add('active');
-    nextBtn.innerText = `[${name}] 선택 완료 - 메인 메뉴로 이동`;
+    const btn = document.getElementById('next-button');
+    btn.classList.add('active');
+    btn.innerText = `[${selectedPackageName}] 선택 완료 - 메뉴로 이동`;
   }
 
   function completeSelection() {
-    const packageId = document.getElementById('package-id-input').value;
-    if (packageId !== "") {
-      document.getElementById('package-form').submit();
-    }
+    if (!selectedPackageId) return;
+
+    fetch('/kiosk/package/select', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ packageId: selectedPackageId })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        location.href = `/kiosk/games?tableNumber=${TABLE_NUMBER}`;
+      } else {
+        alert('패키지 선택에 실패했습니다. 다시 시도해주세요.');
+      }
+    })
+    .catch(() => {
+      alert('오류가 발생했습니다. 다시 시도해주세요.');
+    });
   }
 </script>
 </body>

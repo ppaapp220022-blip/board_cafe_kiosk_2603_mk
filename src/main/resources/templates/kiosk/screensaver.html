@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <title>BoardWave - Tap to Start</title>
@@ -122,19 +122,20 @@
 </div>
 
 <script>
+  // 서버에서 주입된 tableNumber
+  const TABLE_NUMBER = /*[[${tableNumber}]]*/ 1;
+
   const screen = document.getElementById('tap-to-start');
 
   screen.addEventListener('click', function() {
-    // 저장된 복귀 경로가 있는지 확인
     const returnUrl = localStorage.getItem('returnUrl');
 
     if (returnUrl) {
-      // 보던 화면이 있으면 해당 화면으로 복귀 (장바구니 등은 세션에 있으므로 유지됨)
-      localStorage.removeItem('returnUrl'); // 사용 후 삭제
+      localStorage.removeItem('returnUrl');
       window.location.href = returnUrl;
     } else {
-      // 처음 시작하는 경우 기본값인 인원 설정 페이지로 이동
-      window.location.href = '/kiosk/headcount';
+      // 결제 완료 후 or 첫 진입 → 메뉴 화면으로
+      window.location.href = `/kiosk/games?tableNumber=${TABLE_NUMBER}`;
     }
   });
 </script>

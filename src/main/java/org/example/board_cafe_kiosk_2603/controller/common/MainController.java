@@ -38,7 +38,6 @@ public class MainController {
     public String adminKiosk() {
         log.info("관리자 -> 로그인 ...");
         return "/login/admin_login";
-//        return "/admin/dashboard";
     }
 
     @GetMapping("/kiosk/login")
@@ -144,10 +143,10 @@ public class MainController {
         return "layout/kiosk_layout";
     }
 
-    @PostMapping("/admin/login-process") // 에러 메시지에 나온 그 경로입니다!
+    @PostMapping("/admin/login-process")
     public String adminLoginProcess() {
         log.info("관리자 로그인 처리 중... 대시보드로 이동합니다.");
-        return "redirect:/admin/dashboard"; // 로그인 성공 시 대시보드 GetMapping으로 리다이렉트
+        return "redirect:/admin/dashboard";
     }
 
     // 관리자 메인 대시보드 (테이블 현황)
@@ -168,8 +167,6 @@ public class MainController {
 
         model.addAttribute("tableList", dummyTables);
 
-        return "admin/main_dashbord"; // templates/admin/main_dashbord.html 호출
+        return "admin/dashboard";
     }
-
-
 }

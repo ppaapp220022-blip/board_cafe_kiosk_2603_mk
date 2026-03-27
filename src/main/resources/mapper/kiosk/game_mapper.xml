@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.board_cafe_kiosk_2603.mapper.kiosk.GameMapper">
+
+    <resultMap id="GameResultMap" type="org.example.board_cafe_kiosk_2603.domain.kiosk.Game">
+        <id     property="id"          column="id"/>
+        <result property="categoryId"  column="category_id"/>
+        <result property="name"        column="name"/>
+        <result property="minPlayers"  column="min_players"/>
+        <result property="maxPlayers"  column="max_players"/>
+        <result property="playTime"    column="play_time"/>
+        <result property="isActive"    column="is_active"/>
+        <result property="stock"       column="stock"/>
+    </resultMap>
+
+    <!-- 활성 게임 목록 + NORMAL 재고 수 집계 -->
+    <select id="findAllActive" resultMap="GameResultMap">
+        SELECT g.id,
+               g.category_id,
+               g.name,
+               g.min_players,
+               g.max_players,
+               g.play_time,
+               g.is_active,
+               COUNT(CASE WHEN gi.status = 'NORMAL' THEN 1 END) AS stock
+        FROM game g
+        LEFT JOIN game_item gi ON g.id = gi.game_id
+        WHERE g.is_active = TRUE
+        GROUP BY g.id, g.category_id, g.name, g.min_players, g.max_players, g.play_time, g.is_active
+        ORDER BY g.id
+    </select>
+
+</mapper>

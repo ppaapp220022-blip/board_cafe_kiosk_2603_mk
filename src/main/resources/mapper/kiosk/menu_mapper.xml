@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.board_cafe_kiosk_2603.mapper.kiosk.MenuMapper">
+
+    <resultMap id="MenuResultMap" type="org.example.board_cafe_kiosk_2603.domain.kiosk.Menu">
+        <id     property="id"          column="id"/>
+        <result property="categoryId"  column="category_id"/>
+        <result property="name"        column="name"/>
+        <result property="price"       column="price"/>
+        <result property="description" column="description"/>
+        <result property="imageUrl"    column="image_url"/>
+        <result property="isAvailable" column="is_available"/>
+        <result property="isDeleted"   column="is_deleted"/>
+        <result property="createdAt"   column="created_at"/>
+    </resultMap>
+
+    <!-- category type(DRINK/FOOD)으로 판매 가능 메뉴 조회 -->
+    <select id="findByCategoryType" resultMap="MenuResultMap">
+        SELECT m.id, m.category_id, m.name, m.price,
+               m.description, m.image_url, m.is_available, m.is_deleted, m.created_at
+        FROM menu m
+        JOIN category c ON m.category_id = c.id
+        WHERE c.type       = #{type}
+          AND m.is_available = TRUE
+          AND m.is_deleted   = FALSE
+        ORDER BY m.id
+    </select>
+
+</mapper>

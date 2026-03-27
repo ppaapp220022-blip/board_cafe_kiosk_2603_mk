@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.board_cafe_kiosk_2603.mapper.kiosk.OrdersMapper">
+
+    <!-- ===== orders ===== -->
+
+    <resultMap id="OrdersResultMap" type="org.example.board_cafe_kiosk_2603.domain.kiosk.Orders">
+        <id     property="id"            column="id"/>
+        <result property="sessionId"     column="session_id"/>
+        <result property="tableId"       column="table_id"/>
+        <result property="customerPhone" column="customer_phone"/>
+        <result property="status"        column="status"/>
+        <result property="totalAmount"   column="total_amount"/>
+        <result property="orderedAt"     column="ordered_at"/>
+    </resultMap>
+
+    <resultMap id="OrderItemResultMap" type="org.example.board_cafe_kiosk_2603.domain.kiosk.OrderItem">
+        <id     property="id"       column="id"/>
+        <result property="orderId"  column="order_id"/>
+        <result property="menuId"   column="menu_id"/>
+        <result property="menuName" column="menu_name"/>
+        <result property="price"    column="price"/>
+        <result property="quantity" column="quantity"/>
+    </resultMap>
+
+    <resultMap id="PaymentResultMap" type="org.example.board_cafe_kiosk_2603.domain.kiosk.Payment">
+        <id     property="id"          column="id"/>
+        <result property="sessionId"   column="session_id"/>
+        <result property="status"      column="status"/>
+        <result property="finalAmount" column="final_amount"/>
+        <result property="paidAt"      column="paid_at"/>
+    </resultMap>
+
+    <!-- 주문 생성 (session_id, table_id 포함) -->
+    <insert id="insertOrder" parameterType="org.example.board_cafe_kiosk_2603.domain.kiosk.Orders"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO orders (session_id, table_id, customer_phone, status, total_amount)
+        VALUES (#{sessionId}, #{tableId}, #{customerPhone}, #{status}, #{totalAmount})
+    </insert>
+
+    <!-- 주문 아이템 삽입 -->
+    <insert id="insertOrderItem" parameterType="org.example.board_cafe_kiosk_2603.domain.kiosk.OrderItem"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO order_item (order_id, menu_id, menu_name, price, quantity)
+        VALUES (#{orderId}, #{menuId}, #{menuName}, #{price}, #{quantity})
+    </insert>
+
+    <!-- 결제 레코드 생성 (session_id 기반, 세션당 1회) -->
+    <insert id="insertPayment" parameterType="org.example.board_cafe_kiosk_2603.domain.kiosk.Payment"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO payment (session_id, status, final_amount)
+        VALUES (#{sessionId}, 'READY', #{finalAmount})
+    </insert>
+
+    <!-- 결제 완료 처리 (session_id 기반) -->
+    <update id="completePayment" parameterType="long">
+        UPDATE payment
+        SET status  = 'DONE',
+            paid_at = CURRENT_TIMESTAMP
+        WHERE session_id = #{sessionId}
+    </update>
+
+    <!-- 주문 상태 업데이트 -->
+    <update id="updateOrderStatus" parameterType="org.example.board_cafe_kiosk_2603.domain.kiosk.Orders">
+        UPDATE orders
+        SET status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 주문 ID로 단건 조회 -->
+    <select id="findByOrderId" parameterType="int" resultMap="OrdersResultMap">
+        SELECT id, session_id, table_id, customer_phone, status, total_amount, ordered_at
+        FROM orders
+        WHERE id = #{orderId}
+    </select>
+
+    <!-- 세션 ID로 주문 목록 조회 -->
+    <select id="findBySessionId" parameterType="long" resultMap="OrdersResultMap">
+        SELECT id, session_id, table_id, customer_phone, status, total_amount, ordered_at
+        FROM orders
+        WHERE session_id = #{sessionId}
+        ORDER BY ordered_at DESC
+    </select>
+
+    <!-- 테이블 ID로 최근 주문 조회 -->
+    <select id="findLatestByTableId" parameterType="int" resultMap="OrdersResultMap">
+        SELECT id, session_id, table_id, customer_phone, status, total_amount, ordered_at
+        FROM orders
+        WHERE table_id = #{tableId}
+        ORDER BY ordered_at DESC
+        LIMIT 1
+    </select>
+
+    <!-- 주문 ID로 아이템 목록 조회 -->
+    <select id="findItemsByOrderId" parameterType="int" resultMap="OrderItemResultMap">
+        SELECT id, order_id, menu_id, menu_name, price, quantity
+        FROM order_item
+        WHERE order_id = #{orderId}
+    </select>
+
+</mapper>
