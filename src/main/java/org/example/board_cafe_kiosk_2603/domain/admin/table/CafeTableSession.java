@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class TableSession {
+public class CafeTableSession {
     private Long id;                // 세션 고유 번호 (PK, BIGINT)
     private Integer tableId;        // 이용 중인 테이블 번호 (FK)
     private Integer packageId;      // 선택한 요금제 패키지 ID (FK)

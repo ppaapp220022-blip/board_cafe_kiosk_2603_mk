@@ -141,6 +141,11 @@
   <h1>Membership</h1>
   <p class="subtitle">휴대폰 번호를 입력하시면<br>포인트 적립 및 조회가 가능합니다.</p>
 
+  <!-- 폼 추가: 전화번호를 서버로 POST 전송 -->
+  <form id="phone-form" action="/kiosk/phone_login" method="post">
+    <input type="hidden" id="phone-input" name="phone" value="">
+  </form>
+
   <div id="phone-display" class="phone-display"></div>
 
   <div class="keypad">
@@ -212,16 +217,21 @@
     }
   }
 
+  // 확인 버튼 - 전화번호를 폼에 담아서 POST 전송
   function identifyMember() {
     if (rawNumber.length >= 10) {
-      alert(rawNumber + " 번호로 회원을 조회합니다.");
-      location.href = 'main_menu.html';
+      const formatted = rawNumber.slice(0, 3) + "-"
+      + rawNumber.slice(3, 7) + "-" + rawNumber.slice(7);
+      document.getElementById('phone-input').value = formatted;
+      document.getElementById('phone-form').submit();
     }
   }
 
+  // 적립없이 계속 버튼 - phone 빈값으로 POST 전송
   function skipStep() {
     if (confirm("포인트 적립을 포기하시겠습니까?")) {
-      location.href = 'main_menu.html';
+      document.getElementById('phone-input').value = "";
+      document.getElementById('phone-form').submit();
     }
   }
 </script>

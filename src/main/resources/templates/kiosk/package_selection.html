@@ -129,6 +129,11 @@
   <h1>Package Selection</h1>
   <p class="subtitle">이용하실 요금제를 선택해 주세요. (1인 1패키지 선택 필수)</p>
 
+  <!-- 폼 추가: packageId를 서버로 POST 전송 -->
+  <form id="package-form" action="/kiosk/package_selection" method="post">
+    <input type="hidden" id="package-id-input" name="packageId" value="">
+  </form>
+
   <div class="policy-wrapper">
     <div class="policy-card warning">
       <strong><i data-lucide="alert-triangle" style="width:14px; vertical-align: middle;"></i> 이용 시간 및 환불 정책</strong>
@@ -150,46 +155,47 @@
   </div>
 
   <div class="grid">
-    <div class="package-card" onclick="selectPackage('기본 1시간', 3000, this)">
-      <div class="pkg-name">기본 요금</div>
+    <!-- packageId는 DB의 cafe_package.id 값 -->
+    <div class="package-card" onclick="selectPackage('평일 1시간 권', 1, this)">
+      <div class="pkg-name">평일 1시간 권</div>
       <div class="pkg-time">1시간</div>
       <div class="pkg-desc">음료/음식 별도 주문 필수</div>
       <div class="pkg-price">3,000원<span class="pkg-unit">(1인)</span></div>
     </div>
 
-    <div class="package-card" onclick="selectPackage('2시간 패키지', 5000, this)">
-      <div class="pkg-name">2시간 패키지</div>
-      <div class="pkg-time">2시간</div>
-      <div class="pkg-desc">음료 미포함<br>(별도 주문 필요)</div>
-      <div class="pkg-price">5,000원<span class="pkg-unit">(1인)</span></div>
-    </div>
-
-    <div class="package-card" onclick="selectPackage('3시간 패키지', 7000, this)">
-      <div class="pkg-name">3시간 패키지</div>
-      <div class="pkg-time">3시간</div>
-      <div class="pkg-desc">음료 미포함<br>(별도 주문 필요)</div>
-      <div class="pkg-price">7,000원<span class="pkg-unit">(1인)</span></div>
-    </div>
-
-    <div class="package-card" onclick="selectPackage('무제한 패키지', 15000, this)">
-      <div class="pkg-name">무제한 패키지</div>
+    <div class="package-card" onclick="selectPackage('무제한 권', 2, this)">
+      <div class="pkg-name">무제한 권</div>
       <div class="pkg-time">Free</div>
       <div class="pkg-desc">종일 이용 가능<br>(음료 미포함)</div>
       <div class="pkg-price">15,000원<span class="pkg-unit">(1인)</span></div>
     </div>
 
-    <div class="package-card" onclick="selectPackage('음료 패키지 A', 6500, this)">
-      <div class="pkg-name">음료 콤보 A</div>
-      <div class="pkg-time">2시간</div>
-      <div class="pkg-desc">캔음료 1개 포함<br>(추가 주문 불필요)</div>
-      <div class="pkg-price">6,500원<span class="pkg-unit">(1인)</span></div>
+    <div class="package-card" onclick="selectPackage('1시간 패키지', 3, this)">
+      <div class="pkg-name">1시간 패키지</div>
+      <div class="pkg-time">1시간</div>
+      <div class="pkg-desc">음료 미포함<br>(별도 주문 필요)</div>
+      <div class="pkg-price">5,000원<span class="pkg-unit">(1인)</span></div>
     </div>
 
-    <div class="package-card" onclick="selectPackage('음료 패키지 B', 10000, this)">
-      <div class="pkg-name">음료 콤보 B</div>
+    <div class="package-card" onclick="selectPackage('2시간 패키지', 4, this)">
+      <div class="pkg-name">2시간 패키지</div>
+      <div class="pkg-time">2시간</div>
+      <div class="pkg-desc">음료 미포함<br>(별도 주문 필요)</div>
+      <div class="pkg-price">8,000원<span class="pkg-unit">(1인)</span></div>
+    </div>
+
+    <div class="package-card" onclick="selectPackage('3시간 패키지', 5, this)">
+      <div class="pkg-name">3시간 패키지</div>
       <div class="pkg-time">3시간</div>
-      <div class="pkg-desc">캔음료 2개 포함<br>(추가 주문 불필요)</div>
-      <div class="pkg-price">10,000원<span class="pkg-unit">(1인)</span></div>
+      <div class="pkg-desc">음료 미포함<br>(별도 주문 필요)</div>
+      <div class="pkg-price">11,000원<span class="pkg-unit">(1인)</span></div>
+    </div>
+
+    <div class="package-card" onclick="selectPackage('종일 자유이용권', 6, this)">
+      <div class="pkg-name">종일 자유이용권</div>
+      <div class="pkg-time">Free</div>
+      <div class="pkg-desc">종일 이용 가능<br>(음료 미포함)</div>
+      <div class="pkg-price">15,000원<span class="pkg-unit">(1인)</span></div>
     </div>
   </div>
 
@@ -203,12 +209,14 @@
   const urlParams = new URLSearchParams(window.location.search);
   const partySize = urlParams.get('size') || 1;
 
-  function selectPackage(name, price, element) {
+  function selectPackage(name, packageId, element) {
+    // 선택된 카드 하이라이트
     const cards = document.querySelectorAll('.package-card');
     cards.forEach(card => card.classList.remove('selected'));
-
     element.classList.add('selected');
-    selectedPackageName = name;
+
+    // hidden input에 packageId 저장
+    document.getElementById('package-id-input').value = packageId;
 
     const nextBtn = document.getElementById('next-button');
     nextBtn.classList.add('active');
@@ -216,10 +224,9 @@
   }
 
   function completeSelection() {
-    if (selectedPackageName !== "") {
-      // 선택 완료 시 안내 메시지 후 이동 (사용자 경험 개선)
-      alert(`${selectedPackageName}(1인 기준) 선택이 완료되었습니다.\n메인 메뉴로 이동하여 게임 및 음료를 확인해 주세요.`);
-      location.href = `main_menu.html?size=${partySize}&package=${encodeURIComponent(selectedPackageName)}`;
+    const packageId = document.getElementById('package-id-input').value;
+    if (packageId !== "") {
+      document.getElementById('package-form').submit();
     }
   }
 </script>

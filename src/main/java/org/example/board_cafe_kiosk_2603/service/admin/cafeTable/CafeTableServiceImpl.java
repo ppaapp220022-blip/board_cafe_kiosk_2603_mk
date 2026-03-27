@@ -3,7 +3,7 @@ package org.example.board_cafe_kiosk_2603.service.admin.cafeTable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.domain.admin.table.CafeTable;
-import org.example.board_cafe_kiosk_2603.domain.admin.table.TableSession;
+import org.example.board_cafe_kiosk_2603.domain.admin.table.CafeTableSession;
 import org.example.board_cafe_kiosk_2603.dto.admin.table.CafeTableDTO;
 import org.example.board_cafe_kiosk_2603.repository.admin.table.CafeTableRepository;
 import org.springframework.stereotype.Service;
@@ -48,7 +48,7 @@ public class CafeTableServiceImpl implements CafeTableService {
         switch (status) {
             case "OCCUPIED":
                 /* 주 설명: [입실] 신규 방문 세션 생성 및 테이블 포인터 연결 */
-                TableSession newSession = TableSession.builder()
+                CafeTableSession newSession = CafeTableSession.builder()
                         .tableId(id)
                         .packageId(1) // 임시: 향후 프론트에서 전달받은 패키지 ID 적용
                         .initialGuestCnt(1) // 임시: 향후 프론트에서 전달받은 인원 수 적용

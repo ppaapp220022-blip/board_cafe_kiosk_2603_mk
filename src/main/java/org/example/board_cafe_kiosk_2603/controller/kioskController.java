@@ -114,7 +114,7 @@ public class kioskController {
 
     // ===== 장바구니 =====
 
-    /**
+    /*
      * 장바구니 페이지
      * GET /kiosk/cart
      */
@@ -141,7 +141,7 @@ public class kioskController {
         return "kiosk/cart";
     }
 
-    /**
+    /*
      * 정산 페이지
      * GET /kiosk/checkout
      */
@@ -347,10 +347,12 @@ public class kioskController {
     private void initializeSessionIfNeeded(HttpSession session, Integer tableNumber) {
         if (session.getAttribute("tableNumber") == null) {
             session.setAttribute("tableNumber", tableNumber);
-            session.setAttribute("partySize", 2);
             session.setAttribute("cart", new ArrayList<>());
             session.setAttribute("sessionStartTime", System.currentTimeMillis());
             log.info("세션 초기화 - 테이블: {}", tableNumber);
+        }
+        if (session.getAttribute("partySize") == null) {
+            session.setAttribute("partySize", 1);
         }
     }
 

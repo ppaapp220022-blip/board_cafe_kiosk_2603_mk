@@ -2,7 +2,7 @@ package org.example.board_cafe_kiosk_2603.repository.admin.table;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.example.board_cafe_kiosk_2603.domain.admin.table.TableSession;
+import org.example.board_cafe_kiosk_2603.domain.admin.table.CafeTableSession;
 import org.example.board_cafe_kiosk_2603.domain.admin.table.CafeTable;
 
 import java.util.List;
@@ -23,7 +23,7 @@ public interface CafeTableRepository {
      * [Insert] 신규 세션 생성 (입장 시)
      * 주 설명: table_session 테이블에 신규 행을 추가하고, 생성된 PK(id)를 session 객체에 채워줌
      */
-    int insertNewSession(TableSession session);
+    int insertNewSession(CafeTableSession session);
 
     /**
      * [Update] 테이블 상태 및 세션 포인터 갱신 (핵심)
