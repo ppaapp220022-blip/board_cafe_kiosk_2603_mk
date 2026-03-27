@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 public class PointHistoryDTO {
     private long id;
     private int pointId;
-    private Integer orderId;
+    private Long orderId;
     private String type;         // EARN | USE
     private int amount;
     private int balanceAfter;

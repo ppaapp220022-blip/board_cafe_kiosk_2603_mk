@@ -92,14 +92,14 @@ public class PaymentService {
         log.info("결제 완료 - sessionId: {}, 수단: {}, 최종금액: ₩{}", session.getId(), request.getPaymentMethod(), finalAmount);
 
         if (pointUsed > 0) {
-            pointService.usePoint(customerPhone, pointUsed, order.getId());
+            pointService.usePoint(customerPhone, pointUsed, (long) order.getId());
             log.info("포인트 사용 - {}: -{}P", customerPhone, pointUsed);
         }
 
         int earnedPoints = 0;
         if (customerPhone != null && !customerPhone.isBlank() && finalAmount > 0) {
             earnedPoints = (int) Math.floor(finalAmount * EARN_RATE);
-            pointService.earnPoint(customerPhone, earnedPoints, order.getId());
+            pointService.earnPoint(customerPhone, earnedPoints, (long) order.getId());
             log.info("포인트 적립 - {}: +{}P", customerPhone, earnedPoints);
         }
 

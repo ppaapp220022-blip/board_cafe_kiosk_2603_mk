@@ -51,14 +51,14 @@ public class CustomerPointServiceImpl implements CustomerPointService {
         }
 
         // 2. point 계좌 조회 또는 신규 생성
-        Point point = pointMapper.selectByPhone(pointTransactionDTO.getPhone());
+        Point point = pointMapper.findByPhone(pointTransactionDTO.getPhone());
         if (point == null) {
             point = Point.builder()
                     .phone(pointTransactionDTO.getPhone())
                     .balance(0)
                     .build();
-            pointMapper.insertPoint(point);
-            point = pointMapper.selectByPhone(pointTransactionDTO.getPhone());
+            pointMapper.insert(point);
+            point = pointMapper.findByPhone(pointTransactionDTO.getPhone());
         }
 
         int currentBalance = point.getBalance();
@@ -119,7 +119,7 @@ public class CustomerPointServiceImpl implements CustomerPointService {
         Customer customer = customerMapper.selectByPhone(phone);
         if (customer == null) return null;
 
-        Point point = pointMapper.selectByPhone(phone);
+        Point point = pointMapper.findByPhone(phone);
         int balance = (point != null) ? point.getBalance() : 0;
 
         return toResponseDTO(customer, balance);

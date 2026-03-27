@@ -4,37 +4,30 @@
 <mapper namespace="org.example.board_cafe_kiosk_2603.mapper.kiosk.CartMapper">
 
     <!-- tableNumber(표시 번호) → cafe_table.id(PK) 변환 -->
-    <select id="findCafeTableIdByTableNumber" parameterType="int" resultType="int">
+    <select id="findCafeTableIdByTableNumber" resultType="org.example.board_cafe_kiosk_2603.domain.kiosk.Cart">
         SELECT id
         FROM cafe_table
         WHERE table_number = #{tableNumber}
         LIMIT 1
     </select>
 
-    <resultMap id="CartResultMap" type="org.example.board_cafe_kiosk_2603.domain.kiosk.Cart">
-        <id     property="id"        column="id"/>
-        <result property="tableId"   column="table_id"/>
-        <result property="updatedAt" column="updated_at"/>
-    </resultMap>
-
-    <select id="findByTableId" parameterType="int" resultMap="CartResultMap">
+    <select id="findByTableId" resultType="org.example.board_cafe_kiosk_2603.domain.kiosk.Cart">
         SELECT id, table_id, updated_at
         FROM cart
         WHERE table_id = #{tableId}
     </select>
 
-    <insert id="insert" parameterType="org.example.board_cafe_kiosk_2603.domain.kiosk.Cart"
-            useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert">
         INSERT INTO cart (table_id)
         VALUES (#{tableId})
     </insert>
 
-    <delete id="deleteByTableId" parameterType="int">
+    <delete id="deleteByTableId">
         DELETE FROM cart
         WHERE table_id = #{tableId}
     </delete>
 
-    <update id="updateTimestamp" parameterType="int">
+    <update id="updateTimestamp">
         UPDATE cart
         SET updated_at = CURRENT_TIMESTAMP
         WHERE id = #{cartId}

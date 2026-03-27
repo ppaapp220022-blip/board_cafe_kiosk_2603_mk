@@ -75,7 +75,7 @@ public class PointService {
     // ===================================================
 
     @Transactional
-    public void earnPoint(String phone, int amount, Integer orderId) {
+    public void earnPoint(String phone, int amount, Long orderId) {
         Point point = getOrCreatePoint(phone);
 
         int newBalance = point.getBalance() + amount;
@@ -101,7 +101,7 @@ public class PointService {
     // ===================================================
 
     @Transactional
-    public void usePoint(String phone, int amount, Integer orderId) {
+    public void usePoint(String phone, int amount, Long orderId) {
         Point point = pointMapper.findByPhone(phone);
         if (point == null) {
             throw new IllegalArgumentException("포인트 계좌를 찾을 수 없습니다: " + phone);

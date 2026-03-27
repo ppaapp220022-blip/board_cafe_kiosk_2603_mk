@@ -6,7 +6,7 @@
 <mapper namespace="org.example.board_cafe_kiosk_2603.mapper.admin.CustomerMapper">
 
     <!-- 신규 고객 등록 -->
-    <insert id="insertCustomer" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insertCustomer">
         INSERT INTO board_cafe_kiosk_2603.customer (phone)
         VALUES (#{phone})
     </insert>

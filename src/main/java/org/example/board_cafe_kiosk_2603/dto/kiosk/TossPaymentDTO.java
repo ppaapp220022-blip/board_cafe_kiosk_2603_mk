@@ -24,7 +24,7 @@ public class TossPaymentDTO {
     // === 비즈니스 로직용 필드 ===
     private final boolean success;
     private final String  message;
-    private final int     orderId;
+    private final Long     orderId;
     private final int     totalAmount;
 
     @Min(value = 0, message = "포인트 사용액은 0 이상이어야 합니다.")
@@ -53,7 +53,7 @@ public class TossPaymentDTO {
                 .build();
     }
 
-    public static TossPaymentDTO confirmed(int orderId, int totalAmount, int pointUsed,
+    public static TossPaymentDTO confirmed(Long orderId, int totalAmount, int pointUsed,
                                            int finalAmount, int earnedPoints,
                                            String paymentKey, String method) {
         return TossPaymentDTO.builder()

@@ -23,15 +23,16 @@ public class PointController {
     private final PointService pointService;
 
     /** 포인트 관리 페이지 */
-    @GetMapping
-    public String pointManagement(Model model) {
-        model.addAttribute("pointList",      pointService.getAllPoints());
-        model.addAttribute("totalCustomers", pointService.getTotalCustomers());
-        model.addAttribute("totalPoints",    pointService.getTotalPoints());
-        model.addAttribute("avgPoints",      pointService.getAvgPoints());
-        model.addAttribute("activePage",     "pointManagement");
-        return "admin/point";
-    }
+//    @GetMapping
+//    public String pointManagement(Model model) {
+//        model.addAttribute("pointList",      pointService.getAllPoints());
+//        model.addAttribute("totalCustomers", pointService.getTotalCustomers());
+//        model.addAttribute("totalPoints",    pointService.getTotalPoints());
+//        model.addAttribute("avgPoints",      pointService.getAvgPoints());
+//        model.addAttribute("activePage",     "pointManagement");
+//        return "admin/point";
+//
+//    }
 
     /** 포인트 이력 조회 (AJAX) */
     @GetMapping("/{pointId}/history")

@@ -153,14 +153,14 @@ public class TossPaymentService {
                 .build());
 
         if (pointUsed > 0 && customerPhone != null && !customerPhone.isBlank()) {
-            pointService.usePoint(customerPhone, pointUsed, order.getId());
+            pointService.usePoint(customerPhone, pointUsed, (long) order.getId());
             log.info("포인트 사용 - {}: -{}P", customerPhone, pointUsed);
         }
 
         int earnedPoints = 0;
         if (customerPhone != null && !customerPhone.isBlank() && finalAmount > 0) {
             earnedPoints = (int) Math.floor(finalAmount * EARN_RATE);
-            pointService.earnPoint(customerPhone, earnedPoints, order.getId());
+            pointService.earnPoint(customerPhone, earnedPoints, (long) order.getId());
             log.info("포인트 적립 - {}: +{}P", customerPhone, earnedPoints);
         }
 
@@ -168,7 +168,7 @@ public class TossPaymentService {
         log.info("장바구니 비우기 완료 - tableNumber: {}", tableNumber);
 
         return TossPaymentDTO.confirmed(
-                order.getId(), totalAmount, pointUsed, finalAmount, earnedPoints,
+                (long) order.getId(), totalAmount, pointUsed, finalAmount, earnedPoints,
                 paymentKey, approvedMethod);
     }
 

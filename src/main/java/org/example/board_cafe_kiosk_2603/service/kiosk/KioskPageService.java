@@ -23,7 +23,6 @@ public class KioskPageService {
 
     private final CartService    cartService;
     private final PointService   pointService;
-    private final MenuService    menuService;
 
     // ===================================================
     // 세션 헬퍼
@@ -134,11 +133,4 @@ public class KioskPageService {
         model.addAttribute("tableNumber", tableNumber != null ? tableNumber : 1);
     }
 
-    // ===================================================
-    // 메뉴 데이터 위임
-    // ===================================================
-
-    public List<Map<String, Object>> getDrinkItems()  { return menuService.getDrinkItems(); }
-    public List<Map<String, Object>> getFoodItems()   { return menuService.getFoodItems();  }
-    public List<Map<String, Object>> getGameItems()   { return menuService.getGameItems();  }
 }
