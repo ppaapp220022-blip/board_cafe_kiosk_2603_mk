@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin_layout}">
+
+<head>
+  <title>Macro Management</title>
+  <th:block layout:fragment="head-extra">
+    <style>
+      .page-title { font-size: 28px; font-weight: 700; margin-bottom: 24px; }
+      .table-container { background: white; border-radius: 15px; padding: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
+      .macro-massage-table { width: 100%; border-collapse: collapse; }
+      .macro-massage-table th { text-align: left; padding: 15px 20px; border-bottom: 2px solid #f8f9fa; color: #666; font-size: 13px; font-weight: 600; }
+      .macro-massage-table td { padding: 18px 20px; border-bottom: 1px solid #f8f9fa; font-size: 15px; }
+      .macro-massage-table tr:hover { background-color: #f8fbff; }
+      .messageText { font-weight: 600; color: #333; }
+
+      /* 탭 버튼 스타일 */
+      .tabs {
+        display: flex; gap: 10px; margin-bottom: 30px;
+        background: white; padding: 8px; border-radius: 12px;
+        width: fit-content; box-shadow: var(--card-shadow);
+      }
+
+      .tab-btn {
+        padding: 10px 25px; border-radius: 8px; border: none;
+        cursor: pointer; font-weight: 600; background: transparent;
+        color: #666; transition: 0.2s;
+      }
+      .tab-btn.active {
+        background: var(--primary-blue);
+        color: white; }
+    </style>
+  </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+  <h1 class="page-title">💬 매크로 메시지 확인</h1>
+
+  <div class="tabs">
+    <button th:each="entry, stat : ${macroGroups}"
+            class="tab-btn"
+            th:classappend="${stat.first} ? 'active' : ''"
+            th:onclick="'openTab(event, \'content-' + ${stat.index} + '\')'"
+            th:text="${entry.key == 'STAFF_TO_TABLE' ? '직원 → 테이블' : (entry.key == 'TABLE_TO_STAFF' ? '테이블 → 직원' : entry.key)}">
+    </button>
+  </div>
+
+  <!-- 추가 폼 -->
+  <section id="add-macro-form">
+    <div class="form-card">
+      <div class="form-title">Add New Macro</div>
+      <form th:action="@{/macros}" method="post">
+        <div class="form-group">
+          <label>Category</label>
+          <select name="category" class="form-select">
+            <option value="order">Order Status</option>
+            <option value="service">Service Request</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Message</label>
+          <textarea name="message" class="form-textarea" placeholder="Enter macro message..."></textarea>
+        </div>
+        <div class="btn-row">
+          <button type="submit" class="btn-save">💾 Save</button>
+          <button type="button" class="btn-cancel" onclick="toggleAddForm()">✕ Cancel</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- 매크로 그룹 목록 (macroGroups: Map<String, List<MacroDto>>) -->
+  <th:block th:each="entry, stat : ${macroGroups}">
+    <section class="macro-card">
+      <div class="macro-group-header">
+        <div class="icon-box" th:classappend="${stat.even} ? 'bg-blue' : 'bg-green'">💬</div>
+        <span th:text="${entry.key}">카테고리명</span>
+      </div>
+      <div th:each="macro : ${entry.value}" class="message-item">
+        <span th:text="${macro.message}">메시지 내용</span>
+        <form th:action="@{/macros/{id}/delete(id=${macro.id})}" method="post" style="margin:0;">
+          <button type="submit" class="btn-delete-msg" title="삭제">✕</button>
+        </form>
+      </div>
+    </section>
+  </th:block>
+</th:block>
+
+<th:block layout:fragment="scripts">
+  <script>
+    function toggleAddForm() {
+      const form = document.getElementById('add-macro-form');
+      form.style.display = (form.style.display === 'block') ? 'none' : 'block';
+      if (form.style.display === 'block') form.scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+</th:block>
+</body>
+</html>

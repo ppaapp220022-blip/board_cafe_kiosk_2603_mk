@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin_layout}">
+
+<head>
+  <title>Macro Management</title>
+  <th:block layout:fragment="head-extra">
+    <style>
+      :root {
+        --primary-blue: #007AFF;
+        --text-dark: #1C1C1E;
+        --text-gray: #8E8E93;
+        --bg-light: #F2F2F7;
+      }
+
+      .page-title { font-size: 28px; font-weight: 700; margin-bottom: 24px; color: var(--text-dark); }
+      .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+
+      /* 탭 스타일 */
+      .tab-container {
+        display: flex; gap: 10px; margin-bottom: 30px;
+        background: white; padding: 8px; border-radius: 12px;
+        width: fit-content; box-shadow: var(--card-shadow);
+      }
+      .tab-button {
+        padding: 10px 25px; border-radius: 8px; border: none;
+        cursor: pointer; font-weight: 600; background: transparent;
+        color: #666; transition: 0.2s;
+      }
+      .tab-button:hover { color: var(--text-dark); }
+      .tab-button.active {
+        background: var(--primary-blue);
+        color: white; }
+
+      /* 테이블 스타일 */
+      .table-container { background: white; border-radius: 15px; padding: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); overflow-x: auto; }
+      .macro-massage-table { width: 100%; border-collapse: collapse; }
+      .macro-massage-table th { text-align: left; padding: 15px 20px; border-bottom: 2px solid var(--bg-light); color: var(--text-gray); font-size: 13px; font-weight: 600; white-space: nowrap; }
+      .macro-massage-table td { padding: 18px 20px; border-bottom: 1px solid var(--bg-light); font-size: 15px; color: var(--text-dark); vertical-align: middle; }
+
+      /* 상태 배지 */
+      .status-badge { display: inline-flex; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; }
+      .status-active { background-color: #34C759; color: white; box-shadow: 0 2px 4px rgba(52, 199, 89, 0.2); }
+      .status-inactive { background-color: #8E8E93; color: white; }
+      tr.is-disabled { background-color: #F9F9F9; opacity: 0.6; }
+
+      /* 버튼 공통 */
+      .btn-primary { padding: 10px 20px; border-radius: 8px; background: var(--primary-blue); color: white; border: none; font-size: 14px; font-weight: 600; cursor: pointer; }
+      .btn-text { padding: 8px 16px; border-radius: 8px; border: 1px solid #E5E5EA; background: white; font-size: 12px; font-weight: 600; cursor: pointer; }
+      .btn-text.text-danger { color: #FF3B30; border-color: #FF3B30; }
+      .btn-text.text-active { color: var(--primary-blue); border-color: var(--primary-blue); }
+
+      /* 모달 스타일 */
+      .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; z-index: 9999; }
+      .modal-content { background: white; border-radius: 24px; padding: 28px; width: 90%; max-width: 420px; box-sizing: border-box; animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+      @keyframes modalPop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+      .form-group { margin-bottom: 20px; }
+      .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-gray); margin-bottom: 8px; }
+
+      .form-row { display: flex; gap: 12px; align-items: flex-end; margin-bottom: 20px; }
+      .form-row .form-group { flex: 1; min-width: 0; margin-bottom: 0; }
+
+      /* 입력창 스타일 */
+      .form-group input[type="text"] { width: 100%; height: 48px; padding: 0 16px; background: var(--bg-light); border: 2px solid transparent; border-radius: 12px; font-size: 16px; box-sizing: border-box; outline: none; }
+      .form-group input[type="text"]:focus { background: white; border-color: var(--primary-blue); }
+
+      /* ⭐ Stepper UI 수정 (이미지 오류 해결 핵심) */
+      .stepper-control {
+        display: flex; align-items: center; background: var(--bg-light); border-radius: 12px; height: 48px; width: 100%; box-sizing: border-box; overflow: hidden; border: 2px solid transparent; transition: all 0.2s;
+      }
+      .stepper-control:focus-within { background: white; border-color: var(--primary-blue); }
+
+      .stepper-btn {
+        background: transparent; border: none; color: var(--primary-blue); font-size: 20px; font-weight: 600; width: 44px; height: 100%; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none;
+      }
+      .stepper-btn:hover { background: rgba(0, 122, 255, 0.05); }
+
+      .stepper-input {
+        flex: 1; width: 100%; min-width: 0; height: 100%; border: none; background: transparent; text-align: center; font-size: 16px; font-weight: 600; color: var(--text-dark); outline: none;
+      }
+      /* 숫자 기본 화살표 제거 */
+      .stepper-input::-webkit-inner-spin-button, .stepper-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+      .stepper-input { -moz-appearance: textfield; }
+
+      /* 세그먼트 컨트롤 */
+      .toggle-group { display: flex; background: var(--bg-light); padding: 3px; border-radius: 12px; height: 46px; box-sizing: border-box; }
+      .radio-label { flex: 1; display: flex; position: relative; cursor: pointer; }
+      .radio-label input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+      .radio-label span { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: var(--text-gray); border-radius: 9px; transition: all 0.2s ease; }
+      .radio-label input:checked + span { background-color: #FFFFFF; color: var(--primary-blue); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
+    </style>
+  </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+  <div class="header-container">
+    <h1 class="page-title">⚡ 요금 정책</h1>
+    <button class="btn btn-primary" onclick="openPolicyModal()">+ 새 정책 추가</button>
+  </div>
+
+  <div class="tab-container">
+    <button class="tab-button active" onclick="filterTable('all', this)">전체</button>
+    <button class="tab-button" onclick="filterTable('active', this)">적용 중</button>
+    <button class="tab-button" onclick="filterTable('inactive', this)">비활성</button>
+  </div>
+
+  <div class="table-container">
+    <table class="macro-massage-table">
+      <thead>
+      <tr>
+        <th>정책 명칭</th>
+        <th>이용 시간</th>
+        <th>금액</th>
+        <th>음료 포함</th>
+        <th>상태</th> <th style="text-align: right;">관리</th>
+      </tr>
+      </thead>
+      <tbody id="policyTableBody">
+      <tr>
+        <td class="policy-name">프리미엄 2시간 코스</td>
+        <td>120분</td>
+        <td>12,000원</td>
+        <td><span class="text-include">포함</span></td>
+        <td><span class="status-badge status-active">적용 중</span></td>
+        <td style="text-align: right;">
+          <button class="btn-text text-danger" onclick="toggleStatus(this)">비활성화</button>
+        </td>
+      </tr>
+      <tr class="is-disabled">
+        <td class="policy-name">굿모닝 얼리버드</td>
+        <td>60분</td>
+        <td>4,000원</td>
+        <td><span>미포함</span></td>
+        <td><span class="status-badge status-inactive">비활성</span></td>
+        <td style="text-align: right;">
+          <button class="btn-text text-active" onclick="toggleStatus(this)">활성화</button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="policyModal" class="modal-overlay" onclick="closePolicyModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header"><h3 style="margin-bottom: 24px; text-align: center;">새 정책 추가</h3></div>
+      <form id="policyForm">
+        <div class="form-group">
+          <label>정책 명칭</label>
+          <input type="text" id="policyName" placeholder="예: 평일 2시간 패키지">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>이용 시간 (분)</label>
+            <div class="stepper-control">
+              <button type="button" class="stepper-btn" onclick="stepValue('baseTime', -10)">-</button>
+              <input type="number" id="baseTime" class="stepper-input" value="60" readonly>
+              <button type="button" class="stepper-btn" onclick="stepValue('baseTime', 10)">+</button>
+            </div>
+          </div>
+
+          <div class="form-group" style="flex: 1.2;">
+            <label>금액 (원)</label>
+            <div class="stepper-control">
+              <button type="button" class="stepper-btn" onclick="stepValue('basePrice', -500)">-</button>
+              <input type="number" id="basePrice" class="stepper-input" value="5000" readonly>
+              <button type="button" class="stepper-btn" onclick="stepValue('basePrice', 500)">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="toggle-group" style="margin-top: 10px;">
+          <label class="radio-label">
+            <input type="radio" name="includeDrink" value="true" checked>
+            <span>포함</span>
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="includeDrink" value="false">
+            <span>미포함</span>
+          </label>
+        </div>
+      </form>
+      <div style="display: flex; gap: 12px; margin-top: 28px;">
+        <button class="btn-text" style="flex:1" onclick="closePolicyModal()">취소</button>
+        <button class="btn-primary" style="flex:1.5" onclick="savePolicy()">정책 저장</button>
+      </div>
+    </div>
+  </div>
+</th:block>
+
+<th:block layout:fragment="scripts">
+  <script>
+    const tableBody = document.getElementById('policyTableBody');
+    let currentFilter = 'all';
+
+    function openPolicyModal() { document.getElementById('policyModal').style.display = 'flex'; }
+    function closePolicyModal() { document.getElementById('policyModal').style.display = 'none'; document.getElementById('policyForm').reset(); }
+
+    function stepValue(inputId, delta) {
+      const input = document.getElementById(inputId);
+      let val = parseInt(input.value) || 0;
+      val += delta;
+      if (val < 0) val = 0;
+      input.value = val;
+    }
+
+    function savePolicy() {
+      const name = document.getElementById('policyName').value;
+      const time = document.getElementById('baseTime').value;
+      const price = document.getElementById('basePrice').value;
+      const includeDrink = document.querySelector('input[name="includeDrink"]:checked').value === "true";
+
+      if(!name) { alert("정책 명칭을 입력해주세요."); return; }
+
+      const newRow = document.createElement('tr');
+      newRow.innerHTML = `
+        <td class="policy-name">${name}</td>
+        <td>${time}분</td>
+        <td>${Number(price).toLocaleString()}원</td>
+        <td><span class="${includeDrink ? 'text-include' : ''}">${includeDrink ? '포함' : '미포함'}</span></td>
+        <td><span class="status-badge status-active">적용 중</span></td>
+        <td style="text-align: right;">
+          <button class="btn-text text-danger" onclick="toggleStatus(this)">비활성화</button>
+        </td>
+      `;
+      tableBody.prepend(newRow);
+      sortTable();
+      closePolicyModal();
+    }
+
+    function toggleStatus(btn) {
+      const row = btn.closest('tr');
+      const statusCell = row.cells[4];
+      const isDisabling = !row.classList.contains('is-disabled');
+
+      if (isDisabling) {
+        row.classList.add('is-disabled');
+        statusCell.innerHTML = '<span class="status-badge status-inactive">비활성</span>';
+        btn.textContent = "활성화";
+        btn.className = "btn-text text-active";
+      } else {
+        row.classList.remove('is-disabled');
+        statusCell.innerHTML = '<span class="status-badge status-active">적용 중</span>';
+        btn.textContent = "비활성화";
+        btn.className = "btn-text text-danger";
+      }
+      sortTable();
+    }
+
+    function filterTable(filter, element) {
+      currentFilter = filter;
+      if (element) {
+        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+        element.classList.add('active');
+      }
+      applyCurrentFilter();
+    }
+
+    function applyCurrentFilter() {
+      const rows = Array.from(tableBody.querySelectorAll('tr'));
+      rows.forEach(row => {
+        const isDisabled = row.classList.contains('is-disabled');
+        if (currentFilter === 'all') row.style.display = '';
+        else if (currentFilter === 'active') row.style.display = isDisabled ? 'none' : '';
+        else if (currentFilter === 'inactive') row.style.display = isDisabled ? '' : 'none';
+      });
+    }
+
+    function sortTable() {
+      const rows = Array.from(tableBody.querySelectorAll('tr'));
+      rows.sort((a, b) => a.classList.contains('is-disabled') - b.classList.contains('is-disabled'));
+      rows.forEach(row => tableBody.appendChild(row));
+      applyCurrentFilter();
+    }
+
+    window.onload = sortTable;
+  </script>
+</th:block>
+</body>
+</html>
