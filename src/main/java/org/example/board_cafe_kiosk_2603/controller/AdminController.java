@@ -2,7 +2,6 @@ package org.example.board_cafe_kiosk_2603.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.example.board_cafe_kiosk_2603.dto.admin.MacroMessageResponseDTO;
 import org.example.board_cafe_kiosk_2603.service.admin.macro.MacroMessageService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Admin 관리자 페이지 컨트롤러
@@ -25,21 +23,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AdminController {
     private final MacroMessageService macroMessageService;
-
-//    @GetMapping("/dashboard")
-//    public String dashboard(Model model) {
-//        // 추후 DB 연동 시 이 리스트에 데이터를 채우게 됩니다.
-//        // 현재는 화면 확인을 위해 빈 리스트를 넘깁니다.
-//        model.addAttribute("tableList", new ArrayList<>());
-//        model.addAttribute("emptyCount", 12); // 초기값은 모두 비어있음으로 설정
-//        model.addAttribute("occupiedCount", 0);
-//        model.addAttribute("waitingCount", 0);
-//
-//        // activePage 변수는 사이드바의 하이라이트 처리를 위해 사용됩니다.
-//        model.addAttribute("activePage", "tableStatus");
-//
-//        return "admin/dashboard"; // templates/admin/dashboard.html 호출
-//    }
 
     // 포인트 관리 페이지 이동 로직
     @GetMapping("/points")
@@ -95,112 +78,26 @@ public class AdminController {
         return "admin/status"; // 파일 위치: src/main/resources/templates/admin/status.html
     }
 
-    @GetMapping("/price")
-    public String prices(Model model) {
-        // 1. 사이드바 하이라이트 설정
-        model.addAttribute("activePage", "salesAnalysis");
 
-        // 2. 가격 변경 예정 데이터 (더미 데이터)
-        List<Map<String, Object>> pendingPrices = new ArrayList<>();
-        pendingPrices.add(Map.of(
-                "id", 1L,
-                "productName", "아이스 아메리카노 (L)",
-                "currentPrice", 4500,
-                "newPrice", 4800,
-                "applyDate", "2026-04-01"
-        ));
-        pendingPrices.add(Map.of(
-                "id", 2L,
-                "productName", "나초 & 치즈 세트",
-                "currentPrice", 8000,
-                "newPrice", 7500,
-                "applyDate", "2026-04-05"
-        ));
-        model.addAttribute("pendingPrices", pendingPrices);
-
-        // 3. 가격 변경 이력 데이터 (더미 데이터)
-        List<Map<String, Object>> priceHistory = new ArrayList<>();
-        priceHistory.add(Map.of(
-                "productName", "보드게임 1시간 이용권",
-                "changedAt", "2026-01-10",
-                "beforePrice", 3000,
-                "afterPrice", 3500,
-                "diff", 500
-        ));
-        priceHistory.add(Map.of(
-                "productName", "캔콜라 355ml",
-                "changedAt", "2025-12-20",
-                "beforePrice", 2500,
-                "afterPrice", 2000,
-                "diff", -500
-        ));
-        model.addAttribute("priceHistory", priceHistory);
-
-        return "admin/price"; // src/main/resources/templates/admin/price.html
-    }
-
-    @PostMapping("/price")
-    public String savePrices(@RequestParam Map<String, String> params) {
-        // 실제 로직: 서비스 계층을 통해 변경된 가격 저장
-        System.out.println("수정된 가격 데이터: " + params);
-        return "redirect:/admin/price";
-    }
-
-    // 상품 관리 페이지 (게임/음식 통합)
-    @GetMapping("/product")
-    public String products(Model model, @RequestParam(defaultValue = "game") String tab) {
-        model.addAttribute("activePage", "productReg");
-        model.addAttribute("activeTab", tab); // 현재 선택된 탭 정보 전달
-
-        // 보드게임 더미 데이터
-        List<Map<String, Object>> gameList = new ArrayList<>();
-        gameList.add(Map.of("id", 1L, "name", "루미큐브", "price", 0, "stock", 5, "maxStock", 5));
-        gameList.add(Map.of("id", 2L, "name", "스플렌더", "price", 0, "stock", 2, "maxStock", 3));
-
-        // 음식/음료 더미 데이터
-        List<Map<String, Object>> foodList = new ArrayList<>();
-        foodList.add(Map.of("id", 3L, "name", "아이스 아메리카노", "price", 4500, "soldOut", false));
-        foodList.add(Map.of("id", 4L, "name", "초코 츄러스", "price", 3500, "soldOut", true));
-
-        model.addAttribute("gameList", gameList);
-        model.addAttribute("foodList", foodList);
-
-        return "admin/product";
-    }
-
-    // 상품 등록 처리
-    @PostMapping("/product/add")
-    public String addProduct(@RequestParam Map<String, String> params) {
-        log.info("상품 등록 데이터: {}", params);
-        return "redirect:/admin/product?tab=" + params.get("category");
-    }
-
-    // 품절 상태 변경
-    @PostMapping("/product/{id}/soldout")
-    public String toggleSoldOut(@PathVariable Long id) {
-        log.info("상품 품절 상태 변경 ID: {}", id);
-        return "redirect:/admin/product?tab=food";
-    }
-
-    // 상품 삭제
-    @PostMapping("/product/{id}/delete")
-    public String deleteProduct(@PathVariable Long id) {
-        log.info("상품 삭제 ID: {}", id);
-        return "redirect:/admin/product";
-    }
-
-//    // 매크로 메세지 확인
-//    @GetMapping("/macro")
-//    public String getAllMacro(Model model) {
-//        log.info("--- AdminController getAllMacro get ---");
-//        List<MacroMessageResponseDTO> macroList = macroMessageService.getAllActiveMessages();
+//    // 상품 등록 처리
+//    @PostMapping("/product/add")
+//    public String addProduct(@RequestParam Map<String, String> params) {
+//        log.info("상품 등록 데이터: {}", params);
+//        return "redirect:/admin/product?tab=" + params.get("category");
+//    }
 //
-//        // direction별로 그룹핑 (예: "STAFF_TO_TABLE" -> 리스트, "CUSTOMER_TO_STAFF" -> 리스트)
-//        Map<String, List<MacroMessageResponseDTO>> macroGroups = macroList.stream()
-//                .collect(Collectors.groupingBy(MacroMessageResponseDTO::getDirection));
+//    // 품절 상태 변경
+//    @PostMapping("/product/{id}/soldout")
+//    public String toggleSoldOut(@PathVariable Long id) {
+//        log.info("상품 품절 상태 변경 ID: {}", id);
+//        return "redirect:/admin/product?tab=food";
+//    }
 //
-//        model.addAttribute("macroGroups", macroGroups);
-//        return "admin/macro";
+//    // 상품 삭제
+//    @PostMapping("/product/{id}/delete")
+//    public String deleteProduct(@PathVariable Long id) {
+//        log.info("상품 삭제 ID: {}", id);
+//        return "redirect:/admin/product";
 //    }
 
     // 패키지 요금 정책

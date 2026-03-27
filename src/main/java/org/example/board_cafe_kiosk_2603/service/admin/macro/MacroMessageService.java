@@ -1,6 +1,6 @@
 package org.example.board_cafe_kiosk_2603.service.admin.macro;
 
-import org.example.board_cafe_kiosk_2603.dto.admin.MacroMessageResponseDTO;
+import org.example.board_cafe_kiosk_2603.dto.admin.macro.MacroMessageResponseDTO;
 
 import java.util.List;
 

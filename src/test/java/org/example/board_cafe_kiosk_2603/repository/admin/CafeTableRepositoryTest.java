@@ -1,14 +1,13 @@
 package org.example.board_cafe_kiosk_2603.repository.admin;
 
 import lombok.extern.log4j.Log4j2;
-import org.example.board_cafe_kiosk_2603.domain.admin.CafeTable;
+import org.example.board_cafe_kiosk_2603.domain.admin.table.CafeTable;
+import org.example.board_cafe_kiosk_2603.repository.admin.table.CafeTableRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @Log4j2
 @SpringBootTest

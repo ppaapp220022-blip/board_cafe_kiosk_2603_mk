@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.board_cafe_kiosk_2603.repository.admin.macro.MacroMessageRepository">
+
+    <select id="findAllActive" resultType="org.example.board_cafe_kiosk_2603.domain.admin.macro.MacroMessage">
+        SELECT
+            id,
+            direction,
+            message_text AS messageText,
+            is_active AS isActive
+        FROM macro_message
+        WHERE is_active = TRUE
+        ORDER BY direction DESC, id ASC
+    </select>
+
+</mapper>

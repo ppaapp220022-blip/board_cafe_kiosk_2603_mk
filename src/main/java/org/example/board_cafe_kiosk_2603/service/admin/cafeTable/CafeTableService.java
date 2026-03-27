@@ -1,6 +1,6 @@
 package org.example.board_cafe_kiosk_2603.service.admin.cafeTable;
 
-import org.example.board_cafe_kiosk_2603.dto.admin.CafeTableDTO;
+import org.example.board_cafe_kiosk_2603.dto.admin.table.CafeTableDTO;
 
 import java.util.List;
 

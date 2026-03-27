@@ -2,14 +2,13 @@ package org.example.board_cafe_kiosk_2603.service.admin.cafeTable;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.example.board_cafe_kiosk_2603.domain.admin.CafeTable;
-import org.example.board_cafe_kiosk_2603.domain.admin.TableSession;
-import org.example.board_cafe_kiosk_2603.dto.admin.CafeTableDTO;
-import org.example.board_cafe_kiosk_2603.repository.admin.CafeTableRepository;
+import org.example.board_cafe_kiosk_2603.domain.admin.table.CafeTable;
+import org.example.board_cafe_kiosk_2603.domain.admin.table.TableSession;
+import org.example.board_cafe_kiosk_2603.dto.admin.table.CafeTableDTO;
+import org.example.board_cafe_kiosk_2603.repository.admin.table.CafeTableRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
