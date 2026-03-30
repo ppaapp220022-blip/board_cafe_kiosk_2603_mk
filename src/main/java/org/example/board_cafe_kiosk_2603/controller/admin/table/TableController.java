@@ -3,6 +3,7 @@ package org.example.board_cafe_kiosk_2603.controller.admin.table;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.dto.admin.table.CafeTableDTO;
+import org.example.board_cafe_kiosk_2603.dto.kiosk.OrderItemDTO;
 import org.example.board_cafe_kiosk_2603.service.admin.cafeTable.CafeTableService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -33,10 +34,30 @@ public class TableController {
     }
 
     /**
+     * [GET] 특정 테이블의 실시간 주문 항목 조회 (AJAX 호출용)
+     * @param id 테이블 고유 ID
+     * @return OrderItemDTO 리스트 (PAID/CANCELLED 제외된 순수 이용 내역)
+     */
+    @ResponseBody
+    @GetMapping("/{id}/orders")
+    public ResponseEntity<List<OrderItemDTO>> getTableOrders(@PathVariable("id") Integer id) {
+        /**
+         * [핵심 로직]
+         * 1. 서비스에서 해당 테이블의 current_session_id를 추적함.
+         * 2. 해당 세션에 묶인 '미결제' 주문 아이템들만 DTO 리스트로 가져옴.
+         */
+        log.info("API 호출: 테이블 {}번 실시간 주문 내역 요청", id);
+
+        List<OrderItemDTO> activeOrders = cafeTableService.getActiveOrders(id);
+
+        // 데이터가 없더라도 빈 리스트([])와 함께 200 OK를 반환하여 프론트 처리를 원활하게 함
+        return ResponseEntity.ok(activeOrders);
+    }
+
+    /**
      * [PATCH] 테이블 상태 변경 및 세션 연동 (입실/퇴실/청소)
      * @param id 테이블 PK
      * @param request {"status": "OCCUPIED" | "CLEANING" | "EMPTY"}
-     * 상세 설명: 상태가 'OCCUPIED'가 되면 세션이 생성되고, 'CLEANING'이 되면 세션이 마감됩니다.
      */
     @ResponseBody
     @PatchMapping("/{id}/status")
@@ -47,15 +68,21 @@ public class TableController {
         String status = request.get("status");
 
         try {
-            // 핵심 로직 실행 (세션 생성/종료 및 테이블 포인터 업데이트)
+            // 1. 핵심 로직 실행 (토큰 체크 및 세션 생성/종료 포함)
             cafeTableService.changeTableStatus(id, status);
 
             log.info("상태 변경 성공: 테이블 {}번 -> {}", id, status);
             return ResponseEntity.ok(Map.of("message", "상태가 " + status + "(으)로 변경되었습니다."));
 
+        } catch (IllegalStateException e) {
+            // 2. 서비스에서 던진 "토큰 없음" 등의 비즈니스 로직 예외 처리
+            log.warn("상태 변경 거부: 테이블 {}번, 사유: {}", id, e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+
         } catch (Exception e) {
+            // 3. 예상치 못한 기타 서버 오류
             log.error("상태 변경 실패: 테이블 {}번, 사유: {}", id, e.getMessage());
-            return ResponseEntity.internalServerError().body(Map.of("error", "상태 변경 중 오류가 발생했습니다."));
+            return ResponseEntity.internalServerError().body(Map.of("error", "서버 오류가 발생했습니다."));
         }
     }
 
@@ -94,6 +121,31 @@ public class TableController {
             return ResponseEntity.ok(Map.of("message", "모든 테이블과 세션이 초기화되었습니다."));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(Map.of("error", "리셋 중 오류 발생"));
+        }
+    }
+
+    /**
+     * [GET] 특정 테이블의 미확인 메시지 목록 조회 (모달용)
+     */
+    @GetMapping("/messages/{tableId}")
+    @ResponseBody
+    public ResponseEntity<List<String>> getUnreadMessages(@PathVariable("tableId") Integer tableId) {
+        List<String> messages = cafeTableService.getUnreadMessages(tableId);
+        return ResponseEntity.ok(messages);
+    }
+
+    /**
+     * [PATCH] 특정 테이블의 알림 '읽음' 처리
+     */
+    @PatchMapping("/messages/{tableId}/read")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> markAsRead(@PathVariable("tableId") Integer tableId) {
+        try {
+            cafeTableService.markMessagesAsRead(tableId);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (Exception e) {
+            log.error("알림 읽음 처리 중 오류: {}", e.getMessage());
+            return ResponseEntity.internalServerError().body(Map.of("success", false));
         }
     }
 }

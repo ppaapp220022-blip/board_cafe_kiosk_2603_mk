@@ -5,10 +5,12 @@ import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.domain.admin.table.CafeTable;
 import org.example.board_cafe_kiosk_2603.domain.admin.table.CafeTableSession;
 import org.example.board_cafe_kiosk_2603.dto.admin.table.CafeTableDTO;
+import org.example.board_cafe_kiosk_2603.dto.kiosk.OrderItemDTO;
 import org.example.board_cafe_kiosk_2603.repository.admin.table.CafeTableRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -33,6 +35,8 @@ public class CafeTableServiceImpl implements CafeTableService {
                 .status(cafeTable.getStatus())
                 .accessToken(cafeTable.getAccessToken())
                 .checkInTime(cafeTable.getCheckInTime())
+                .guestCount(cafeTable.getGuestCount())
+                .hasUnreadMessage(cafeTable.isHasUnreadMessage())
                 .build()
         ).collect(Collectors.toList());
     }
@@ -44,6 +48,16 @@ public class CafeTableServiceImpl implements CafeTableService {
          * 상세 설명: 단순 텍스트 변경이 아닌, OCCUPIED 시 세션을 생성(매핑)하고 CLEANING 시 세션을 마감(해제)함
          */
         log.info("테이블 ID: {} 상태 변경 프로세스 시작 -> {}", id, status);
+
+        // 토큰 체크 로직: 입실(OCCUPIED) 시도 시 토큰이 없으면 예외 던짐
+        if ("OCCUPIED".equals(status)) {
+            String currentToken = cafeTableRepository.selectAccessTokenById(id);
+
+            if (currentToken == null || currentToken.trim().isEmpty()) {
+                log.error("실패: 테이블 ID {}번에 토큰이 없어 OCCUPIED 전환이 불가능합니다.", id);
+                throw new IllegalStateException("인증 토큰이 없는 테이블은 입실 처리가 불가능합니다.");
+            }
+        }
 
         switch (status) {
             case "OCCUPIED":
@@ -115,5 +129,61 @@ public class CafeTableServiceImpl implements CafeTableService {
         log.info("자정 데이터 리셋 - 전체 테이블 공석(EMPTY) 및 매핑 해제 완료 (적용 건수: {})", resetTables);
 
         log.info("--- 자정 데이터 리셋 프로세스 종료 ---");
+    }
+
+    /**
+     * [실시간 주문 상세 내역 조회]
+     * 대시보드 모달창에 표시할 특정 테이블의 현재 주문 항목 리스트를 가져옵니다.
+     * * @param tableId 조회 대상 테이블의 고유 식별 번호 (PK)
+     * @return OrderItemDTO 리스트 (진행 중인 주문이 없거나 빈 테이블일 경우 빈 리스트 반환)
+     */
+    @Override
+    @Transactional(readOnly = true) // 데이터 정합성을 유지하면서도 성능 최적화를 위해 읽기 전용 트랜잭션 적용
+    public List<OrderItemDTO> getActiveOrders(Integer tableId) {
+
+        log.info("주문 내역 조회 요청 - 테이블 ID: {}", tableId);
+
+        // 1. [세션 확인] 해당 물리 테이블이 현재 가리키고 있는 활성 방문 세션(current_session_id)을 조회합니다.
+        // 상세 설명: 테이블 상태가 'OCCUPIED'인 경우에만 유효한 ID가 존재하며, 'EMPTY'나 'CLEANING'일 경우 NULL이 반환됩니다.
+        Long sessionId = cafeTableRepository.selectCurrentSessionId(tableId);
+
+        // 2. [방어 로드] 세션 ID가 존재하지 않는 경우 (손님이 없는 테이블 등)
+        // 상세 설명: 불필요하게 orders 테이블을 Join 하지 않도록 즉시 빈 리스트(ArrayList)를 생성하여 반환합니다.
+        if (sessionId == null) {
+            log.debug("테이블 {}번: 연결된 활성 세션이 없어 주문 조회를 중단합니다.", tableId);
+            return new ArrayList<>();
+        }
+
+        // 3. [데이터 추출] MyBatis Mapper를 통해 실제 DB에서 주문 항목들을 가져옵니다.
+        /**
+         * SQL 필터링 기준 (Mapper.xml 내부 로직):
+         * - session_id가 일치해야 함
+         * - 주문 상태(status)가 'PAID'(결제완료) 또는 'CANCELLED'(주소)가 아닌 것만 포함
+         * - 최신 주문이 위로 오도록 ordered_at 기준 정렬
+         */
+        List<OrderItemDTO> activeItems = cafeTableRepository.selectActiveOrderItems(sessionId);
+
+        log.info("조회 완료 - 테이블 {}번(세션 {}), 진행 중인 주문 항목: {}건",
+                tableId, sessionId, activeItems.size());
+
+        return activeItems;
+    }
+
+    /**
+     * 읽지 않은 메시지 내용들만 추출
+     */
+    @Override
+    public List<String> getUnreadMessages(Integer tableId) {
+        return cafeTableRepository.selectUnreadMessageContents(tableId);
+    }
+
+    /**
+     * 알림 상태 업데이트 (is_read = true)
+     */
+    @Override
+    @Transactional
+    public void markMessagesAsRead(Integer tableId) {
+        // Mapper에 작성하신 updateMessagesReadStatus 호출
+        cafeTableRepository.updateMessagesReadStatus(tableId);
     }
 }

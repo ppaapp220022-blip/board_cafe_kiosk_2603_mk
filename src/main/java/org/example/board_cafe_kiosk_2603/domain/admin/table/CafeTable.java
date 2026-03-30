@@ -27,4 +27,10 @@ public class CafeTable {
 
     /* JOIN을 통해 가져온 세션 시작 시간 */
     private LocalDateTime checkInTime;
+
+    /* JOIN을 통해 가져온 이용 인원 수 */
+    private Integer guestCount;
+
+    /* 미확인 메시지 존재 여부 */
+    private boolean hasUnreadMessage;
 }

@@ -25,12 +25,28 @@
                 background: white; border-radius: 16px; height: 180px; padding: 24px;
                 display: flex; flex-direction: column; justify-content: space-between;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); border: 2px solid transparent;
-                transition: all 0.2s ease; cursor: pointer;
+                transition: all 0.2s ease; cursor: pointer; position: relative;
             }
             .table-card:hover { transform: translateY(-4px); box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1); }
             .table-card.selected { border: 2px solid #4285f4; background-color: #f8faff; }
 
-            /* 상태별 카드 배경색 정의 */
+            /* --- 알림 점(Alert Dot) 스타일 --- */
+            .alert-dot {
+                position: absolute; top: 18px; right: 18px;
+                width: 12px; height: 12px; background-color: #ea4335;
+                border-radius: 50%; border: 2px solid white;
+                display: none;
+                z-index: 10;
+            }
+            .has-msg .alert-dot { display: block; animation: pulse-red 1.5s infinite; }
+
+            @keyframes pulse-red {
+                0% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(234, 67, 53, 0.7); }
+                70% { transform: scale(1.2); opacity: 0.8; box-shadow: 0 0 0 10px rgba(234, 67, 53, 0); }
+                100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(234, 67, 53, 0); }
+            }
+
+            /* 상태별 카드 디자인 */
             .table-card.status-occupied { border-left: 8px solid #4285f4; }
             .table-card.status-empty { border-left: 8px solid #f1f3f4; }
             .table-card.status-cleaning { border-left: 8px solid #fbbc04; }
@@ -55,13 +71,70 @@
             .order-item { display: flex; justify-content: space-between; font-size: 14px; padding: 8px 0; border-bottom: 1px solid #eee; }
             .order-item:last-child { border-bottom: none; }
 
-            .action-group { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 25px; }
-            .btn { padding: 14px; border-radius: 10px; border: none; font-weight: 600; cursor: pointer; font-size: 14px; transition: 0.2s; }
-            .btn-pay { background: #34a853; color: white; }
-            .btn-status { background: #fbbc04; color: white; }
-            .btn-msg { background: #ea4335; color: white; }
-            .btn-close { background: #f1f3f4; color: #3c4043; grid-column: span 1; }
+            /* 버튼 레이아웃 - 2x2 가변형 */
+            .action-group {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                margin-top: 25px;
+            }
+
+            .action-group .btn {
+                flex: 1 1 calc(50% - 10px);
+                padding: 15px;
+                border: none;
+                border-radius: 10px;
+                font-weight: bold;
+                cursor: pointer;
+                font-size: 14px;
+                transition: all 0.2s;
+            }
+
+            .btn-pay { background: #ea4335; color: white; }    /* 결제완료: 빨강 */
+            .btn-status { background: #28a745; color: white; } /* 상태변경: 초록 */
+            .btn-msg { background: #fbbc05; color: white; }    /* 요청확인: 노랑 */
+            .btn-close {
+                background: #f1f3f4;
+                color: #3c4043;
+                flex-grow: 1; /* 요청확인 없을 때 꽉 차게 */
+            }
+
             .btn:hover { opacity: 0.9; transform: scale(0.98); }
+
+            /* 모달 내부 미확인 메시지 박스 스타일 */
+            .unread-msg-box {
+                background: #fff9c4; border-left: 5px solid #fbc02d;
+                padding: 15px; margin-bottom: 20px; border-radius: 12px;
+                font-size: 14px; color: #5d4037; display: none;
+            }
+
+            /* --- 전체 리셋 버튼 전용 디자인 (회색/다크 계열) --- */
+            .btn-reset {
+                background: #5f6368;
+                color: white;
+                display: flex;
+                align-items: center;
+                border-radius: 10px;
+                cursor: pointer;
+                gap: 8px;
+                padding: 10px 18px;
+                height: fit-content;
+
+                /* --- [핵심] 브라우저 기본 테두리 제거 --- */
+                border: none;
+
+                /* 혹시 모를 폰트 두께 조절 */
+                font-weight: 600;
+
+                /* 부드러운 전환 효과 */
+                transition: all 0.2s ease;
+            }
+
+            /* 포커스 시에도 아예 아무것도 안 보이게 하고 싶다면 */
+            .btn-reset:focus {
+                outline: none;
+                box-shadow: none;
+            }
         </style>
     </th:block>
 </head>
@@ -71,9 +144,7 @@
     <div class="header-container">
         <h1 class="page-title">📊 테이블 현황</h1>
         <div style="display: flex; align-items: center; gap: 20px;">
-            <button class="btn btn-msg"
-                    style="background: #5f6368; padding: 8px 16px; font-size: 13px;"
-                    onclick="handleTotalReset()">
+            <button class="btn btn-reset" onclick="handleTotalReset()">
                 🔄 전체 리셋 (마감)
             </button>
 
@@ -83,18 +154,20 @@
                 <div class="legend-item"><div class="dot cleaning"></div>청소 중</div>
                 <div class="legend-item"><div class="dot request"></div>요청 있음</div>
             </div>
-            </div>
         </div>
     </div>
 
     <div class="table-grid">
         <div th:each="table : ${tables}"
              class="table-card"
-             th:classappend="${'status-' + #strings.toLowerCase(table.status)}"
+             th:classappend="${(table.hasUnreadMessage ? 'has-msg ' : '') + 'status-' + #strings.toLowerCase(table.status)}"
              th:data-id="${table.id}"
              th:data-num="${table.tableNumber}"
              th:data-status="${table.status}"
+             th:data-token="${table.accessToken}"
              onclick="openTableModal(this)">
+
+            <div class="alert-dot"></div>
 
             <div class="table-number" th:text="'Table ' + ${table.tableNumber}">Table 1</div>
 
@@ -104,9 +177,16 @@
                 <span th:if="${table.status == 'CLEANING'}" style="color: #fbbc04;">청소 중</span>
             </div>
 
-            <div class="time-info" style="font-size: 12px; color: #9aa0a6;">
-                <span th:if="${table.checkInTime != null}"
-                      th:text="'입장 ' + ${#temporals.format(table.checkInTime, 'HH:mm')}">14:30</span>
+            <div class="time-info" style="font-size: 12px; color: #5f6368; display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 10px; border-top: 1px dashed #eee;">
+                <span th:if="${table.status == 'OCCUPIED' and table.guestCount != null}"
+                      style="display: flex; align-items: center; gap: 4px; font-weight: 500;">
+                    👥 <span th:text="${table.guestCount} + '명'">2명</span>
+                </span>
+                <span th:unless="${table.status == 'OCCUPIED'}"></span>
+                <span th:if="${table.status == 'OCCUPIED' and table.checkInTime != null}"
+                      style="display: flex; align-items: center; gap: 4px;">
+                    🕒 <span th:text="${#temporals.format(table.checkInTime, 'HH:mm')}">14:30</span>
+                </span>
             </div>
         </div>
     </div>
@@ -117,12 +197,14 @@
                 <span id="modalTitle">Table 0</span>
                 <button class="close-btn" onclick="closeTableModal()">×</button>
             </div>
-
             <div class="modal-body">
-                <div style="font-weight: 600; color: #3c4043;">📋 실시간 주문 내역</div>
-                <div id="orderList" class="order-list">
-                    <div class="order-item">주문 내역이 없습니다.</div>
+                <div id="unreadMsgBox" class="unread-msg-box">
+                    <strong>⚠️ 확인이 필요한 손님 요청</strong>
+                    <ul id="unreadMsgList"></ul>
                 </div>
+
+                <div style="font-weight: 600; color: #3c4043;">📋 실시간 주문 내역</div>
+                <div id="orderList" class="order-list"></div>
 
                 <div class="total-price-container" style="margin-top: 20px; padding-top: 15px; border-top: 2px dashed #eee;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -134,7 +216,7 @@
                 <div class="action-group">
                     <button class="btn btn-pay" onclick="handlePayment()">💰 결제완료</button>
                     <button class="btn btn-status" onclick="handleStatusUpdate()">🔄 상태변경</button>
-                    <button class="btn btn-msg" onclick="alert('메시지 기능 준비중')">✉️ 요청확인</button>
+                    <button class="btn btn-msg" id="readBtn" onclick="handleReadMessage()" style="display:none;">✉️ 요청확인</button>
                     <button class="btn btn-close" onclick="closeTableModal()">닫기</button>
                 </div>
             </div>
@@ -143,73 +225,109 @@
 
     <th:block layout:fragment="script">
         <script th:inline="javascript">
-            /** [핵심] 현재 제어 중인 테이블 ID 및 상태 전역 관리 */
             let currentTableId = null;
             let currentTableStatus = null;
 
-            /** [핵심] 모달 열기 및 데이터 연동 */
-            function openTableModal(element) {
-                // 1. 선택 시각화 및 데이터 추출
+            function hideMessageBox() {
+                const box = document.getElementById('unreadMsgBox');
+                const btn = document.getElementById('readBtn');
+                if (box) box.style.display = 'none';
+                if (btn) btn.style.display = 'none';
+            }
+
+            function renderOrders(orders) {
+                const listDiv = document.getElementById('orderList');
+                const priceSpan = document.getElementById('totalPrice');
+                let sum = 0;
+                if (!listDiv || !priceSpan) return;
+                if (!orders || orders.length === 0) {
+                    listDiv.innerHTML = '<div class="order-item" style="color:#999;">진행 중인 주문이 없습니다.</div>';
+                    priceSpan.innerText = '0원';
+                    return;
+                }
+                listDiv.innerHTML = orders.map(item => {
+                    const itemTotal = item.price * item.quantity;
+                    sum += itemTotal;
+                    return `<div class="order-item"><span>${item.menuName} x ${item.quantity}</span><span>${itemTotal.toLocaleString()}원</span></div>`;
+                }).join('');
+                priceSpan.innerText = sum.toLocaleString() + '원';
+            }
+
+            async function openTableModal(element) {
                 document.querySelectorAll('.table-card').forEach(c => c.classList.remove('selected'));
                 element.classList.add('selected');
-
                 currentTableId = element.getAttribute('data-id');
+                currentTableStatus = element.getAttribute('data-status');
                 const tableNum = element.getAttribute('data-num');
-                currentTableStatus = element.getAttribute('data-status'); // 현재 상태 저장
+                const hasMsg = element.classList.contains('has-msg');
 
-                document.getElementById('modalTitle').innerText = 'Table ' + tableNum;
+                const modalTitle = document.getElementById('modalTitle');
+                if (modalTitle) modalTitle.innerText = 'Table ' + tableNum;
+                hideMessageBox();
 
-                /* 주 설명: 이용 중인 테이블인 경우에만 샘플 주문 데이터를 표시함 */
-                // 상세 설명: 실제 구현 시에는 별도의 API를 통해 세션 기반 주문 내역을 가져와야 함
-                if (currentTableStatus === 'OCCUPIED') {
-                    const mockData = [
-                        { name: '아메리카노', qty: 2, price: '8,000' },
-                        { name: '보드게임 2시간', qty: 1, price: '10,000' }
-                    ];
-                    renderOrders(mockData);
-                } else {
-                    renderOrders([]);
-                }
+                if (currentTableStatus === 'OCCUPIED') { await fetchActiveOrders(); }
+                else { renderOrders([]); }
 
-                // 2. 모달 열기 애니메이션
+                if (hasMsg) { await fetchUnreadMessages(); }
+
                 const modal = document.getElementById('tableModal');
-                modal.style.display = 'flex';
-                setTimeout(() => modal.querySelector('.modal-content').style.transform = 'translateY(0)', 10);
+                if (modal) {
+                    modal.style.display = 'flex';
+                    setTimeout(() => {
+                        const content = modal.querySelector('.modal-content');
+                        if (content) content.style.transform = 'translateY(0)';
+                    }, 10);
+                }
             }
 
             function closeTableModal() {
                 const modal = document.getElementById('tableModal');
-                modal.style.display = 'none';
-                modal.querySelector('.modal-content').style.transform = 'translateY(-20px)';
+                if (modal) {
+                    modal.style.display = 'none';
+                    const content = modal.querySelector('.modal-content');
+                    if (content) content.style.transform = 'translateY(-20px)';
+                }
                 document.querySelectorAll('.table-card').forEach(c => c.classList.remove('selected'));
                 currentTableId = null;
                 currentTableStatus = null;
             }
 
-            /** [핵심] 주문 내역 및 합계 렌더링 */
-            function renderOrders(orders) {
-                const listDiv = document.getElementById('orderList');
-                const priceSpan = document.getElementById('totalPrice');
-                let sum = 0;
-
-                if (!orders || orders.length === 0) {
-                    listDiv.innerHTML = '<div class="order-item" style="color:#999;">주문 내역이 없습니다.</div>';
-                    priceSpan.innerText = '0원';
-                    return;
-                }
-
-                listDiv.innerHTML = orders.map(item => {
-                    const price = parseInt(item.price.replace(/,/g, ''));
-                    sum += price;
-                    return `<div class="order-item"><span>${item.name} x ${item.qty}</span><span>${item.price}원</span></div>`;
-                }).join('');
-
-                priceSpan.innerText = sum.toLocaleString() + '원';
+            async function fetchUnreadMessages() {
+                try {
+                    const response = await fetch(`/admin/dashboard/messages/${currentTableId}`);
+                    if (response.ok) {
+                        const messages = await response.json();
+                        const listDiv = document.getElementById('unreadMsgList');
+                        if (messages && messages.length > 0 && listDiv) {
+                            listDiv.innerHTML = messages.map(msg => `<li>${msg}</li>`).join('');
+                            document.getElementById('unreadMsgBox').style.display = 'block';
+                            document.getElementById('readBtn').style.display = 'block';
+                        }
+                    }
+                } catch (err) { console.error(err); }
             }
 
-            /** [핵심] 상태 변경 API 연동 (PATCH) */
+            async function handleReadMessage() {
+                if (!currentTableId) return;
+                if (!confirm("요청 내용을 모두 확인하셨습니까?")) return;
+                try {
+                    const response = await fetch(`/admin/dashboard/messages/${currentTableId}/read`, { method: 'PATCH' });
+                    if (response.ok) { location.reload(); }
+                } catch (err) { console.error(err); }
+            }
+
+            async function fetchActiveOrders() {
+                try {
+                    const response = await fetch(`/admin/dashboard/${currentTableId}/orders`);
+                    if (response.ok) {
+                        const orders = await response.json();
+                        renderOrders(orders);
+                    } else { renderOrders([]); }
+                } catch (err) { renderOrders([]); }
+            }
+
+            // --- [2. 상태 변경 (에러 메시지 처리 보강)] ---
             async function callUpdateStatus(status) {
-                /* 주 설명: 서버의 TableController.updateStatus API를 호출함 */
                 try {
                     const response = await fetch(`/admin/dashboard/${currentTableId}/status`, {
                         method: 'PATCH',
@@ -220,79 +338,58 @@
                     const result = await response.json();
 
                     if (response.ok) {
-                        // 상세 설명: 성공 메시지 출력 후 대시보드 새로고침
-                        alert(result.message);
                         location.reload();
                     } else {
-                        alert(result.error || "상태 변경에 실패했습니다.");
+                        // 서버(컨트롤러)에서 보낸 error 메시지 출력
+                        alert("❌ " + (result.error || "상태 변경에 실패했습니다."));
                     }
                 } catch (err) {
-                    console.error("통신 에러:", err);
+                    console.error(err);
                     alert("서버와 통신 중 오류가 발생했습니다.");
                 }
             }
 
-            /** [핵심] 결제 완료 처리 로직 */
             function handlePayment() {
                 if (currentTableStatus !== 'OCCUPIED') {
                     alert("이용 중인 테이블만 결제가 가능합니다.");
                     return;
                 }
-
-                if(confirm("결제를 완료하시겠습니까?\n확인 시 퇴실 처리 및 청소 단계로 전환됩니다.")) {
-                    /* 상세 설명: 서비스 로직에 따라 세션 마감(is_active=false) 및 CLEANING 상태로 변경됨 */
+                if(confirm("결제를 완료하시겠습니까?\n확인 시 퇴실 및 청소 단계로 전환됩니다.")) {
                     callUpdateStatus('CLEANING');
                 }
             }
 
-            /** 상태 순환 로직: EMPTY -> OCCUPIED -> CLEANING -> EMPTY */
+            // --- [3. 토큰 유무 체크 로직 추가] ---
             async function handleStatusUpdate() {
-                /* 주 설명: 현재 상태를 기반으로 다음 단계 상태를 결정하여 서버에 요청함 */
                 if (!currentTableId || !currentTableStatus) return;
+
+                // 1. 현재 테이블 카드의 토큰 값 확인
+                const selectedTable = document.querySelector(`.table-card[data-id="${currentTableId}"]`);
+                const token = selectedTable ? selectedTable.getAttribute('data-token') : null;
+
+                // 2. EMPTY 상태에서 입실(OCCUPIED)하려는데 토큰이 없는 경우 차단
+                if (currentTableStatus === 'EMPTY') {
+                    if (!token || token.trim() === "" || token === 'null') {
+                        alert("⚠️ 인증 토큰이 없는 테이블입니다.\n토큰 발급 후에만 입실(OCCUPIED)이 가능합니다.");
+                        return;
+                    }
+                }
 
                 let nextStatus = '';
                 let confirmMsg = '';
+                if (currentTableStatus === 'EMPTY') { nextStatus = 'OCCUPIED'; confirmMsg = "손님 입실 처리를 하시겠습니까?"; }
+                else if (currentTableStatus === 'OCCUPIED') { nextStatus = 'CLEANING'; confirmMsg = "퇴실 및 청소 중 상태로 변경하시겠습니까?"; }
+                else if (currentTableStatus === 'CLEANING') { nextStatus = 'EMPTY'; confirmMsg = "청소가 완료되었습니까?"; }
 
-                // 설계된 순환 구조 적용
-                if (currentTableStatus === 'EMPTY') {
-                    nextStatus = 'OCCUPIED';
-                    confirmMsg = "손님 입실 처리를 하시겠습니까?\n(새로운 방문 세션이 생성됩니다)";
-                } else if (currentTableStatus === 'OCCUPIED') {
-                    nextStatus = 'CLEANING';
-                    confirmMsg = "퇴실 처리 및 청소 중 상태로 변경하시겠습니까?\n(이용 세션이 마감됩니다)";
-                } else if (currentTableStatus === 'CLEANING') {
-                    nextStatus = 'EMPTY';
-                    confirmMsg = "청소가 완료되었습니까?\n(다음 손님 대기 상태로 전환됩니다)";
-                }
-
-                if (confirm(confirmMsg)) {
-                    await callUpdateStatus(nextStatus);
-                }
+                if (confirm(confirmMsg)) { await callUpdateStatus(nextStatus); }
             }
 
             async function handleTotalReset() {
-                const confirmMsg = "⚠️ 주의: 모든 테이블의 상태, 토큰, 세션 정보가 완전히 초기화됩니다.\n영업 종료 시에만 사용하세요. 진행하시겠습니까?";
-
-                if (!confirm(confirmMsg)) return;
-
+                if (!confirm("⚠️ 주의: 모든 데이터가 초기화됩니다. 진행하시겠습니까?")) return;
                 try {
-                    // 이전에 작성한 Controller의 @DeleteMapping("/reset") 호출
-                    const response = await fetch('/admin/dashboard/reset', {
-                        method: 'DELETE'
-                    });
-
-                    const result = await response.json();
-
-                    if (response.ok) {
-                        alert(result.message);
-                        location.reload(); // 모든 데이터가 초기화된 상태로 화면 갱신
-                    } else {
-                        alert(result.error || "리셋 처리 중 오류가 발생했습니다.");
-                    }
-                } catch (err) {
-                    console.error("리셋 통신 에러:", err);
-                    alert("서버와 통신할 수 없습니다.");
-                }
+                    const response = await fetch('/admin/dashboard/reset', { method: 'DELETE' });
+                    if (response.ok) { location.reload(); }
+                } catch (err) { console.error(err); }
             }
         </script>
     </th:block>

@@ -27,7 +27,7 @@ VALUES (1, 'table1234', 'OCCUPIED', 'a1b2c3d4-e5f6-7890-abcd-ef1234567801', NULL
        (6, 'table1234', 'CLEANING', 'a1b2c3d4-e5f6-7890-abcd-ef1234567806', NULL),
        (7, 'table1234', 'EMPTY', 'a1b2c3d4-e5f6-7890-abcd-ef1234567807', NULL),
        (8, 'table1234', 'OCCUPIED', 'a1b2c3d4-e5f6-7890-abcd-ef1234567808', NULL),
-       (9,  'table1234', 'EMPTY', 'a1b2c3d4-e5f6-7890-abcd-ef1234567809', NULL),
+       (9, 'table1234', 'EMPTY', 'a1b2c3d4-e5f6-7890-abcd-ef1234567809', NULL),
        (10, 'table1234', 'EMPTY', 'a1b2c3d4-e5f6-7890-abcd-ef1234567810', NULL),
        (11, 'table1234', 'EMPTY', 'a1b2c3d4-e5f6-7890-abcd-ef1234567811', NULL),
        (12, 'table1234', 'EMPTY', 'a1b2c3d4-e5f6-7890-abcd-ef1234567812', NULL);
@@ -182,12 +182,13 @@ VALUES (1, 1, '아메리카노', 3000, 2),
 -- ============================================================
 --   category: 5=전략 게임, 6=파티 게임, 7=협력 게임
 INSERT INTO `game` (`category_id`, `name`, `min_players`, `max_players`, `play_time`, `is_active`)
-VALUES (6, '맞춤법 게임', 2, 6, 20,  TRUE),  -- id=1  stock=NORMAL 3개
-       (6, '숫자 맞추기', 2, 4, 15,  TRUE),  -- id=2  stock=NORMAL 2개
-       (6, '동물 맞추기', 2, 6, 20,  TRUE),  -- id=3  stock=NORMAL 0개 (전부 대여중/파손)
-       (7, '색상 맞추기', 2, 5, 25,  TRUE),  -- id=4  stock=NORMAL 1개
-       (5, '스피드 게임',  2, 8, 10,  TRUE),  -- id=5  stock=NORMAL 0개 (전부 대여중)
-       (6, '퀴즈 게임',   2, 10, 30, TRUE);  -- id=6  stock=NORMAL 4개
+VALUES (6, '맞춤법 게임', 2, 6, 20, TRUE), -- id=1  stock=NORMAL 3개
+       (6, '숫자 맞추기', 2, 4, 15, TRUE), -- id=2  stock=NORMAL 2개
+       (6, '동물 맞추기', 2, 6, 20, TRUE), -- id=3  stock=NORMAL 0개 (전부 대여중/파손)
+       (7, '색상 맞추기', 2, 5, 25, TRUE), -- id=4  stock=NORMAL 1개
+       (5, '스피드 게임', 2, 8, 10, TRUE), -- id=5  stock=NORMAL 0개 (전부 대여중)
+       (6, '퀴즈 게임', 2, 10, 30, TRUE);
+-- id=6  stock=NORMAL 4개
 
 -- ============================================================
 -- 11. game_item (실물 박스 재고 — status별 합산이 game별 stock)
@@ -199,13 +200,13 @@ VALUES
 (1, 'SPL-001', 'NORMAL'),
 (1, 'SPL-002', 'NORMAL'),
 (1, 'SPL-003', 'NORMAL'),
-(1, 'SPL-004', 'RENTED'),   -- 현재 대여 중
-(1, 'SPL-005', 'DAMAGED'),  -- 파손
+(1, 'SPL-004', 'RENTED'),  -- 현재 대여 중
+(1, 'SPL-005', 'DAMAGED'), -- 파손
 
 -- 숫자 맞추기 (game_id=2): NORMAL 2개
 (2, 'NUM-001', 'NORMAL'),
 (2, 'NUM-002', 'NORMAL'),
-(2, 'NUM-003', 'RENTED'),   -- 현재 대여 중
+(2, 'NUM-003', 'RENTED'),  -- 현재 대여 중
 
 -- 동물 맞추기 (game_id=3): NORMAL 0개 (전부 대여중 or 파손)
 (3, 'ANM-001', 'RENTED'),
@@ -214,8 +215,8 @@ VALUES
 
 -- 색상 맞추기 (game_id=4): NORMAL 1개
 (4, 'CLR-001', 'NORMAL'),
-(4, 'CLR-002', 'RENTED'),   -- 현재 대여 중
-(4, 'CLR-003', 'LOST'),     -- 분실
+(4, 'CLR-002', 'RENTED'),  -- 현재 대여 중
+(4, 'CLR-003', 'LOST'),    -- 분실
 
 -- 스피드 게임 (game_id=5): NORMAL 0개 (전부 대여중)
 (5, 'SPD-001', 'RENTED'),
@@ -226,7 +227,8 @@ VALUES
 (6, 'QUZ-002', 'NORMAL'),
 (6, 'QUZ-003', 'NORMAL'),
 (6, 'QUZ-004', 'NORMAL'),
-(6, 'QUZ-005', 'RENTED');   -- 현재 대여 중
+(6, 'QUZ-005', 'RENTED');
+-- 현재 대여 중
 
 -- ============================================================
 -- 12. rental_log (게임 대여 이력 — 현재 대여 중인 RENTED 항목 반영)
@@ -235,38 +237,60 @@ VALUES
 INSERT INTO `rental_log` (`session_id`, `game_item_id`, `rented_at`, `returned_at`, `status`)
 VALUES
 -- 과거 세션 반납 완료 기록
-(1, 4,  '2026-03-25 13:05:00', '2026-03-25 14:50:00', 'RETURNED'),  -- 맞춤법 SPL-004
-(2, 9,  '2026-03-25 15:35:00', '2026-03-25 18:30:00', 'RETURNED'),  -- 동물 ANM-001
-(3, 6,  '2026-03-25 17:05:00', '2026-03-25 18:00:00', 'RETURNED'),  -- 숫자 NUM-001
-(4, 12, '2026-03-25 19:05:00', '2026-03-25 21:10:00', 'RETURNED'),  -- 색상 CLR-002
-(5, 15, '2026-03-25 11:05:00', '2026-03-25 22:50:00', 'RETURNED'),  -- 스피드 SPD-001
+(1, 4, '2026-03-25 13:05:00', '2026-03-25 14:50:00', 'RETURNED'),  -- 맞춤법 SPL-004
+(2, 9, '2026-03-25 15:35:00', '2026-03-25 18:30:00', 'RETURNED'),  -- 동물 ANM-001
+(3, 6, '2026-03-25 17:05:00', '2026-03-25 18:00:00', 'RETURNED'),  -- 숫자 NUM-001
+(4, 12, '2026-03-25 19:05:00', '2026-03-25 21:10:00', 'RETURNED'), -- 색상 CLR-002
+(5, 15, '2026-03-25 11:05:00', '2026-03-25 22:50:00', 'RETURNED'), -- 스피드 SPD-001
 
 -- 현재 대여 중 (session_id 6~9, returned_at=NULL)
-(6,  4, '2026-03-26 13:35:00', NULL, 'RENTING'),  -- table1: 맞춤법 SPL-004
-(7,  9, '2026-03-26 14:05:00', NULL, 'RENTING'),  -- table2: 동물 ANM-001
-(7, 10, '2026-03-26 14:05:00', NULL, 'RENTING'),  -- table2: 동물 ANM-002
-(8, 12, '2026-03-26 15:05:00', NULL, 'RENTING'),  -- table5: 색상 CLR-002
-(8, 15, '2026-03-26 15:05:00', NULL, 'RENTING'),  -- table5: 스피드 SPD-001
-(8, 16, '2026-03-26 15:05:00', NULL, 'RENTING'),  -- table5: 스피드 SPD-002
-(9,  7, '2026-03-26 12:05:00', NULL, 'RENTING'),  -- table8: 숫자 NUM-003
-(9, 20, '2026-03-26 12:05:00', NULL, 'RENTING');  -- table8: 퀴즈 QUZ-005
+(6, 4, '2026-03-26 13:35:00', NULL, 'RENTING'),                    -- table1: 맞춤법 SPL-004
+(7, 9, '2026-03-26 14:05:00', NULL, 'RENTING'),                    -- table2: 동물 ANM-001
+(7, 10, '2026-03-26 14:05:00', NULL, 'RENTING'),                   -- table2: 동물 ANM-002
+(8, 12, '2026-03-26 15:05:00', NULL, 'RENTING'),                   -- table5: 색상 CLR-002
+(8, 15, '2026-03-26 15:05:00', NULL, 'RENTING'),                   -- table5: 스피드 SPD-001
+(8, 16, '2026-03-26 15:05:00', NULL, 'RENTING'),                   -- table5: 스피드 SPD-002
+(9, 7, '2026-03-26 12:05:00', NULL, 'RENTING'),                    -- table8: 숫자 NUM-003
+(9, 20, '2026-03-26 12:05:00', NULL, 'RENTING');
+-- table8: 퀴즈 QUZ-005
 
 -- ============================================================
 -- 13. macro_message
 -- ============================================================
-INSERT INTO `macro_message` (`direction`, `message_text`, `is_active`) VALUES
+INSERT INTO `macro_message` (`direction`, `message_text`, `is_active`)
+VALUES
 /* STAFF_TO_TABLE: 직원이 테이블(키오스크)로 보내는 알림 */
-                                                                           ('STAFF_TO_TABLE', '주문하신 음료와 스낵이 준비되었습니다. 카운터에서 수령해 주세요.', TRUE),
-                                                                           ('STAFF_TO_TABLE', '이용 시간이 10분 남았습니다. 연장을 원하시면 카운터에 문의해 주세요.', TRUE),
-                                                                           ('STAFF_TO_TABLE', '주문하신 메뉴가 품절되어 취소 처리되었습니다. 죄송합니다.', TRUE),
-                                                                           ('STAFF_TO_TABLE', '현재 보드게임 반납 구역이 혼잡하오니 테이블에 그대로 두시면 치워드리겠습니다.', TRUE),
-                                                                           ('STAFF_TO_TABLE', '진행 중인 이벤트에 당첨되셨습니다! 카운터에서 선물을 확인하세요.', TRUE),
-                                                                           ('STAFF_TO_TABLE', '외부 음식 반입은 금지되어 있습니다. 양해 부탁드립니다.', TRUE),
+    ('STAFF_TO_TABLE', '주문하신 음료와 스낵이 준비되었습니다. 카운터에서 수령해 주세요.', TRUE),
+    ('STAFF_TO_TABLE', '이용 시간이 10분 남았습니다. 연장을 원하시면 카운터에 문의해 주세요.', TRUE),
+    ('STAFF_TO_TABLE', '주문하신 메뉴가 품절되어 취소 처리되었습니다. 죄송합니다.', TRUE),
+    ('STAFF_TO_TABLE', '현재 보드게임 반납 구역이 혼잡하오니 테이블에 그대로 두시면 치워드리겠습니다.', TRUE),
+    ('STAFF_TO_TABLE', '진행 중인 이벤트에 당첨되셨습니다! 카운터에서 선물을 확인하세요.', TRUE),
+    ('STAFF_TO_TABLE', '외부 음식 반입은 금지되어 있습니다. 양해 부탁드립니다.', TRUE),
 
 /* TABLE_TO_STAFF: 고객이 직원(관리자 페이지)에게 보내는 요청 */
-                                                                           ('TABLE_TO_STAFF', '게임 설명이 필요합니다. 직원을 호출해 주세요.', TRUE),
-                                                                           ('TABLE_TO_STAFF', '테이블이 지저분합니다. 청소 부탁드려요.', TRUE),
-                                                                           ('TABLE_TO_STAFF', '물티슈나 티슈가 부족합니다. 가져다주세요.', TRUE),
-                                                                           ('TABLE_TO_STAFF', '에어컨/히터 온도 조절 부탁드립니다. (추워요/더워요)', TRUE),
-                                                                           ('TABLE_TO_STAFF', '음료를 쏟았습니다. 도움이 필요합니다.', TRUE),
-                                                                           ('TABLE_TO_STAFF', '결제 방식 변경이나 오류 문의로 호출합니다.', TRUE);
+    ('TABLE_TO_STAFF', '게임 설명이 필요합니다. 직원을 호출해 주세요.', TRUE),
+    ('TABLE_TO_STAFF', '테이블이 지저분합니다. 청소 부탁드려요.', TRUE),
+    ('TABLE_TO_STAFF', '물티슈나 티슈가 부족합니다. 가져다주세요.', TRUE),
+    ('TABLE_TO_STAFF', '에어컨/히터 온도 조절 부탁드립니다. (추워요/더워요)', TRUE),
+    ('TABLE_TO_STAFF', '음료를 쏟았습니다. 도움이 필요합니다.', TRUE),
+    ('TABLE_TO_STAFF', '결제 방식 변경이나 오류 문의로 호출합니다.', TRUE);
+
+-- ============================================================
+-- 14. table_message
+-- ============================================================
+
+-- 1번 테이블에 '물 좀 주세요' 요청 (미확인)
+INSERT INTO table_message (table_id, content, is_read)
+VALUES (1, '물 좀 주세요!', false);
+
+-- 1번 테이블에 '물티슈 좀 주세요' 요청 (미확인)
+INSERT INTO table_message (table_id, content, is_read)
+VALUES (1, '물티슈 좀 주세요!', false);
+
+-- 2번 테이블에 '보드게임 추천해주세요' 요청 (미확인)
+INSERT INTO table_message (table_id, content, is_read)
+VALUES (2, '2인용 보드게임 추천 부탁드려요.', false);
+
+-- 3번 테이블에 '결제 요청' (이미 확인 완료된 데이터 - 점 안나옴)
+INSERT INTO table_message (table_id, content, is_read)
+VALUES (5, '결제할게요~', true);
