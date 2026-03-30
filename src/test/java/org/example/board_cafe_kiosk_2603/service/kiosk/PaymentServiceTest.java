@@ -2,12 +2,12 @@
 //
 //import lombok.extern.log4j.Log4j2;
 //import org.example.board_cafe_kiosk_2603.domain.kiosk.*;
-//import org.example.board_cafe_kiosk_2603.dto.kiosk.PaymentDTO;
-//import org.example.board_cafe_kiosk_2603.mapper.kiosk.CartItemMapper;
-//import org.example.board_cafe_kiosk_2603.mapper.kiosk.CartMapper;
-//import org.example.board_cafe_kiosk_2603.mapper.kiosk.OrdersMapper;
+//import org.example.board_cafe_kiosk_2603.dto.kiosk.payment.PaymentDTO;
+//import org.example.board_cafe_kiosk_2603.mapper.kiosk.cart.CartItemMapper;
+//import org.example.board_cafe_kiosk_2603.mapper.kiosk.cart.CartMapper;
+//import org.example.board_cafe_kiosk_2603.mapper.kiosk.order.OrdersMapper;
 //import org.example.board_cafe_kiosk_2603.mapper.kiosk.TableSessionMapper;
-//import org.example.board_cafe_kiosk_2603.service.admin.PointService;
+//import org.example.board_cafe_kiosk_2603.service.admin.point.PointService;
 //import org.junit.jupiter.api.BeforeEach;
 //import org.junit.jupiter.api.Test;
 //import org.junit.jupiter.api.extension.ExtendWith;

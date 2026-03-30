@@ -1,9 +1,10 @@
 package org.example.board_cafe_kiosk_2603.service.admin;
 
 import lombok.extern.log4j.Log4j2;
-import org.example.board_cafe_kiosk_2603.dto.admin.CustomerResponseDTO;
-import org.example.board_cafe_kiosk_2603.dto.admin.PointHistoryResponseDTO;
-import org.example.board_cafe_kiosk_2603.dto.admin.PointTransactionDTO;
+import org.example.board_cafe_kiosk_2603.dto.admin.point.CustomerResponseDTO;
+import org.example.board_cafe_kiosk_2603.dto.admin.point.PointHistoryResponseDTO;
+import org.example.board_cafe_kiosk_2603.dto.admin.point.PointTransactionDTO;
+import org.example.board_cafe_kiosk_2603.service.admin.point.CustomerPointService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -1,7 +1,7 @@
 package org.example.board_cafe_kiosk_2603.mapper.kiosk;
 
 import lombok.extern.log4j.Log4j2;
-import org.example.board_cafe_kiosk_2603.domain.common.TableSession;
+import org.example.board_cafe_kiosk_2603.domain.TableSession;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

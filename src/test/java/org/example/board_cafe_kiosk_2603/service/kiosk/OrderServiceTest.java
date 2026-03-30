@@ -1,11 +1,12 @@
 package org.example.board_cafe_kiosk_2603.service.kiosk;
 
 import lombok.extern.log4j.Log4j2;
-import org.example.board_cafe_kiosk_2603.domain.kiosk.OrderItem;
-import org.example.board_cafe_kiosk_2603.domain.kiosk.Orders;
-import org.example.board_cafe_kiosk_2603.dto.kiosk.OrdersDTO;
-import org.example.board_cafe_kiosk_2603.mapper.kiosk.CartMapper;
-import org.example.board_cafe_kiosk_2603.mapper.kiosk.OrdersMapper;
+import org.example.board_cafe_kiosk_2603.domain.kiosk.order.OrderItem;
+import org.example.board_cafe_kiosk_2603.domain.kiosk.order.Orders;
+import org.example.board_cafe_kiosk_2603.dto.kiosk.order.OrdersDTO;
+import org.example.board_cafe_kiosk_2603.mapper.kiosk.cart.CartMapper;
+import org.example.board_cafe_kiosk_2603.mapper.kiosk.order.OrdersMapper;
+import org.example.board_cafe_kiosk_2603.service.kiosk.order.OrderService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

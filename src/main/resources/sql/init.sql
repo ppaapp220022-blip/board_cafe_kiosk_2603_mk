@@ -314,6 +314,7 @@ CREATE TABLE `daily_sales_summary`
   DEFAULT CHARSET = utf8mb4;
 
 -- 사용자 생성 및 권한
-CREATE USER IF NOT EXISTS `admin`@`localhost` IDENTIFIED BY '0331';
-GRANT ALL PRIVILEGES ON `board_cafe_kiosk_2603`.* TO `admin`@`localhost`;
+--
+CREATE USER IF NOT EXISTS `admin`@`%` IDENTIFIED BY '0331';
+GRANT ALL PRIVILEGES ON `board_cafe_kiosk_2603`.* TO `admin`@`%`;
 FLUSH PRIVILEGES;

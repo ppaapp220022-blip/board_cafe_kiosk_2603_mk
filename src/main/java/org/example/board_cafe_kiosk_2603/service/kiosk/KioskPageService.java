@@ -3,9 +3,10 @@ package org.example.board_cafe_kiosk_2603.service.kiosk;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.example.board_cafe_kiosk_2603.dto.admin.PointAdminDTO;
-import org.example.board_cafe_kiosk_2603.dto.kiosk.CartDTO;
-import org.example.board_cafe_kiosk_2603.service.admin.PointService;
+import org.example.board_cafe_kiosk_2603.dto.admin.point.PointAdminDTO;
+import org.example.board_cafe_kiosk_2603.dto.kiosk.cart.CartDTO;
+import org.example.board_cafe_kiosk_2603.service.admin.point.PointService;
+import org.example.board_cafe_kiosk_2603.service.kiosk.cart.CartService;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
@@ -21,8 +22,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class KioskPageService {
 
-    private final CartService    cartService;
-    private final PointService   pointService;
+    private final CartService cartService;
+    private final PointService pointService;
 
     // ===================================================
     // 세션 헬퍼
@@ -30,8 +31,8 @@ public class KioskPageService {
 
     public void initSessionIfNeeded(HttpSession session, Integer tableNumber) {
         if (session.getAttribute("tableNumber") == null) {
-            session.setAttribute("tableNumber",      tableNumber);
-            session.setAttribute("partySize",        2);
+            session.setAttribute("tableNumber", tableNumber);
+            session.setAttribute("partySize", 2);
             session.setAttribute("sessionStartTime", System.currentTimeMillis());
             log.info("세션 초기화 - 테이블: {}", tableNumber);
         }
@@ -71,23 +72,23 @@ public class KioskPageService {
 
     public void buildPhoneLoginModel(Model model, Integer tableNumber, Integer size,
                                      HttpSession session) {
-        session.setAttribute("partySize",   size);
+        session.setAttribute("partySize", size);
         session.setAttribute("tableNumber", tableNumber);
         model.addAttribute("tableNumber", tableNumber);
-        model.addAttribute("partySize",   size);
+        model.addAttribute("partySize", size);
     }
 
     public void buildPackageSelectionModel(Model model, Integer tableNumber, Integer size,
                                            HttpSession session,
                                            List<?> packageList) {
         if (tableNumber != 1) session.setAttribute("tableNumber", tableNumber);
-        if (size        != 1) session.setAttribute("partySize",   size);
+        if (size != 1) session.setAttribute("partySize", size);
 
         Integer sessionTable = (Integer) session.getAttribute("tableNumber");
-        Integer sessionSize  = (Integer) session.getAttribute("partySize");
+        Integer sessionSize = (Integer) session.getAttribute("partySize");
 
         model.addAttribute("tableNumber", sessionTable != null ? sessionTable : tableNumber);
-        model.addAttribute("partySize",   sessionSize  != null ? sessionSize  : size);
+        model.addAttribute("partySize", sessionSize != null ? sessionSize : size);
         model.addAttribute("packageList", packageList);
     }
 
@@ -95,37 +96,37 @@ public class KioskPageService {
                                String menuType, List<Map<String, Object>> menuItems, String title) {
         CartDTO cartDTO = cartService.getCart(tableNumber);
         model.addAttribute("tableNumber", tableNumber);
-        model.addAttribute("partySize",   getPartySize(session));
+        model.addAttribute("partySize", getPartySize(session));
         model.addAttribute("currentMenu", menuType);
-        model.addAttribute("menuItems",   menuItems);
-        model.addAttribute("cartCount",   cartDTO.getCartCount());
-        model.addAttribute("pageTitle",   title);
+        model.addAttribute("menuItems", menuItems);
+        model.addAttribute("cartCount", cartDTO.getCartCount());
+        model.addAttribute("pageTitle", title);
     }
 
     public void buildCartModel(Model model, int tableNumber, HttpSession session) {
         CartDTO cartDTO = cartService.getCart(tableNumber);
         model.addAttribute("tableNumber", tableNumber);
-        model.addAttribute("partySize",   getPartySize(session));
-        model.addAttribute("cartItems",   cartDTO.getCartItems());
-        model.addAttribute("totalPrice",  cartDTO.getTotalPrice());
-        model.addAttribute("cartCount",   cartDTO.getCartCount());
+        model.addAttribute("partySize", getPartySize(session));
+        model.addAttribute("cartItems", cartDTO.getCartItems());
+        model.addAttribute("totalPrice", cartDTO.getTotalPrice());
+        model.addAttribute("cartCount", cartDTO.getCartCount());
     }
 
     public void buildCheckoutModel(Model model, int tableNumber, HttpSession session) {
-        CartDTO cartDTO       = cartService.getCart(tableNumber);
-        int     sessionDuration = getSessionDuration(session);
-        String  customerPhone   = (String) session.getAttribute("customerPhone");
-        int     pointBalance    = resolvePointBalance(customerPhone);
+        CartDTO cartDTO = cartService.getCart(tableNumber);
+        int sessionDuration = getSessionDuration(session);
+        String customerPhone = (String) session.getAttribute("customerPhone");
+        int pointBalance = resolvePointBalance(customerPhone);
 
-        model.addAttribute("tableNumber",    tableNumber);
-        model.addAttribute("partySize",      getPartySize(session));
-        model.addAttribute("cartItems",      cartDTO.getCartItems());
-        model.addAttribute("totalPrice",     cartDTO.getTotalPrice());
-        model.addAttribute("cartCount",      cartDTO.getCartCount());
-        model.addAttribute("sessionHours",   sessionDuration / 60);
+        model.addAttribute("tableNumber", tableNumber);
+        model.addAttribute("partySize", getPartySize(session));
+        model.addAttribute("cartItems", cartDTO.getCartItems());
+        model.addAttribute("totalPrice", cartDTO.getTotalPrice());
+        model.addAttribute("cartCount", cartDTO.getCartCount());
+        model.addAttribute("sessionHours", sessionDuration / 60);
         model.addAttribute("sessionMinutes", sessionDuration % 60);
-        model.addAttribute("pointBalance",   pointBalance);
-        model.addAttribute("customerPhone",  customerPhone != null ? customerPhone : "");
+        model.addAttribute("pointBalance", pointBalance);
+        model.addAttribute("customerPhone", customerPhone != null ? customerPhone : "");
     }
 
     public void buildScreensaverModel(Model model, HttpSession session) {

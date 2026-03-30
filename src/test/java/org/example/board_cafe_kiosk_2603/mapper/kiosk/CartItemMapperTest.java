@@ -1,8 +1,10 @@
 package org.example.board_cafe_kiosk_2603.mapper.kiosk;
 
 import lombok.extern.log4j.Log4j2;
-import org.example.board_cafe_kiosk_2603.domain.kiosk.Cart;
-import org.example.board_cafe_kiosk_2603.domain.kiosk.CartItem;
+import org.example.board_cafe_kiosk_2603.domain.kiosk.cart.Cart;
+import org.example.board_cafe_kiosk_2603.domain.kiosk.cart.CartItem;
+import org.example.board_cafe_kiosk_2603.mapper.kiosk.cart.CartItemMapper;
+import org.example.board_cafe_kiosk_2603.mapper.kiosk.cart.CartMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +18,7 @@ import static org.assertj.core.api.Assertions.*;
 @SpringBootTest
 class CartItemMapperTest {
 
-    @Autowired private CartMapper     cartMapper;
+    @Autowired private CartMapper cartMapper;
     @Autowired private CartItemMapper cartItemMapper;
 
     private int cartId;

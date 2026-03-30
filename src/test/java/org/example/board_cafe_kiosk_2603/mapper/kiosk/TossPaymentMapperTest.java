@@ -1,7 +1,12 @@
 package org.example.board_cafe_kiosk_2603.mapper.kiosk;
 
 import lombok.extern.log4j.Log4j2;
-import org.example.board_cafe_kiosk_2603.domain.kiosk.*;
+import org.example.board_cafe_kiosk_2603.domain.kiosk.order.Orders;
+import org.example.board_cafe_kiosk_2603.domain.kiosk.payment.Payment;
+import org.example.board_cafe_kiosk_2603.domain.kiosk.payment.TossPayment;
+import org.example.board_cafe_kiosk_2603.mapper.kiosk.cart.CartMapper;
+import org.example.board_cafe_kiosk_2603.mapper.kiosk.order.OrdersMapper;
+import org.example.board_cafe_kiosk_2603.mapper.kiosk.payment.TossPaymentMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,8 +20,8 @@ import static org.assertj.core.api.Assertions.*;
 class TossPaymentMapperTest {
 
     @Autowired private TossPaymentMapper tossPaymentMapper;
-    @Autowired private OrdersMapper      ordersMapper;
-    @Autowired private CartMapper        cartMapper;
+    @Autowired private OrdersMapper ordersMapper;
+    @Autowired private CartMapper cartMapper;
 
     /**
      * payment 테이블은 session_id UNIQUE 제약이 있어 직접 insert 시 충돌 가능.

@@ -1,9 +1,9 @@
 //package org.example.board_cafe_kiosk_2603.service.admin;
 //
 //import lombok.extern.log4j.Log4j2;
-//import org.example.board_cafe_kiosk_2603.domain.admin.Point;
-//import org.example.board_cafe_kiosk_2603.dto.admin.PointAdminDTO;
-//import org.example.board_cafe_kiosk_2603.mapper.admin.PointMapper;
+//import org.example.board_cafe_kiosk_2603.domain.admin.point.Point;
+//import org.example.board_cafe_kiosk_2603.dto.admin.point.PointAdminDTO;
+//import org.example.board_cafe_kiosk_2603.mapper.admin.point.PointMapper;
 //import org.junit.jupiter.api.BeforeEach;
 //import org.junit.jupiter.api.Test;
 //import org.junit.jupiter.api.extension.ExtendWith;

@@ -6,7 +6,7 @@ import org.example.board_cafe_kiosk_2603.domain.admin.product.GameItem;
 import org.example.board_cafe_kiosk_2603.domain.admin.product.GameItemStatus;
 import org.example.board_cafe_kiosk_2603.dto.admin.product.GameItemRequestDTO;
 import org.example.board_cafe_kiosk_2603.dto.admin.product.GameItemResponseDTO;
-import org.example.board_cafe_kiosk_2603.repository.admin.product.GameItemMapper;
+import org.example.board_cafe_kiosk_2603.mapper.admin.product.GameItemMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 

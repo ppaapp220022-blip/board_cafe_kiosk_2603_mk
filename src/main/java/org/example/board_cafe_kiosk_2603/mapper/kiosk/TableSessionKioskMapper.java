@@ -1,7 +1,7 @@
 package org.example.board_cafe_kiosk_2603.mapper.kiosk;
 
 import org.apache.ibatis.annotations.Mapper;
-import org.example.board_cafe_kiosk_2603.domain.common.TableSession;
+import org.example.board_cafe_kiosk_2603.domain.TableSession;
 
 @Mapper
 public interface TableSessionKioskMapper {

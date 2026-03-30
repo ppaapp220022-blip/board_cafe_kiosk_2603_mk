@@ -6,7 +6,7 @@ import org.example.board_cafe_kiosk_2603.domain.admin.product.Category;
 import org.example.board_cafe_kiosk_2603.domain.admin.product.CategoryType;
 import org.example.board_cafe_kiosk_2603.dto.admin.product.CategoryRequestDTO;
 import org.example.board_cafe_kiosk_2603.dto.admin.product.CategoryResponseDTO;
-import org.example.board_cafe_kiosk_2603.repository.admin.product.CategoryMapper;
+import org.example.board_cafe_kiosk_2603.mapper.admin.product.CategoryMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 

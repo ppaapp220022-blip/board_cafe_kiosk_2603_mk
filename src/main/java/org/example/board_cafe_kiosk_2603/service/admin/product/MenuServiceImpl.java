@@ -5,7 +5,7 @@ import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.domain.admin.product.Menu;
 import org.example.board_cafe_kiosk_2603.dto.admin.product.MenuRequestDTO;
 import org.example.board_cafe_kiosk_2603.dto.admin.product.MenuResponseDTO;
-import org.example.board_cafe_kiosk_2603.repository.admin.product.MenuMapper;
+import org.example.board_cafe_kiosk_2603.mapper.admin.product.MenuMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 

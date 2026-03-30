@@ -3,7 +3,7 @@ package org.example.board_cafe_kiosk_2603.controller.admin.table;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.dto.admin.table.CafeTableDTO;
-import org.example.board_cafe_kiosk_2603.dto.kiosk.OrderItemDTO;
+import org.example.board_cafe_kiosk_2603.dto.kiosk.order.OrderItemDTO;
 import org.example.board_cafe_kiosk_2603.service.admin.cafeTable.CafeTableService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;

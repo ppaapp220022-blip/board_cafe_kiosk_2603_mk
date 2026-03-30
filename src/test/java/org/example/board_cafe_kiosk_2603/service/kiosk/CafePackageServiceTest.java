@@ -1,9 +1,10 @@
 package org.example.board_cafe_kiosk_2603.service.kiosk;
 
 import lombok.extern.log4j.Log4j2;
-import org.example.board_cafe_kiosk_2603.domain.kiosk.CafePackage;
-import org.example.board_cafe_kiosk_2603.dto.kiosk.CafePackageDTO;
-import org.example.board_cafe_kiosk_2603.mapper.kiosk.CafePackageMapper;
+import org.example.board_cafe_kiosk_2603.domain.kiosk.cafePackage.CafePackage;
+import org.example.board_cafe_kiosk_2603.dto.kiosk.cafePackage.CafePackageDTO;
+import org.example.board_cafe_kiosk_2603.mapper.kiosk.cafePackage.CafePackageMapper;
+import org.example.board_cafe_kiosk_2603.service.kiosk.cafePackage.CafePackageService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

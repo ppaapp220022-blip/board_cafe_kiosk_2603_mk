@@ -5,8 +5,8 @@ import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.domain.admin.table.CafeTable;
 import org.example.board_cafe_kiosk_2603.domain.admin.table.CafeTableSession;
 import org.example.board_cafe_kiosk_2603.dto.admin.table.CafeTableDTO;
-import org.example.board_cafe_kiosk_2603.dto.kiosk.OrderItemDTO;
-import org.example.board_cafe_kiosk_2603.repository.admin.table.CafeTableRepository;
+import org.example.board_cafe_kiosk_2603.dto.kiosk.order.OrderItemDTO;
+import org.example.board_cafe_kiosk_2603.mapper.admin.table.CafeTableMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,13 +20,13 @@ import java.util.stream.Collectors;
 @Transactional
 @RequiredArgsConstructor
 public class CafeTableServiceImpl implements CafeTableService {
-    private final CafeTableRepository cafeTableRepository;
+    private final CafeTableMapper cafeTableMapper;
 
     @Override
     @Transactional(readOnly = true) // 상세 설명: 단순 조회 메서드이므로 성능 최적화를 위해 readOnly 적용
     public List<CafeTableDTO> getAllTableStatus() {
         /* 주 설명: DB 도메인(VO)을 DTO 리스트로 변환하여 컨트롤러로 반환 */
-        List<CafeTable> cafeTableList = cafeTableRepository.selectAllTables();
+        List<CafeTable> cafeTableList = cafeTableMapper.selectAllTables();
 
         // 상세 설명: Stream API를 활용하여 DTO 변환 코드를 간결화
         return cafeTableList.stream().map(cafeTable -> CafeTableDTO.builder()
@@ -51,7 +51,7 @@ public class CafeTableServiceImpl implements CafeTableService {
 
         // 토큰 체크 로직: 입실(OCCUPIED) 시도 시 토큰이 없으면 예외 던짐
         if ("OCCUPIED".equals(status)) {
-            String currentToken = cafeTableRepository.selectAccessTokenById(id);
+            String currentToken = cafeTableMapper.selectAccessTokenById(id);
 
             if (currentToken == null || currentToken.trim().isEmpty()) {
                 log.error("실패: 테이블 ID {}번에 토큰이 없어 OCCUPIED 전환이 불가능합니다.", id);
@@ -68,29 +68,29 @@ public class CafeTableServiceImpl implements CafeTableService {
                         .initialGuestCnt(1) // 임시: 향후 프론트에서 전달받은 인원 수 적용
                         .build();
 
-                cafeTableRepository.insertNewSession(newSession);
+                cafeTableMapper.insertNewSession(newSession);
                 Long newSessionId = newSession.getId(); // DB에서 생성된 PK 획득
 
-                cafeTableRepository.updateTableStatusAndSession(id, "OCCUPIED", newSessionId);
+                cafeTableMapper.updateTableStatusAndSession(id, "OCCUPIED", newSessionId);
                 log.info("성공: 세션 {}번 생성 및 테이블 매핑 완료", newSessionId);
                 break;
 
             case "CLEANING":
                 /* 주 설명: [퇴실/결제] 현재 이용 중인 세션 마감 및 테이블 포인터 해제 */
-                Long currentSessionId = cafeTableRepository.selectCurrentSessionId(id);
+                Long currentSessionId = cafeTableMapper.selectCurrentSessionId(id);
                 if (currentSessionId != null) {
-                    cafeTableRepository.closeSession(currentSessionId);
+                    cafeTableMapper.closeSession(currentSessionId);
                     log.info("성공: 세션 {}번 이용 이력 마감 완료", currentSessionId);
                 }
 
                 // 매핑 해제 시 sessionId에 null을 명시적으로 전달
-                cafeTableRepository.updateTableStatusAndSession(id, "CLEANING", null);
+                cafeTableMapper.updateTableStatusAndSession(id, "CLEANING", null);
                 log.info("성공: 테이블 매핑 해제 및 CLEANING 상태 전환 완료");
                 break;
 
             case "EMPTY":
                 /* 주 설명: [청소 완료] 다음 손님 대기 상태로 전환 */
-                cafeTableRepository.updateTableStatusAndSession(id, "EMPTY", null);
+                cafeTableMapper.updateTableStatusAndSession(id, "EMPTY", null);
                 log.info("성공: 테이블 EMPTY 상태 전환 완료");
                 break;
 
@@ -105,7 +105,7 @@ public class CafeTableServiceImpl implements CafeTableService {
         String newToken = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         // 상세 설명: 주석 내용(8자리 짧은 토큰)과 일치하도록 substring(0, 8)로 유지함
 
-        cafeTableRepository.updateAccessToken(id, newToken);
+        cafeTableMapper.updateAccessToken(id, newToken);
         log.info("테이블 ID: {} 새 토큰 발급 완료: {}", id, newToken);
 
         return newToken;
@@ -120,12 +120,12 @@ public class CafeTableServiceImpl implements CafeTableService {
         log.info("--- 자정 데이터 리셋 프로세스 시작 ---");
 
         // 1. 활성 세션 일괄 종료
-        int closedSessions = cafeTableRepository.updateAllActiveSessions();
+        int closedSessions = cafeTableMapper.updateAllActiveSessions();
         log.info("자정 데이터 리셋 - 활성 세션 {}개 강제 종료 완료", closedSessions);
 
         // 2. 전체 테이블 공석 처리 및 연결 해제
         // 상세 설명: for문으로 건건이 쿼리하는 대신, Mapper에 등록된 일괄 업데이트 쿼리를 호출하여 통신 횟수 및 부하 최소화
-        int resetTables = cafeTableRepository.resetAllTablesAtMidnight();
+        int resetTables = cafeTableMapper.resetAllTablesAtMidnight();
         log.info("자정 데이터 리셋 - 전체 테이블 공석(EMPTY) 및 매핑 해제 완료 (적용 건수: {})", resetTables);
 
         log.info("--- 자정 데이터 리셋 프로세스 종료 ---");
@@ -145,7 +145,7 @@ public class CafeTableServiceImpl implements CafeTableService {
 
         // 1. [세션 확인] 해당 물리 테이블이 현재 가리키고 있는 활성 방문 세션(current_session_id)을 조회합니다.
         // 상세 설명: 테이블 상태가 'OCCUPIED'인 경우에만 유효한 ID가 존재하며, 'EMPTY'나 'CLEANING'일 경우 NULL이 반환됩니다.
-        Long sessionId = cafeTableRepository.selectCurrentSessionId(tableId);
+        Long sessionId = cafeTableMapper.selectCurrentSessionId(tableId);
 
         // 2. [방어 로드] 세션 ID가 존재하지 않는 경우 (손님이 없는 테이블 등)
         // 상세 설명: 불필요하게 orders 테이블을 Join 하지 않도록 즉시 빈 리스트(ArrayList)를 생성하여 반환합니다.
@@ -161,7 +161,7 @@ public class CafeTableServiceImpl implements CafeTableService {
          * - 주문 상태(status)가 'PAID'(결제완료) 또는 'CANCELLED'(주소)가 아닌 것만 포함
          * - 최신 주문이 위로 오도록 ordered_at 기준 정렬
          */
-        List<OrderItemDTO> activeItems = cafeTableRepository.selectActiveOrderItems(sessionId);
+        List<OrderItemDTO> activeItems = cafeTableMapper.selectActiveOrderItems(sessionId);
 
         log.info("조회 완료 - 테이블 {}번(세션 {}), 진행 중인 주문 항목: {}건",
                 tableId, sessionId, activeItems.size());
@@ -174,7 +174,7 @@ public class CafeTableServiceImpl implements CafeTableService {
      */
     @Override
     public List<String> getUnreadMessages(Integer tableId) {
-        return cafeTableRepository.selectUnreadMessageContents(tableId);
+        return cafeTableMapper.selectUnreadMessageContents(tableId);
     }
 
     /**
@@ -184,6 +184,6 @@ public class CafeTableServiceImpl implements CafeTableService {
     @Transactional
     public void markMessagesAsRead(Integer tableId) {
         // Mapper에 작성하신 updateMessagesReadStatus 호출
-        cafeTableRepository.updateMessagesReadStatus(tableId);
+        cafeTableMapper.updateMessagesReadStatus(tableId);
     }
 }

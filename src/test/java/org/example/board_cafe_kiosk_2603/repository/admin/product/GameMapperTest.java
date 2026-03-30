@@ -3,14 +3,13 @@ package org.example.board_cafe_kiosk_2603.repository.admin.product;
 import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.domain.admin.product.Game;
 import org.example.board_cafe_kiosk_2603.dto.admin.product.GameResponseDTO;
+import org.example.board_cafe_kiosk_2603.mapper.admin.product.GameMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @Log4j2
 @SpringBootTest
