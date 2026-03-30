@@ -290,3 +290,5 @@ VALUES (2, '2인용 보드게임 추천 부탁드려요.', false);
 -- 3번 테이블에 '결제 요청' (이미 확인 완료된 데이터 - 점 안나옴)
 INSERT INTO table_message (table_id, content, is_read)
 VALUES (5, '결제할게요~', true);
+
+SELECT id, table_number, access_token FROM cafe_table;

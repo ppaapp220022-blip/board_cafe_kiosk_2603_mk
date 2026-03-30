@@ -25,7 +25,7 @@
                 background: white; border-radius: 16px; height: 180px; padding: 24px;
                 display: flex; flex-direction: column; justify-content: space-between;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); border: 2px solid transparent;
-                transition: all 0.2s ease; cursor: pointer; position: relative; /* 점 배치를 위해 추가 */
+                transition: all 0.2s ease; cursor: pointer; position: relative;
             }
             .table-card:hover { transform: translateY(-4px); box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1); }
             .table-card.selected { border: 2px solid #4285f4; background-color: #f8faff; }
@@ -35,10 +35,9 @@
                 position: absolute; top: 18px; right: 18px;
                 width: 12px; height: 12px; background-color: #ea4335;
                 border-radius: 50%; border: 2px solid white;
-                display: none; /* 기본 숨김 */
+                display: none;
                 z-index: 10;
             }
-            /* 읽지 않은 메시지가 있을 때 깜빡임 효과 */
             .has-msg .alert-dot { display: block; animation: pulse-red 1.5s infinite; }
 
             @keyframes pulse-red {
@@ -72,12 +71,34 @@
             .order-item { display: flex; justify-content: space-between; font-size: 14px; padding: 8px 0; border-bottom: 1px solid #eee; }
             .order-item:last-child { border-bottom: none; }
 
-            .action-group { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 25px; }
-            .btn { padding: 14px; border-radius: 10px; border: none; font-weight: 600; cursor: pointer; font-size: 14px; transition: 0.2s; }
-            .btn-pay { background: #34a853; color: white; }
-            .btn-status { background: #fbbc04; color: white; }
-            .btn-msg { background: #ea4335; color: white; }
-            .btn-close { background: #f1f3f4; color: #3c4043; grid-column: span 1; }
+            /* 버튼 레이아웃 - 2x2 가변형 */
+            .action-group {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                margin-top: 25px;
+            }
+
+            .action-group .btn {
+                flex: 1 1 calc(50% - 10px);
+                padding: 15px;
+                border: none;
+                border-radius: 10px;
+                font-weight: bold;
+                cursor: pointer;
+                font-size: 14px;
+                transition: all 0.2s;
+            }
+
+            .btn-pay { background: #ea4335; color: white; }    /* 결제완료: 빨강 */
+            .btn-status { background: #28a745; color: white; } /* 상태변경: 초록 */
+            .btn-msg { background: #fbbc05; color: white; }    /* 요청확인: 노랑 */
+            .btn-close {
+                background: #f1f3f4;
+                color: #3c4043;
+                flex-grow: 1; /* 요청확인 없을 때 꽉 차게 */
+            }
+
             .btn:hover { opacity: 0.9; transform: scale(0.98); }
 
             /* 모달 내부 미확인 메시지 박스 스타일 */
@@ -86,47 +107,34 @@
                 padding: 15px; margin-bottom: 20px; border-radius: 12px;
                 font-size: 14px; color: #5d4037; display: none;
             }
-            .unread-msg-box strong { display: block; margin-bottom: 5px; color: #856404; }
-            .unread-msg-box ul { margin: 0; padding-left: 20px; }
-            .has-msg .alert-dot {
-                display: block !important;
-                animation: pulse-red 1.5s infinite;
-            }
 
-            /* 버튼 컨테이너 */
-            .action-group {
+            /* --- 전체 리셋 버튼 전용 디자인 (회색/다크 계열) --- */
+            .btn-reset {
+                background: #5f6368;
+                color: white;
                 display: flex;
-                flex-wrap: wrap; /* 버튼이 넘치면 다음 줄로 */
-                gap: 10px;
-                margin-top: 20px;
-            }
-
-            /* 모든 버튼 공통 스타일 */
-            .action-group .btn {
-                /* 기본적으로 한 줄에 2개씩 (여백 제외 약 48%) */
-                flex: 1 1 calc(50% - 10px);
-                padding: 15px;
-                border: none;
-                border-radius: 8px;
-                font-weight: bold;
+                align-items: center;
+                border-radius: 10px;
                 cursor: pointer;
-                font-size: 14px;
-                transition: all 0.2s;
+                gap: 8px;
+                padding: 10px 18px;
+                height: fit-content;
+
+                /* --- [핵심] 브라우저 기본 테두리 제거 --- */
+                border: none;
+
+                /* 혹시 모를 폰트 두께 조절 */
+                font-weight: 600;
+
+                /* 부드러운 전환 효과 */
+                transition: all 0.2s ease;
             }
 
-            /* 기존 색상 유지 */
-            .btn-pay { background: #ea4335; color: white; }    /* 결제완료: 빨강 */
-            .btn-status { background: #28a745; color: white; } /* 상태변경: 파랑 */
-            .btn-msg { background: #fbbc05; color: white; }    /* 요청확인: 노랑 */
-
-            /* 닫기 버튼: 요청확인이 없을 때 혼자 꽉 차도록 설정 */
-            .btn-close {
-                background: #f1f3f4;
-                color: #3c4043;
-                flex-grow: 1; /* 남은 가로 공간을 다 차지함 */
+            /* 포커스 시에도 아예 아무것도 안 보이게 하고 싶다면 */
+            .btn-reset:focus {
+                outline: none;
+                box-shadow: none;
             }
-
-            .btn:hover { opacity: 0.9; }
         </style>
     </th:block>
 </head>
@@ -136,9 +144,7 @@
     <div class="header-container">
         <h1 class="page-title">📊 테이블 현황</h1>
         <div style="display: flex; align-items: center; gap: 20px;">
-            <button class="btn btn-msg"
-                    style="background: #5f6368; padding: 8px 16px; font-size: 13px;"
-                    onclick="handleTotalReset()">
+            <button class="btn btn-reset" onclick="handleTotalReset()">
                 🔄 전체 리셋 (마감)
             </button>
 
@@ -158,6 +164,7 @@
              th:data-id="${table.id}"
              th:data-num="${table.tableNumber}"
              th:data-status="${table.status}"
+             th:data-token="${table.accessToken}"
              onclick="openTableModal(this)">
 
             <div class="alert-dot"></div>
@@ -221,9 +228,6 @@
             let currentTableId = null;
             let currentTableStatus = null;
 
-            // --- [1. 보조 함수 및 초기화 로직] ---
-
-            // 알림 박스와 버튼을 숨기는 함수 (ReferenceError 방지)
             function hideMessageBox() {
                 const box = document.getElementById('unreadMsgBox');
                 const btn = document.getElementById('readBtn');
@@ -231,20 +235,16 @@
                 if (btn) btn.style.display = 'none';
             }
 
-            // 주문 내역을 화면에 그리는 함수
             function renderOrders(orders) {
                 const listDiv = document.getElementById('orderList');
                 const priceSpan = document.getElementById('totalPrice');
                 let sum = 0;
-
                 if (!listDiv || !priceSpan) return;
-
                 if (!orders || orders.length === 0) {
                     listDiv.innerHTML = '<div class="order-item" style="color:#999;">진행 중인 주문이 없습니다.</div>';
                     priceSpan.innerText = '0원';
                     return;
                 }
-
                 listDiv.innerHTML = orders.map(item => {
                     const itemTotal = item.price * item.quantity;
                     sum += itemTotal;
@@ -253,37 +253,23 @@
                 priceSpan.innerText = sum.toLocaleString() + '원';
             }
 
-            // --- [2. 메인 모달 제어 로직] ---
-
             async function openTableModal(element) {
-                // 1. 선택 효과 초기화
                 document.querySelectorAll('.table-card').forEach(c => c.classList.remove('selected'));
                 element.classList.add('selected');
-
-                // 2. 데이터 세팅
                 currentTableId = element.getAttribute('data-id');
                 currentTableStatus = element.getAttribute('data-status');
                 const tableNum = element.getAttribute('data-num');
                 const hasMsg = element.classList.contains('has-msg');
 
-                // 3. UI 초기화
                 const modalTitle = document.getElementById('modalTitle');
                 if (modalTitle) modalTitle.innerText = 'Table ' + tableNum;
                 hideMessageBox();
 
-                // 4. 상태별 데이터 로드
-                if (currentTableStatus === 'OCCUPIED') {
-                    await fetchActiveOrders();
-                } else {
-                    renderOrders([]);
-                }
+                if (currentTableStatus === 'OCCUPIED') { await fetchActiveOrders(); }
+                else { renderOrders([]); }
 
-                // 5. 알림 메시지가 있다면 로드
-                if (hasMsg) {
-                    await fetchUnreadMessages();
-                }
+                if (hasMsg) { await fetchUnreadMessages(); }
 
-                // 6. 모달 표시
                 const modal = document.getElementById('tableModal');
                 if (modal) {
                     modal.style.display = 'flex';
@@ -306,9 +292,6 @@
                 currentTableStatus = null;
             }
 
-            // --- [3. 통신(API) 관련 함수] ---
-
-            // 서버에서 미확인 메시지 가져오기
             async function fetchUnreadMessages() {
                 try {
                     const response = await fetch(`/admin/dashboard/messages/${currentTableId}`);
@@ -321,46 +304,29 @@
                             document.getElementById('readBtn').style.display = 'block';
                         }
                     }
-                } catch (err) {
-                    console.error("메시지 로딩 에러:", err);
-                }
+                } catch (err) { console.error(err); }
             }
 
-            // 알림 읽음 처리
             async function handleReadMessage() {
                 if (!currentTableId) return;
                 if (!confirm("요청 내용을 모두 확인하셨습니까?")) return;
-
                 try {
-                    const response = await fetch(`/admin/dashboard/messages/${currentTableId}/read`, {
-                        method: 'PATCH'
-                    });
-                    if (response.ok) {
-                        location.reload();
-                    } else {
-                        alert("요청 처리 중 오류가 발생했습니다.");
-                    }
-                } catch (err) {
-                    console.error("통신 에러:", err);
-                }
+                    const response = await fetch(`/admin/dashboard/messages/${currentTableId}/read`, { method: 'PATCH' });
+                    if (response.ok) { location.reload(); }
+                } catch (err) { console.error(err); }
             }
 
-            // 주문 내역 로드
             async function fetchActiveOrders() {
                 try {
                     const response = await fetch(`/admin/dashboard/${currentTableId}/orders`);
                     if (response.ok) {
                         const orders = await response.json();
                         renderOrders(orders);
-                    } else {
-                        renderOrders([]);
-                    }
-                } catch (err) {
-                    renderOrders([]);
-                }
+                    } else { renderOrders([]); }
+                } catch (err) { renderOrders([]); }
             }
 
-            // 테이블 상태 변경 (공통)
+            // --- [2. 상태 변경 (에러 메시지 처리 보강)] ---
             async function callUpdateStatus(status) {
                 try {
                     const response = await fetch(`/admin/dashboard/${currentTableId}/status`, {
@@ -368,8 +334,19 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ status: status })
                     });
-                    if (response.ok) { location.reload(); }
-                } catch (err) { console.error(err); }
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        // 서버(컨트롤러)에서 보낸 error 메시지 출력
+                        alert("❌ " + (result.error || "상태 변경에 실패했습니다."));
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert("서버와 통신 중 오류가 발생했습니다.");
+                }
             }
 
             function handlePayment() {
@@ -382,13 +359,28 @@
                 }
             }
 
+            // --- [3. 토큰 유무 체크 로직 추가] ---
             async function handleStatusUpdate() {
                 if (!currentTableId || !currentTableStatus) return;
+
+                // 1. 현재 테이블 카드의 토큰 값 확인
+                const selectedTable = document.querySelector(`.table-card[data-id="${currentTableId}"]`);
+                const token = selectedTable ? selectedTable.getAttribute('data-token') : null;
+
+                // 2. EMPTY 상태에서 입실(OCCUPIED)하려는데 토큰이 없는 경우 차단
+                if (currentTableStatus === 'EMPTY') {
+                    if (!token || token.trim() === "" || token === 'null') {
+                        alert("⚠️ 인증 토큰이 없는 테이블입니다.\n토큰 발급 후에만 입실(OCCUPIED)이 가능합니다.");
+                        return;
+                    }
+                }
+
                 let nextStatus = '';
                 let confirmMsg = '';
                 if (currentTableStatus === 'EMPTY') { nextStatus = 'OCCUPIED'; confirmMsg = "손님 입실 처리를 하시겠습니까?"; }
                 else if (currentTableStatus === 'OCCUPIED') { nextStatus = 'CLEANING'; confirmMsg = "퇴실 및 청소 중 상태로 변경하시겠습니까?"; }
                 else if (currentTableStatus === 'CLEANING') { nextStatus = 'EMPTY'; confirmMsg = "청소가 완료되었습니까?"; }
+
                 if (confirm(confirmMsg)) { await callUpdateStatus(nextStatus); }
             }
 

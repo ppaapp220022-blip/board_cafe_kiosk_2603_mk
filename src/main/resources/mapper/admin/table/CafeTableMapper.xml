@@ -9,6 +9,7 @@
             ct.id,
             ct.table_number AS tableNumber,
             ct.status,
+            ct.access_token AS accessToken,
             ts.check_in_time AS checkInTime,
             ts.initial_guest_cnt AS guestCount,
             (SELECT COUNT(*) FROM table_message tm
@@ -17,6 +18,12 @@
             LEFT JOIN table_session ts ON ct.current_session_id = ts.id
             ORDER BY ct.table_number
             <!-- 메인 대시보드 배치를 위해 테이블 번호 순으로 정렬하여 리턴 -->
+    </select>
+
+    <select id="selectAccessTokenById" resultType="string">
+        SELECT access_token
+        FROM cafe_table
+        WHERE id = #{id}
     </select>
 
     <insert id="insertNewSession" useGeneratedKeys="true" keyProperty="id">

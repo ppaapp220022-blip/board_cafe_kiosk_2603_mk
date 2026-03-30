@@ -79,4 +79,9 @@ public interface CafeTableRepository {
      * 특정 테이블의 읽지 않은 메시지들만 가져오기
      */
     List<String> selectUnreadMessageContents(@Param("tableId") Integer tableId);
+
+    /**
+     * 특정 테이블의 현재 액세스 토큰만 조회
+     */
+    String selectAccessTokenById(@Param("id") Integer id);
 }

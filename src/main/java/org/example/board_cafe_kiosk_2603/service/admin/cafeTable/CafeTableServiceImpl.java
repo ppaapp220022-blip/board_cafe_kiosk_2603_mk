@@ -49,6 +49,16 @@ public class CafeTableServiceImpl implements CafeTableService {
          */
         log.info("테이블 ID: {} 상태 변경 프로세스 시작 -> {}", id, status);
 
+        // 토큰 체크 로직: 입실(OCCUPIED) 시도 시 토큰이 없으면 예외 던짐
+        if ("OCCUPIED".equals(status)) {
+            String currentToken = cafeTableRepository.selectAccessTokenById(id);
+
+            if (currentToken == null || currentToken.trim().isEmpty()) {
+                log.error("실패: 테이블 ID {}번에 토큰이 없어 OCCUPIED 전환이 불가능합니다.", id);
+                throw new IllegalStateException("인증 토큰이 없는 테이블은 입실 처리가 불가능합니다.");
+            }
+        }
+
         switch (status) {
             case "OCCUPIED":
                 /* 주 설명: [입실] 신규 방문 세션 생성 및 테이블 포인터 연결 */

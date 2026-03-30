@@ -58,7 +58,6 @@ public class TableController {
      * [PATCH] 테이블 상태 변경 및 세션 연동 (입실/퇴실/청소)
      * @param id 테이블 PK
      * @param request {"status": "OCCUPIED" | "CLEANING" | "EMPTY"}
-     * 상세 설명: 상태가 'OCCUPIED'가 되면 세션이 생성되고, 'CLEANING'이 되면 세션이 마감됩니다.
      */
     @ResponseBody
     @PatchMapping("/{id}/status")
@@ -69,15 +68,21 @@ public class TableController {
         String status = request.get("status");
 
         try {
-            // 핵심 로직 실행 (세션 생성/종료 및 테이블 포인터 업데이트)
+            // 1. 핵심 로직 실행 (토큰 체크 및 세션 생성/종료 포함)
             cafeTableService.changeTableStatus(id, status);
 
             log.info("상태 변경 성공: 테이블 {}번 -> {}", id, status);
             return ResponseEntity.ok(Map.of("message", "상태가 " + status + "(으)로 변경되었습니다."));
 
+        } catch (IllegalStateException e) {
+            // 2. 서비스에서 던진 "토큰 없음" 등의 비즈니스 로직 예외 처리
+            log.warn("상태 변경 거부: 테이블 {}번, 사유: {}", id, e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+
         } catch (Exception e) {
+            // 3. 예상치 못한 기타 서버 오류
             log.error("상태 변경 실패: 테이블 {}번, 사유: {}", id, e.getMessage());
-            return ResponseEntity.internalServerError().body(Map.of("error", "상태 변경 중 오류가 발생했습니다."));
+            return ResponseEntity.internalServerError().body(Map.of("error", "서버 오류가 발생했습니다."));
         }
     }
 
