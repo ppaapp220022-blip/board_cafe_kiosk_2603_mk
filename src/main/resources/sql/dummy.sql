@@ -279,6 +279,10 @@ VALUES
 INSERT INTO table_message (table_id, content, is_read)
 VALUES (1, '물 좀 주세요!', false);
 
+-- 1번 테이블에 '물티슈 좀 주세요' 요청 (미확인)
+INSERT INTO table_message (table_id, content, is_read)
+VALUES (1, '물티슈 좀 주세요!', false);
+
 -- 2번 테이블에 '보드게임 추천해주세요' 요청 (미확인)
 INSERT INTO table_message (table_id, content, is_read)
 VALUES (2, '2인용 보드게임 추천 부탁드려요.', false);
