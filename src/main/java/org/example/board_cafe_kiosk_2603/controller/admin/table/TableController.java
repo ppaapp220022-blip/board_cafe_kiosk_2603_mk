@@ -3,6 +3,7 @@ package org.example.board_cafe_kiosk_2603.controller.admin.table;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.dto.admin.table.CafeTableDTO;
+import org.example.board_cafe_kiosk_2603.dto.kiosk.OrderItemDTO;
 import org.example.board_cafe_kiosk_2603.service.admin.cafeTable.CafeTableService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -30,6 +31,27 @@ public class TableController {
 
         log.info("대시보드 조회: 총 {}개의 테이블 상태 로드 완료", tables.size());
         return "admin/dashboard";
+    }
+
+    /**
+     * [GET] 특정 테이블의 실시간 주문 항목 조회 (AJAX 호출용)
+     * @param id 테이블 고유 ID
+     * @return OrderItemDTO 리스트 (PAID/CANCELLED 제외된 순수 이용 내역)
+     */
+    @ResponseBody
+    @GetMapping("/{id}/orders")
+    public ResponseEntity<List<OrderItemDTO>> getTableOrders(@PathVariable("id") Integer id) {
+        /**
+         * [핵심 로직]
+         * 1. 서비스에서 해당 테이블의 current_session_id를 추적함.
+         * 2. 해당 세션에 묶인 '미결제' 주문 아이템들만 DTO 리스트로 가져옴.
+         */
+        log.info("API 호출: 테이블 {}번 실시간 주문 내역 요청", id);
+
+        List<OrderItemDTO> activeOrders = cafeTableService.getActiveOrders(id);
+
+        // 데이터가 없더라도 빈 리스트([])와 함께 200 OK를 반환하여 프론트 처리를 원활하게 함
+        return ResponseEntity.ok(activeOrders);
     }
 
     /**

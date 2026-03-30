@@ -5,17 +5,15 @@
 <mapper namespace="org.example.board_cafe_kiosk_2603.repository.admin.table.CafeTableRepository">
     <select id="selectAllTables" resultType="org.example.board_cafe_kiosk_2603.domain.admin.table.CafeTable">
         /* DB의 스네이크 케이스 필드명을 Entity의 카멜케이스 속성에 매핑 */
-        SELECT
-            t.id,
-            t.table_number AS tableNumber,
-            t.password,
-            t.status,
-            t.access_token AS accessToken,
-            t.current_session_id AS currentSessionId,
-            s.check_in_time AS checkInTime
-            FROM cafe_table t
-        LEFT JOIN table_session s ON t.current_session_id = s.id
-        ORDER BY t.table_number
+            SELECT
+            ct.id,
+            ct.table_number AS tableNumber,
+            ct.status,
+            ct.access_token AS accessToken,
+            ts.check_in_time AS checkInTime,
+            ts.initial_guest_cnt AS guestCount FROM cafe_table ct
+            LEFT JOIN table_session ts ON ct.current_session_id = ts.id
+            ORDER BY ct.table_number
             <!-- 메인 대시보드 배치를 위해 테이블 번호 순으로 정렬하여 리턴 -->
     </select>
 
@@ -79,5 +77,20 @@
             check_out_time = NOW()
         WHERE is_active = TRUE
     </update>
+
+    <select id="selectActiveOrderItems" resultType="org.example.board_cafe_kiosk_2603.dto.kiosk.OrderItemDTO">
+        SELECT
+            oi.id,
+            oi.order_id AS orderId,
+            oi.menu_id AS menuId,
+            oi.menu_name AS menuName,
+            oi.price,
+            oi.quantity
+        FROM orders o
+                 JOIN order_item oi ON o.id = oi.order_id
+        WHERE o.session_id = #{sessionId}
+          AND o.status NOT IN ('PAID', 'CANCELLED')
+        ORDER BY o.ordered_at DESC
+    </select>
 
 </mapper>

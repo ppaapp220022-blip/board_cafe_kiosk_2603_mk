@@ -4,6 +4,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.example.board_cafe_kiosk_2603.domain.admin.table.CafeTableSession;
 import org.example.board_cafe_kiosk_2603.domain.admin.table.CafeTable;
+import org.example.board_cafe_kiosk_2603.dto.kiosk.OrderItemDTO;
 
 import java.util.List;
 
@@ -62,4 +63,10 @@ public interface CafeTableRepository {
      * 주 설명: 아직 퇴실 처리되지 않은(is_active=TRUE) 세션들의 check_out_time을 현재 시각으로 기록
      */
     int updateAllActiveSessions();
+
+    /**
+     * [관리자 전용] 특정 세션의 실시간 유효 주문 항목 리스트 조회
+     * (PAID, CANCELLED 상태 제외)
+     */
+    List<OrderItemDTO> selectActiveOrderItems(@Param("sessionId") Long sessionId);
 }
