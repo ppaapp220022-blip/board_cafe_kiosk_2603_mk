@@ -275,6 +275,10 @@ VALUES
     ('TABLE_TO_STAFF', '음료를 쏟았습니다. 도움이 필요합니다.', TRUE),
     ('TABLE_TO_STAFF', '결제 방식 변경이나 오류 문의로 호출합니다.', TRUE);
 
+-- ============================================================
+-- 14. table_message
+-- ============================================================
+
 -- 1번 테이블에 '물 좀 주세요' 요청 (미확인)
 INSERT INTO table_message (table_id, content, is_read)
 VALUES (1, '물 좀 주세요!', false);
@@ -290,5 +294,3 @@ VALUES (2, '2인용 보드게임 추천 부탁드려요.', false);
 -- 3번 테이블에 '결제 요청' (이미 확인 완료된 데이터 - 점 안나옴)
 INSERT INTO table_message (table_id, content, is_read)
 VALUES (5, '결제할게요~', true);
-
-SELECT id, table_number, access_token FROM cafe_table;
