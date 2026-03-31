@@ -2,17 +2,17 @@ package org.example.board_cafe_kiosk_2603.service.kiosk.payment;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.example.board_cafe_kiosk_2603.domain.kiosk.*;
+import org.example.board_cafe_kiosk_2603.domain.common.cafeTableSession.CafeTableSession;
 import org.example.board_cafe_kiosk_2603.domain.kiosk.cart.Cart;
 import org.example.board_cafe_kiosk_2603.domain.kiosk.cart.CartItem;
 import org.example.board_cafe_kiosk_2603.domain.kiosk.order.OrderItem;
 import org.example.board_cafe_kiosk_2603.domain.kiosk.order.Orders;
 import org.example.board_cafe_kiosk_2603.domain.kiosk.payment.Payment;
 import org.example.board_cafe_kiosk_2603.dto.kiosk.payment.PaymentDTO;
+import org.example.board_cafe_kiosk_2603.mapper.common.cafeTableSession.CafeTableSessionMapper;
 import org.example.board_cafe_kiosk_2603.mapper.kiosk.cart.CartItemMapper;
 import org.example.board_cafe_kiosk_2603.mapper.kiosk.cart.CartMapper;
 import org.example.board_cafe_kiosk_2603.mapper.kiosk.order.OrdersMapper;
-import org.example.board_cafe_kiosk_2603.mapper.kiosk.TableSessionMapper;
 import org.example.board_cafe_kiosk_2603.service.admin.point.PointService;
 import org.example.board_cafe_kiosk_2603.service.kiosk.cart.CartService;
 import org.springframework.stereotype.Service;
@@ -30,7 +30,7 @@ public class PaymentService {
     private final CartItemMapper     cartItemMapper;
     private final CartService cartService;
     private final PointService       pointService;
-    private final TableSessionMapper tableSessionMapper;
+    private final CafeTableSessionMapper tableSessionMapper;
 
     private static final double EARN_RATE = 0.05;
 
@@ -42,7 +42,7 @@ public class PaymentService {
             return PaymentDTO.fail("존재하지 않는 테이블 번호입니다: " + tableNumber);
         }
 
-        TableSession session = tableSessionMapper.findActiveByTableId(tableId);
+        CafeTableSession session = tableSessionMapper.findActiveByTableId(tableId);
         if (session == null) {
             return PaymentDTO.fail("진행 중인 세션이 없습니다. 패키지를 먼저 선택해 주세요.");
         }
