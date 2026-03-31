@@ -36,7 +36,7 @@
     .nav-group {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 15px; /* 버튼이 늘어남에 따라 간격을 약간 조정했습니다 */
     }
 
     .nav-btn {
@@ -562,6 +562,12 @@
       <i data-lucide="gamepad-2"></i>
       <span class="nav-label">게임</span>
     </button>
+
+    <button class="nav-btn" th:classappend="${currentMenu == 'members' ? 'active' : ''}"
+            onclick="navigateMenu('members')">
+      <i data-lucide="user-plus"></i>
+      <span class="nav-label">추가인원관리</span>
+    </button>
   </div>
 
   <div class="nav-group">
@@ -602,15 +608,23 @@
   <div class="content">
     <div class="menu-grid" id="menu-grid">
       <th:block th:each="item : ${menuItems}">
-        <div class="menu-item" th:data-name="${item.menuName}" th:data-price="${item.menuPrice}">
-          <div class="menu-emoji" th:text="${item.emoji}">☕</div>
-          <div class="menu-name" th:text="${item.menuName}">상품명</div>
-          <div class="menu-price" th:classappend="${item.menuPrice == 0 ? 'free' : ''}"
-               th:text="${item.menuPrice == 0 ? 'FREE' : '₩' + #numbers.formatInteger(item.menuPrice, 1, 'COMMA')}">
+
+        <div class="menu-item" th:data-name="${item.name}" th:data-price="${item.price}">
+          <div class="menu-emoji">
+            <img th:if="${item.imageUrl != null and item.imageUrl != ''}"
+                 th:src="${item.imageUrl}"
+                 style="width:60px; height:60px; object-fit:contain;">
+            <span th:unless="${item.imageUrl != null and item.imageUrl != ''}">🎲</span>
+          </div>
+
+          <div class="menu-name" th:text="${item.name}">상품명</div>
+
+          <div class="menu-price"
+               th:classappend="${item.price == 0 ? 'free' : ''}"
+               th:text="${item.price == 0 ? 'FREE' : '₩' + #numbers.formatInteger(item.price, 1, 'COMMA')}">
             ₩5,000
           </div>
 
-          <!-- 게임 재고 뱃지 (stock >= 0 인 경우만 표시) -->
           <div th:if="${item.stock >= 0}"
                class="stock-badge"
                th:classappend="${item.stock > 0 and item.stock <= 2 ? 'low' : ''}">
@@ -619,12 +633,15 @@
           </div>
 
           <div class="quantity-control" th:classappend="${item.stock == 0 ? 'disabled' : ''}">
-            <button class="qty-btn minus" onclick="decreaseQty(this)" th:disabled="${item.stock == 0}"><i data-lucide="minus"></i></button>
+            <button class="qty-btn minus" onclick="decreaseQty(this)" th:disabled="${item.stock == 0}">
+              <i data-lucide="minus"></i>
+            </button>
             <span class="qty-number">0</span>
-            <button class="qty-btn plus" onclick="increaseQty(this)" th:disabled="${item.stock == 0}"><i data-lucide="plus"></i></button>
+            <button class="qty-btn plus" onclick="increaseQty(this)" th:disabled="${item.stock == 0}">
+              <i data-lucide="plus"></i>
+            </button>
           </div>
 
-            <!-- stock=-1: 음료·음식(무제한) | stock>0: 게임 대여 가능 | stock=0: 품절 -->
           <button class="add-to-cart-btn"
                   onclick="addItemToCart(this)"
                   th:if="${item.stock == -1 or item.stock > 0}">
@@ -691,17 +708,16 @@
     }
   });
 
-  const tableNumber = document.querySelector('.table-info').textContent.replace('Table #', '').trim();
+  const tableInfoElement = document.querySelector('.table-info');
+  const tableNumber = tableInfoElement ? tableInfoElement.textContent.replace('Table #', '').trim() : '1';
 
-  // ===== 페이지 로드 시 장바구니 뱃지 초기화 =====
   document.addEventListener('DOMContentLoaded', function () {
     fetch(`/kiosk/cart/items?tableNumber=${tableNumber}`)
-      .then(res => res.json())
-      .then(data => { if (data.success) updateCartBadge(data.cartCount); })
-      .catch(() => {});
+            .then(res => res.json())
+            .then(data => { if (data.success) updateCartBadge(data.cartCount); })
+            .catch(() => {});
   });
 
-  // ===== 메뉴 네비게이션 =====
   function navigateMenu(menu) {
     const path = `/kiosk/${menu}?tableNumber=${tableNumber}`;
     window.location.href = path;
@@ -721,7 +737,6 @@
     window.location.href = `/kiosk/messenger?tableNumber=${tableNumber}`;
   }
 
-  // ===== 수량 조절 =====
   function increaseQty(btn) {
     const qtyElement = btn.parentElement.querySelector('.qty-number');
     qtyElement.innerText = parseInt(qtyElement.innerText) + 1;
@@ -751,34 +766,34 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ menuName, menuPrice, quantity })
     })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          showToast(`${menuName} x${quantity}이(가) 장바구니에 추가되었습니다.`);
-          menuItem.querySelector('.qty-number').innerText = '0';
-          updateCartBadge(data.cartCount);
-        } else {
-          showToast(data.message || '장바구니 추가에 실패했습니다.');
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        showToast('장바구니 추가에 실패했습니다.');
-      });
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                showToast(`${menuName} x${quantity}이(가) 장바구니에 추가되었습니다.`);
+                menuItem.querySelector('.qty-number').innerText = '0';
+                updateCartBadge(data.cartCount);
+              } else {
+                showToast(data.message || '장바구니 추가에 실패했습니다.');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              showToast('장바구니 추가에 실패했습니다.');
+            });
   }
 
-  // ===== 장바구니 배지 업데이트 =====
   function updateCartBadge(count) {
     const badge = document.getElementById('cart-badge');
-    if (count > 0) {
-      badge.innerText = count;
-      badge.style.display = 'flex';
-    } else {
-      badge.style.display = 'none';
+    if (badge) {
+      if (count > 0) {
+        badge.innerText = count;
+        badge.style.display = 'flex';
+      } else {
+        badge.style.display = 'none';
+      }
     }
   }
 
-  // ===== 서비스 요청 =====
   function openServiceModal() {
     document.getElementById('serviceModal').classList.add('active');
   }
@@ -796,22 +811,21 @@
         serviceType: serviceType
       })
     })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          showToast(`${serviceType} 요청이 관리자에게 전송되었습니다.`);
-        } else {
-          showToast('요청 전송에 실패했습니다.');
-        }
-        closeServiceModal();
-      })
-      .catch(error => {
-        console.error('Service request error:', error);
-        showToast('요청 전송에 실패했습니다.');
-      });
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                showToast(`${serviceType} 요청이 관리자에게 전송되었습니다.`);
+              } else {
+                showToast('요청 전송에 실패했습니다.');
+              }
+              closeServiceModal();
+            })
+            .catch(error => {
+              console.error('Service request error:', error);
+              showToast('요청 전송에 실패했습니다.');
+            });
   }
 
-  // ===== 토스트 알림 =====
   function showToast(message) {
     const toast = document.createElement('div');
     toast.className = 'toast';
@@ -823,7 +837,6 @@
     }, 2000);
   }
 
-  // ===== 모달 닫기 =====
   document.getElementById('serviceModal').addEventListener('click', function(e) {
     if (e.target === this) closeServiceModal();
   });
@@ -831,11 +844,8 @@
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') closeServiceModal();
   });
-</script>
-<script>
+
   let idleTimer;
-  // const timeoutMS = 15 * 60 * 1000; // 15분 (밀리초 단위)
-  // 테스트를 위해 30초로 설정 (30 * 1000ms)
   const timeoutMS = 30 * 1000;
 
   function resetIdleTimer() {
@@ -844,20 +854,11 @@
   }
 
   function goScreensaver() {
-    // 현재 URL을 로컬 스토리지에 저장하여 나중에 복귀할 때 사용
-    // localStorage.setItem('returnUrl', window.location.pathname);
-    // window.location.href = '/kiosk/screensaver'; // 화면 보호기 경로
-
-    // pathname(/kiosk/drinks) + search(?tableNumber=5)를 합쳐서 전체 경로를 저장합니다.
     const currentFullUrl = window.location.pathname + window.location.search;
-
     localStorage.setItem('returnUrl', currentFullUrl);
-    console.log("세션 보존 경로 저장됨: " + currentFullUrl); // 디버깅용
-
     window.location.href = '/kiosk/screensaver';
   }
 
-  // 사용자 활동(클릭, 터치, 키입력)이 있을 때마다 타이머 초기화
   window.onload = resetIdleTimer;
   window.onmousemove = resetIdleTimer;
   window.onmousedown = resetIdleTimer;

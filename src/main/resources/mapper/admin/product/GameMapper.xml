@@ -14,6 +14,7 @@
                g.max_players,
                g.play_time,
                g.is_active,
+               g.image_url,
                COUNT(gi.id) AS game_item_count
         FROM game g
                  LEFT JOIN category c ON g.category_id = c.id
@@ -55,7 +56,7 @@
     </select>
 
     <!-- 게임 등록 -->
-    <insert id="insert">
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO game (category_id, name, min_players, max_players, play_time, is_active, image_url)
         VALUES (#{categoryId}, #{name}, #{minPlayers}, #{maxPlayers}, #{playTime}, #{isActive}, #{imageUrl})
     </insert>

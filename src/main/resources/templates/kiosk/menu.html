@@ -14,18 +14,35 @@
 <div th:fragment="menuContent">
   <div class="menu-grid" id="menu-grid">
     <th:block th:each="item : ${menuItems}">
-      <div class="menu-item" th:data-name="${item.itemName}" th:data-price="${item.price}">
-        <div class="menu-emoji" th:text="${item.emoji}">☕</div>
+      <div class="menu-item"
+           th:data-name="${item.itemName}"
+           th:data-price="${item.price != null ? item.price : 0}">
+
+        <!-- 이미지가 있으면 이미지(image), 없으면 기본 이모지 -->
+        <div class="menu-img">
+          <img th:if="${item.imageUrl != null}" th:src="${item.imageUrl}" alt="">
+          <span th:unless="${item.imageUrl != null}">🎲</span>
+        </div>
+
+<!--        <div class="menu-emoji" th:text="${item.emoji}">☕</div>-->
         <div class="menu-name" th:text="${item.itemName}">상품명</div>
-        <div class="menu-price" th:classappend="${item.price == 0 ? 'free' : ''}"
-             th:text="${item.price == 0 ? 'FREE' : '₩' + #numbers.formatInteger(item.price, 1, 'COMMA')}">
+
+        <div class="menu-price"
+             th:classappend="${(item.price != null ? item.price : 0) == 0 ? 'free' : ''}"
+             th:text="${(item.price != null ? item.price : 0) == 0
+                        ? 'FREE'
+                        : '₩' + #numbers.formatInteger(item.price, 1, 'COMMA')}">
           ₩5,000
         </div>
 
         <div class="quantity-control">
-          <button class="qty-btn minus" onclick="decreaseQty(this)"><i data-lucide="minus"></i></button>
+          <button class="qty-btn minus" onclick="decreaseQty(this)">
+            <i data-lucide="minus"></i>
+          </button>
           <span class="qty-number">0</span>
-          <button class="qty-btn plus" onclick="increaseQty(this)"><i data-lucide="plus"></i></button>
+          <button class="qty-btn plus" onclick="increaseQty(this)">
+            <i data-lucide="plus"></i>
+          </button>
         </div>
 
         <button class="add-to-cart-btn" onclick="addItemToCart(this)" th:if="${item.price > 0}">

@@ -90,7 +90,7 @@ class GameServiceImpl implements GameService {
                 .build();
         gameMapper.insert(game);
         log.info("게임 등록 완료 - generated id: {}", game.getId());
-        return game.getId();
+        return game.getId();  // insert 후 game.getId() 반환
     }
 
     /**
@@ -112,6 +112,7 @@ class GameServiceImpl implements GameService {
                 .maxPlayers(gameRequestDTO.getMaxPlayers())
                 .playTime(gameRequestDTO.getPlayTime())
                 .isActive(gameRequestDTO.isActive())
+                .imageUrl(gameRequestDTO.getImageUrl())
                 .build();
         int result = gameMapper.update(game);
         log.debug("게임 수정 결과 - affected rows: {}", result);

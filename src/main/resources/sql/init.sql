@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS `board_cafe_kiosk_2603`;
-USE `board_cafe_kiosk_2603`;
+# CREATE DATABASE IF NOT EXISTS `board_cafe_kiosk_2603`;
+# USE `board_cafe_kiosk_2603`;
 
 --  보드게임 카페 키오스크 시스템 — 최종 고도화 스키마
 --  수정 사항: table_session 추가(22번), GUEST 카테고리 확장, 세션 기반 관계 재설정

@@ -93,14 +93,14 @@ public class GameController {
 
         // 게임 등록 (insert 후 gameRequestDTO.getId()에 생성된 PK 세팅됨)
         // 생성된 PK 반환
-        int gameId = gameService.register(gameRequestDTO);
+        int gameId = gameService.register(gameRequestDTO);  // game 등록 후 PK 반환
         log.debug("게임 등록 완료 - gameId: {}", gameId);
 
         // 신규 game_item 등록
         if (gameRequestDTO.getNewItems() != null) {
             for (GameItemRequestDTO item : gameRequestDTO.getNewItems()) {
                 if (item.getSerialNumber() != null && !item.getSerialNumber().isEmpty()) {
-                    item.setGameId(gameId);
+                    item.setGameId(gameId);  // gameId 세팅
                     gameItemService.register(item);
                     log.debug("game_item 등록 완료 - serialNumber: {}", item.getSerialNumber());
                 }
@@ -148,10 +148,16 @@ public class GameController {
         // 새 이미지 업로드 시 기존 이미지 삭제 후 교체
         // 없으면 hidden name="imageUrl"로 넘어온 기존 값이 dto에 자동 바인딩
         if (imageFile != null && !imageFile.isEmpty()) {
+            // 기존 이미지 삭제 후 새 이미지 저장
             fileUploadUtil.delete(gameService.getById(id).getImageUrl());
             gameRequestDTO.setImageUrl(fileUploadUtil.save(imageFile));
             log.debug("게임 이미지 교체 완료: {}", gameRequestDTO.getImageUrl());
-        }
+        }  // 새파일 없음 → hidden name="imageUrl" 값이 DTO에 이미 바인딩되어 있으므로 그대로 사용
+
+//        String imageUrl = fileUploadUtil.save(imageFile);
+//        if (imageUrl != null) {
+//            gameRequestDTO.setImageUrl(imageUrl);
+//        }
 
         // 게임 기본 정보 수정
         gameService.modify(id, gameRequestDTO);
