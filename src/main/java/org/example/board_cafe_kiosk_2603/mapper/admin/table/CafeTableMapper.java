@@ -2,7 +2,7 @@ package org.example.board_cafe_kiosk_2603.mapper.admin.table;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.example.board_cafe_kiosk_2603.domain.admin.table.CafeTableSession;
+import org.example.board_cafe_kiosk_2603.domain.common.cafeTableSession.CafeTableSession;
 import org.example.board_cafe_kiosk_2603.domain.admin.table.CafeTable;
 import org.example.board_cafe_kiosk_2603.dto.kiosk.order.OrderItemDTO;
 

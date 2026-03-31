@@ -1,9 +1,10 @@
 package org.example.board_cafe_kiosk_2603.mapper.kiosk;
 
 import lombok.extern.log4j.Log4j2;
+import org.example.board_cafe_kiosk_2603.domain.common.cafeTableSession.CafeTableSession;
 import org.example.board_cafe_kiosk_2603.domain.kiosk.order.OrderItem;
 import org.example.board_cafe_kiosk_2603.domain.kiosk.order.Orders;
-import org.example.board_cafe_kiosk_2603.domain.kiosk.TableSession;
+import org.example.board_cafe_kiosk_2603.mapper.common.cafeTableSession.CafeTableSessionMapper;
 import org.example.board_cafe_kiosk_2603.mapper.kiosk.cart.CartMapper;
 import org.example.board_cafe_kiosk_2603.mapper.kiosk.order.OrdersMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +22,7 @@ class OrdersMapperTest {
 
     @Autowired private OrdersMapper ordersMapper;
     @Autowired private CartMapper cartMapper;
-    @Autowired private TableSessionMapper tableSessionMapper;
+    @Autowired private CafeTableSessionMapper tableSessionMapper;
 
     private int  tableId;
     private long sessionId;
@@ -30,7 +31,7 @@ class OrdersMapperTest {
     void setUp() {
         // table_number=1 의 활성 세션을 동적으로 조회 (init.sql 더미데이터 기반)
         tableId = cartMapper.findCafeTableIdByTableNumber(1);
-        TableSession activeSession = tableSessionMapper.findActiveByTableId(tableId);
+        CafeTableSession activeSession = tableSessionMapper.findActiveByTableId(tableId);
         assertThat(activeSession)
                 .as("table_number=1 의 활성 세션이 init.sql 더미데이터에 존재해야 합니다.")
                 .isNotNull();

@@ -8,7 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @Log4j2
 @SpringBootTest
-class CafeTableSessionKioskServiceTest {
+class CafeTableSessionMapperKioskServiceTest {
 
     @Autowired
     private TableSessionKioskService tableSessionKioskService;

@@ -3,14 +3,14 @@ package org.example.board_cafe_kiosk_2603.controller.kiosk.payment;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.example.board_cafe_kiosk_2603.domain.kiosk.*;
+import org.example.board_cafe_kiosk_2603.domain.common.cafeTableSession.CafeTableSession;
 import org.example.board_cafe_kiosk_2603.domain.kiosk.cart.Cart;
 import org.example.board_cafe_kiosk_2603.domain.kiosk.cart.CartItem;
 import org.example.board_cafe_kiosk_2603.domain.kiosk.order.OrderItem;
 import org.example.board_cafe_kiosk_2603.domain.kiosk.order.Orders;
 import org.example.board_cafe_kiosk_2603.domain.kiosk.payment.Payment;
 import org.example.board_cafe_kiosk_2603.dto.admin.point.PointAdminDTO;
-import org.example.board_cafe_kiosk_2603.mapper.kiosk.*;
+import org.example.board_cafe_kiosk_2603.mapper.common.cafeTableSession.CafeTableSessionMapper;
 import org.example.board_cafe_kiosk_2603.mapper.kiosk.cart.CartItemMapper;
 import org.example.board_cafe_kiosk_2603.mapper.kiosk.cart.CartMapper;
 import org.example.board_cafe_kiosk_2603.mapper.kiosk.order.OrdersMapper;
@@ -41,7 +41,7 @@ public class PaymentController {
     private final CartMapper cartMapper;
     private final CartItemMapper cartItemMapper;
     private final OrdersMapper ordersMapper;
-    private final TableSessionMapper tableSessionMapper;
+    private final CafeTableSessionMapper cafeTableSessionMapper;
     private final PointService pointService;
 
     // ===========================================================
@@ -121,7 +121,7 @@ public class PaymentController {
         }
 
         // 2. 활성 세션 조회
-        TableSession activeSession = tableSessionMapper.findActiveByTableId(tableId);
+        CafeTableSession activeSession = cafeTableSessionMapper.findActiveByTableId(tableId);
         if (activeSession == null) {
             res.put("success", false);
             res.put("message", "활성 세션이 없습니다.");
