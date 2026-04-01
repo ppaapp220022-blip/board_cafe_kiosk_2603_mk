@@ -10,11 +10,13 @@ import org.example.board_cafe_kiosk_2603.domain.kiosk.order.OrderItem;
 import org.example.board_cafe_kiosk_2603.domain.kiosk.order.Orders;
 import org.example.board_cafe_kiosk_2603.domain.kiosk.payment.Payment;
 import org.example.board_cafe_kiosk_2603.dto.admin.point.PointAdminDTO;
+import org.example.board_cafe_kiosk_2603.dto.kiosk.cafePackage.CafePackageDTO;
 import org.example.board_cafe_kiosk_2603.mapper.common.cafeTableSession.CafeTableSessionMapper;
 import org.example.board_cafe_kiosk_2603.mapper.kiosk.cart.CartItemMapper;
 import org.example.board_cafe_kiosk_2603.mapper.kiosk.cart.CartMapper;
 import org.example.board_cafe_kiosk_2603.mapper.kiosk.order.OrdersMapper;
 import org.example.board_cafe_kiosk_2603.service.admin.point.PointService;
+import org.example.board_cafe_kiosk_2603.service.kiosk.cafePackage.CafePackageService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -43,6 +45,7 @@ public class PaymentController {
     private final OrdersMapper ordersMapper;
     private final CafeTableSessionMapper cafeTableSessionMapper;
     private final PointService pointService;
+    private final CafePackageService cafePackageService;
 
     // ===========================================================
     // 페이지
@@ -50,21 +53,36 @@ public class PaymentController {
 
     @GetMapping
     public String checkoutPage(
-            @RequestParam(required = false, defaultValue = "1") Integer tableNumber,
             HttpSession session, Model model) {
+        Integer tableNumber = (Integer) session.getAttribute("tableId");
+        Integer partySize = getPartySize(session);
 
         // DB에서 장바구니 조회
         Integer tableId = cartMapper.findCafeTableIdByTableNumber(tableNumber);
         List<CartItem> cartItems = new ArrayList<>();
-        int total = 0;
+        int menuTotal  = 0;
 
         if (tableId != null) {
             Cart cart = cartMapper.findByTableId(tableId);
             if (cart != null) {
                 cartItems = cartItemMapper.findByCartId(cart.getId());
-                total = cartItems.stream().mapToInt(i -> i.getMenuPrice() * i.getQuantity()).sum();
+                menuTotal  = cartItems.stream().mapToInt(i -> i.getMenuPrice() * i.getQuantity()).sum();
             }
         }
+
+        // 패키지 금액 계산
+        Integer packageId = (Integer) session.getAttribute("selectedPackageId");
+        int packageTotal  = 0;
+        String packageName = "";
+        if (packageId != null) {
+            CafePackageDTO pkg = cafePackageService.getById(packageId);
+            if (pkg != null) {
+                packageTotal = pkg.getBasePrice() * partySize;
+                packageName  = pkg.getName();
+            }
+        }
+
+        int total = menuTotal + packageTotal;
 
         int sessionDuration = getSessionDuration(session);
         String customerPhone = session.getAttribute("customerPhone") != null
@@ -82,6 +100,9 @@ public class PaymentController {
         model.addAttribute("tableNumber", tableNumber);
         model.addAttribute("partySize", getPartySize(session));
         model.addAttribute("cartItems", cartItems);
+        model.addAttribute("menuTotal", menuTotal);
+        model.addAttribute("packageName", packageName);
+        model.addAttribute("packageTotal", packageTotal);
         model.addAttribute("totalPrice", total);
         model.addAttribute("cartCount", cartItems.size());
         model.addAttribute("sessionHours", sessionDuration / 60);
@@ -89,9 +110,8 @@ public class PaymentController {
         model.addAttribute("pointBalance", pointBalance);
         model.addAttribute("customerPhone", customerPhone);
 
-        log.info("정산 화면 - 테이블: {}, 아이템: {}개, 총액: ₩{}, 포인트: {}P ({})",
-                tableNumber, cartItems.size(), total, pointBalance,
-                customerPhone.isBlank() ? "비회원" : customerPhone);
+        log.info("정산 화면 - 테이블: {}, 메뉴: ₩{}, 패키지: {} ₩{}, 합계: ₩{}, 포인트: {}P",
+                tableNumber, menuTotal, packageName, packageTotal, total, pointBalance);
         return "kiosk/checkout";
     }
 
@@ -103,9 +123,10 @@ public class PaymentController {
     @ResponseBody
     public Map<String, Object> processPayment(
             @RequestBody Map<String, Object> req,
-            @RequestParam(required = false, defaultValue = "1") Integer tableNumber,
             HttpSession session) {
 
+        Integer tableNumber = (Integer) session.getAttribute("tableId");
+        Integer partySize    = getPartySize(session);
         String paymentMethod = (String) req.get("paymentMethod");
         int pointUsed = toInt(req.get("pointUsed"));
         String customerPhone = (String) session.getAttribute("customerPhone");
@@ -129,22 +150,34 @@ public class PaymentController {
         }
         long sessionId = activeSession.getId();
 
-        // 3. cart_item 조회
+        // 3. cart_item 조회 (없어도 패키지만으로 결제 가능)
         Cart cart = cartMapper.findByTableId(tableId);
-        if (cart == null) {
-            res.put("success", false);
-            res.put("message", "장바구니가 없습니다.");
-            return res;
+        List<CartItem> cartItems = new ArrayList<>();
+        int menuTotal = 0;
+        if (cart != null) {
+            cartItems = cartItemMapper.findByCartId(cart.getId());
+            menuTotal = cartItems.stream().mapToInt(i -> i.getMenuPrice() * i.getQuantity()).sum();
         }
-        List<CartItem> cartItems = cartItemMapper.findByCartId(cart.getId());
-        if (cartItems.isEmpty()) {
+
+        // 4. 패키지 금액 계산
+        Integer packageId = (Integer) session.getAttribute("selectedPackageId");
+        int packageTotal = 0;
+        String packageName = "";
+        if (packageId != null) {
+            CafePackageDTO pkg = cafePackageService.getById(packageId);
+            if (pkg != null) {
+                packageTotal = pkg.getBasePrice() * partySize;
+                packageName  = pkg.getName();
+            }
+        }
+
+        int totalAmount = menuTotal + packageTotal;
+        if (totalAmount == 0) {
             res.put("success", false);
-            res.put("message", "장바구니가 비어있습니다.");
+            res.put("message", "결제 금액이 없습니다.");
             return res;
         }
 
-        // 4. 금액 계산
-        int totalAmount = cartItems.stream().mapToInt(i -> i.getMenuPrice() * i.getQuantity()).sum();
         int finalAmount = Math.max(0, totalAmount - pointUsed);
 
         // 5. orders 저장
@@ -153,10 +186,11 @@ public class PaymentController {
                 .tableId(tableId)
                 .customerPhone(customerPhone)
                 .status("PAID")
-                .totalAmount(finalAmount)
+                .totalAmount(totalAmount)
                 .build();
         ordersMapper.insertOrder(order);
-        log.info("주문 저장 완료 - orderId: {}, 총액: ₩{}", order.getId(), finalAmount);
+        log.info("주문 저장 완료 - orderId: {}, 메뉴: ₩{}, 패키지: {} ₩{}, 합계: ₩{}",
+                order.getId(), menuTotal, packageName, packageTotal, totalAmount);
 
         // 6. order_item 저장
         for (CartItem item : cartItems) {
@@ -181,8 +215,10 @@ public class PaymentController {
         log.info("결제 저장 완료 - paymentId: {}, 수단: {}", payment.getId(), paymentMethod);
 
         // 8. cart_item 비우기
-        cartItemMapper.deleteAllByCartId(cart.getId());
-        cartMapper.updateTimestamp(cart.getId());
+        if (cart != null) {
+            cartItemMapper.deleteAllByCartId(cart.getId());
+            cartMapper.updateTimestamp(cart.getId());
+        }
 
         // 9. 포인트 처리
         int earnedPoints = 0;
