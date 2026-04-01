@@ -6,7 +6,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class RestTemplateConfig {
-
+    // toss 결제시 사용. 지우면 안됨
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();

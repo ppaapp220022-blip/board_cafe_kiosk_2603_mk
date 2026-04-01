@@ -3,18 +3,17 @@ package org.example.board_cafe_kiosk_2603.controller.kiosk.cart;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.example.board_cafe_kiosk_2603.domain.kiosk.cart.Cart;
-import org.example.board_cafe_kiosk_2603.domain.kiosk.cart.CartItem;
-import org.example.board_cafe_kiosk_2603.mapper.kiosk.cart.CartItemMapper;
-import org.example.board_cafe_kiosk_2603.mapper.kiosk.cart.CartMapper;
+import org.example.board_cafe_kiosk_2603.dto.kiosk.cart.CartDTO;
+import org.example.board_cafe_kiosk_2603.dto.kiosk.cart.CartItemDTO;
+import org.example.board_cafe_kiosk_2603.service.kiosk.KioskPageService;
+import org.example.board_cafe_kiosk_2603.service.kiosk.cart.CartService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
-
 /**
- * 장바구니 페이지 + REST API (DB 연동).
+ * 장바구니 페이지 + REST API.
  *
  * [페이지] GET    /kiosk/cart        → cart.html
  * [API]   GET    /kiosk/cart/items  → 장바구니 조회
@@ -28,19 +27,18 @@ import java.util.*;
 @RequiredArgsConstructor
 public class CartController {
 
-    private final CartMapper     cartMapper;
-    private final CartItemMapper cartItemMapper;
+    private final CartService     cartService;
+    private final KioskPageService kioskPageService;
 
     // ===========================================================
     // 페이지
     // ===========================================================
 
     @GetMapping
-    public String cartPage(
-            HttpSession session, Model model) {
-        Integer tableNumber = (Integer) session.getAttribute("tableId");
-        model.addAttribute("tableNumber", tableNumber);
-        model.addAttribute("partySize",   getPartySize(session));
+    public String cartPage(HttpSession session, Model model) {
+        Integer tableNumber = tableNumber(session);
+        if (tableNumber == null) return "redirect:/kiosk";
+        kioskPageService.buildCartModel(model, tableNumber, session);
         return "kiosk/cart";
     }
 
@@ -50,172 +48,44 @@ public class CartController {
 
     @GetMapping("/items")
     @ResponseBody
-    public Map<String, Object> getCart(HttpSession session) {
-        Integer tableNumber = (Integer) session.getAttribute("tableId");
-        Integer tableId = cartMapper.findCafeTableIdByTableNumber(tableNumber);
-        Map<String, Object> res = new LinkedHashMap<>();
-
-        if (tableId == null) {
-            res.put("success",    false);
-            res.put("message",    "테이블을 찾을 수 없습니다.");
-            res.put("cartItems",  List.of());
-            res.put("cartCount",  0);
-            res.put("totalPrice", 0);
-            return res;
-        }
-
-        Cart cart = cartMapper.findByTableId(tableId);
-        if (cart == null) {
-            res.put("success",    true);
-            res.put("cartItems",  List.of());
-            res.put("cartCount",  0);
-            res.put("totalPrice", 0);
-            return res;
-        }
-
-        List<CartItem> items = cartItemMapper.findByCartId(cart.getId());
-        int total = items.stream().mapToInt(i -> i.getMenuPrice() * i.getQuantity()).sum();
-
-        res.put("success",    true);
-        res.put("cartItems",  items);
-        res.put("cartCount",  items.size());
-        res.put("totalPrice", total);
-        return res;
+    public ResponseEntity<CartDTO> getCart(HttpSession session) {
+        Integer tableNumber = tableNumber(session);
+        if (tableNumber == null) return ResponseEntity.badRequest().build();
+        return ResponseEntity.ok(cartService.getCart(tableNumber));
     }
 
     @PostMapping("/add")
     @ResponseBody
-    public Map<String, Object> addToCart(
-            @RequestBody Map<String, Object> req,
-            HttpSession session) {
-
-        Integer tableNumber = (Integer) session.getAttribute("tableId");
-        String menuName  = (String) req.get("menuName");
-        int    menuPrice = toInt(req.get("menuPrice"));
-        int    quantity  = toInt(req.get("quantity"));
-
-        log.info("장바구니 추가 - 테이블: {}, 메뉴: {} x{} (₩{})", tableNumber, menuName, quantity, menuPrice);
-
-        Map<String, Object> res = new LinkedHashMap<>();
-
-        // 1. tableId 조회
-        Integer tableId = cartMapper.findCafeTableIdByTableNumber(tableNumber);
-        if (tableId == null) {
-            res.put("success", false);
-            res.put("message", "테이블을 찾을 수 없습니다.");
-            return res;
-        }
-
-        // 2. menuId 조회
-        Integer menuId = cartItemMapper.findMenuIdByNameAndPrice(menuName, menuPrice);
-        if (menuId == null) {
-            res.put("success", false);
-            res.put("message", "메뉴를 찾을 수 없습니다: " + menuName);
-            return res;
-        }
-
-        // 3. cart 조회 or 생성
-        Cart cart = cartMapper.findByTableId(tableId);
-        if (cart == null) {
-            cart = Cart.builder().tableId(tableId).build();
-            cartMapper.insert(cart);
-        }
-
-        // 4. 기존 항목 확인 → 수량 누적 or 신규 추가
-        CartItem existing = cartItemMapper.findByCartIdAndMenuId(cart.getId(), menuId);
-        if (existing != null) {
-            cartItemMapper.updateQuantity(cart.getId(), menuId, existing.getQuantity() + quantity);
-        } else {
-            cartItemMapper.insert(CartItem.builder()
-                    .cartId(cart.getId())
-                    .menuId(menuId)
-                    .quantity(quantity)
-                    .build());
-        }
-        cartMapper.updateTimestamp(cart.getId());
-
-        // 5. 최신 cart 조회 후 응답
-        List<CartItem> items = cartItemMapper.findByCartId(cart.getId());
-        int total = items.stream().mapToInt(i -> i.getMenuPrice() * i.getQuantity()).sum();
-
-        res.put("success",    true);
-        res.put("message",    menuName + "이(가) 장바구니에 추가되었습니다.");
-        res.put("cartCount",  items.size());
-        res.put("totalPrice", total);
-        return res;
+    public ResponseEntity<CartDTO> addToCart(@RequestBody CartItemDTO item,
+                                             HttpSession session) {
+        Integer tableNumber = tableNumber(session);
+        if (tableNumber == null) return ResponseEntity.badRequest().build();
+        log.info("장바구니 추가 - 테이블: {}, 메뉴: {} x{}", tableNumber, item.getMenuName(), item.getQuantity());
+        return ResponseEntity.ok(cartService.addItem(tableNumber, item));
     }
 
     @PutMapping("/update")
     @ResponseBody
-    public Map<String, Object> updateCart(
-            @RequestBody Map<String, Object> req,
-            HttpSession session) {
-
-        Integer tableNumber = (Integer) session.getAttribute("tableId");
-        String menuName  = (String) req.get("menuName");
-        int    menuPrice = toInt(req.get("menuPrice"));
-        int    quantity  = toInt(req.get("quantity"));
-
-        Map<String, Object> res = new LinkedHashMap<>();
-
-        Integer tableId = cartMapper.findCafeTableIdByTableNumber(tableNumber);
-        if (tableId == null) { res.put("success", false); return res; }
-
-        Integer menuId = cartItemMapper.findMenuIdByNameAndPrice(menuName, menuPrice);
-        if (menuId == null) { res.put("success", false); return res; }
-
-        Cart cart = cartMapper.findByTableId(tableId);
-        if (cart == null)    { res.put("success", false); return res; }
-
-        if (quantity <= 0) {
-            cartItemMapper.deleteByCartIdAndMenuId(cart.getId(), menuId);
-        } else {
-            cartItemMapper.updateQuantity(cart.getId(), menuId, quantity);
-        }
-        cartMapper.updateTimestamp(cart.getId());
-
-        List<CartItem> items = cartItemMapper.findByCartId(cart.getId());
-        int total = items.stream().mapToInt(i -> i.getMenuPrice() * i.getQuantity()).sum();
-
-        res.put("success",    true);
-        res.put("cartCount",  items.size());
-        res.put("totalPrice", total);
-        return res;
+    public ResponseEntity<CartDTO> updateCart(@RequestBody CartItemDTO item,
+                                              HttpSession session) {
+        Integer tableNumber = tableNumber(session);
+        if (tableNumber == null) return ResponseEntity.badRequest().build();
+        return ResponseEntity.ok(cartService.updateItem(tableNumber, item));
     }
 
     @DeleteMapping("/clear")
     @ResponseBody
-    public Map<String, Object> clearCart(
-            HttpSession session) {
-
-        Map<String, Object> res = new LinkedHashMap<>();
-        Integer tableNumber = (Integer) session.getAttribute("tableId");
-        Integer tableId = cartMapper.findCafeTableIdByTableNumber(tableNumber);
-        if (tableId == null) { res.put("success", false); return res; }
-
-        Cart cart = cartMapper.findByTableId(tableId);
-        if (cart != null) {
-            cartItemMapper.deleteAllByCartId(cart.getId());
-            cartMapper.updateTimestamp(cart.getId());
-        }
-
-        res.put("success",    true);
-        res.put("cartCount",  0);
-        res.put("totalPrice", 0);
-        return res;
+    public ResponseEntity<CartDTO> clearCart(HttpSession session) {
+        Integer tableNumber = tableNumber(session);
+        if (tableNumber == null) return ResponseEntity.badRequest().build();
+        return ResponseEntity.ok(cartService.clearCart(tableNumber));
     }
 
     // ===========================================================
     // 헬퍼
     // ===========================================================
 
-    private int getPartySize(HttpSession session) {
-        Object val = session.getAttribute("partySize");
-        return val instanceof Integer ? (Integer) val : 2;
-    }
-
-    private int toInt(Object val) {
-        if (val == null) return 0;
-        return ((Number) val).intValue();
+    private Integer tableNumber(HttpSession session) {
+        return (Integer) session.getAttribute("tableNumber");
     }
 }

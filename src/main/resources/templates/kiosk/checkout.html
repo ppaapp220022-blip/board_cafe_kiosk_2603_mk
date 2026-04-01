@@ -452,47 +452,35 @@
 <script>
   lucide.createIcons({ attrs: { 'stroke-width': 2.5 } });
 
-  const packageName  = '[[${packageName}]]';
-  const partySize    = [[${partySize}]];
-  const pointBalance   = [[${pointBalance}]];
-  const packageTotal  = [[${packageTotal}]];   // 서버에서 받은 패키지 금액
+  const tableNumber    = /*[[${tableNumber}]]*/ '1';
+  const pointBalance   = /*[[${pointBalance}]]*/ 0;
+  const cartItems      = /*[[${cartItems}]]*/ [];
+  const totalPrice     = /*[[${totalPrice}]]*/ 0;
   const tossClientKey  = 'test_ck_YOUR_CLIENT_KEY_HERE'; // TODO: 실제 클라이언트 키로 교체
-
-  let menuSubtotal      = 0;  // 메뉴 합계
-  let subtotalPrice = packageTotal; // 패키지 + 메뉴 합계 (초기값 = 패키지)
+  let subtotalPrice    = 0;
   let appliedPoint     = 0;
   let selectedPaymentMethod = 'CARD';
 
   // ===== 페이지 로드 =====
   document.addEventListener('DOMContentLoaded', () => {
-    loadCheckoutData();
+    renderCheckout(cartItems, totalPrice);
   });
 
-  // ===== 장바구니 데이터 로드 =====
-  function loadCheckoutData() {
-    fetch(`/kiosk/cart/items`)
-      .then(r => r.json())
-      .then(data => {
-        if (data.success) renderCheckout(data.cartItems, data.totalPrice);
-        else renderCheckout([], 0); // 장바구니 없음 → 패키지만 표시
-      })
-            .catch(() => showErrorPage()); // 실제 오류만 에러 페이지
-  }
-
   // ===== 주문 내역 렌더링 =====
-  function renderCheckout(cartItems, totalMenuPrice) {
-    menuSubtotal  = totalMenuPrice;
-    subtotalPrice = packageTotal + menuSubtotal;
+  function renderCheckout(cartItems, totalPrice) {
+    subtotalPrice = totalPrice;
 
-  // 패키지 행 추가
-    const packageRow = packageTotal > 0 ? `
-    <div class="order-item">
-      <div>
-        <span>${packageName}</span>
-        <span class="order-qty">x${partySize}명</span>
-      </div>
-      <div class="price">₩${packageTotal.toLocaleString()}</div>
-    </div>` : '';
+    if (cartItems.length === 0) {
+      document.getElementById('order-summary').innerHTML = `
+        <div style="text-align:center; padding:50px 20px; color:#888;">
+          <i data-lucide="shopping-cart" style="width:60px;height:60px;opacity:0.3;margin-bottom:16px;"></i>
+          <h2 style="font-size:1.3rem;color:#333;margin-bottom:8px;">장바구니가 비어있습니다</h2>
+          <p>메뉴에서 상품을 추가해주세요.</p>
+        </div>`;
+      document.getElementById('pay-btn').disabled = true;
+      lucide.createIcons();
+      return;
+    }
 
     const rows = cartItems.map(item => `
       <div class="order-item">
@@ -503,17 +491,12 @@
         <div class="price">₩${(item.menuPrice * item.quantity).toLocaleString()}</div>
       </div>`).join('');
 
-    const emptyMsg = cartItems.length === 0
-            ? `<p style="color:#aaa;text-align:center;padding:12px 0;">추가 주문 없음</p>` : '';
-
     document.getElementById('order-summary').innerHTML = `
       <div class="card-header"><i data-lucide="shopping-bag"></i> 주문 내역</div>
-      ${packageRow}
       ${rows}
-      ${emptyMsg}
       <div class="summary-divider">
         <span>소계</span>
-        <span>₩${subtotalPrice.toLocaleString()}</span>
+        <span>₩${totalPrice.toLocaleString()}</span>
       </div>`;
 
     updateAmounts();
@@ -525,7 +508,7 @@
     const finalAmount = Math.max(subtotalPrice - appliedPoint, 0);
 
     document.getElementById('subtotal-amount').innerText = `₩${subtotalPrice.toLocaleString()}`;
-    document.getElementById('final-total').innerText = `₩${finalAmount.toLocaleString()}`;
+    document.getElementById('final-total').innerText     = `₩${finalAmount.toLocaleString()}`;
 
     const discountRow = document.getElementById('point-discount-row');
     if (appliedPoint > 0) {
@@ -604,7 +587,7 @@
     payBtn.disabled = true;
     document.getElementById('pay-btn-label').innerText = '결제 처리 중...';
 
-    fetch(`/kiosk/checkout/pay`, {
+    fetch(`/kiosk/checkout/pay?tableNumber=${tableNumber}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ paymentMethod: selectedPaymentMethod, pointUsed: appliedPoint })
@@ -634,7 +617,7 @@
 
     try {
       // 1. 백엔드에서 orderId / amount 발급
-      const prepRes  = await fetch(`/kiosk/toss/prepare`, {
+      const prepRes  = await fetch(`/kiosk/toss/prepare?tableNumber=${tableNumber}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pointUsed: appliedPoint })
@@ -655,8 +638,8 @@
         orderId:      prepData.orderIdToss,
         orderName:    prepData.orderName,
         customerName: `Table #${tableNumber}`,
-        successUrl:   `${window.location.origin}/kiosk/toss/success`,
-        failUrl:      `${window.location.origin}/kiosk/toss/fail`
+        successUrl:   `${window.location.origin}/kiosk/toss/success?tableNumber=${tableNumber}`,
+        failUrl:      `${window.location.origin}/kiosk/toss/fail?tableNumber=${tableNumber}`
       });
 
     } catch (err) {
@@ -692,8 +675,7 @@
         <p style="font-size:0.9rem;opacity:0.65;margin-top:24px;">3초 후 메인 화면으로 이동합니다...</p>
       </div>`;
     lucide.createIcons();
-    localStorage.removeItem('returnUrl');
-    setTimeout(() => { window.location.href = `/kiosk/screensaver`; }, 3000);
+    setTimeout(() => { window.location.href = '/kiosk/screensaver'; }, 3000);
   }
 
   // ===== 오류 화면 =====

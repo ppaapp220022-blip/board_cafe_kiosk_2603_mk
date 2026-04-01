@@ -4,31 +4,17 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.example.board_cafe_kiosk_2603.domain.kiosk.order.OrderItem;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderItemDTO {
+
     private int     id;
-    private int     orderId;
     private Integer menuId;
     private String  menuName;
     private int     price;
     private int     quantity;
-    private String  status;
-
-    // === 정적 팩토리 ===
-    public static OrderItemDTO from(OrderItem item) {
-        return OrderItemDTO.builder()
-                .id(item.getId())
-                .orderId(item.getOrderId())
-                .menuId(item.getMenuId())
-                .menuName(item.getMenuName())
-                .price(item.getPrice())
-                .quantity(item.getQuantity())
-                .status(item.getStatus())
-                .build();
-    }
 }
+
