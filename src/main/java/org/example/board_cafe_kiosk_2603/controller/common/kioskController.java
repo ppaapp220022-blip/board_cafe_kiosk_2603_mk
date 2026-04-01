@@ -66,9 +66,8 @@ public class kioskController {
     // ===========================================================
     @GetMapping("/games")
     public String games(
-            @RequestParam(required = false, defaultValue = "1") Integer tableNumber,
             HttpSession session, Model model) {
-        initSession(session, tableNumber);
+        Integer tableNumber = (Integer) session.getAttribute("tableId");
 
         List<kioskItem> items = gameService.getByIsActive(true).stream()
                 .map(g -> kioskItem.builder()
@@ -89,9 +88,9 @@ public class kioskController {
 
     @GetMapping("/drinks")
     public String drinks(
-            @RequestParam(required = false, defaultValue = "1") Integer tableNumber,
             HttpSession session, Model model) {
-        initSession(session, tableNumber);
+        Integer tableNumber = (Integer) session.getAttribute("tableId");
+
 
         List<kioskItem> items = menuService.getByType("DRINK").stream()
                 .filter(m -> m.isAvailable() && !m.isDeleted())
@@ -113,9 +112,9 @@ public class kioskController {
 
     @GetMapping("/food")
     public String food(
-            @RequestParam(required = false, defaultValue = "1") Integer tableNumber,
             HttpSession session, Model model) {
-        initSession(session, tableNumber);
+        Integer tableNumber = (Integer) session.getAttribute("tableId");
+
 
         List<kioskItem> items = menuService.getByType("FOOD").stream()
                 .filter(m -> m.isAvailable() && !m.isDeleted())
@@ -137,9 +136,8 @@ public class kioskController {
 
     @GetMapping("/members")
     public String members(
-            @RequestParam(required = false, defaultValue = "1") Integer tableNumber,
             HttpSession session, Model model) {
-        initSession(session, tableNumber);
+        Integer tableNumber = (Integer) session.getAttribute("tableId");
 
         List<kioskItem> items = menuService.getByType("GUEST").stream()
                 .filter(m -> m.isAvailable() && !m.isDeleted())
@@ -197,16 +195,6 @@ public class kioskController {
     // 헬퍼
     // ===========================================================
 
-    private void initSession(HttpSession session, Integer tableNumber) {
-        if (session.getAttribute("tableNumber") == null) {
-            session.setAttribute("tableNumber",      tableNumber);
-            session.setAttribute("partySize",        2);
-            session.setAttribute("sessionStartTime", System.currentTimeMillis());
-        }
-        if (session.getAttribute("cart") == null) {
-            session.setAttribute("cart", new ArrayList<>());
-        }
-    }
 
     private void buildMenuModel(Model model, int tableNumber, HttpSession session,
                                 String menuType, List<Map<String, Object>> menuItems, String title) {

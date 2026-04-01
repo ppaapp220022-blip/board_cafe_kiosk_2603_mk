@@ -620,7 +620,7 @@
     const tableNumber = tableInfoElement ? tableInfoElement.textContent.replace('Table #', '').trim() : '1';
 
     document.addEventListener('DOMContentLoaded', function () {
-        fetch(`/kiosk/cart/items?tableNumber=${tableNumber}`)
+        fetch(`/kiosk/cart/items`)
             .then(res => res.json())
             .then(data => {
                 if (data.success) updateCartBadge(data.cartCount);
@@ -630,21 +630,21 @@
     });
 
     function navigateMenu(menu) {
-        window.location.href = `/kiosk/${menu}?tableNumber=${tableNumber}`;
+        window.location.href = `/kiosk/${menu}`;
     }
 
     function navigateCart() {
-        window.location.href = `/kiosk/cart?tableNumber=${tableNumber}`;
+        window.location.href = `/kiosk/cart`;
     }
 
     function navigateCheckout() {
         if (confirm('정산하시겠습니까?')) {
-            window.location.href = `/kiosk/checkout?tableNumber=${tableNumber}`;
+            window.location.href = `/kiosk/checkout`;
         }
     }
 
     function navigateMessenger() {
-        window.location.href = `/kiosk/messenger?tableNumber=${tableNumber}`;
+        window.location.href = `/kiosk/messenger`;
     }
 
     /* ★★★ 플러스 버튼 클릭 시 작동할 '바로 담기' 함수 ★★★ */
@@ -654,7 +654,7 @@
         const menuPrice = parseInt(menuItem.getAttribute('data-price'));
         const quantity = 1; // 사진 레이아웃 특성상 수량 선택이 없어 1개로 고정합니다
 
-        fetch(`/kiosk/cart/add?tableNumber=${tableNumber}`, {
+        fetch(`/kiosk/cart/add`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({menuName, menuPrice, quantity})
@@ -729,6 +729,7 @@
     function resetIdleTimer() {
         clearTimeout(idleTimer);
         idleTimer = setTimeout(() => {
+            localStorage.setItem('returnUrl', window.location.pathname);
             window.location.href = '/kiosk/screensaver';
         }, 30000);
     }

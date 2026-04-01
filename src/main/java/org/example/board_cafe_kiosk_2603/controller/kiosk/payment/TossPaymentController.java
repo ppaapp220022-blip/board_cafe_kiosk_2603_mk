@@ -30,10 +30,8 @@ public class TossPaymentController {
     @ResponseBody
     public TossPaymentDTO tossPrepare(
             @RequestBody @Valid TossPaymentDTO request,
-            @RequestParam(required = false, defaultValue = "1") Integer tableNumber,
-            HttpSession session) {
-
-        tableNumber = kioskPageService.resolveTableNumber(tableNumber, session);
+                        HttpSession session) {
+        Integer tableNumber = (Integer) session.getAttribute("tableId");
         TossPaymentDTO response = tossPaymentService.preparePayment(tableNumber, request);
 
         if (response.isSuccess()) {
@@ -49,10 +47,9 @@ public class TossPaymentController {
             @RequestParam String paymentKey,
             @RequestParam String orderId,
             @RequestParam int amount,
-            @RequestParam(required = false, defaultValue = "1") Integer tableNumber,
             HttpSession session, Model model) {
 
-        tableNumber = kioskPageService.resolveTableNumber(tableNumber, session);
+        Integer tableNumber = (Integer) session.getAttribute("tableId");
 
         Integer savedAmount = (Integer) session.getAttribute("toss_amount");
         Integer savedPointUsed = (Integer) session.getAttribute("toss_pointUsed");
@@ -87,10 +84,9 @@ public class TossPaymentController {
     public String tossFail(
             @RequestParam(required = false) String code,
             @RequestParam(required = false) String message,
-            @RequestParam(required = false, defaultValue = "1") Integer tableNumber,
             HttpSession session, Model model) {
 
-        tableNumber = kioskPageService.resolveTableNumber(tableNumber, session);
+        Integer tableNumber = (Integer) session.getAttribute("tableId");
         log.warn("토스 결제 실패 - code: {}, message: {}", code, message);
         model.addAttribute("errorMessage", message != null ? message : "결제가 취소되었습니다.");
         model.addAttribute("tableNumber", tableNumber);

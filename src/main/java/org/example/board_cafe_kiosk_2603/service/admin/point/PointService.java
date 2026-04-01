@@ -2,10 +2,12 @@ package org.example.board_cafe_kiosk_2603.service.admin.point;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.example.board_cafe_kiosk_2603.domain.admin.point.Customer;
 import org.example.board_cafe_kiosk_2603.domain.admin.point.Point;
 import org.example.board_cafe_kiosk_2603.domain.admin.point.PointHistory;
 import org.example.board_cafe_kiosk_2603.dto.admin.point.PointAdminDTO;
 import org.example.board_cafe_kiosk_2603.dto.admin.point.PointHistoryDTO;
+import org.example.board_cafe_kiosk_2603.mapper.admin.point.CustomerMapper;
 import org.example.board_cafe_kiosk_2603.mapper.admin.point.PointMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +19,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class PointService {
-
+    private final CustomerMapper customerMapper;
     private final PointMapper pointMapper;
 
     // ===================================================
@@ -134,6 +136,15 @@ public class PointService {
     // ===================================================
 
     private Point getOrCreatePoint(String phone) {
+        // customer 테이블에도 없으면 생성
+        if (customerMapper.selectByPhone(phone) == null) {
+            customerMapper.insertCustomer(Customer.builder()
+                    .phone(phone)
+                    .isActive(true)
+                    .build());
+            log.info("신규 고객 등록 - 전화번호: {}", phone);
+        }
+
         Point point = pointMapper.findByPhone(phone);
         if (point == null) {
             pointMapper.insert(Point.builder().phone(phone).balance(0).build());

@@ -22,7 +22,6 @@ import java.util.List;
 public class OrderController {
 
     private final OrderService orderService;
-    private final KioskPageService kioskPageService;
 
     /**
      * 주문 단건 조회
@@ -40,9 +39,8 @@ public class OrderController {
      */
     @GetMapping("/latest")
     public OrdersDTO getLatestOrder(
-            @RequestParam(required = false, defaultValue = "1") Integer tableNumber,
             HttpSession session) {
-        tableNumber = kioskPageService.resolveTableNumber(tableNumber, session);
+        Integer tableNumber = (Integer) session.getAttribute("tableId");
         log.info("최근 주문 조회 - tableNumber: {}", tableNumber);
         return orderService.getLatestOrder(tableNumber);
     }
