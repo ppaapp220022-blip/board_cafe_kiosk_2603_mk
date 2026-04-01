@@ -14,7 +14,8 @@ public class KioskAuthorizationManager implements AuthorizationManager<RequestAu
     public AuthorizationDecision check(Supplier<Authentication> authentication,
                                        RequestAuthorizationContext context) {
         HttpServletRequest request = context.getRequest();
-        Object tableNumber = request.getSession().getAttribute("tableNumber"); // 키 통일
-        return new AuthorizationDecision(tableNumber != null);
+        Object tableId = request.getSession().getAttribute("tableId");
+        Object tableNumber = request.getSession().getAttribute("tableNumber");
+        return new AuthorizationDecision(tableId != null || tableNumber != null);
     }
 }

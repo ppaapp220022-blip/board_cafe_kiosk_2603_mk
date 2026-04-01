@@ -4,8 +4,10 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.dto.admin.point.PointAdminDTO;
+import org.example.board_cafe_kiosk_2603.dto.kiosk.cafePackage.CafePackageDTO;
 import org.example.board_cafe_kiosk_2603.dto.kiosk.cart.CartDTO;
 import org.example.board_cafe_kiosk_2603.service.admin.point.PointService;
+import org.example.board_cafe_kiosk_2603.service.kiosk.cafePackage.CafePackageService;
 import org.example.board_cafe_kiosk_2603.service.kiosk.cart.CartService;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
@@ -24,6 +26,7 @@ public class KioskPageService {
 
     private final CartService cartService;
     private final PointService pointService;
+    private final CafePackageService cafePackageService;
 
     // ===================================================
     // 세션 헬퍼
@@ -117,16 +120,37 @@ public class KioskPageService {
         int sessionDuration = getSessionDuration(session);
         String customerPhone = (String) session.getAttribute("customerPhone");
         int pointBalance = resolvePointBalance(customerPhone);
+        int partySize         = getPartySize(session);
+
+        // 패키지 금액 계산
+        Integer packageId    = (Integer) session.getAttribute("selectedPackageId");
+        int packageTotal     = 0;
+        String packageName   = "";
+        if (packageId != null) {
+            CafePackageDTO pkg = cafePackageService.getById(packageId);
+            if (pkg != null) {
+                packageTotal = pkg.getBasePrice() * partySize;
+                packageName  = pkg.getName();
+            }
+        }
+
+        int totalPrice = cartDTO.getTotalPrice() + packageTotal;
 
         model.addAttribute("tableNumber", tableNumber);
-        model.addAttribute("partySize", getPartySize(session));
+        model.addAttribute("partySize", partySize);
         model.addAttribute("cartItems", cartDTO.getCartItems());
-        model.addAttribute("totalPrice", cartDTO.getTotalPrice());
+        model.addAttribute("menuTotal", cartDTO.getTotalPrice());
+        model.addAttribute("packageName", packageName);
+        model.addAttribute("packageTotal", packageTotal);
+        model.addAttribute("totalPrice", totalPrice);
         model.addAttribute("cartCount", cartDTO.getCartCount());
         model.addAttribute("sessionHours", sessionDuration / 60);
         model.addAttribute("sessionMinutes", sessionDuration % 60);
         model.addAttribute("pointBalance", pointBalance);
         model.addAttribute("customerPhone", customerPhone != null ? customerPhone : "");
+
+        log.info("정산 화면 - 테이블: {}, 메뉴: ₩{}, 패키지: {} ₩{}, 합계: ₩{}, 포인트: {}P",
+                tableNumber, cartDTO.getTotalPrice(), packageName, packageTotal, totalPrice, pointBalance);
     }
 
     public void buildScreensaverModel(Model model, HttpSession session) {

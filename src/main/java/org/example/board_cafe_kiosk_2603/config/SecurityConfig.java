@@ -45,7 +45,7 @@ public class SecurityConfig {
                         "/admin/login",
                         "/admin/login-process",
                         "/kiosk/login",
-                        "/kiosk/login-process"  // 키오스크 로그인 처리 경로 추가
+                        "/error" // Security에서 막혀서 로그인 페이지로 리다이렉트돼서 /error 경로를 허용해서 에러 페이지가 제대로 표시
                         ).permitAll()
 
                 // [키오스크 전용] /kiosk/로 시작하는 모든 경로는 TABLE 권한 필수
