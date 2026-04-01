@@ -116,4 +116,11 @@
         ORDER BY created_at DESC
     </select>
 
+    <!-- 테이블 번호로 단건 조회 (로그인용) -->
+    <select id="findByTableNumber" resultType="org.example.board_cafe_kiosk_2603.domain.admin.table.CafeTable">
+        SELECT id, table_number, password, status, access_token, current_session_id
+        FROM cafe_table
+        WHERE table_number = #{tableNumber}
+    </select>
+
 </mapper>

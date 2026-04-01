@@ -1,9 +1,11 @@
 package org.example.board_cafe_kiosk_2603.service.admin.cafeTable;
 
+import org.example.board_cafe_kiosk_2603.domain.admin.table.CafeTable;
 import org.example.board_cafe_kiosk_2603.dto.admin.table.CafeTableDTO;
 import org.example.board_cafe_kiosk_2603.dto.kiosk.order.OrderItemDTO;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CafeTableService {
     /* 전체 테이블 목록 및 현재 세션 정보 조회 */
@@ -26,4 +28,7 @@ public interface CafeTableService {
 
     /* 알림 확인 처리 */
     void markMessagesAsRead(Integer tableId);
+
+    // 키오스크 로그인: 테이블 번호 + 비밀번호 검증 후 테이블 반환
+    Optional<CafeTable> login(int tableNumber, String password);
 }

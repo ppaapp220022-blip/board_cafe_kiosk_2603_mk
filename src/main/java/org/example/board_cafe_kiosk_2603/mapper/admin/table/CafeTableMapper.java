@@ -7,6 +7,7 @@ import org.example.board_cafe_kiosk_2603.domain.admin.table.CafeTable;
 import org.example.board_cafe_kiosk_2603.dto.kiosk.order.OrderItemDTO;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 대시보드 테이블 현황 전용 DAO 인터페이스
@@ -84,4 +85,7 @@ public interface CafeTableMapper {
      * 특정 테이블의 현재 액세스 토큰만 조회
      */
     String selectAccessTokenById(@Param("id") Integer id);
+
+    // 테이블 번호로 단건 조회 (로그인용), 주연
+    Optional<CafeTable> findByTableNumber(int tableNumber);
 }

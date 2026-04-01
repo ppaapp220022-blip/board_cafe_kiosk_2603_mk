@@ -33,4 +33,7 @@ public class CafeTable {
 
     /* 미확인 메시지 존재 여부 */
     private boolean hasUnreadMessage;
+
+    // 키오스크 로그인 (주연)
+    private Long currentSessionId;
 }

@@ -223,7 +223,9 @@
                     2026-03-19 14:30:00</td>
                 <td style="text-align:center;">
                     <button class="history-btn"
-                            th:onclick="|openHistoryModal(${point.id}, '${point.phone}')|">
+                            th:data-id="${point.id}"
+                            th:data-phone="${point.phone}"
+                            onclick="openHistoryModal(this.getAttribute('data-id'), this.getAttribute('data-phone'))">
                         History
                     </button>
                 </td>

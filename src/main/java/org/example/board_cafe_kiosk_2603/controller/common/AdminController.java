@@ -119,13 +119,13 @@ public class AdminController {
     }
 
     // 패키지 요금 정책
-    @GetMapping("/staff")
-    public String getAllStaff(Model model) {
-        log.info("--- AdminController getAllStaff post ---");
-
-        // 중요: 사이드바 하이라이트를 위해 'pointManagement' 전달
-        model.addAttribute("activePage", "staffManagement");
-        return "admin/staff";
-    }
+//    @GetMapping("/staff")
+//    public String getAllStaff(Model model) {
+//        log.info("--- AdminController getAllStaff post ---");
+//
+//        // 중요: 사이드바 하이라이트를 위해 'pointManagement' 전달
+//        model.addAttribute("activePage", "staffManagement");
+//        return "admin/staff";
+//    }
 
 }

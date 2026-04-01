@@ -1,72 +1,164 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>Admin Login - Board Game Cafe</title>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    /* 기본 스타일은 Kiosk Login과 동일하게 유지하여 일관성 부여 */
-    body { margin: 0; padding: 0; font-family: 'Pretendard', sans-serif; background-color: #f0f2f5; display: flex; align-items: center; justify-content: center; height: 100vh; }
-    .login-card { background: white; width: 400px; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-align: center; }
-    .icon-box { width: 60px; height: 60px; background-color: #007bff; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: white; }
-    h2 { margin: 0; font-size: 1.8rem; color: #111; }
-    .subtitle { color: #888; margin: 10px 0 30px; font-size: 0.95rem; }
+    <meta charset="UTF-8">
+    <title>Admin Login - Board Game Cafe</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
 
-    .input-group { text-align: left; margin-bottom: 20px; }
-    .label { display: block; font-size: 0.85rem; color: #666; margin-bottom: 8px; font-weight: 600; }
+        .login-card {
+            background: white;
+            width: 400px;
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
 
-    .input-wrapper { position: relative; display: flex; align-items: center; }
-    .input-wrapper i { position: absolute; left: 15px; color: #aaa; }
-    input { width: 100%; padding: 15px 15px 15px 45px; border: 1px solid #e1e4e8; border-radius: 12px; background-color: #f8f9fa; font-size: 1rem; box-sizing: border-box; outline: none; }
-    input:focus { border-color: #007bff; background-color: #fff; }
+        .icon-box {
+            width: 60px;
+            height: 60px;
+            background-color: #007bff;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+        }
 
-    .btn-primary { width: 100%; padding: 16px; background-color: #007bff; color: white; border: none; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        h2 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: #111;
+        }
 
-    /* 관리자 전용 스타일: 비밀번호 찾기 */
-    .admin-options {
-      margin-top: 15px;
-      display: flex;
-      justify-content: flex-end;
-    }
-    .find-pw {
-      color: #666;
-      font-size: 0.85rem;
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-    .find-pw:hover { color: #007bff; text-decoration: underline; }
-  </style>
+        .subtitle {
+            color: #888;
+            margin: 10px 0 30px;
+            font-size: 0.95rem;
+        }
+
+        .input-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .label {
+            display: block;
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        /* 아이콘을 다시 살릴 경우를 대비해 패딩 유지 */
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #e1e4e8;
+            border-radius: 12px;
+            background-color: #f8f9fa;
+            font-size: 1rem;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #007bff;
+            background-color: #fff;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .admin-options {
+            margin-top: 15px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .find-pw {
+            color: #666;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .find-pw:hover {
+            color: #007bff;
+            text-decoration: underline;
+        }
+
+        /* 에러 메시지 스타일 추가 */
+        .error-msg {
+            color: #e74c3c;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+            background: #fdf2f2;
+            padding: 10px;
+            border-radius: 8px;
+        }
+    </style>
 </head>
 <body>
 
 <div class="login-card">
-  <div class="icon-box"><i data-lucide="users"></i></div>
-  <h2>Admin Login</h2>
-  <p class="subtitle">매장 관리 시스템 접속</p>
+    <div class="icon-box"><i data-lucide="users"></i></div>
+    <h2>Admin Login</h2>
+    <p class="subtitle">매장 관리 시스템 접속</p>
 
-  <form action="/admin/login-process" method="POST">
-    <div class="input-group">
-      <span class="label">Admin ID</span>
-      <div class="input-wrapper">
-<!--        <i data-lucide="user" style="width:18px;"></i>-->
-        <input type="text" name="adminId" placeholder="아이디를 입력하세요" required>
-      </div>
+    <div th:if="${param.error}" class="error-msg">
+        아이디 또는 비밀번호가 잘못되었습니다.
     </div>
 
-    <div class="input-group">
-      <span class="label">Password</span>
-      <div class="input-wrapper">
-<!--        <i data-lucide="lock" style="width:18px;"></i>-->
-        <input type="password" name="password" placeholder="비밀번호를 입력하세요" required>
-      </div>
+    <form th:action="@{/admin/login-process}" method="POST">
+        <div class="input-group">
+            <span class="label">Admin ID</span>
+            <div class="input-wrapper">
+                <input type="text" name="username" placeholder="아이디를 입력하세요" required>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <span class="label">Password</span>
+            <div class="input-wrapper">
+                <input type="password" name="password" placeholder="비밀번호를 입력하세요" required>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-primary">로그인</button>
+    </form>
+
+    <div class="admin-options">
+        <a th:href="@{/admin/find-pw}" class="find-pw">비밀번호를 잊으셨나요?</a>
     </div>
-
-    <button type="submit" class="btn-primary">로그인</button>
-  </form>
-
-  <div class="admin-options">
-    <a href="/admin/find-pw" class="find-pw">비밀번호를 잊으셨나요?</a>
-  </div>
 </div>
 
 <script>lucide.createIcons();</script>

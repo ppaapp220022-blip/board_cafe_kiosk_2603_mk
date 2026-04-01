@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin_layout}">
+
+<head>
+    <title>My Profile</title>
+    <th:block layout:fragment="head-extra">
+        <style>
+            /* 배경과 카드 설정 */
+            .profile-container {
+                max-width: 700px;
+                margin: 40px auto;
+            }
+
+            .profile-card {
+                background: white;
+                border-radius: 28px;
+                padding: 50px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+                border: 1px solid #f0f0f0;
+            }
+
+            /* 헤더 섹션 */
+            .profile-header {
+                text-align: center;
+                margin-bottom: 45px;
+            }
+
+            /*.profile-avatar-wrapper {*/
+            /*  width: 80px;*/
+            /*  height: 80px; !* 가로세로 똑같이! *!*/
+            /*  margin: 0 auto 20px;*/
+            /*  position: relative;*/
+            /*}*/
+
+            /*.profile-avatar {*/
+            /*  width: 100%;*/
+            /*  height: 100%;*/
+
+            /*  !* 1. 너무 둥글지 않은, 딱 적당한 사각형 *!*/
+            /*  border-radius: 16px;*/
+
+            /*  !* 2. 사이드바와 톤을 맞춘 연한 배경 *!*/
+            /*  background-color: #f0f4f9;*/
+
+            /*  !* 3. 깔끔한 테두리 *!*/
+            /*  border: 1px solid #e1e4e8;*/
+
+            /*  display: flex;*/
+            /*  align-items: center;*/
+            /*  justify-content: center;*/
+            /*  font-size: 32px;*/
+
+            /*  !* 4. 과하지 않은 은은한 그림자 *!*/
+            /*  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);*/
+            /*}*/
+            .profile-header h2 {
+                font-size: 24px;
+                font-weight: 800;
+                color: #1d1d1f;
+                margin-bottom: 8px;
+            }
+
+            /* 입력 폼 섹션 */
+            .form-section {
+                margin-bottom: 40px;
+            }
+
+            .section-title {
+                font-size: 13px;
+                font-weight: 700;
+                color: var(--primary-blue);
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                margin-bottom: 20px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .section-title::after {
+                content: "";
+                flex: 1;
+                height: 1px;
+                background: #f0f0f0;
+            }
+
+            /* 입력창 디자인 */
+            .form-group {
+                margin-bottom: 20px;
+            }
+
+            .form-group label {
+                display: block;
+                font-size: 14px;
+                font-weight: 600;
+                color: #515154;
+                margin-bottom: 8px;
+                margin-left: 4px;
+            }
+
+            input[type="text"], input[type="password"] {
+                width: 100%;
+                height: 52px;
+                padding: 0 18px;
+                border-radius: 14px;
+                border: 1.5px solid #e8eaed;
+                background: #fbfbfd;
+                font-size: 15px;
+                transition: all 0.3s ease;
+                outline: none;
+            }
+
+            input:focus {
+                border-color: var(--primary-blue);
+                background: white;
+                box-shadow: 0 0 0 4px rgba(66, 133, 244, 0.1);
+            }
+
+            .readonly-input {
+                background: #f2f2f7 !important;
+                color: #8e8e93;
+                border: 1.5px solid #efeff4 !important;
+                cursor: not-allowed;
+            }
+
+            /* 하단 안내 문구 */
+            .helper-text {
+                font-size: 12px;
+                color: #86868b;
+                margin-top: 6px;
+                margin-left: 4px;
+            }
+
+            /* 저장 버튼 */
+            .btn-save {
+                width: 100%;
+                height: 58px;
+                border-radius: 18px;
+                background: #1d1d1f; /* 시크한 블랙/다크그레이 추천 */
+                color: white;
+                font-size: 16px;
+                font-weight: 700;
+                border: none;
+                cursor: pointer;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                margin-top: 10px;
+            }
+
+            .btn-save:hover {
+                background: #000;
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            }
+
+            .btn-save:active {
+                transform: translateY(0);
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div class="profile-card">
+        <div class="profile-header">
+            <!--      <div class="profile-avatar">👤</div>-->
+            <h2 th:text="${manager.name} + ' 님, 안녕하세요'">홍길동 님, 안녕하세요</h2>
+            <p style="color: var(--text-gray); font-size: 14px;">내 정보를 확인하고 수정할 수 있습니다.</p>
+        </div>
+
+        <form id="profileForm">
+            <div class="form-section">
+                <span class="section-title">기본 정보</span>
+                <div class="form-group">
+                    <label>아이디 (수정 불가)</label>
+                    <input type="text" th:value="${manager.loginId}" class="readonly-input" readonly>
+                </div>
+                <div class="form-group">
+                    <label>이름</label>
+                    <input type="text" id="userName" th:value="${manager.name}" placeholder="수정할 이름을 입력하세요">
+                </div>
+                <div class="form-group">
+                    <label>권한</label>
+                    <input type="text" th:value="${manager.role}" class="readonly-input" readonly>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <span class="section-title">비밀번호 변경</span>
+                <p style="font-size: 12px; color: #FF3B30; margin-bottom: 10px;">* 변경을 원하실 때만 입력하세요.</p>
+                <div class="form-group">
+                    <label>새 비밀번호</label>
+                    <input type="password" id="newPassword" placeholder="최소 8자 이상">
+                </div>
+                <div class="form-group">
+                    <label>비밀번호 확인</label>
+                    <input type="password" id="confirmPassword" placeholder="한 번 더 입력하세요">
+                </div>
+            </div>
+
+            <button type="button" class="btn-save" onclick="updateProfile()">저장하기</button>
+        </form>
+    </div>
+</th:block>
+
+<th:block layout:fragment="scripts">
+    <script th:inline="javascript">
+        function updateProfile() {
+            const name = document.getElementById('userName').value.trim();
+            const password = document.getElementById('newPassword').value;
+            const confirmPw = document.getElementById('confirmPassword').value;
+
+            if (!name) {
+                alert("이름은 필수 입력 항목입니다.");
+                return;
+            }
+
+            // 비밀번호 변경 시도 시 체크
+            if (password || confirmPw) {
+                if (password.length < 4) {
+                    alert("비밀번호는 4자 이상이어야 합니다.");
+                    return;
+                }
+                if (password !== confirmPw) {
+                    alert("비밀번호가 일치하지 않습니다.");
+                    return;
+                }
+            }
+
+            if (!confirm("정보를 수정하시겠습니까?")) return;
+
+            const updateData = {
+                name: name,
+                password: password // 빈 값이면 서버에서 변경 안 함 처리
+            };
+
+            fetch('/admin/staff/profile/update', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(updateData)
+            })
+                .then(res => {
+                    if (res.ok) {
+                        alert("성공적으로 수정되었습니다.");
+                        location.reload();
+                    } else {
+                        alert("수정 중 오류가 발생했습니다.");
+                    }
+                })
+                .catch(err => console.error(err));
+        }
+    </script>
+</th:block>
+</body>
+</html>

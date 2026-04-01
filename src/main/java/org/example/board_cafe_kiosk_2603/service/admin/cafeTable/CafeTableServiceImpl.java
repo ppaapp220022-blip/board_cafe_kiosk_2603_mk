@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -185,5 +186,27 @@ public class CafeTableServiceImpl implements CafeTableService {
     public void markMessagesAsRead(Integer tableId) {
         // Mapper에 작성하신 updateMessagesReadStatus 호출
         cafeTableMapper.updateMessagesReadStatus(tableId);
+    }
+
+    // 키오스크 로그인: 테이블 번호 + 비밀번호 검증 후 테이블 반환
+    @Override
+    public Optional<CafeTable> login(int tableNumber, String password) {
+        CafeTable cafeTable = cafeTableMapper.findByTableNumber(tableNumber)
+                .orElse(null);
+
+        if (cafeTable == null) {
+            log.warn("존재하지 않는 테이블 번호: {}", tableNumber);
+            return Optional.empty();
+        }
+
+        // 현재 비밀번호가 평문이므로 equals 비교
+        // 추후 BCrypt 적용 시 -> if문을 아래 코드로 교체
+        // !passwordEncoder.matches(password, cafeTable.getPassword())
+        if (!cafeTable.getPassword().equals(password)) {
+            log.warn("테이블 {} 비밀번호 불일치", tableNumber);
+            return Optional.empty();
+        }
+
+        return Optional.of(cafeTable);
     }
 }
