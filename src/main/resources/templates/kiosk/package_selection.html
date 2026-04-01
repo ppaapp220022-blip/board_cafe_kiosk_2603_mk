@@ -168,7 +168,7 @@
     .then(res => res.json())
     .then(data => {
       if (data.success) {
-        location.href = `/kiosk/games?tableNumber=${TABLE_NUMBER}`;
+        location.href = `/kiosk/drinks?tableNumber=${TABLE_NUMBER}`;
       } else {
         alert('패키지 선택에 실패했습니다. 다시 시도해주세요.');
       }
