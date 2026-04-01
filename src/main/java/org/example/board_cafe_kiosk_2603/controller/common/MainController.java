@@ -62,9 +62,21 @@ public class MainController {
                     "관리자로 로그인된 상태입니다. 먼저 관리자 로그아웃 후 시도해주세요.");
             return "redirect:/common/login";
         }
-
         return "/login/kiosk_login";
     }
+
+    // ===== ⛔️ 디버깅용 ⛔️ =====
+    // MainController에 임시 추가 (테스트 전용)
+    @GetMapping("/kiosk/force-logout")
+    public String kioskForceLogout(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            log.info("강제 로그아웃 - 테이블: {}", session.getAttribute("tableNumber"));
+            session.invalidate();
+        }
+        return "redirect:/kiosk/login";
+    }
+    // ===== //⛔️ 디버깅용 ⛔️ =====
 
     @PostMapping("/logout")
     public String adminLogoutPage() {
