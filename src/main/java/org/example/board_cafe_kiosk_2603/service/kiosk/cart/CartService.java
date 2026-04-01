@@ -11,6 +11,7 @@ import org.example.board_cafe_kiosk_2603.mapper.kiosk.cart.CartMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,18 +24,6 @@ public class CartService {
     private final CartItemMapper cartItemMapper;
 
     // ===================================================
-    // tableNumber → cafe_table.id(PK) 변환
-    // ===================================================
-
-    private int resolveTableId(int tableNumber) {
-        Integer cafeTableId = cartMapper.findCafeTableIdByTableNumber(tableNumber);
-        if (cafeTableId == null) {
-            throw new IllegalArgumentException("존재하지 않는 테이블 번호입니다: " + tableNumber);
-        }
-        return cafeTableId;
-    }
-
-    // ===================================================
     // 장바구니 조회
     // ===================================================
 
@@ -42,33 +31,54 @@ public class CartService {
         try {
             int tableId = resolveTableId(tableNumber);
             Cart cart = cartMapper.findByTableId(tableId);
-            if (cart == null) return CartDTO.empty();
+            if (cart == null) {
+                return CartDTO.builder()
+                        .success(true)
+                        .cartItems(Collections.emptyList())
+                        .build();
+            }
 
-            List<CartItem> items = cartItemMapper.findByCartId(cart.getId());
-            List<CartItemDTO> itemDTOs = items.stream()
-                    .map(CartItemDTO::from)
+            List<CartItemDTO> itemDTOs = cartItemMapper.findByCartId(cart.getId()).stream()
+                    .map(i -> CartItemDTO.builder()
+                            .id(i.getId())
+                            .cartId(i.getCartId())
+                            .menuId(i.getMenuId())
+                            .menuName(i.getMenuName())
+                            .menuPrice(i.getMenuPrice())
+                            .quantity(i.getQuantity())
+                            .build())
                     .collect(Collectors.toList());
+            int total = itemDTOs.stream().mapToInt(i -> i.getMenuPrice() * i.getQuantity()).sum();
 
-            int total = itemDTOs.stream()
-                    .mapToInt(r -> r.getMenuPrice() * r.getQuantity())
-                    .sum();
+            return CartDTO.builder()
+                    .success(true)
+                    .cartItems(itemDTOs)
+                    .totalPrice(total)
+                    .cartCount(itemDTOs.size())
+                    .build();
 
-            return CartDTO.fetched(itemDTOs, total);
         } catch (Exception e) {
             log.warn("장바구니 조회 실패 - tableNumber: {}, 원인: {}", tableNumber, e.getMessage());
-            return CartDTO.fail();
+            return CartDTO.builder()
+                    .success(false)
+                    .cartItems(Collections.emptyList())
+                    .build();
         }
     }
 
     // ===================================================
-    // 장바구니에 상품 추가
+    // 상품 추가
     // ===================================================
 
     @Transactional
     public CartDTO addItem(int tableNumber, CartItemDTO request) {
         Integer menuId = cartItemMapper.findMenuIdByNameAndPrice(request.getMenuName(), request.getMenuPrice());
         if (menuId == null) {
-            return CartDTO.fail("메뉴를 찾을 수 없습니다: " + request.getMenuName());
+            return CartDTO.builder()
+                    .success(false)
+                    .message("메뉴를 찾을 수 없습니다: " + request.getMenuName())
+                    .cartItems(Collections.emptyList())
+                    .build();
         }
 
         int tableId = resolveTableId(tableNumber);
@@ -80,19 +90,22 @@ public class CartService {
             cartItemMapper.updateQuantity(cart.getId(), menuId, newQty);
             log.info("수량 누적 - 메뉴: {}, {}→{}", request.getMenuName(), existing.getQuantity(), newQty);
         } else {
-            CartItem newItem = CartItem.builder()
+            cartItemMapper.insert(CartItem.builder()
                     .cartId(cart.getId())
                     .menuId(menuId)
                     .quantity(request.getQuantity())
-                    .build();
-            cartItemMapper.insert(newItem);
+                    .build());
             log.info("신규 추가 - 메뉴: {}, 수량: {}", request.getMenuName(), request.getQuantity());
         }
 
         cartMapper.updateTimestamp(cart.getId());
         int cartCount = cartItemMapper.findByCartId(cart.getId()).size();
 
-        return CartDTO.added(request.getMenuName(), cartCount);
+        return CartDTO.builder()
+                .success(true)
+                .message(request.getMenuName() + "이(가) 장바구니에 추가되었습니다.")
+                .cartCount(cartCount)
+                .build();
     }
 
     // ===================================================
@@ -103,13 +116,21 @@ public class CartService {
     public CartDTO updateItem(int tableNumber, CartItemDTO request) {
         Integer menuId = cartItemMapper.findMenuIdByNameAndPrice(request.getMenuName(), request.getMenuPrice());
         if (menuId == null) {
-            return CartDTO.fail("메뉴를 찾을 수 없습니다.");
+            return CartDTO.builder()
+                    .success(false)
+                    .message("메뉴를 찾을 수 없습니다.")
+                    .cartItems(Collections.emptyList())
+                    .build();
         }
 
         int tableId = resolveTableId(tableNumber);
         Cart cart = cartMapper.findByTableId(tableId);
         if (cart == null) {
-            return CartDTO.fail("장바구니가 없습니다.");
+            return CartDTO.builder()
+                    .success(false)
+                    .message("장바구니가 없습니다.")
+                    .cartItems(Collections.emptyList())
+                    .build();
         }
 
         if (request.getQuantity() <= 0) {
@@ -125,11 +146,15 @@ public class CartService {
         List<CartItem> items = cartItemMapper.findByCartId(cart.getId());
         int total = items.stream().mapToInt(i -> i.getMenuPrice() * i.getQuantity()).sum();
 
-        return CartDTO.updated(items.size(), total);
+        return CartDTO.builder()
+                .success(true)
+                .cartCount(items.size())
+                .totalPrice(total)
+                .build();
     }
 
     // ===================================================
-    // 장바구니 전체 비우기
+    // 장바구니 비우기
     // ===================================================
 
     @Transactional
@@ -141,15 +166,33 @@ public class CartService {
                 cartItemMapper.deleteAllByCartId(cart.getId());
                 log.info("장바구니 비우기 - tableNumber: {}", tableNumber);
             }
+            return CartDTO.builder()
+                    .success(true)
+                    .cartCount(0)
+                    .totalPrice(0)
+                    .cartItems(Collections.emptyList())
+                    .build();
         } catch (Exception e) {
             log.warn("장바구니 비우기 실패: {}", e.getMessage());
+            return CartDTO.builder()
+                    .success(false)
+                    .message("장바구니 비우기에 실패했습니다.")
+                    .cartItems(Collections.emptyList())
+                    .build();
         }
-        return CartDTO.cleared();
     }
 
     // ===================================================
     // 헬퍼
     // ===================================================
+
+    private int resolveTableId(int tableNumber) {
+        Integer tableId = cartMapper.findCafeTableIdByTableNumber(tableNumber);
+        if (tableId == null) {
+            throw new IllegalArgumentException("존재하지 않는 테이블 번호입니다: " + tableNumber);
+        }
+        return tableId;
+    }
 
     private Cart getOrCreateCart(int tableId) {
         Cart cart = cartMapper.findByTableId(tableId);
@@ -157,8 +200,9 @@ public class CartService {
             Cart newCart = Cart.builder().tableId(tableId).build();
             cartMapper.insert(newCart);
             cart = cartMapper.findByTableId(tableId);
-            log.info("장바구니 신규 생성 - tableId(PK): {}", tableId);
+            log.info("장바구니 신규 생성 - tableId: {}", tableId);
         }
         return cart;
     }
 }
+

@@ -413,7 +413,7 @@
         attrs: { 'stroke-width': 2.5 }
     });
 
-    const tableNumber = document.querySelector('.table-info').textContent.replace('Table #', '').trim();
+    const tableNumber = /*[[${tableNumber}]]*/ 1;
     let remainingTime = 300;
     const timerDisplay = document.getElementById('timer-display');
     const warningModal = document.getElementById('warning-modal');
@@ -427,7 +427,7 @@
 
     // ===== 장바구니 로드 =====
     function loadCart() {
-        fetch(`/kiosk/cart/items?tableNumber=${tableNumber}`)
+        fetch('/kiosk/cart/items')
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -493,7 +493,7 @@
         const currentQty = parseInt(cartItem.querySelector('.qty-number').innerText);
         const newQty = currentQty + delta;
 
-        fetch(`/kiosk/cart/update?tableNumber=${tableNumber}`, {
+        fetch('/kiosk/cart/update', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ menuName: menuName, menuPrice: menuPrice, quantity: newQty })
@@ -515,7 +515,7 @@
     function deleteItem(menuName, menuPrice) {
         if (!confirm(`${menuName}을(를) 삭제하시겠습니까?`)) return;
 
-        fetch(`/kiosk/cart/update?tableNumber=${tableNumber}`, {
+        fetch('/kiosk/cart/update', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ menuName: menuName, menuPrice: menuPrice, quantity: 0 })
@@ -535,14 +535,14 @@
 
     // ===== 정산으로 이동 =====
     function proceedToCheckout() {
-        window.location.href = `/kiosk/checkout?tableNumber=${tableNumber}`;
+        window.location.href = '/kiosk/checkout';
     }
 
     // ===== 장바구니 비우기 =====
     function clearCart() {
         if (!confirm('장바구니를 비우시겠습니까?')) return;
 
-        fetch(`/kiosk/cart/clear?tableNumber=${tableNumber}`, { method: 'DELETE' })
+        fetch('/kiosk/cart/clear', { method: 'DELETE' })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -572,7 +572,7 @@
         }
         if (remainingTime <= 0) {
             clearInterval(timerInterval);
-            window.location.href = `/kiosk/games?tableNumber=${tableNumber}`;
+            window.location.href = '/kiosk/games';
         }
     }
 

@@ -454,6 +454,8 @@
 
   const tableNumber    = /*[[${tableNumber}]]*/ '1';
   const pointBalance   = /*[[${pointBalance}]]*/ 0;
+  const cartItems      = /*[[${cartItems}]]*/ [];
+  const totalPrice     = /*[[${totalPrice}]]*/ 0;
   const tossClientKey  = 'test_ck_YOUR_CLIENT_KEY_HERE'; // TODO: 실제 클라이언트 키로 교체
   let subtotalPrice    = 0;
   let appliedPoint     = 0;
@@ -461,19 +463,8 @@
 
   // ===== 페이지 로드 =====
   document.addEventListener('DOMContentLoaded', () => {
-    loadCheckoutData();
+    renderCheckout(cartItems, totalPrice);
   });
-
-  // ===== 장바구니 데이터 로드 =====
-  function loadCheckoutData() {
-    fetch(`/kiosk/cart/items?tableNumber=${tableNumber}`)
-      .then(r => r.json())
-      .then(data => {
-        if (data.success) renderCheckout(data.cartItems, data.totalPrice);
-        else showErrorPage();
-      })
-      .catch(() => showErrorPage());
-  }
 
   // ===== 주문 내역 렌더링 =====
   function renderCheckout(cartItems, totalPrice) {
@@ -684,8 +675,7 @@
         <p style="font-size:0.9rem;opacity:0.65;margin-top:24px;">3초 후 메인 화면으로 이동합니다...</p>
       </div>`;
     lucide.createIcons();
-    localStorage.removeItem('returnUrl');
-    setTimeout(() => { window.location.href = `/kiosk/screensaver?tableNumber=${tableNumber}`; }, 3000);
+    setTimeout(() => { window.location.href = '/kiosk/screensaver'; }, 3000);
   }
 
   // ===== 오류 화면 =====
