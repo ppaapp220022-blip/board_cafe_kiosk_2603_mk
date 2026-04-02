@@ -37,6 +37,9 @@ class StatMapperTest {
             statMapper.deleteDailySummary(targetDate);
             statMapper.insertDailySummaryFromSessions(targetDate);
 
+            statMapper.deleteItemSalesHistory(targetDate);
+            statMapper.insertItemSalesHistory(targetDate);
+
             // 3. Then: JdbcTemplate을 사용하여 실제로 데이터가 1줄 생성되었는지 확인
             Integer count = jdbcTemplate.queryForObject(
                     "SELECT COUNT(*) FROM daily_sales_summary WHERE stat_date = ?",
