@@ -24,14 +24,13 @@ import org.springframework.web.bind.annotation.*;
 public class TossPaymentController {
 
     private final TossPaymentService tossPaymentService;
-    private final KioskPageService kioskPageService;
 
     @PostMapping("/prepare")
     @ResponseBody
     public TossPaymentDTO tossPrepare(
             @RequestBody @Valid TossPaymentDTO request,
                         HttpSession session) {
-        Integer tableNumber = (Integer) session.getAttribute("tableId");
+        Integer tableNumber = (Integer) session.getAttribute("tableNumber");
         TossPaymentDTO response = tossPaymentService.preparePayment(tableNumber, request);
 
         if (response.isSuccess()) {
@@ -49,7 +48,7 @@ public class TossPaymentController {
             @RequestParam int amount,
             HttpSession session, Model model) {
 
-        Integer tableNumber = (Integer) session.getAttribute("tableId");
+        Integer tableNumber = (Integer) session.getAttribute("tableNumber");
 
         Integer savedAmount = (Integer) session.getAttribute("toss_amount");
         Integer savedPointUsed = (Integer) session.getAttribute("toss_pointUsed");
@@ -86,7 +85,7 @@ public class TossPaymentController {
             @RequestParam(required = false) String message,
             HttpSession session, Model model) {
 
-        Integer tableNumber = (Integer) session.getAttribute("tableId");
+        Integer tableNumber = (Integer) session.getAttribute("tableNumber");
         log.warn("토스 결제 실패 - code: {}, message: {}", code, message);
         model.addAttribute("errorMessage", message != null ? message : "결제가 취소되었습니다.");
         model.addAttribute("tableNumber", tableNumber);

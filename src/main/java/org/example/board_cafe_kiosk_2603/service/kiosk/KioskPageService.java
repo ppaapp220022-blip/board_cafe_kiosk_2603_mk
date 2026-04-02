@@ -7,6 +7,7 @@ import org.example.board_cafe_kiosk_2603.dto.admin.point.PointAdminDTO;
 import org.example.board_cafe_kiosk_2603.dto.kiosk.cart.CartDTO;
 import org.example.board_cafe_kiosk_2603.service.admin.point.PointService;
 import org.example.board_cafe_kiosk_2603.service.kiosk.cart.CartService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 

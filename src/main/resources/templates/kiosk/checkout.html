@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>정산 - Board Game Cafe</title>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://js.tosspayments.com/v1/payment"></script>
+  <script src="https://js.tosspayments.com/v2/standard"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -415,33 +415,18 @@
     </div>
   </div>
 
-  <!-- 결제 수단 -->
-  <div class="card">
+  <!-- 토스페이먼츠 위젯 컨테이너 -->
+  <div class="card" id="toss-widget-card">
     <div class="card-header"><i data-lucide="credit-card"></i> 결제 수단</div>
-    <div class="payment-methods">
-      <div class="payment-method active" onclick="selectPaymentMethod('CARD', this)">
-        <i data-lucide="credit-card"></i>
-        <div class="payment-method-name">카드 결제</div>
-      </div>
-      <div class="payment-method" onclick="selectPaymentMethod('MOBILE', this)">
-        <i data-lucide="smartphone"></i>
-        <div class="payment-method-name">모바일 결제</div>
-      </div>
-      <div class="payment-method" onclick="selectPaymentMethod('TOSS', this)"
-           style="grid-column: span 2;">
-        <img src="https://static.tosspayments.com/icons/brandpay/logo_brandpay_compact_blue.svg"
-             alt="토스페이먼츠" style="height:28px; margin-bottom:8px;"
-             onerror="this.style.display='none'; this.nextElementSibling.style.fontSize='1.2rem';">
-        <div class="payment-method-name">토스페이먼츠</div>
-      </div>
-    </div>
+    <div id="payment-widget" style="margin-bottom: 20px;"></div>
+    <div id="agreement" style="margin-top: 20px;"></div>
   </div>
 
   <!-- 버튼 -->
   <div class="button-group">
     <button class="pay-btn" id="pay-btn" onclick="processPayment()">
       <i data-lucide="credit-card"></i>
-      <span id="pay-btn-label">카드로 결제하기</span>
+      <span id="pay-btn-label">결제하기</span>
     </button>
     <button class="back-btn" onclick="history.back()">
       <i data-lucide="arrow-left"></i> 돌아가기
@@ -452,18 +437,26 @@
 <script>
   lucide.createIcons({ attrs: { 'stroke-width': 2.5 } });
 
-  const tableNumber    = /*[[${tableNumber}]]*/ '1';
-  const pointBalance   = /*[[${pointBalance}]]*/ 0;
-  const cartItems      = /*[[${cartItems}]]*/ [];
-  const totalPrice     = /*[[${totalPrice}]]*/ 0;
-  const tossClientKey  = 'test_ck_YOUR_CLIENT_KEY_HERE'; // TODO: 실제 클라이언트 키로 교체
+  const tableNumber    = [[${tableNumber}]] || 0;
+  const pointBalance   = [[${pointBalance}]] || 0;
+  let cartItems        = [];
+  let totalPrice       = 0;
   let subtotalPrice    = 0;
   let appliedPoint     = 0;
-  let selectedPaymentMethod = 'CARD';
 
   // ===== 페이지 로드 =====
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
+    // REST API에서 장바구니 데이터 조회
+    const response = await fetch(`/kiosk/cart/items`, {
+      method: 'GET'
+    });
+    const data = await response.json();
+    if (data.success) {
+      cartItems = data.cartItems || [];
+      totalPrice = data.totalPrice || 0;
+    }
     renderCheckout(cartItems, totalPrice);
+    await initializeTossWidget();
   });
 
   // ===== 주문 내역 렌더링 =====
@@ -544,6 +537,7 @@
     document.getElementById('point-applied-msg').style.display = 'block';
     input.disabled = true;
     updateAmounts();
+    updateWidgetAmount();
     showToast(`${val.toLocaleString()}P 적용되었습니다.`);
   }
 
@@ -555,145 +549,104 @@
     input.disabled = false;
     document.getElementById('point-applied-msg').style.display = 'none';
     updateAmounts();
+    updateWidgetAmount();
   }
 
-  // ===== 결제 수단 선택 =====
-  function selectPaymentMethod(method, el) {
-    selectedPaymentMethod = method;
-    document.querySelectorAll('.payment-method').forEach(e => e.classList.remove('active'));
-    el.classList.add('active');
-
-    const label = document.getElementById('pay-btn-label');
-    if (method === 'CARD')         label.innerText = '카드로 결제하기';
-    else if (method === 'MOBILE')  label.innerText = '모바일로 결제하기';
-    else if (method === 'TOSS')    label.innerText = '토스페이먼츠로 결제하기';
+  // ===== 위젯 금액 업데이트 =====
+  function updateWidgetAmount() {
+    if (tossPaymentsWidget) {
+      const newAmount = Math.max(subtotalPrice - appliedPoint, 0);
+      tossPaymentsWidget.setAmount(newAmount);
+      console.log('위젯 금액 업데이트:', newAmount);
+    }
   }
 
-  // ===== 결제 처리 (수단 분기) =====
+  // ===== 결제 처리 =====
   function processPayment() {
     if (subtotalPrice === 0) { showToast('장바구니가 비어있습니다.'); return; }
-    if (selectedPaymentMethod === 'TOSS') processTossPayment();
-    else processDirectPayment();
+    processTossPayment();
   }
 
-  // ===== 카드 / 모바일 직접 결제 =====
-  function processDirectPayment() {
-    const finalAmount = Math.max(subtotalPrice - appliedPoint, 0);
-    const methodLabel = selectedPaymentMethod === 'CARD' ? '카드' : '모바일';
+  // ===== 토스페이먼츠 위젯 초기화 =====
+  let tossPaymentsWidget;
+  let orderId;
+  let finalAmount;
 
-    if (!confirm(`₩${finalAmount.toLocaleString()}을 ${methodLabel}로 결제하시겠습니까?`)) return;
-
-    const payBtn = document.getElementById('pay-btn');
-    payBtn.disabled = true;
-    document.getElementById('pay-btn-label').innerText = '결제 처리 중...';
-
-    fetch(`/kiosk/checkout/pay?tableNumber=${tableNumber}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ paymentMethod: selectedPaymentMethod, pointUsed: appliedPoint })
-    })
-    .then(r => r.json())
-    .then(data => {
-      if (data.success) {
-        showSuccessPage(data.orderId, data.finalAmount, data.earnedPoints || 0);
-      } else {
-        showToast(data.message || '결제에 실패했습니다. 다시 시도해주세요.');
-        payBtn.disabled = false;
-        document.getElementById('pay-btn-label').innerText = `${methodLabel}로 결제하기`;
-      }
-    })
-    .catch(() => {
-      showToast('결제 처리 중 오류가 발생했습니다.');
-      payBtn.disabled = false;
-      document.getElementById('pay-btn-label').innerText = `${methodLabel}로 결제하기`;
-    });
-  }
-
-  // ===== 토스페이먼츠 결제 =====
-  async function processTossPayment() {
-    const payBtn = document.getElementById('pay-btn');
-    payBtn.disabled = true;
-    document.getElementById('pay-btn-label').innerText = '결제창 준비 중...';
-
+  async function initializeTossWidget() {
     try {
-      // 1. 백엔드에서 orderId / amount 발급
-      const prepRes  = await fetch(`/kiosk/toss/prepare?tableNumber=${tableNumber}`, {
+      // 1. 백엔드에서 orderId / amount / clientKey 발급
+      console.log('결제 준비 요청:', { tableNumber, appliedPoint });
+
+      const prepRes  = await fetch(`/kiosk/toss/prepare`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pointUsed: appliedPoint })
       });
-      const prepData = await prepRes.json();
 
-      if (!prepData.success) {
-        showToast(prepData.message || '결제 준비에 실패했습니다.');
-        payBtn.disabled = false;
-        document.getElementById('pay-btn-label').innerText = '토스페이먼츠로 결제하기';
+      if (!prepRes.ok) {
+        showToast(`결제 준비 요청 실패 (${prepRes.status})`);
         return;
       }
 
-      // 2. 토스 SDK 결제창 호출
-      const tossPayments = TossPayments(tossClientKey);
-      await tossPayments.requestPayment('카드', {
-        amount:       prepData.amount,
-        orderId:      prepData.orderIdToss,
-        orderName:    prepData.orderName,
-        customerName: `Table #${tableNumber}`,
-        successUrl:   `${window.location.origin}/kiosk/toss/success?tableNumber=${tableNumber}`,
-        failUrl:      `${window.location.origin}/kiosk/toss/fail?tableNumber=${tableNumber}`
+      const prepData = await prepRes.json();
+      console.log('준비 응답:', prepData);
+
+      if (!prepData.success) {
+        showToast(prepData.message || '결제 준비에 실패했습니다.');
+        return;
+      }
+
+      // 2. 위젯 초기화
+      console.log('토스 클라이언트 키:', prepData.clientKey);
+      orderId = prepData.orderIdToss;
+      finalAmount = prepData.amount;
+
+      tossPaymentsWidget = TossPaymentsWidget({ clientKey: prepData.clientKey });
+
+      // 3. 위젯 설정 및 렌더링
+      tossPaymentsWidget.setAmount(finalAmount);
+
+      tossPaymentsWidget.render({
+        selector: '#payment-widget',
+        variantKey: 'DEFAULT'
       });
 
     } catch (err) {
-      // 사용자가 결제창을 직접 닫은 경우 조용히 복원
-      if (err.code !== 'USER_CANCEL') {
-        showToast(err.message || '토스 결제 중 오류가 발생했습니다.');
-      }
-      payBtn.disabled = false;
-      document.getElementById('pay-btn-label').innerText = '토스페이먼츠로 결제하기';
+      console.error('위젯 초기화 오류:', err);
+      showToast('결제 준비 중 오류가 발생했습니다.');
     }
   }
 
-  // ===== 결제 완료 화면 =====
-  function showSuccessPage(orderId, finalAmount, earnedPoints) {
-    const pointMsg = earnedPoints > 0
-      ? `<div style="background:rgba(255,255,255,0.2);padding:12px 24px;border-radius:14px;margin-bottom:20px;">
-           🎁 <strong>${earnedPoints.toLocaleString()}P</strong> 적립 완료!
-         </div>`
-      : '';
+  // ===== 토스페이먼츠 결제 요청 =====
+  async function processTossPayment() {
+    const payBtn = document.getElementById('pay-btn');
+    payBtn.disabled = true;
+    document.getElementById('pay-btn-label').innerText = '결제 처리 중...';
 
-    document.body.innerHTML = `
-      <div style="display:flex;align-items:center;justify-content:center;height:100vh;
-                  flex-direction:column;background:linear-gradient(135deg,#007bff,#0056b3);
-                  color:white;text-align:center;padding:20px;">
-        <i data-lucide="circle-check-big" style="width:110px;height:110px;margin-bottom:28px;"></i>
-        <h1 style="font-size:2.4rem;font-weight:800;margin:0 0 12px 0;">결제 완료!</h1>
-        <p style="font-size:2rem;font-weight:700;margin:0 0 20px 0;">
-          ₩${finalAmount.toLocaleString()}
-        </p>
-        ${pointMsg}
-        <p style="font-size:0.9rem;opacity:0.7;margin:0 0 6px 0;">주문번호: #${orderId}</p>
-        <p style="font-size:1rem;opacity:0.85;">이용해주셔서 감사합니다 😊</p>
-        <p style="font-size:0.9rem;opacity:0.65;margin-top:24px;">3초 후 메인 화면으로 이동합니다...</p>
-      </div>`;
-    lucide.createIcons();
-    setTimeout(() => { window.location.href = '/kiosk/screensaver'; }, 3000);
+    try {
+      // 위젯 결제 요청
+      await tossPaymentsWidget.requestPayment({
+        orderId: orderId,
+        orderName: '주문',
+        customerEmail: 'kiosk@example.com',
+        customerName: '키오스크',
+        successUrl: `${window.location.origin}/kiosk/toss/success`,
+        failUrl: `${window.location.origin}/kiosk/toss/fail`
+      });
+
+    } catch (err) {
+      // 사용자가 결제를 취소한 경우
+      if (err.code === 'USER_CANCEL') {
+        console.log('사용자가 결제를 취소했습니다.');
+      } else {
+        console.error('결제 오류:', err);
+        showToast(err.message || '결제 처리 중 오류가 발생했습니다.');
+      }
+      payBtn.disabled = false;
+      document.getElementById('pay-btn-label').innerText = '결제하기';
+    }
   }
 
-  // ===== 오류 화면 =====
-  function showErrorPage() {
-    document.body.innerHTML = `
-      <div style="display:flex;align-items:center;justify-content:center;height:100vh;
-                  flex-direction:column;background:#f4f6f8;text-align:center;">
-        <i data-lucide="alert-circle" style="width:90px;height:90px;color:#f44336;margin-bottom:20px;"></i>
-        <h1 style="font-size:1.8rem;color:#333;margin:0 0 10px 0;">오류가 발생했습니다</h1>
-        <p style="color:#888;margin:0 0 28px 0;">장바구니 정보를 불러올 수 없습니다.</p>
-        <button onclick="history.back()"
-          style="padding:14px 28px;background:#007bff;color:white;border:none;
-                 border-radius:12px;font-size:1rem;cursor:pointer;font-weight:600;">
-          돌아가기
-        </button>
-      </div>`;
-    lucide.createIcons();
-  }
 
   // ===== 토스트 =====
   function showToast(message) {
