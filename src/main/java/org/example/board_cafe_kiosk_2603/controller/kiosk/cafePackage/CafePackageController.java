@@ -89,6 +89,7 @@ public class CafePackageController {
         session.setAttribute("selectedPackageName",  pkg.getName());
         session.setAttribute("selectedPackagePrice", pkg.getBasePrice());
         session.setAttribute("sessionStartTime",     System.currentTimeMillis());
+        session.setAttribute("durationMinutes", pkg.getDurationMinutes());
 
         log.info("패키지 선택 완료 - 테이블: {}, 패키지: {} ({}원)",
                 session.getAttribute("tableNumber"), pkg.getName(), pkg.getBasePrice());

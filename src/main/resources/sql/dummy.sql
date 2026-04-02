@@ -10,10 +10,16 @@ USE `board_cafe_kiosk_2603`;
 -- 1. manager (관리자·직원)
 -- ============================================================
 INSERT INTO `manager` (`login_id`, `password`, `name`, `role`, `is_active`)
-VALUES ('admin', '1111', '김민준', 'ADMIN', TRUE),
-       ('staff01', '1111', '이서연', 'STAFF', TRUE),
-       ('staff02', '1111', '박지호', 'STAFF', TRUE),
-       ('staff03', '1111', '최유나', 'STAFF', FALSE);
+VALUES ('admin', '$2a$10$I/U.nHfsL/6wBqXAJV1A3u0KwyHn9wiOVRK7ZVI6rAptphEgRW1Qi', '관리자01', 'ADMIN', TRUE),
+       ('admin02', '$2a$10$RySZbh.V/f9khlbVamY3O.Mg8uY9qbwNTbykKep1SqqtbZ9OMB4xe', '관리자02', 'ADMIN', FALSE),
+       ('super', '$2a$10$BTMMVv2aPEqCnTF4aWn7u.Tyuh.yruDyPVk1buElSdgCwbMUWOFRi', '사장님', 'ADMIN', TRUE),
+       ('staff01', '$2a$10$VW29gAYZYxDRdWhNP.KYUOVAkPeS1DZYSrcxywKGdjGpx4z0QitDa', '직원01', 'STAFF', FALSE),
+       ('staff02', '$2a$10$OhUaODvgez2RlesuWWlyXeMzwWRNhYvTrNjgOy07//KxK8sdWaDFG', '직원02', 'STAFF', FALSE);
+-- admin01 / 1111 / ADMIN / TRUE
+-- admin02 / 2222 / ADMIN / FALSE
+-- super / 1234 / ADMIN / TRUE
+-- staff01 / 1111 / STAFF / TRUE
+-- staff02 / 2222 / STAFF / FALSE
 
 -- ============================================================
 -- 2. cafe_table (물리적 테이블 8개)

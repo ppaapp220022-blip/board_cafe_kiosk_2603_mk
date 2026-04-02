@@ -215,6 +215,35 @@
             height: 30px;
         }
 
+        .timer-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #eef6ff 0%, #e3f2fd 100%);
+            color: #007bff;
+            border: 1px solid #bbdefb;
+            min-width: 100px;
+            justify-content: center;
+        }
+
+        .timer-badge.overtime {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            color: #f44336;
+            border-color: #ffccbc;
+            animation: pulse-red 1s infinite;
+        }
+
+        .timer-badge i { width: 18px; height: 18px; }
+
+        @keyframes pulse-red {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
         /* 콘텐츠 영역 */
         .content {
             flex: 1;
@@ -570,6 +599,10 @@
 <!--            <button class="icon-btn messenger" onclick="navigateMessenger()" title="메신저">-->
 <!--                <i data-lucide="message-circle"></i>-->
 <!--            </button>-->
+            <div class="timer-badge" id="timer-badge">
+                <i data-lucide="clock"></i>
+                <span id="timer-text">--:--</span>
+            </div>
             <button class="icon-btn cart" onclick="navigateCart()" title="장바구니">
                 <i data-lucide="shopping-cart"></i>
                 <span class="cart-badge" id="cart-badge" th:text="${cartCount}" style="display: none;">0</span>
@@ -737,6 +770,61 @@
     window.onload = resetIdleTimer;
     window.onmousemove = resetIdleTimer;
     window.onclick = resetIdleTimer;
+
+    /* ============== 패키지 타이머 ============== */
+    // Thymeleaf 인라인 구문을 사용하여 세션 값을 가져옵니다.
+    const SESSION_START_TIME = [[${sessionStartTime != null ? sessionStartTime : 'null'}]];
+    const DURATION_MINUTES   = [[${durationMinutes != null ? durationMinutes : 'null'}]];
+
+    // 2. [테스트 설정] 현재 시간에서 (패키지 시간 - 1분)을 뺍니다.
+    // 이렇게 하면 정확히 10초 뒤에 패키지 시간이 종료됩니다.
+    // const SESSION_START_TIME = Date.now() - (DURATION_MINUTES * 60 * 1000) + (1 * 10 * 1000);
+
+    function startTimer() {
+        const timerText = document.getElementById('timer-text');
+        const badge = document.getElementById('timer-badge');
+
+        // 세션 값이 없으면 타이머 영역을 숨기거나 실행하지 않음
+        if (!DURATION_MINUTES || DURATION_MINUTES <= 0) {
+            if (timerText) timerText.innerText = "자유이용";
+            if (badge) badge.style.backgroundColor = "#28a745"; // 자유이용은 초록색 등 다른색으로 강조 가능
+            return;
+        }
+
+        const totalMs = DURATION_MINUTES * 60 * 1000;
+        const endTime = SESSION_START_TIME + totalMs;
+
+        function tick() {
+            const now       = Date.now();
+            const remaining = endTime - now;
+            const badge     = document.getElementById('timer-badge');
+            const timerText = document.getElementById('timer-text');
+
+            if (remaining > 0) {
+                // 남은 시간 카운트다운
+                const mins = Math.floor(remaining / 60000);
+                const secs = Math.floor((remaining % 60000) / 1000);
+                timerText.innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+                badge.classList.remove('overtime');
+            } else {
+
+                // 시간 초과 시 + 증가
+                const overtime = Math.abs(remaining);
+                const mins = Math.floor(overtime / 60000);
+                const secs = Math.floor((overtime % 60000) / 1000);
+                timerText.innerText = `+${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+                // 빨간색으로 변경
+                badge.classList.add('overtime');
+            }
+        }
+
+        tick(); // 즉시 실행
+        setInterval(tick, 1000); // 1초마다 갱신
+    }
+
+    document.addEventListener('DOMContentLoaded', startTimer)
+
 </script>
 </body>
 </html>

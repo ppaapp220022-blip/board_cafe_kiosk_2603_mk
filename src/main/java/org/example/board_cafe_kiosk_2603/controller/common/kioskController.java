@@ -200,6 +200,8 @@ public class kioskController {
         model.addAttribute("pageTitle", title);
         model.addAttribute("menuItems", items);
         model.addAttribute("cartCount", cartCount);
+        model.addAttribute("sessionStartTime", session.getAttribute("sessionStartTime"));
+        model.addAttribute("durationMinutes", session.getAttribute("durationMinutes"));
     }
 
 
