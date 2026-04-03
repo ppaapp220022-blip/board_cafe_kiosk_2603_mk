@@ -89,8 +89,22 @@
       .toggle-group { display: flex; background: var(--bg-light); padding: 3px; border-radius: 12px; height: 46px; box-sizing: border-box; }
       .radio-label { flex: 1; display: flex; position: relative; cursor: pointer; }
       .radio-label input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
-      .radio-label span { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: var(--text-gray); border-radius: 9px; transition: all 0.2s ease; }
+      .radio-label span { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 600; color: var(--text-gray); border-radius: 9px; transition: all 0.2s ease; }
       .radio-label input:checked + span { background-color: #FFFFFF; color: var(--primary-blue); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
+
+      .pagination {
+        display: flex; justify-content: center; align-items: center;
+        gap: 8px; margin-top: 24px;
+      }
+      .page-btn {
+        width: 40px; height: 40px; border-radius: 10px; border: 1px solid #E5E5EA;
+        background: white; font-size: 14px; font-weight: 600; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        color: var(--text-dark); transition: all 0.2s;
+      }
+      .page-btn:hover { background: #f1f3f4; }
+      .page-btn.active { background: var(--primary-blue); color: white; border-color: var(--primary-blue); }
+      .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
     </style>
   </th:block>
 </head>
@@ -99,13 +113,16 @@
 <th:block layout:fragment="content">
   <div class="header-container">
     <h1 class="page-title">⚡ 요금 정책</h1>
-    <button class="btn btn-primary" onclick="openPolicyModal()">+ 새 정책 추가</button>
+    <button class="btn-primary" onclick="openPolicyModal()">+ 새 정책 추가</button>
   </div>
 
   <div class="tab-container">
-    <button class="tab-button active" onclick="filterTable('all', this)">전체</button>
-    <button class="tab-button" onclick="filterTable('active', this)">적용 중</button>
-    <button class="tab-button" onclick="filterTable('inactive', this)">비활성</button>
+    <button class="tab-button" th:classappend="${filter == 'all'} ? 'active'"
+            onclick="filterTable('all')">전체</button>
+    <button class="tab-button" th:classappend="${filter == 'active'} ? 'active'"
+            onclick="filterTable('active')">적용 중</button>
+    <button class="tab-button" th:classappend="${filter == 'inactive'} ? 'active'"
+            onclick="filterTable('inactive')">비활성</button>
   </div>
 
   <div class="table-container">
@@ -114,36 +131,43 @@
       <tr>
         <th>정책 명칭</th>
         <th>이용 시간</th>
-        <th>금액</th>
-        <th>음료 포함</th>
-        <th>상태</th> <th style="text-align: right;">관리</th>
+        <th>금액 (1인)</th>
+        <th>초과 요금</th>
+        <th>상태</th>
+        <th style="text-align: right;">관리</th>
       </tr>
       </thead>
       <tbody id="policyTableBody">
-      <tr>
-        <td class="policy-name">프리미엄 2시간 코스</td>
-        <td>120분</td>
-        <td>12,000원</td>
-        <td><span class="text-include">포함</span></td>
-        <td><span class="status-badge status-active">적용 중</span></td>
-        <td style="text-align: right;">
-          <button class="btn-text text-danger" onclick="toggleStatus(this)">비활성화</button>
+      <tr th:each="policy : ${policyList}"
+          th:data-id="${policy.id}"
+          th:classappend="${!policy.active} ? 'is-disabled' : ''">
+        <td th:text="${policy.name}">패키지명</td>
+        <td th:text="${policy.displayTime}">1시간</td>
+        <td th:text="${#numbers.formatInteger(policy.basePrice, 0, 'COMMA') + '원'}">5,000원</td>
+        <td th:text="${policy.extraPricePerMin != null and policy.extraPricePerMin > 0}
+                       ? '10분당 ' + ${policy.extraPricePerMin} + '원'
+                       : '없음'">없음</td>
+        <td>
+            <span class="status-badge"
+                  th:classappend="${policy.active} ? 'status-active' : 'status-inactive'"
+                  th:text="${policy.active} ? '적용 중' : '비활성'">적용 중</span>
         </td>
-      </tr>
-      <tr class="is-disabled">
-        <td class="policy-name">굿모닝 얼리버드</td>
-        <td>60분</td>
-        <td>4,000원</td>
-        <td><span>미포함</span></td>
-        <td><span class="status-badge status-inactive">비활성</span></td>
         <td style="text-align: right;">
-          <button class="btn-text text-active" onclick="toggleStatus(this)">활성화</button>
+          <button th:if="${policy.active}"
+                  class="btn-text text-danger"
+                  th:data-id="${policy.id}"
+                  onclick="toggleStatus(this, false)">비활성화</button>
+          <button th:if="${!policy.active}"
+                  class="btn-text text-active"
+                  th:data-id="${policy.id}"
+                  onclick="toggleStatus(this, true)">활성화</button>
         </td>
       </tr>
       </tbody>
     </table>
   </div>
 
+  <!-- 등록 모달 -->
   <div id="policyModal" class="modal-overlay" onclick="closePolicyModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
       <div class="modal-header"><h3 style="margin-bottom: 24px; text-align: center;">새 정책 추가</h3></div>
@@ -152,53 +176,86 @@
           <label>정책 명칭</label>
           <input type="text" id="policyName" placeholder="예: 평일 2시간 패키지">
         </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>이용 시간 (분)</label>
-            <div class="stepper-control">
-              <button type="button" class="stepper-btn" onclick="stepValue('baseTime', -10)">-</button>
-              <input type="number" id="baseTime" class="stepper-input" value="60" readonly>
-              <button type="button" class="stepper-btn" onclick="stepValue('baseTime', 10)">+</button>
-            </div>
+      </form>
+        <div class="form-group">
+          <label>타입</label>
+          <div class="toggle-group">
+            <label class="radio-label">
+              <input type="radio" name="policyType" value="HOURLY" checked onchange="onTypeChange(this.value)">
+              <span>시간제</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="policyType" value="FREE" onchange="onTypeChange(this.value)">
+              <span>자유</span>
+            </label>
           </div>
+        </div>
 
-          <div class="form-group" style="flex: 1.2;">
-            <label>금액 (원)</label>
+        <div class="form-row" id="time-row">
+            <div class="form-group">
+              <label>이용 시간 (분)</label>
+              <div class="stepper-control">
+                <button type="button" class="stepper-btn" onclick="stepValue('baseTime', -10)">-</button>
+                <input type="number" id="baseTime" class="stepper-input" value="60">
+                <button type="button" class="stepper-btn" onclick="stepValue('baseTime', 10)">+</button>
+              </div>
+            </div>
+        </div>
+          <div class="form-group">
+            <label>금액 (원 / 1인)</label>
             <div class="stepper-control">
               <button type="button" class="stepper-btn" onclick="stepValue('basePrice', -500)">-</button>
-              <input type="number" id="basePrice" class="stepper-input" value="5000" readonly>
+              <input type="number" id="basePrice" class="stepper-input" value="5000">
               <button type="button" class="stepper-btn" onclick="stepValue('basePrice', 500)">+</button>
             </div>
           </div>
+
+        <div class="form-group" id="extra-row">
+          <label>초과 요금 (10분당 / 원)</label>
+          <div class="stepper-control">
+            <button type="button" class="stepper-btn" onclick="stepValue('extraPrice', -10)">-</button>
+            <input type="number" id="extraPrice" class="stepper-input" value="0">
+            <button type="button" class="stepper-btn" onclick="stepValue('extraPrice', 10)">+</button>
+          </div>
         </div>
 
-        <div class="toggle-group" style="margin-top: 10px;">
-          <label class="radio-label">
-            <input type="radio" name="includeDrink" value="true" checked>
-            <span>포함</span>
-          </label>
-          <label class="radio-label">
-            <input type="radio" name="includeDrink" value="false">
-            <span>미포함</span>
-          </label>
-        </div>
-      </form>
       <div style="display: flex; gap: 12px; margin-top: 28px;">
         <button class="btn-text" style="flex:1" onclick="closePolicyModal()">취소</button>
         <button class="btn-primary" style="flex:1.5" onclick="savePolicy()">정책 저장</button>
       </div>
     </div>
   </div>
+  <div class="pagination" th:if="${totalPages > 1}">
+    <button class="page-btn"
+            th:disabled="${currentPage == 1}"
+            th:onclick="'movePage(' + (${currentPage} - 1) + ')'">‹</button>
+
+    <button th:each="i : ${#numbers.sequence(1, totalPages)}"
+            class="page-btn"
+            th:classappend="${i == currentPage} ? 'active'"
+            th:text="${i}"
+            th:onclick="'movePage(' + ${i} + ')'"></button>
+
+    <button class="page-btn"
+            th:disabled="${currentPage == totalPages}"
+            th:onclick="'movePage(' + (${currentPage} + 1) + ')'">›</button>
+  </div>
 </th:block>
 
 <th:block layout:fragment="scripts">
   <script>
-    const tableBody = document.getElementById('policyTableBody');
-    let currentFilter = 'all';
+    const currentFilter = '[[${filter}]]';
+    const currentPage   = [[${currentPage}]];
 
     function openPolicyModal() { document.getElementById('policyModal').style.display = 'flex'; }
-    function closePolicyModal() { document.getElementById('policyModal').style.display = 'none'; document.getElementById('policyForm').reset(); }
+    function closePolicyModal(e) {
+      if (e && e.target !== document.getElementById('policyModal')) return;
+      document.getElementById('policyModal').style.display = 'none';
+      document.getElementById('policyForm').reset();
+      document.getElementById('baseTime').value = 60;
+      document.getElementById('basePrice').value = 5000;
+      document.getElementById('extraPrice').value = 0;
+    }
 
     function stepValue(inputId, delta) {
       const input = document.getElementById(inputId);
@@ -208,76 +265,95 @@
       input.value = val;
     }
 
+    // ===== 패키지 등록 =====
     function savePolicy() {
-      const name = document.getElementById('policyName').value;
-      const time = document.getElementById('baseTime').value;
-      const price = document.getElementById('basePrice').value;
-      const includeDrink = document.querySelector('input[name="includeDrink"]:checked').value === "true";
+      const name = document.getElementById('policyName').value.trim();
+      const type     = document.querySelector('input[name="policyType"]:checked').value;
+      const price    = parseInt(document.getElementById('basePrice').value);
+
+      // FREE 타입이면 duration, extra는 null
+      const duration = type === 'FREE' ? null : parseInt(document.getElementById('baseTime').value);
+      const extra    = type === 'FREE' ? null : (parseFloat(document.getElementById('extraPrice').value) || null);
 
       if(!name) { alert("정책 명칭을 입력해주세요."); return; }
 
-      const newRow = document.createElement('tr');
-      newRow.innerHTML = `
-        <td class="policy-name">${name}</td>
-        <td>${time}분</td>
-        <td>${Number(price).toLocaleString()}원</td>
-        <td><span class="${includeDrink ? 'text-include' : ''}">${includeDrink ? '포함' : '미포함'}</span></td>
-        <td><span class="status-badge status-active">적용 중</span></td>
-        <td style="text-align: right;">
-          <button class="btn-text text-danger" onclick="toggleStatus(this)">비활성화</button>
-        </td>
-      `;
-      tableBody.prepend(newRow);
-      sortTable();
-      closePolicyModal();
+      fetch('/admin/policy/insert', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          name: name,
+          type: type,
+          durationMinutes: duration,
+          basePrice: price,
+          extraPricePerMin: extra
+        })
+      })
+              .then(r => r.json())
+              .then(data => {
+                if (data.success) {
+                  showToast('O ' + data.message);
+                  closePolicyModal();
+                  setTimeout(() => {
+                    window.location.href = `/admin/policy?page=1&filter=${currentFilter}`;  // ← location.reload() 대신
+                  }, 800);
+                } else {
+                  showToast('X ' + data.message);
+                }
+              })
+              .catch(() => showToast('X 오류가 발생했습니다.'));
     }
 
-    function toggleStatus(btn) {
-      const row = btn.closest('tr');
-      const statusCell = row.cells[4];
-      const isDisabling = !row.classList.contains('is-disabled');
+    // ===== 활성/비활성 토글 =====
+    function toggleStatus(btn, active) {
+      const id = parseInt(btn.getAttribute('data-id'));
 
-      if (isDisabling) {
-        row.classList.add('is-disabled');
-        statusCell.innerHTML = '<span class="status-badge status-inactive">비활성</span>';
-        btn.textContent = "활성화";
-        btn.className = "btn-text text-active";
+      fetch('/admin/policy/status', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({id: id, active: active})
+      })
+              .then(r => r.json())
+              .then(data => {
+                if (data.success) {
+                  showToast('O' + data.message);
+                  setTimeout(() => {
+                    window.location.href = `/admin/policy?page=${currentPage}&filter=${currentFilter}`;  // ← location.reload() 대신
+                  }, 800);
+                } else {
+                  showToast('X ' + data.message);
+                }
+              })
+              .catch(() => showToast('X 오류가 발생했습니다.'));
+    }
+
+    function filterTable(filter) {
+      window.location.href = `/admin/policy?page=1&filter=${filter}`;
+    }
+
+    function onTypeChange(type) {
+      const timeRow  = document.getElementById('time-row');
+      const extraRow = document.getElementById('extra-row');
+      if (type === 'FREE') {
+        timeRow.style.display  = 'none';
+        extraRow.style.display = 'none';
       } else {
-        row.classList.remove('is-disabled');
-        statusCell.innerHTML = '<span class="status-badge status-active">적용 중</span>';
-        btn.textContent = "비활성화";
-        btn.className = "btn-text text-danger";
+        timeRow.style.display  = '';
+        extraRow.style.display = '';
       }
-      sortTable();
     }
 
-    function filterTable(filter, element) {
-      currentFilter = filter;
-      if (element) {
-        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-        element.classList.add('active');
-      }
-      applyCurrentFilter();
+    function movePage(page) {
+      window.location.href = `/admin/policy?page=${page}&filter=${currentFilter}`;
     }
 
-    function applyCurrentFilter() {
-      const rows = Array.from(tableBody.querySelectorAll('tr'));
-      rows.forEach(row => {
-        const isDisabled = row.classList.contains('is-disabled');
-        if (currentFilter === 'all') row.style.display = '';
-        else if (currentFilter === 'active') row.style.display = isDisabled ? 'none' : '';
-        else if (currentFilter === 'inactive') row.style.display = isDisabled ? '' : 'none';
-      });
+    // ===== 토스트 =====
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerText = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2500);
     }
-
-    function sortTable() {
-      const rows = Array.from(tableBody.querySelectorAll('tr'));
-      rows.sort((a, b) => a.classList.contains('is-disabled') - b.classList.contains('is-disabled'));
-      rows.forEach(row => tableBody.appendChild(row));
-      applyCurrentFilter();
-    }
-
-    window.onload = sortTable;
   </script>
 </th:block>
 </body>
