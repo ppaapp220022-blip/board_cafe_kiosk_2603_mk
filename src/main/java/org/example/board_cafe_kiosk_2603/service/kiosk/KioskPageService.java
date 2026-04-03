@@ -3,9 +3,11 @@ package org.example.board_cafe_kiosk_2603.service.kiosk;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.example.board_cafe_kiosk_2603.domain.common.cafeTableSession.CafeTableSession;
 import org.example.board_cafe_kiosk_2603.dto.admin.point.PointAdminDTO;
 import org.example.board_cafe_kiosk_2603.dto.kiosk.cafePackage.CafePackageDTO;
 import org.example.board_cafe_kiosk_2603.dto.kiosk.cart.CartDTO;
+import org.example.board_cafe_kiosk_2603.service.admin.cafeTable.TableSessionAdminService;
 import org.example.board_cafe_kiosk_2603.service.admin.point.PointService;
 import org.example.board_cafe_kiosk_2603.service.kiosk.cafePackage.CafePackageService;
 import org.example.board_cafe_kiosk_2603.service.kiosk.cart.CartService;
@@ -28,6 +30,7 @@ public class KioskPageService {
     private final CartService cartService;
     private final PointService pointService;
     private final CafePackageService cafePackageService;
+    private final TableSessionAdminService tableSessionAdminService;
 
     // ===================================================
     // 세션 헬퍼
@@ -117,6 +120,7 @@ public class KioskPageService {
     }
 
     public void buildCheckoutModel(Model model, int tableNumber, HttpSession session) {
+        Integer tableId = (Integer) session.getAttribute("tableId");
         CartDTO cartDTO = cartService.getCart(tableNumber);
         int sessionDuration = getSessionDuration(session);
         String customerPhone = (String) session.getAttribute("customerPhone");
@@ -136,6 +140,22 @@ public class KioskPageService {
         }
 
         int totalPrice = cartDTO.getTotalPrice() + packageTotal;
+
+        // tableId로 활성 세션 조회
+        if (tableId != null) {
+            CafeTableSession activeSession = tableSessionAdminService.getActiveSession(tableId);
+            if (activeSession != null && activeSession.getCheckInTime() != null) {
+                long checkInMillis = activeSession.getCheckInTime()
+                        .atZone(java.time.ZoneId.systemDefault())
+                        .toInstant()
+                        .toEpochMilli();
+                model.addAttribute("sessionStartTime", checkInMillis);
+            } else {
+                model.addAttribute("sessionStartTime", session.getAttribute("sessionStartTime"));
+            }
+        } else {
+            model.addAttribute("sessionStartTime", session.getAttribute("sessionStartTime"));
+        }
 
         model.addAttribute("tableNumber", tableNumber);
         model.addAttribute("partySize", partySize);

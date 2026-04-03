@@ -342,16 +342,25 @@
     <div class="card-header"><i data-lucide="shopping-bag"></i> 주문 내역</div>
   </div>
 
-  <!-- 세션 정보 -->
   <div class="card">
     <div class="card-header"><i data-lucide="clock"></i> 이용 정보</div>
     <div class="info-row">
       <span class="info-label"><i data-lucide="timer"></i> 이용 시간</span>
-      <span th:text="${sessionHours} + '시간 ' + ${sessionMinutes} + '분'">0시간 0분</span>
+      <span id="elapsed-time">계산 중...</span>
     </div>
     <div class="info-row">
       <span class="info-label"><i data-lucide="users"></i> 인원</span>
       <span th:text="${partySize} + '명'">2명</span>
+    </div>
+    <!-- 패키지명 추가 -->
+    <div class="info-row" th:if="${packageName != null and packageName != ''}">
+      <span class="info-label"><i data-lucide="package"></i> 패키지</span>
+      <span th:text="${packageName}">패키지명</span>
+    </div>
+    <!-- 패키지 금액 추가 -->
+    <div class="info-row" th:if="${packageTotal > 0}">
+      <span class="info-label"><i data-lucide="tag"></i> 패키지 금액</span>
+      <span th:text="'₩' + ${#numbers.formatInteger(packageTotal, 0, 'COMMA')}">₩0</span>
     </div>
   </div>
 
@@ -441,11 +450,25 @@
   const partySize    = [[${partySize}]];
   const pointBalance   = [[${pointBalance}]];
   const packageTotal  = [[${packageTotal}]];   // 서버에서 받은 패키지 금액
+  const sessionStartTime = [[${sessionStartTime}]];
   const tossClientKey  = 'test_ck_YOUR_CLIENT_KEY_HERE'; // TODO: 실제 클라이언트 키로 교체
 
   let menuSubtotal      = 0;  // 메뉴 합계
   let subtotalPrice = packageTotal; // 패키지 + 메뉴 합계 (초기값 = 패키지)
   let appliedPoint     = 0;
+
+  // ===== 이용 시간 계산 =====
+  function updateElapsedTime() {
+    if (!sessionStartTime) {
+      document.getElementById('elapsed-time').innerText = '0시간 0분';
+      return;
+    }
+    const elapsed = Math.floor((Date.now() - sessionStartTime) / 60000);
+    const hours   = Math.floor(elapsed / 60);
+    const minutes = elapsed % 60;
+    document.getElementById('elapsed-time').innerText = `${hours}시간 ${minutes}분`;
+  }
+  updateElapsedTime();
 
   // ===== 페이지 로드 =====
   document.addEventListener('DOMContentLoaded', () => {
@@ -481,16 +504,6 @@
     menuSubtotal  = totalMenuPrice;
     subtotalPrice = packageTotal + menuSubtotal;
 
-    // 패키지 행 추가
-    const packageRow = packageTotal > 0 ? `
-    <div class="order-item">
-      <div>
-        <span>${packageName}</span>
-        <span class="order-qty">x${partySize}명</span>
-      </div>
-      <div class="price">₩${packageTotal.toLocaleString()}</div>
-    </div>` : '';
-
     const rows = cartItems.map(item => `
       <div class="order-item">
         <div>
@@ -504,14 +517,13 @@
             ? `<p style="color:#aaa;text-align:center;padding:12px 0;">추가 주문 없음</p>` : '';
 
     document.getElementById('order-summary').innerHTML = `
-      <div class="card-header"><i data-lucide="shopping-bag"></i> 주문 내역</div>
-      ${packageRow}
-      ${rows}
-      ${emptyMsg}
-      <div class="summary-divider">
-        <span>소계</span>
-        <span>₩${subtotalPrice.toLocaleString()}</span>
-      </div>`;
+  <div class="card-header"><i data-lucide="shopping-bag"></i> 주문 내역</div>
+  ${rows}
+  ${emptyMsg}
+  <div class="summary-divider">
+    <span>메뉴 소계</span>
+    <span>₩${menuSubtotal.toLocaleString()}</span>
+  </div>`;
 
     updateAmounts();
     lucide.createIcons();
