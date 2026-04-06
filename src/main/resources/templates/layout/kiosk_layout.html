@@ -99,6 +99,95 @@
             position: fixed; bottom: 30px; right: 30px; background: #333; color: white;
             padding: 15px 25px; border-radius: 12px; z-index: 2000;
         }
+        /* --- 메뉴 그리드 및 아이템 (추가된 부분) --- */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 24px;
+            padding-bottom: 20px;
+        }
+        .menu-item {
+            background-color: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid #eaeaea;
+        }
+        .menu-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+        .menu-item.sold-out {
+            opacity: 0.5;
+            filter: grayscale(100%);
+            pointer-events: none; /* 클릭 방지 */
+        }
+        .menu-img-area {
+            height: 180px;
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .menu-img-area img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .placeholder-icon {
+            width: 48px;
+            height: 48px;
+            color: #ccc;
+        }
+        .menu-info-area {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .menu-info-left {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .menu-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #333;
+            word-break: keep-all;
+        }
+        .menu-price {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #007bff;
+        }
+        .menu-price.free {
+            color: #f44336; /* FREE일 경우 빨간색 강조 */
+        }
+        .menu-info-right .add-direct-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+        .menu-info-right .add-direct-btn:hover {
+            background-color: #0056b3;
+        }
+        .menu-info-right .add-direct-btn:disabled {
+            background-color: #e0e0e0;
+            color: #9e9e9e;
+        }
     </style>
 </head>
 <body>
