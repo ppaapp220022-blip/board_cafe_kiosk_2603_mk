@@ -81,8 +81,8 @@ VALUES ('커피·에스프레소', 'DRINK'), -- 1
 -- ============================================================
 INSERT INTO `cafe_package` (`name`, `type`, `duration_minutes`, `base_price`, `extra_price_per_min`, `is_active`)
 VALUES ('1시간 패키지', 'HOURLY', 60, 5000, NULL, TRUE),
-       ('2시간 패키지', 'FIXED_TIME', 120, 8000, NULL, TRUE),
-       ('3시간 패키지', 'FIXED_TIME', 180, 11000, NULL, TRUE),
+       ('2시간 패키지', 'HOURLY', 120, 8000, NULL, TRUE),
+       ('3시간 패키지', 'HOURLY', 180, 11000, NULL, TRUE),
        ('종일 자유이용권', 'FREE', NULL, 15000, NULL, TRUE),
        ('초과 시간 요금', 'HOURLY', 60, 2000, 35.00, FALSE);
 

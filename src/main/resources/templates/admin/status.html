@@ -78,54 +78,33 @@
       .item-name  { flex: 1; font-weight: 500; font-size: 14px; }
       .item-count { color: #888; font-size: 13px; margin-right: 20px; }
       .item-price { font-weight: 700; color: var(--primary-blue); font-size: 14px; }
+
+      /* 동기화 버튼 스타일 (추가) */
+      .sync-btn {
+        padding: 8px 15px; border-radius: 8px; border: 1px solid #007bff;
+        background: white; color: #007bff; cursor: pointer; font-weight: 600; font-size: 13px;
+      }
+      .sync-btn:hover { background: #f0f7ff; }
     </style>
   </th:block>
 </head>
 
 <body>
-<!--
-  ※ Controller 작성 가이드 (StatsController.java)
-  -------------------------------------------------
-  @GetMapping("/stats")
-  public String stats(Model model) {
-      model.addAttribute("activePage", "salesStats");
-      model.addAttribute("isAdmin", true);
-
-      // 요약 통계
-      model.addAttribute("totalRevenue",   statsService.totalRevenue7Days());  // Long
-      model.addAttribute("dailyAvgRevenue",statsService.dailyAverage());       // Long
-      model.addAttribute("totalOrders",    statsService.totalOrders());        // int
-      model.addAttribute("totalVisitors",  statsService.totalVisitors());      // int
-      model.addAttribute("avgUsageTime",   statsService.avgUsageMinutes());    // int (분)
-
-      // 차트 데이터 (JSON 문자열로 전달 권장)
-      model.addAttribute("dailyLabels",    statsService.dailyLabelsJson());    // "[\"3/5\",...]"
-      model.addAttribute("dailyData",      statsService.dailyRevenueJson());   // "[450000,...]"
-      model.addAttribute("categoryLabels", statsService.categoryLabelsJson()); // "[\"음료\",...]"
-      model.addAttribute("categoryData",   statsService.categoryRevenueJson());// "[600000,...]"
-      model.addAttribute("avgTimeData",    statsService.avgTimeJson());        // "[65,72,...]"
-
-      // 베스트 셀러
-      model.addAttribute("bestSellers",    statsService.bestSellers());        // List<BestSellerDto>
-      return "pages/stats";
-  }
-
-  BestSellerDto 필드:
-    - int    rank       : 순위
-    - String productName: 상품명
-    - int    soldCount  : 판매 수량
-    - long   totalAmount: 총 매출액
--->
 <th:block layout:fragment="content">
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
     <h1 class="page-title" style="margin-bottom: 0;">📈 매출 통계</h1>
-    <div class="date-picker-wrapper">
-      <label for="targetDate" style="font-weight: 600; margin-right: 10px;">기준 날짜:</label>
-      <input type="date" id="targetDate"
-             th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"
-             th:max="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"
-             onchange="loadStatData(this.value)"
-             style="padding: 8px 12px; border-radius: 8px; border: 1px solid #ddd; font-family: inherit;">
+    <div style="display: flex; align-items: center; gap: 15px;">
+      <button onclick="loadStatData(document.getElementById('targetDate').value)" class="sync-btn">
+        🔄 실시간 동기화
+      </button>
+      <div class="date-picker-wrapper">
+        <label for="targetDate" style="font-weight: 600; margin-right: 10px;">기준 날짜:</label>
+        <input type="date" id="targetDate"
+               th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"
+               th:max="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"
+               onchange="loadStatData(this.value)"
+               style="padding: 8px 12px; border-radius: 8px; border: 1px solid #ddd; font-family: inherit;">
+      </div>
     </div>
   </div>
 

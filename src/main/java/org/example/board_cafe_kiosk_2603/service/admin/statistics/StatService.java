@@ -22,29 +22,34 @@ public class StatService {
     private final StatMapper statMapper;
 
     /**
-     * 특정 날짜의 모든 통계 데이터를 갱신 (일일 요약 + 상품별 히스토리)
+     * 단일 날짜 동기화 - 특정 날짜의 모든 통계 데이터를 갱신 (일일 요약 + 상품별 히스토리)
+     * Mapper의 INNER JOIN 로직을 통해 '인원 추가' 수량을 실제 방문자 수에 합산
+     * 상품 히스토리 저장 시 '인원 추가' 매출은 자동으로 제외
      */
     public void createDailyStatistics(LocalDate targetDate) {
-        log.info("=== StatService createDailyStatistics ===");
-        log.info("{} 날짜의 통계 데이터 생성 시작", targetDate);
+        log.info("--- StatService createDailyStatistics ---");
+        log.info("{} 날짜 통계 데이터 재집계", targetDate);
 
-        // 1. 일일 매출 요약 (기존 데이터 삭제 후 삽입)
+        // 1. 일일 매출 요약 (기존 데이터 삭제 후 JOIN 기반 재삽입)
+        // SQL 내부: ts.initial_guest_cnt + 추가인원 수량 합산 처리됨
         statMapper.deleteDailySummary(targetDate);
         statMapper.insertDailySummaryFromSessions(targetDate);
 
-        // 2. 상품별 판매 히스토리 (기존 데이터 삭제 후 삽입)
+        // 2. 상품별 판매 히스토리 (기존 데이터 삭제 후 재삽입)
+        // SQL 내부: menu.name != '인원 추가 (1명)' 조건으로 순수 메뉴 실적만 저장됨
         statMapper.deleteItemSalesHistory(targetDate);
         statMapper.insertItemSalesHistory(targetDate);
 
-        log.info("{} 날짜의 통계 데이터 갱신 완료", targetDate);
+        log.info("{} 날짜 통계 갱신 완료", targetDate);
     }
 
     /**
-     * 특정 기간(예: 최근 한 달)의 통계를 한 번에 초기화할 때 사용
+     * 기간 동기화 특정 기간(예: 최근 한 달)의 통계를 한 번에 초기화할 때 사용
+     * 대규모 데이터 수정이나 로직 변경 후 과거 데이터를 일괄 갱신할 때 유용
      */
-    @Transactional
     public void createStatisticsForPeriod(LocalDate startDate, LocalDate endDate) {
-        log.info("=== StatService createStatisticsForPeriod ===");
+        log.info("--- StatService createStatisticsForPeriod ---");
+        log.info("{} 부터 {} 까지 기간 통계 생성", startDate, endDate);
         LocalDate current = startDate;
         while (!current.isAfter(endDate)) {
             createDailyStatistics(current);
@@ -53,29 +58,46 @@ public class StatService {
     }
 
     /**
-     * 어제 날짜를 자동으로 계산해서 호출
+     * 자동 스케줄링용 어제 날짜를 자동으로 계산해서 통계 생성
+     * 매일 새벽 배치 프로그램이 호출하기 적합한 메서드
      */
     public void createYesterdayStatistics() {
-        log.info("=== StatService createYesterdayStatistics ===");
+        log.info("--- StatService createYesterdayStatistics ---");
         LocalDate yesterday = LocalDate.now().minusDays(1);
+        log.info("어제 날짜({}) 통계 자동 생성 시작", yesterday);
         createDailyStatistics(yesterday);
     }
 
     /**
-     * 기준 날짜 포함 최근 7일간의 통계 데이터 조회
+     * 조회 기준 날짜 포함 최근 7일간의 요약 통계 데이터 조회 (차트 및 요약용)
      */
+    @Transactional(readOnly = true)
     public List<DailySalesDTO> getWeeklyStats(LocalDate endDate) {
+        log.info("--- StatService getWeeklyStats ---");
+
         return statMapper.getWeeklyStats(endDate);
     }
 
     /**
-     * 특정 날짜의 인기 메뉴 조회
+     * 조회 특정 날짜의 인기 메뉴 TOP N 조회
+     * '인원 추가' 항목이 이미 히스토리 저장 단계에서 배제되었으므로 순수 인기 상품만 반환
      */
+    @Transactional(readOnly = true)
     public List<ItemSalesDTO> getTopSellingMenuByDate(LocalDate targetDate, int limit) {
+        log.info("--- StatService getTopSellingMenuByDate ---");
+
         return statMapper.getTopSellingMenuByDate(targetDate, limit);
     }
 
+    /**
+     * 조회 - 특정 날짜의 카테고리별 매출 통계 가공
+     * 프론트엔드 차트 라이브러리(Chart.js 등) 형식에 맞게 라벨과 데이터 값을 분리하여 반환
+     */
+    @Transactional(readOnly = true)
     public Map<String, Object> getCategoryStats(LocalDate targetDate) {
+        log.info("--- StatService getCategoryStats ---");
+
+        // 이미 '인원 추가' 금액이 제외된 item_sales_history 기반으로 조회됨
         List<Map<String, Object>> stats = statMapper.getCategoryStatsByDate(targetDate);
 
         List<String> labels = stats.stream()

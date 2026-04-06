@@ -55,7 +55,7 @@ public class GameController {
         model.addAttribute("activePage", "productReg");
         model.addAttribute("activeTab", "game");
 
-        log.debug("게임 목록 조회 완료 - categoryId: {}, 건수: {}", categoryId, gameList.size());
+        log.debug("게임 목록 조회 완료 - 건수: {}", gameList.size());
         return "admin/product_game";
     }
 

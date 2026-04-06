@@ -23,7 +23,7 @@ public class MacroMessageController {
 
     @GetMapping
     public String getAllMacro(Model model) {
-        log.info("--- AdminController getAllMacro get ---");
+        log.info("--- MacroMessageController getAllMacro get ---");
         List<MacroMessageResponseDTO> macroList = macroMessageService.getAllActiveMessages();
 
         // direction별로 그룹핑 (예: "STAFF_TO_TABLE" -> 리스트, "CUSTOMER_TO_STAFF" -> 리스트)
