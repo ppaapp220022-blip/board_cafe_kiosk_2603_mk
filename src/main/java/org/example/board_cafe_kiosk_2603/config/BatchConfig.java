@@ -37,6 +37,7 @@ public class BatchConfig {
      */
     @Bean
     public Job dailyRevenueJob() {
+        log.info("--- Spring Batch dailyRevenueJob ---");
         return new JobBuilder("dailyRevenueJob", jobRepository)
                 .start(statStep())
                 .build();
@@ -48,6 +49,7 @@ public class BatchConfig {
      */
     @Bean
     public Step statStep() {
+        log.info("--- Spring Batch statStep ---");
         return new StepBuilder("statStep", jobRepository)
                 .tasklet(statTasklet(null), transactionManager)
                 .build();
@@ -62,7 +64,8 @@ public class BatchConfig {
     public Tasklet statTasklet(@Value("#{jobParameters['targetDate']}") String targetDateStr) {
         return (contribution, chunkContext) -> {
             LocalDate targetDate = LocalDate.parse(targetDateStr);
-            log.info(">>> [Spring Batch] {} 날짜 통계 작업을 StatService에 위임합니다.", targetDate);
+            log.info("--- Spring Batch statTasklet ---");
+            log.info("{} 날짜 통계 insert", targetDate);
 
             // 서비스의 공통 로직 호출
             statService.createDailyStatistics(targetDate);

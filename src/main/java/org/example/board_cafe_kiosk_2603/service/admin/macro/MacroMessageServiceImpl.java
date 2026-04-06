@@ -20,6 +20,8 @@ public class MacroMessageServiceImpl implements MacroMessageService {
 
     @Override
     public List<MacroMessageResponseDTO> getAllActiveMessages() {
+        log.info("--- MacroMessageServiceImpl getAllActiveMessages ---");
+
         List<MacroMessageResponseDTO> activeMessages = new ArrayList<>();
         List<MacroMessage> result = macroMessageMapper.findAllActive();
         result.forEach(item -> {

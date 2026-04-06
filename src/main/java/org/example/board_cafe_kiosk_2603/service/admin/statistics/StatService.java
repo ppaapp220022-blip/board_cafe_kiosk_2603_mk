@@ -27,7 +27,8 @@ public class StatService {
      * 상품 히스토리 저장 시 '인원 추가' 매출은 자동으로 제외
      */
     public void createDailyStatistics(LocalDate targetDate) {
-        log.info("=== StatService: {} 날짜 통계 데이터 재집계 시작 ===", targetDate);
+        log.info("--- StatService createDailyStatistics ---");
+        log.info("{} 날짜 통계 데이터 재집계", targetDate);
 
         // 1. 일일 매출 요약 (기존 데이터 삭제 후 JOIN 기반 재삽입)
         // SQL 내부: ts.initial_guest_cnt + 추가인원 수량 합산 처리됨
@@ -39,7 +40,7 @@ public class StatService {
         statMapper.deleteItemSalesHistory(targetDate);
         statMapper.insertItemSalesHistory(targetDate);
 
-        log.info("=== StatService: {} 날짜 통계 갱신 완료 ===", targetDate);
+        log.info("{} 날짜 통계 갱신 완료", targetDate);
     }
 
     /**
@@ -47,7 +48,8 @@ public class StatService {
      * 대규모 데이터 수정이나 로직 변경 후 과거 데이터를 일괄 갱신할 때 유용
      */
     public void createStatisticsForPeriod(LocalDate startDate, LocalDate endDate) {
-        log.info("=== StatService: {} 부터 {} 까지 기간 통계 생성 ===", startDate, endDate);
+        log.info("--- StatService createStatisticsForPeriod ---");
+        log.info("{} 부터 {} 까지 기간 통계 생성", startDate, endDate);
         LocalDate current = startDate;
         while (!current.isAfter(endDate)) {
             createDailyStatistics(current);
@@ -60,8 +62,9 @@ public class StatService {
      * 매일 새벽 배치 프로그램이 호출하기 적합한 메서드
      */
     public void createYesterdayStatistics() {
+        log.info("--- StatService createYesterdayStatistics ---");
         LocalDate yesterday = LocalDate.now().minusDays(1);
-        log.info("=== StatService: 어제 날짜({}) 통계 자동 생성 시작 ===", yesterday);
+        log.info("어제 날짜({}) 통계 자동 생성 시작", yesterday);
         createDailyStatistics(yesterday);
     }
 
@@ -70,6 +73,8 @@ public class StatService {
      */
     @Transactional(readOnly = true)
     public List<DailySalesDTO> getWeeklyStats(LocalDate endDate) {
+        log.info("--- StatService getWeeklyStats ---");
+
         return statMapper.getWeeklyStats(endDate);
     }
 
@@ -79,6 +84,8 @@ public class StatService {
      */
     @Transactional(readOnly = true)
     public List<ItemSalesDTO> getTopSellingMenuByDate(LocalDate targetDate, int limit) {
+        log.info("--- StatService getTopSellingMenuByDate ---");
+
         return statMapper.getTopSellingMenuByDate(targetDate, limit);
     }
 
@@ -88,6 +95,8 @@ public class StatService {
      */
     @Transactional(readOnly = true)
     public Map<String, Object> getCategoryStats(LocalDate targetDate) {
+        log.info("--- StatService getCategoryStats ---");
+
         // 이미 '인원 추가' 금액이 제외된 item_sales_history 기반으로 조회됨
         List<Map<String, Object>> stats = statMapper.getCategoryStatsByDate(targetDate);
 

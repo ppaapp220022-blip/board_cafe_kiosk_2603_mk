@@ -29,7 +29,7 @@ public class StatController {
      */
     @GetMapping("/status")
     public String adminStatusPage(Model model) {
-        log.info("=== 관리자 통계 페이지 접근 ===");
+        log.info("--- StatController adminStatusPage ---");
         model.addAttribute("activePage", "salesStats");
         // 초기 진입 시 오늘 날짜 기준으로 설정
         model.addAttribute("selectedDate", LocalDate.now());
@@ -43,6 +43,8 @@ public class StatController {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> getStatData(
             @RequestParam(value = "targetDate", required = false) String targetDateStr) {
+        log.info("--- StatController ResponseEntity ---");
+        log.info("targetDateStr: " + targetDateStr);
 
         LocalDate targetDate = (targetDateStr == null || targetDateStr.isEmpty())
                 ? LocalDate.now() : LocalDate.parse(targetDateStr);
@@ -54,9 +56,10 @@ public class StatController {
 
         // 1. 주간 매출 (차트용)
         List<DailySalesDTO> weeklySales = statService.getWeeklyStats(targetDate);
+        log.info("weeklySales : {}...", weeklySales);
         response.put("weeklySales", weeklySales);
 
-        // 📈 주간 일평균 매출 직접 계산
+        // 주간 일평균 매출 직접 계산
         long weeklyTotal = weeklySales.stream().mapToLong(DailySalesDTO::getTotalRevenue).sum();
         long weeklyAvg = weeklySales.isEmpty() ? 0 : weeklyTotal / weeklySales.size();
 
@@ -66,15 +69,24 @@ public class StatController {
                 .findFirst()
                 .orElse(DailySalesDTO.builder().statDate(targetDate.toString())
                         .totalRevenue(0L).orderCount(0).visitCount(0).build());
+        log.info("summary : {}...", summary.toString());
         response.put("summary", summary);
 
         // 3. 베스트 셀러
+        log.info("topMenus : {}", statService.getTopSellingMenuByDate(targetDate, 5));
         response.put("topMenus", statService.getTopSellingMenuByDate(targetDate, 5));
 
+
         // 4. 카테고리 통계
+        log.info("categoryStats : {}", statService.getCategoryStats(targetDate));
         response.put("categoryStats", statService.getCategoryStats(targetDate));
 
+        // 5. 최근 7일간의 일별 매출 추이
+        log.info("weeklySales : {}", weeklySales);
         response.put("weeklySales", weeklySales);
+
+        // 6. 해당 기간(7일) 동안의 일일 평균 매출액
+        log.info("weeklyAvgRevenue : {}", weeklyAvg);
         response.put("weeklyAvgRevenue", weeklyAvg);
 
         return ResponseEntity.ok(response);

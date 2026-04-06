@@ -26,6 +26,7 @@ public class TableController {
      */
     @GetMapping
     public String dashboard(Model model) {
+        log.info("--- TableController dashboard ---");
         List<CafeTableDTO> tables = cafeTableService.getAllTableStatus();
         model.addAttribute("tables", tables);
 
@@ -41,6 +42,7 @@ public class TableController {
     @ResponseBody
     @GetMapping("/{id}/orders")
     public ResponseEntity<List<OrderItemDTO>> getTableOrders(@PathVariable("id") Integer id) {
+        log.info("--- TableController getTableOrders ---");
         /**
          * [핵심 로직]
          * 1. 서비스에서 해당 테이블의 current_session_id를 추적함.
@@ -64,7 +66,7 @@ public class TableController {
     public ResponseEntity<Map<String, String>> updateStatus(
             @PathVariable("id") Integer id,
             @RequestBody Map<String, String> request) {
-
+        log.info("--- TableController updateStatus ---");
         String status = request.get("status");
 
         try {
@@ -94,6 +96,7 @@ public class TableController {
     @ResponseBody
     @PostMapping("/{id}/token")
     public ResponseEntity<Map<String, String>> refreshToken(@PathVariable("id") Integer id) {
+        log.info("--- TableController refreshToken ---");
         try {
             String newToken = cafeTableService.generateNewToken(id);
             log.info("토큰 갱신 완료: 테이블 {}번 -> {}", id, newToken);
@@ -114,6 +117,7 @@ public class TableController {
     @ResponseBody
     @DeleteMapping("/reset")
     public ResponseEntity<Map<String, String>> forceReset() {
+        log.info("--- TableController forceReset ---");
         try {
             cafeTableService.resetAllTablesForNewDay();
             log.warn("경고: 관리자에 의한 시스템 전체 강제 리셋이 수행되었습니다.");
@@ -130,6 +134,8 @@ public class TableController {
     @GetMapping("/messages/{tableId}")
     @ResponseBody
     public ResponseEntity<List<String>> getUnreadMessages(@PathVariable("tableId") Integer tableId) {
+        log.info("--- TableController getUnreadMessages ---");
+
         List<String> messages = cafeTableService.getUnreadMessages(tableId);
         return ResponseEntity.ok(messages);
     }
@@ -140,6 +146,8 @@ public class TableController {
     @PatchMapping("/messages/{tableId}/read")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> markAsRead(@PathVariable("tableId") Integer tableId) {
+        log.info("--- TableController markAsRead ---");
+
         try {
             cafeTableService.markMessagesAsRead(tableId);
             return ResponseEntity.ok(Map.of("success", true));
