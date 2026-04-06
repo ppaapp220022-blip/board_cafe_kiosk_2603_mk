@@ -3,15 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="'Kiosk - ' + ${pageTitle}">Kiosk Main Menu</title>
+    <title th:text="'Kiosk - ' + ${pageTitle != null ? pageTitle : 'Main'}">Kiosk Main Menu</title>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background-color: #f4f6f8;
@@ -19,7 +14,6 @@
             height: 100vh;
             overflow: hidden;
         }
-
         /* --- 좌측 사이드바 --- */
         .sidebar-left {
             width: 100px;
@@ -32,518 +26,78 @@
             padding: 20px 0;
             z-index: 10;
         }
-
-        .nav-group {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
+        .nav-group { display: flex; flex-direction: column; gap: 15px; }
         .nav-btn {
-            width: 64px;
-            height: 64px;
-            border-radius: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #f0f2f5;
-            color: #888;
-            cursor: pointer;
-            border: none;
-            transition: all 0.3s ease;
-            font-size: 0;
-            position: relative;
+            width: 64px; height: 64px; border-radius: 18px;
+            display: flex; align-items: center; justify-content: center;
+            background-color: #f0f2f5; color: #888; cursor: pointer;
+            border: none; transition: all 0.3s ease; font-size: 0; position: relative;
         }
-
-        .nav-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .nav-btn.active {
-            background-color: #007bff;
-            color: white;
-            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
-        }
-
-        .nav-btn.orange {
-            background-color: #ff9800;
-            color: white;
-        }
-
-        .nav-btn.orange:hover {
-            background-color: #f57c00;
-        }
-
-        .nav-btn.red {
-            background-color: #f44336;
-            color: white;
-        }
-
-        .nav-btn.red:hover {
-            background-color: #d32f2f;
-        }
-
-        .nav-btn i {
-            width: 34px;
-            height: 34px;
-        }
-
+        .nav-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+        .nav-btn.active { background-color: #007bff; color: white; box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3); }
+        .nav-btn.orange { background-color: #ff9800; color: white; }
+        .nav-btn.red { background-color: #f44336; color: white; }
+        .nav-btn i { width: 34px; height: 34px; }
         .nav-label {
-            position: absolute;
-            left: 80px;
-            background-color: #333;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s;
-            z-index: 100;
-            bottom: 15px;
+            position: absolute; left: 80px; background-color: #333; color: white;
+            padding: 6px 12px; border-radius: 8px; font-size: 0.85rem;
+            white-space: nowrap; opacity: 0; pointer-events: none;
+            transition: opacity 0.2s; z-index: 100; bottom: 15px;
         }
-
-        .nav-btn:hover .nav-label {
-            opacity: 1;
-        }
+        .nav-btn:hover .nav-label { opacity: 1; }
 
         /* --- 메인 영역 --- */
-        .main-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* 헤더 */
+        .main-area { flex: 1; display: flex; flex-direction: column; }
         .header {
-            height: 80px;
-            background-color: white;
-            border-bottom: 1px solid #eaeaea;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 30px;
+            height: 80px; background-color: white; border-bottom: 1px solid #eaeaea;
+            display: flex; align-items: center; justify-content: space-between; padding: 0 30px;
         }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .table-info {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #333;
-            letter-spacing: -0.5px;
-        }
-
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .table-info { font-size: 1.5rem; font-weight: 700; color: #333; letter-spacing: -0.5px; }
         .party-badge {
             background: linear-gradient(135deg, #eef6ff 0%, #e3f2fd 100%);
-            color: #007bff;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 1rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border: 1px solid #bbdefb;
+            color: #007bff; padding: 8px 16px; border-radius: 20px;
+            font-size: 1rem; font-weight: 500; display: flex; align-items: center; gap: 8px; border: 1px solid #bbdefb;
         }
-
-        .party-badge i {
-            width: 20px;
-            height: 20px;
-        }
-
-        .header-right {
-            display: flex;
-            gap: 15px;
-        }
-
+        .header-right { display: flex; gap: 15px; }
         .icon-btn {
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: none;
-            cursor: pointer;
-            color: white;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            font-size: 0;
-            position: relative;
+            width: 56px; height: 56px; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; border: none; cursor: pointer;
+            color: white; font-weight: 600; transition: all 0.3s ease; position: relative;
         }
-
-        .icon-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .icon-btn.messenger {
-            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
-        }
-
-        .icon-btn.cart {
-            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
-            position: relative;
-        }
-
+        .icon-btn.cart { background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%); }
         .cart-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background-color: #ff5252;
-            color: white;
-            font-size: 0.75rem;
-            font-weight: 700;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid white;
+            position: absolute; top: -5px; right: -5px; background-color: #ff5252;
+            color: white; font-size: 0.75rem; font-weight: 700; width: 24px; height: 24px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white;
         }
-
-        .icon-btn i {
-            width: 30px;
-            height: 30px;
-        }
-
         .timer-badge {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 1rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #eef6ff 0%, #e3f2fd 100%);
-            color: #007bff;
-            border: 1px solid #bbdefb;
-            min-width: 100px;
-            justify-content: center;
+            display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 20px;
+            font-size: 1rem; font-weight: 700; background: linear-gradient(135deg, #eef6ff 0%, #e3f2fd 100%);
+            color: #007bff; border: 1px solid #bbdefb; min-width: 100px; justify-content: center;
         }
-
         .timer-badge.overtime {
             background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
-            color: #f44336;
-            border-color: #ffccbc;
-            animation: pulse-red 1s infinite;
+            color: #f44336; border-color: #ffccbc; animation: pulse-red 1s infinite;
         }
+        @keyframes pulse-red { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .content { flex: 1; padding: 30px; overflow-y: auto; background-color: #f4f6f8; }
 
-        .timer-badge i { width: 18px; height: 18px; }
-
-        @keyframes pulse-red {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-
-        /* 콘텐츠 영역 */
-        .content {
-            flex: 1;
-            padding: 30px;
-            overflow-y: auto;
-            background-color: #f4f6f8;
-        }
-
-        .content::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .content::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        .content::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 10px;
-        }
-
-        /* ★★★ 메뉴 아이템 그리드 & 카드 (사진 스타일로 전면 수정) ★★★ */
-        .menu-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 25px;
-        }
-
-        .menu-item {
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            display: flex;
-            flex-direction: column;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border: 1px solid #eaeaea;
-        }
-
-        .menu-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        /* 상단 회색 이미지 영역 */
-        .menu-img-area {
-            width: 100%;
-            height: 200px;
-            background-color: #eaedf1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-
-        .menu-img-area img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .menu-img-area .placeholder-icon {
-            color: #9aa0a6;
-            width: 48px;
-            height: 48px;
-        }
-
-        /* 하단 흰색 정보 영역 */
-        .menu-info-area {
-            background: white;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .menu-info-left {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .menu-name {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .menu-price {
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: #007bff;
-        }
-
-        .menu-price.free {
-            color: #4caf50;
-        }
-
-        /* 동그란 파란색 플러스 버튼 */
-        .add-direct-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background-color 0.2s, transform 0.2s;
-        }
-
-        .add-direct-btn:hover {
-            background-color: #0056b3;
-            transform: scale(1.05);
-        }
-
-        .add-direct-btn i {
-            width: 18px;
-            height: 18px;
-            stroke-width: 3;
-        }
-
-        /* 품절 상태 */
-        .menu-item.sold-out {
-            opacity: 0.6;
-        }
-
-        .menu-item.sold-out .add-direct-btn {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-
-        /* --- 모달 등 나머지 스타일 --- */
+        /* 모달 및 기타 */
         .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            animation: fadeIn 0.3s ease;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5); display: none; align-items: center; justify-content: center; z-index: 1000;
         }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-
-        .modal-content {
-            background: white;
-            padding: 40px;
-            border-radius: 24px;
-            width: 500px;
-            text-align: center;
-            position: relative;
-            animation: slideUp 0.3s ease;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .modal-description {
-            color: #888;
-            margin-bottom: 30px;
-            font-size: 0.95rem;
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            cursor: pointer;
-            color: #888;
-            border: none;
-            background: none;
-            font-size: 0;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .close-btn:hover {
-            color: #333;
-            transform: rotate(90deg);
-        }
-
-        .close-btn i {
-            width: 28px;
-            height: 28px;
-        }
-
-        .modal-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
+        .modal-overlay.active { display: flex; }
+        .modal-content { background: white; padding: 40px; border-radius: 24px; width: 500px; text-align: center; position: relative; }
+        .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
         .service-btn {
-            background: #f8f9fa;
-            padding: 30px 10px;
-            border-radius: 16px;
-            border: 2px solid transparent;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            transition: all 0.2s;
+            background: #f8f9fa; padding: 30px 10px; border-radius: 16px; border: 2px solid transparent;
+            cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 12px;
         }
-
-        .service-btn:hover {
-            background: #eef6ff;
-            border-color: #007bff;
-            transform: translateY(-2px);
-        }
-
-        .service-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0;
-        }
-
-        .service-icon i {
-            width: 32px;
-            height: 32px;
-        }
-
-        .service-btn strong {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .service-btn span {
-            font-size: 0.85rem;
-            color: #888;
-        }
-
         .toast {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: #333;
-            color: white;
-            padding: 15px 25px;
-            border-radius: 12px;
-            z-index: 2000;
-            animation: slideInUp 0.3s ease;
-        }
-
-        @keyframes slideInUp {
-            from {
-                transform: translateY(100px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+            position: fixed; bottom: 30px; right: 30px; background: #333; color: white;
+            padding: 15px 25px; border-radius: 12px; z-index: 2000;
         }
     </style>
 </head>
@@ -551,195 +105,105 @@
 
 <div class="sidebar-left">
     <div class="nav-group">
-        <button class="nav-btn" th:classappend="${currentMenu == 'drinks' ? 'active' : ''}"
-                onclick="navigateMenu('drinks')">
-            <i data-lucide="coffee"></i>
-            <span class="nav-label">음료</span>
+        <button class="nav-btn" th:classappend="${currentMenu == 'drinks' ? 'active' : ''}" onclick="navigateMenu('drinks')">
+            <i data-lucide="coffee"></i><span class="nav-label">음료</span>
         </button>
-        <button class="nav-btn" th:classappend="${currentMenu == 'food' ? 'active' : ''}"
-                onclick="navigateMenu('food')">
-            <i data-lucide="utensils"></i>
-            <span class="nav-label">음식</span>
+        <button class="nav-btn" th:classappend="${currentMenu == 'food' ? 'active' : ''}" onclick="navigateMenu('food')">
+            <i data-lucide="utensils"></i><span class="nav-label">음식</span>
         </button>
-        <button class="nav-btn" th:classappend="${currentMenu == 'games' ? 'active' : ''}"
-                onclick="navigateMenu('games')">
-            <i data-lucide="gamepad-2"></i>
-            <span class="nav-label">게임</span>
+        <button class="nav-btn" th:classappend="${currentMenu == 'games' ? 'active' : ''}" onclick="navigateMenu('games')">
+            <i data-lucide="gamepad-2"></i><span class="nav-label">게임</span>
         </button>
-        <button class="nav-btn" th:classappend="${currentMenu == 'members' ? 'active' : ''}"
-                onclick="navigateMenu('members')">
-            <i data-lucide="user-plus"></i>
-            <span class="nav-label">추가인원관리</span>
+        <button class="nav-btn" th:classappend="${currentMenu == 'members' ? 'active' : ''}" onclick="navigateMenu('members')">
+            <i data-lucide="user-plus"></i><span class="nav-label">추가인원관리</span>
         </button>
     </div>
-
     <div class="nav-group">
-        <button class="nav-btn orange" onclick="openServiceModal()" title="직원 호출">
-            <i data-lucide="bell"></i>
-            <span class="nav-label">직원호출</span>
-        </button>
-        <button class="nav-btn red" onclick="navigateCheckout()" title="정산">
-            <i data-lucide="credit-card"></i>
-            <span class="nav-label">정산</span>
-        </button>
+        <button class="nav-btn orange" onclick="openServiceModal()"><i data-lucide="bell"></i><span class="nav-label">직원호출</span></button>
+        <button class="nav-btn red" onclick="navigateCheckout()"><i data-lucide="credit-card"></i><span class="nav-label">정산</span></button>
     </div>
 </div>
 
 <div class="main-area">
     <div class="header">
         <div class="header-left">
-            <span class="table-info" th:text="'Table #' + ${tableNumber}">Table #5</span>
+            <span class="table-info" th:text="'Table #' + ${tableNumber != null ? tableNumber : '0'}">Table #0</span>
             <span class="party-badge">
-        <i data-lucide="users"></i>
-        <span th:text="${partySize} + ' ' + (${partySize} > 1 ? 'people' : 'person')">2 people</span>
-      </span>
+                <i data-lucide="users"></i>
+                <span th:text="(${partySize ?: 0}) + ' ' + (${(partySize ?: 0) > 1} ? 'people' : 'person')">1 person</span>
+            </span>
         </div>
-
         <div class="header-right">
-<!--            <button class="icon-btn messenger" onclick="navigateMessenger()" title="메신저">-->
-<!--                <i data-lucide="message-circle"></i>-->
-<!--            </button>-->
             <div class="timer-badge" id="timer-badge">
-                <i data-lucide="clock"></i>
-                <span id="timer-text">--:--</span>
+                <i data-lucide="clock"></i><span id="timer-text">--:--</span>
             </div>
-            <button class="icon-btn cart" onclick="navigateCart()" title="장바구니">
+            <button class="icon-btn cart" onclick="navigateCart()">
                 <i data-lucide="shopping-cart"></i>
-                <span class="cart-badge" id="cart-badge" th:text="${cartCount}" style="display: none;">0</span>
+                <span class="cart-badge" id="cart-badge" th:text="${cartCount ?: 0}" th:style="${(cartCount ?: 0) > 0 ? 'display:flex' : 'display:none'}">0</span>
             </button>
         </div>
     </div>
-
     <div class="content">
-        <div th:include="kiosk/menu :: menuContent"></div>
+        <div th:replace="~{kiosk/menu :: menuContent}"></div>
     </div>
 </div>
 
 <div class="modal-overlay" id="serviceModal">
     <div class="modal-content">
-        <button class="close-btn" onclick="closeServiceModal()">
-            <i data-lucide="x"></i>
-        </button>
         <h2 class="modal-title">서비스 요청</h2>
-        <p class="modal-description">무엇을 도와드릴까요?</p>
         <div class="modal-grid">
-            <button class="service-btn" onclick="callService('직원 호출')">
-                <div class="service-icon" style="background: #eef6ff; color: #007bff;"><i data-lucide="user"></i></div>
-                <strong>직원 호출</strong><span>Staff Call</span>
-            </button>
-            <button class="service-btn" onclick="callService('물티슈 요청')">
-                <div class="service-icon" style="background: #e8f5e9; color: #4caf50;"><i data-lucide="droplet"></i>
-                </div>
-                <strong>물티슈</strong><span>Wet Tissue</span>
-            </button>
-            <button class="service-btn" onclick="callService('게임 규칙 설명')">
-                <div class="service-icon" style="background: #fff3e0; color: #ff9800;"><i data-lucide="help-circle"></i>
-                </div>
-                <strong>게임 규칙</strong><span>Game Help</span>
-            </button>
-            <button class="service-btn" onclick="callService('테이블 청소')">
-                <div class="service-icon" style="background: #f3e5f5; color: #9c27b0;"><i data-lucide="sparkles"></i>
-                </div>
-                <strong>테이블 청소</strong><span>Clean Table</span>
-            </button>
+            <button class="service-btn" onclick="callService('직원 호출')"><strong>직원 호출</strong></button>
+            <button class="service-btn" onclick="callService('물티슈 요청')"><strong>물티슈</strong></button>
+            <button class="service-btn" onclick="callService('게임 규칙 설명')"><strong>게임 규칙</strong></button>
+            <button class="service-btn" onclick="callService('테이블 청소')"><strong>테이블 청소</strong></button>
         </div>
+        <button onclick="closeServiceModal()" style="margin-top:20px; border:none; background:none; cursor:pointer;">닫기</button>
     </div>
 </div>
 
-<script>
+<script th:inline="javascript">
     lucide.createIcons({attrs: {'stroke-width': 2.5}});
 
-    const tableInfoElement = document.querySelector('.table-info');
-    const tableNumber = tableInfoElement ? tableInfoElement.textContent.replace('Table #', '').trim() : '1';
+    /* Thymeleaf 인라인 변수 안전하게 가져오기 */
+    const SESSION_START_TIME = [[${sessionStartTime}]];
+    const DURATION_MINUTES   = [[${durationMinutes}]];
 
-    document.addEventListener('DOMContentLoaded', function () {
-        fetch(`/kiosk/cart/items`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) updateCartBadge(data.cartCount);
-            })
-            .catch(() => {
-            });
-    });
+    function navigateMenu(menu) { window.location.href = `/kiosk/${menu}`; }
+    function navigateCart() { window.location.href = `/kiosk/cart`; }
+    function navigateCheckout() { if(confirm('정산하시겠습니까?')) window.location.href = `/kiosk/checkout`; }
 
-    function navigateMenu(menu) {
-        window.location.href = `/kiosk/${menu}`;
-    }
+    function openServiceModal() { document.getElementById('serviceModal').classList.add('active'); }
+    function closeServiceModal() { document.getElementById('serviceModal').classList.remove('active'); }
 
-    function navigateCart() {
-        window.location.href = `/kiosk/cart`;
-    }
+    function startTimer() {
+        const timerText = document.getElementById('timer-text');
+        const badge = document.getElementById('timer-badge');
 
-    function navigateCheckout() {
-        if (confirm('정산하시겠습니까?')) {
-            window.location.href = `/kiosk/checkout`;
+        if (!SESSION_START_TIME || !DURATION_MINUTES) {
+            if (timerText) timerText.innerText = "자유이용";
+            return;
         }
-    }
 
-    function navigateMessenger() {
-        window.location.href = `/kiosk/messenger`;
-    }
+        const endTime = SESSION_START_TIME + (DURATION_MINUTES * 60 * 1000);
 
-    /* ★★★ 플러스 버튼 클릭 시 작동할 '바로 담기' 함수 ★★★ */
-    function addItemToCartDirect(btn) {
-        const menuItem = btn.closest('.menu-item');
-        const menuName = menuItem.getAttribute('data-name');
-        const menuPrice = parseInt(menuItem.getAttribute('data-price'));
-        const quantity = 1; // 사진 레이아웃 특성상 수량 선택이 없어 1개로 고정합니다
-
-        fetch(`/kiosk/cart/add`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({menuName, menuPrice, quantity})
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showToast(`${menuName}이(가) 장바구니에 추가되었습니다.`);
-                    updateCartBadge(data.cartCount);
-                } else {
-                    showToast(data.message || '장바구니 추가에 실패했습니다.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showToast('장바구니 추가에 실패했습니다.');
-            });
-    }
-
-    function updateCartBadge(count) {
-        const badge = document.getElementById('cart-badge');
-        if (badge) {
-            if (count > 0) {
-                badge.innerText = count;
-                badge.style.display = 'flex';
+        function tick() {
+            const now = Date.now();
+            const remaining = endTime - now;
+            if (remaining > 0) {
+                const mins = Math.floor(remaining / 60000);
+                const secs = Math.floor((remaining % 60000) / 1000);
+                timerText.innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+                badge.classList.remove('overtime');
             } else {
-                badge.style.display = 'none';
+                const overtime = Math.abs(remaining);
+                const mins = Math.floor(overtime / 60000);
+                const secs = Math.floor((overtime % 60000) / 1000);
+                timerText.innerText = `+${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+                badge.classList.add('overtime');
             }
         }
-    }
-
-    function openServiceModal() {
-        document.getElementById('serviceModal').classList.add('active');
-    }
-
-    function closeServiceModal() {
-        document.getElementById('serviceModal').classList.remove('active');
-    }
-
-    function callService(serviceType) {
-        fetch('/kiosk/service-request', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({tableNumber: parseInt(tableNumber), serviceType: serviceType})
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) showToast(`${serviceType} 요청이 전송되었습니다.`);
-                else showToast('요청 전송에 실패했습니다.');
-                closeServiceModal();
-            })
-            .catch(() => showToast('요청 전송에 실패했습니다.'));
+        tick();
+        setInterval(tick, 1000);
     }
 
     function showToast(message) {
@@ -750,81 +214,9 @@
         setTimeout(() => toast.remove(), 2000);
     }
 
-    document.getElementById('serviceModal').addEventListener('click', function (e) {
-        if (e.target === this) closeServiceModal();
+    document.addEventListener('DOMContentLoaded', () => {
+        startTimer();
     });
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') closeServiceModal();
-    });
-
-    let idleTimer;
-
-    function resetIdleTimer() {
-        clearTimeout(idleTimer);
-        idleTimer = setTimeout(() => {
-            localStorage.setItem('returnUrl', window.location.pathname);
-            window.location.href = '/kiosk/screensaver';
-        }, 30000);
-    }
-
-    window.onload = resetIdleTimer;
-    window.onmousemove = resetIdleTimer;
-    window.onclick = resetIdleTimer;
-
-    /* ============== 패키지 타이머 ============== */
-    // Thymeleaf 인라인 구문을 사용하여 세션 값을 가져옵니다.
-    const SESSION_START_TIME = [[${sessionStartTime != null ? sessionStartTime : 'null'}]];
-    const DURATION_MINUTES   = [[${durationMinutes != null ? durationMinutes : 'null'}]];
-
-    // 2. [테스트 설정] 현재 시간에서 (패키지 시간 - 1분)을 뺍니다.
-    // 이렇게 하면 정확히 10초 뒤에 패키지 시간이 종료됩니다.
-    // const SESSION_START_TIME = Date.now() - (DURATION_MINUTES * 60 * 1000) + (1 * 10 * 1000);
-
-    function startTimer() {
-        const timerText = document.getElementById('timer-text');
-        const badge = document.getElementById('timer-badge');
-
-        // 세션 값이 없으면 타이머 영역을 숨기거나 실행하지 않음
-        if (!DURATION_MINUTES || DURATION_MINUTES <= 0) {
-            if (timerText) timerText.innerText = "자유이용";
-            if (badge) badge.style.backgroundColor = "#28a745"; // 자유이용은 초록색 등 다른색으로 강조 가능
-            return;
-        }
-
-        const totalMs = DURATION_MINUTES * 60 * 1000;
-        const endTime = SESSION_START_TIME + totalMs;
-
-        function tick() {
-            const now       = Date.now();
-            const remaining = endTime - now;
-            const badge     = document.getElementById('timer-badge');
-            const timerText = document.getElementById('timer-text');
-
-            if (remaining > 0) {
-                // 남은 시간 카운트다운
-                const mins = Math.floor(remaining / 60000);
-                const secs = Math.floor((remaining % 60000) / 1000);
-                timerText.innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-                badge.classList.remove('overtime');
-            } else {
-
-                // 시간 초과 시 + 증가
-                const overtime = Math.abs(remaining);
-                const mins = Math.floor(overtime / 60000);
-                const secs = Math.floor((overtime % 60000) / 1000);
-                timerText.innerText = `+${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-
-                // 빨간색으로 변경
-                badge.classList.add('overtime');
-            }
-        }
-
-        tick(); // 즉시 실행
-        setInterval(tick, 1000); // 1초마다 갱신
-    }
-
-    document.addEventListener('DOMContentLoaded', startTimer)
-
 </script>
 </body>
 </html>

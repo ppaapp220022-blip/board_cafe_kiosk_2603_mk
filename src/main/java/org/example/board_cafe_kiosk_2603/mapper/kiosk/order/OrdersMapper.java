@@ -36,4 +36,7 @@ public interface OrdersMapper {
 
     // 주문 ID로 아이템 목록 조회
     List<OrderItem> findItemsByOrderId(int orderId);
+
+    // 결제 키로 결제 조회 (중복 승인 방지)
+    Payment findByPaymentKey(String paymentKey);
 }

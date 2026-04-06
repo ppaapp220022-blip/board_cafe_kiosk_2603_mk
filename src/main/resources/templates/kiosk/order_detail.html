@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>주문 상세 - Board Game Cafe</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+      padding: 40px;
+      background: white;
+      border-radius: 40px;
+      box-shadow: 0 20px 80px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      max-height: 95vh;
+      overflow-y: auto;
+    }
+
+    .container::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .container::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+
+    .container::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 10px;
+    }
+
+    .container::-webkit-scrollbar-thumb:hover {
+      background: #888;
+    }
+
+    /* 헤더 */
+    .header {
+      margin-bottom: 30px;
+    }
+
+    .order-number {
+      font-size: 0.95rem;
+      color: #888;
+      margin-bottom: 8px;
+    }
+
+    .order-number strong {
+      color: #007bff;
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+
+    .page-title {
+      font-size: 2rem;
+      color: #333;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    /* 상태 표시 영역 */
+    .status-section {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px;
+      border-radius: 30px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .status-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .status-icon i {
+      width: 50px;
+      height: 50px;
+      stroke-width: 1.5;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+      }
+    }
+
+    .status-text {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+
+    .status-subtext {
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
+
+    /* 진행 상황 표시 */
+    .progress-bar {
+      margin-top: 30px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: white;
+      border-radius: 10px;
+      transition: width 0.3s ease;
+    }
+
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-size: 0.75rem;
+      opacity: 0.8;
+    }
+
+    /* 주문 내역 */
+    .card {
+      background: white;
+      border: 1px solid #f0f0f0;
+      border-radius: 20px;
+      padding: 25px;
+      margin-bottom: 20px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin-bottom: 18px;
+      color: #333;
+      border-bottom: 2px solid #f0f0f0;
+      padding-bottom: 12px;
+    }
+
+    .card-header i {
+      width: 24px;
+      height: 24px;
+      color: #007bff;
+    }
+
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 1rem;
+      color: #333;
+    }
+
+    .order-item:last-child {
+      border-bottom: none;
+    }
+
+    .item-info {
+      flex: 1;
+      text-align: left;
+    }
+
+    .item-name {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .item-qty {
+      color: #888;
+      font-size: 0.85rem;
+    }
+
+    .item-price {
+      color: #007bff;
+      font-weight: bold;
+      min-width: 100px;
+      text-align: right;
+    }
+
+    /* 주문 정보 */
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 0.95rem;
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      color: #888;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .info-label i {
+      width: 18px;
+      height: 18px;
+    }
+
+    .info-value {
+      color: #333;
+      font-weight: bold;
+    }
+
+    /* 가격 정보 */
+    .price-section {
+      background: #f8f9fa;
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 25px;
+    }
+
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      font-size: 1.1rem;
+      color: #333;
+    }
+
+    .price-row.total {
+      border-top: 2px solid #e0e0e0;
+      padding-top: 15px;
+      font-size: 1.4rem;
+      font-weight: bold;
+    }
+
+    .price-row.total .price-label {
+      color: #333;
+    }
+
+    .price-row.total .price-value {
+      color: #007bff;
+      font-size: 1.6rem;
+    }
+
+    .price-value {
+      color: #007bff;
+      font-weight: bold;
+      text-align: right;
+    }
+
+    /* 버튼 영역 */
+    .button-group {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 18px;
+      border: none;
+      border-radius: 15px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn i {
+      width: 20px;
+      height: 20px;
+    }
+
+    .btn-payment {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      flex: 2;
+    }
+
+    .btn-payment:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-payment:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-back {
+      background: #f0f2f5;
+      color: #888;
+      flex: 1;
+    }
+
+    .btn-back:hover {
+      background: #e0e2e7;
+      color: #555;
+    }
+
+    /* 상태별 아이콘 */
+    .status-pending {
+      color: #ff9800;
+    }
+
+    .status-paid {
+      color: #2196f3;
+    }
+
+    .status-confirmed {
+      color: #4caf50;
+    }
+
+    .status-cooking {
+      color: #ff5722;
+    }
+
+    .status-delivering {
+      color: #9c27b0;
+    }
+
+    .status-completed {
+      color: #4caf50;
+    }
+
+    /* 로딩 스피너 */
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* 토스트 알림 */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: #333;
+      color: white;
+      padding: 15px 25px;
+      border-radius: 12px;
+      z-index: 2000;
+      animation: slideInUp 0.3s ease;
+    }
+
+    @keyframes slideInUp {
+      from { transform: translateY(100px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* 모바일 반응형 */
+    @media (max-width: 480px) {
+      .container {
+        padding: 20px;
+        border-radius: 20px;
+      }
+
+      .page-title {
+        font-size: 1.5rem;
+      }
+
+      .status-section {
+        padding: 25px;
+      }
+
+      .button-group {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .btn {
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- 헤더 -->
+  <div class="header">
+    <div class="order-number">
+      주문번호 <strong th:text="${orderId}">123</strong>
+    </div>
+    <h1 class="page-title">주문이 접수되었습니다!</h1>
+  </div>
+
+  <!-- 상태 표시 -->
+  <div class="status-section" th:classappend="'status-' + ${order.status.toLowerCase()}">
+    <div class="status-icon" id="status-icon">
+      <i data-lucide="clock"></i>
+    </div>
+    <div class="status-text" id="status-text" th:text="${statusDisplay}">
+      주문 확인중...
+    </div>
+    <div class="status-subtext">
+      실시간으로 상태가 업데이트됩니다
+    </div>
+
+    <!-- 진행 상황 바 -->
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width: 20%;"></div>
+    </div>
+    <div class="progress-labels">
+      <span>결제</span>
+      <span>확인</span>
+      <span>조리</span>
+      <span>서빙</span>
+      <span>완료</span>
+    </div>
+  </div>
+
+  <!-- 주문 내역 -->
+  <div class="card">
+    <div class="card-header">
+      <i data-lucide="shopping-bag"></i>
+      주문 내역
+    </div>
+    <div id="order-items">
+      <!-- JavaScript로 동적 생성 -->
+    </div>
+  </div>
+
+  <!-- 주문 정보 -->
+  <div class="card">
+    <div class="card-header">
+      <i data-lucide="info"></i>
+      주문 정보
+    </div>
+    <div class="info-row">
+      <div class="info-label">
+        <i data-lucide="table-2"></i>
+        테이블
+      </div>
+      <div class="info-value" th:text="'#' + ${tableNumber}">
+        #5
+      </div>
+    </div>
+    <div class="info-row">
+      <div class="info-label">
+        <i data-lucide="clock"></i>
+        주문 시간
+      </div>
+      <div class="info-value" id="order-time">
+        <!-- JavaScript로 동적 생성 -->
+      </div>
+    </div>
+    <div class="info-row" th:if="${order.customerPhone != null}">
+      <div class="info-label">
+        <i data-lucide="phone"></i>
+        연락처
+      </div>
+      <div class="info-value" th:text="${order.customerPhone}">
+        <!-- 있을 경우만 표시 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 가격 정보 -->
+  <div class="price-section">
+    <div class="price-row">
+      <span class="price-label">상품 소계</span>
+      <span class="price-value" id="subtotal" th:text="'₩' + ${#numbers.formatInteger(order.totalAmount, 0)}">
+                ₩15,000
+            </span>
+    </div>
+    <div class="price-row total">
+      <span class="price-label">결제액</span>
+      <span class="price-value" id="total" th:text="'₩' + ${#numbers.formatInteger(order.totalAmount, 0)}">
+                ₩15,000
+            </span>
+    </div>
+  </div>
+
+  <!-- 버튼 -->
+  <div class="button-group">
+    <button class="btn btn-payment" id="payment-btn" onclick="goToPayment()">
+      <i data-lucide="credit-card"></i>
+      <span id="payment-btn-text">결제하기</span>
+    </button>
+    <button class="btn btn-back" onclick="goBack()">
+      <i data-lucide="arrow-left"></i>
+      돌아가기
+    </button>
+  </div>
+</div>
+
+<script>
+  lucide.createIcons({
+    attrs: { 'stroke-width': 2.5 }
+  });
+
+  // 서버에서 전달받은 데이터
+  const orderId = /*[[${orderId}]]*/ 1;
+  const tableNumber = /*[[${tableNumber}]]*/ 1;
+  const orderData = /*[[${order}]]*/ {};
+
+  // 현재 상태
+  let currentStatus = orderData.status || 'PENDING';
+
+  // ===== 페이지 로드 =====
+  document.addEventListener('DOMContentLoaded', function() {
+    renderOrderItems();
+    renderOrderTime();
+    updateStatusDisplay();
+    pollOrderStatus();  // 주문 상태 실시간 폴링
+  });
+
+  // ===== 주문 아이템 렌더링 =====
+  function renderOrderItems() {
+    const itemsContainer = document.getElementById('order-items');
+    const items = orderData.items || [];
+
+    itemsContainer.innerHTML = items.map(item => `
+            <div class="order-item">
+                <div class="item-info">
+                    <div class="item-name">${item.menuName}</div>
+                    <div class="item-qty">수량: ${item.quantity}개</div>
+                </div>
+                <div class="item-price">
+                    ₩${(item.price * item.quantity).toLocaleString()}
+                </div>
+            </div>
+        `).join('');
+  }
+
+  // ===== 주문 시간 표시 =====
+  function renderOrderTime() {
+    const orderedAt = orderData.orderedAt;
+    if (!orderedAt) {
+      document.getElementById('order-time').innerText = '방금 전';
+      return;
+    }
+
+    const date = new Date(orderedAt);
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    document.getElementById('order-time').innerText = `${hours}:${minutes}`;
+  }
+
+  // ===== 상태 표시 업데이트 =====
+  function updateStatusDisplay() {
+    const status = currentStatus;
+    const statusIcon = document.getElementById('status-icon');
+    const statusText = document.getElementById('status-text');
+    const progressFill = document.getElementById('progress-fill');
+
+    // 상태별 아이콘 및 진행률
+    const statusConfig = {
+      'PENDING': {
+        icon: 'clock',
+        text: '결제 대기 중...',
+        progress: 20,
+        color: 'ff9800'
+      },
+      'PAID': {
+        icon: 'credit-card',
+        text: '결제 완료! 관리자 확인 중...',
+        progress: 40,
+        color: '2196f3'
+      },
+      'CONFIRMED': {
+        icon: 'check-circle',
+        text: '주문 확인! 조리 시작...',
+        progress: 60,
+        color: '4caf50'
+      },
+      'COOKING': {
+        icon: 'flame',
+        text: '조리 중입니다...',
+        progress: 75,
+        color: 'ff5722'
+      },
+      'DELIVERING': {
+        icon: 'truck',
+        text: '준비 완료! 서빙 중...',
+        progress: 90,
+        color: '9c27b0'
+      },
+      'COMPLETED': {
+        icon: 'check-circle-2',
+        text: '주문 완료!',
+        progress: 100,
+        color: '4caf50'
+      },
+      'CANCELLED': {
+        icon: 'x-circle',
+        text: '주문 취소됨',
+        progress: 0,
+        color: 'f44336'
+      }
+    };
+
+    const config = statusConfig[status] || statusConfig['PENDING'];
+
+    // 아이콘 업데이트
+    statusIcon.innerHTML = `<i data-lucide="${config.icon}"></i>`;
+
+    // 텍스트 업데이트
+    statusText.innerText = config.text;
+
+    // 진행률 업데이트
+    progressFill.style.width = config.progress + '%';
+
+    // 아이콘 재생성
+    lucide.createIcons();
+  }
+
+  // ===== 주문 상태 실시간 폴링 =====
+  function pollOrderStatus() {
+    // 2초마다 상태 확인
+    const pollInterval = setInterval(() => {
+      fetch(`/kiosk/order/api/${orderId}`)
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  const newStatus = data.status;
+                  if (newStatus !== currentStatus) {
+                    console.log(`주문 상태 변경: ${currentStatus} → ${newStatus}`);
+                    currentStatus = newStatus;
+                    updateStatusDisplay();
+                    showToast(`✓ 상태 변경: ${getStatusText(newStatus)}`);
+
+                    // 완료 또는 취소 상태면 폴링 중지
+                    if (newStatus === 'COMPLETED' || newStatus === 'CANCELLED') {
+                      clearInterval(pollInterval);
+                    }
+                  }
+                }
+              })
+              .catch(error => {
+                console.error('상태 조회 실패:', error);
+              });
+    }, 2000);  // 2초마다 확인
+
+    // 페이지 떠날 때 폴링 중지
+    window.addEventListener('beforeunload', () => {
+      clearInterval(pollInterval);
+    });
+  }
+
+  // ===== 상태별 텍스트 =====
+  function getStatusText(status) {
+    const texts = {
+      'PENDING': '결제 대기',
+      'PAID': '결제 완료',
+      'CONFIRMED': '주문 확인',
+      'COOKING': '조리 중',
+      'DELIVERING': '서빙 중',
+      'COMPLETED': '완료',
+      'CANCELLED': '취소'
+    };
+    return texts[status] || '상태 확인';
+  }
+
+  // ===== 결제하기 버튼 =====
+  function goToPayment() {
+    const payBtn = document.getElementById('payment-btn');
+    const payBtnText = document.getElementById('payment-btn-text');
+
+    // 결제 버튼 비활성화
+    payBtn.disabled = true;
+    payBtnText.innerHTML = '<span class="spinner"></span>결제 준비 중...';
+
+    // 결제 페이지로 이동 (orderId 전달)
+    setTimeout(() => {
+      window.location.href = `/kiosk/checkout?orderId=${orderId}`;
+    }, 1000);
+  }
+
+  // ===== 돌아가기 =====
+  function goBack() {
+    // 이전 페이지로 또는 메뉴로 이동
+    if (document.referrer) {
+      history.back();
+    } else {
+      window.location.href = '/kiosk/screensaver';
+    }
+  }
+
+  // ===== 토스트 알림 =====
+  function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerText = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => toast.remove(), 2500);
+  }
+</script>
+
+</body>
+</html>

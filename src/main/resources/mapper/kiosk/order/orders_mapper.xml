@@ -17,15 +17,11 @@
         VALUES (#{orderId}, #{menuId}, #{menuName}, #{price}, #{quantity})
     </insert>
 
-    <!-- 결제 레코드 생성 (이미 존재하면 금액만 갱신) -->
+    <!-- 결제 레코드 생성 (토스 필드 포함) -->
     <insert id="insertPayment"
             useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO payment (session_id, status, final_amount)
-        VALUES (#{sessionId}, 'READY', #{finalAmount})
-        ON DUPLICATE KEY UPDATE
-            final_amount = #{finalAmount},
-            status       = 'READY',
-            paid_at      = NULL
+        INSERT INTO payment (session_id, status, final_amount, payment_key, order_id_toss, method, raw_response, approved_at)
+        VALUES (#{sessionId}, 'READY', #{finalAmount}, #{paymentKey}, #{orderIdToss}, #{method}, #{rawResponse}, #{approvedAt})
     </insert>
 
     <!-- 결제 완료 처리 (READY → DONE) -->
@@ -36,6 +32,15 @@
         WHERE session_id = #{sessionId}
           AND status     = 'READY'
     </update>
+
+    <!-- 결제 키로 결제 조회 (중복 승인 방지) -->
+    <select id="findByPaymentKey"
+            resultType="org.example.board_cafe_kiosk_2603.domain.kiosk.payment.Payment">
+        SELECT id, session_id, status, final_amount, payment_key, order_id_toss, method, raw_response, approved_at, paid_at
+        FROM payment
+        WHERE payment_key = #{paymentKey}
+        LIMIT 1
+    </select>
 
     <!-- 주문 상태 업데이트 -->
     <update id="updateOrderStatus">

@@ -284,7 +284,7 @@
             color: white;
         }
 
-        .order-btn:hover {
+        .order-btn:hover:not(:disabled) {
             background: #0056b3;
             box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
         }
@@ -293,12 +293,167 @@
             transform: scale(0.98);
         }
 
+        .order-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
         .clear-btn {
             background: #f0f2f5;
             color: #888;
         }
 
         .clear-btn:hover {
+            background: #e0e2e7;
+            color: #555;
+        }
+
+        /* ========== 주문 확인 모달 ========== */
+        #order-confirm-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 50px;
+            border-radius: 30px;
+            width: 90%;
+            max-width: 550px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-content h2 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: #333;
+            text-align: center;
+        }
+
+        .modal-content .subtitle {
+            text-align: center;
+            color: #888;
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+        }
+
+        .modal-items-list {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .modal-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .modal-item:last-child {
+            border-bottom: none;
+        }
+
+        .modal-item-info {
+            flex: 1;
+        }
+
+        .modal-item-name {
+            font-weight: bold;
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .modal-item-qty {
+            color: #888;
+            font-size: 0.85rem;
+            margin-top: 3px;
+        }
+
+        .modal-item-price {
+            font-weight: bold;
+            color: #007bff;
+            text-align: right;
+            min-width: 100px;
+        }
+
+        .price-section {
+            border-top: 2px solid #eaeaea;
+            padding-top: 20px;
+            margin-bottom: 30px;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .price-row span:last-child {
+            color: #007bff;
+            font-size: 1.8rem;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-confirm {
+            flex: 1;
+            padding: 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-confirm:hover:not(:disabled) {
+            background: #0056b3;
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        }
+
+        .btn-confirm:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 20px;
+            background: #f0f2f5;
+            color: #888;
+            border: none;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-cancel:hover {
             background: #e0e2e7;
             color: #555;
         }
@@ -314,7 +469,7 @@
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 10000;
+            z-index: 9000;
         }
 
         .modal-box {
@@ -368,10 +523,26 @@
             from { transform: translateY(100px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
+
+        /* 로딩 스피너 */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body onclick="resetActivityTimer()">
-
 
 <div class="timer-banner">
     <i data-lucide="clock"></i>
@@ -395,11 +566,41 @@
         <span id="total-amount">₩0</span>
     </div>
     <div class="button-group">
-        <button class="order-btn" id="checkout-btn" onclick="proceedToCheckout()">주문하기</button>
+        <button class="order-btn" id="checkout-btn" onclick="openOrderConfirmModal()">주문하기</button>
         <button class="clear-btn" onclick="clearCart()">장바구니 비우기</button>
     </div>
 </div>
 
+<!-- ========== 주문 확인 모달 ========== -->
+<div id="order-confirm-modal">
+    <div class="modal-content">
+        <h2>주문 확인</h2>
+        <p class="subtitle">주문 내용을 확인하신 후 진행해주세요</p>
+
+        <!-- 주문 상품 리스트 -->
+        <div class="modal-items-list" id="modal-items-list">
+            <!-- 동적으로 채워짐 -->
+        </div>
+
+        <!-- 가격 정보 -->
+        <div class="price-section">
+            <div class="price-row">
+                <span>총 결제액</span>
+                <span id="modal-total">₩0</span>
+            </div>
+        </div>
+
+        <!-- 버튼 -->
+        <div class="modal-buttons">
+            <button class="btn-confirm" id="confirm-btn" onclick="confirmOrder()">
+                <span id="confirm-btn-text">주문하기</span>
+            </button>
+            <button class="btn-cancel" onclick="closeOrderConfirmModal()">취소</button>
+        </div>
+    </div>
+</div>
+
+<!-- 경고 모달 -->
 <div id="warning-modal">
     <div class="modal-box">
         <h2>계속 이용하시겠습니까?</h2>
@@ -419,6 +620,10 @@
     const warningModal = document.getElementById('warning-modal');
     let timerInterval;
 
+    // 현재 장바구니 정보를 메모리에 저장
+    let currentCartItems = [];
+    let currentTotalPrice = 0;
+
     // ===== 페이지 로드 시 장바구니 데이터 로드 =====
     document.addEventListener('DOMContentLoaded', function() {
         loadCart();
@@ -431,6 +636,8 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    currentCartItems = data.cartItems;
+                    currentTotalPrice = data.totalPrice;
                     renderCart(data.cartItems, data.totalPrice);
                 }
             })
@@ -533,11 +740,6 @@
             });
     }
 
-    // ===== 정산으로 이동 =====
-    function proceedToCheckout() {
-        window.location.href = '/kiosk/checkout';
-    }
-
     // ===== 장바구니 비우기 =====
     function clearCart() {
         if (!confirm('장바구니를 비우시겠습니까?')) return;
@@ -556,6 +758,94 @@
             });
     }
 
+    // ========== 주문 확인 모달 함수들 ==========
+
+    /**
+     * 주문 확인 모달 열기
+     */
+    function openOrderConfirmModal() {
+        if (currentCartItems.length === 0) {
+            showToast('장바구니가 비어있습니다.');
+            return;
+        }
+
+        // 모달에 상품 정보 채우기
+        const modalItemsList = document.getElementById('modal-items-list');
+        modalItemsList.innerHTML = currentCartItems.map(item => `
+      <div class="modal-item">
+        <div class="modal-item-info">
+          <div class="modal-item-name">${item.menuName}</div>
+          <div class="modal-item-qty">수량: ${item.quantity}개</div>
+        </div>
+        <div class="modal-item-price">
+          ${item.menuPrice === 0 ? 'FREE' : '₩' + (item.menuPrice * item.quantity).toLocaleString()}
+        </div>
+      </div>
+    `).join('');
+
+        // 총액 채우기
+        document.getElementById('modal-total').innerText = `₩${currentTotalPrice.toLocaleString()}`;
+
+        // 모달 표시
+        document.getElementById('order-confirm-modal').style.display = 'flex';
+        lucide.createIcons();
+    }
+
+    /**
+     * 모달 닫기
+     */
+    function closeOrderConfirmModal() {
+        document.getElementById('order-confirm-modal').style.display = 'none';
+    }
+
+    /**
+     * 주문 하기
+     * 1. 서버에 주문 생성 API 호출 (POST /kiosk/order/create)
+     * 2. 성공 시 /kiosk/order/{orderId} 페이지로 이동
+     * 3. 실패 시 에러 메시지 표시
+     */
+    async function confirmOrder() {
+        const confirmBtn = document.getElementById('confirm-btn');
+        const confirmBtnText = document.getElementById('confirm-btn-text');
+
+        // 버튼 비활성화
+        confirmBtn.disabled = true;
+        confirmBtnText.innerHTML = '<span class="spinner"></span>주문 처리 중...';
+
+        try {
+            const response = await fetch('/kiosk/order/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    tableNumber: tableNumber,
+                    totalAmount: currentTotalPrice,
+                    customerPhone: null
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                console.log('주문 생성 성공 - orderId:', data.id);
+                showToast(`✓ 주문이 생성되었습니다. (주문번호: ${data.id})`);
+
+                // 2초 후 주문 상세 페이지로 이동
+                setTimeout(() => {
+                    window.location.href = `/kiosk/order/${data.id}`;
+                }, 1500);
+            } else {
+                showToast(`✗ 주문 생성 실패: ${data.message}`);
+                confirmBtn.disabled = false;
+                confirmBtnText.innerText = '주문하기';
+            }
+        } catch (error) {
+            console.error('주문 생성 중 오류:', error);
+            showToast('주문 처리 중 오류가 발생했습니다.');
+            confirmBtn.disabled = false;
+            confirmBtnText.innerText = '주문하기';
+        }
+    }
+
     // ===== 타이머 =====
     function startTimer() {
         timerInterval = setInterval(updateTimer, 1000);
@@ -572,7 +862,7 @@
         }
         if (remainingTime <= 0) {
             clearInterval(timerInterval);
-            window.location.href = '/kiosk/games';
+            window.location.href = '/kiosk/screensaver';
         }
     }
 
@@ -594,7 +884,7 @@
         toast.innerText = message;
         document.body.appendChild(toast);
 
-        setTimeout(() => toast.remove(), 2000);
+        setTimeout(() => toast.remove(), 2500);
     }
 </script>
 </body>
