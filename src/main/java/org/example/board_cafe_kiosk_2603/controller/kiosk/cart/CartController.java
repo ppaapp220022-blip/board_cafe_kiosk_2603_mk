@@ -85,7 +85,34 @@ public class CartController {
     // 헬퍼
     // ===========================================================
 
+//    private Integer tableNumber(HttpSession session) {
+//        return (Integer) session.getAttribute("tableNumber");
+//    }
+    /**
+     * session의 tableNumber를 Integer로 안전하게 변환
+     * - KioskLoginSuccessHandler에서 Integer로 저장되지만
+     *   이전 세션(String 저장)이 남아있을 경우를 방어
+     */
     private Integer tableNumber(HttpSession session) {
-        return (Integer) session.getAttribute("tableNumber");
+        Object raw = session.getAttribute("tableNumber");
+        if (raw == null) {
+            log.warn("--- [CartController] session에 tableNumber 없음 ---");
+            return null;
+        }
+        if (raw instanceof Integer) {
+            return (Integer) raw;
+        }
+        // String으로 저장된 이전 세션 방어 처리
+        try {
+            int parsed = Integer.parseInt(raw.toString());
+            log.warn("--- [CartController] tableNumber가 String으로 저장됨 → 변환 처리: {} ---", parsed);
+            // 이후 요청에서 다시 변환하지 않도록 Integer로 재저장
+            session.setAttribute("tableNumber", parsed);
+            return parsed;
+        } catch (NumberFormatException e) {
+            log.error("--- [CartController] tableNumber 변환 실패 | raw: {} ---", raw);
+            return null;
+        }
     }
+
 }

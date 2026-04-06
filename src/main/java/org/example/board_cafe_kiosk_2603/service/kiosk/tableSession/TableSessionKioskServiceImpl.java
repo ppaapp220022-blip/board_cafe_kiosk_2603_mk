@@ -14,15 +14,16 @@ public class TableSessionKioskServiceImpl implements TableSessionKioskService{
     private final CafeTableSessionMapper tableSessionKioskMapper;
 
     @Override
-    public void createSession(int tableId, int packageId, int initialGuestCnt) {
+    public Long createSession(int tableId, int packageId, int initialGuestCnt) {
         CafeTableSession tableSession = CafeTableSession.builder()
                 .tableId(tableId)
                 .packageId(packageId)
                 .initialGuestCnt(initialGuestCnt)
                 .build();
 
-        tableSessionKioskMapper.insert(tableSession);
+        tableSessionKioskMapper.insert(tableSession);  // useGEneratedKeys로 id 채워짐
         log.info("세션 생성 완료... tableId: {}, packageId: {}, 인원: {}",
                 tableId, packageId, initialGuestCnt);
+        return tableSession.getId();  // Long 반환
     }
 }

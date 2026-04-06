@@ -46,7 +46,8 @@
         UPDATE cafe_table
         SET
             status = #{status},
-            current_session_id = #{sessionId}  WHERE id = #{id}
+            current_session_id = #{sessionId}
+        WHERE id = #{id}
     </update>
 
     <update id="closeSession">
@@ -58,17 +59,38 @@
         WHERE id = #{sessionId}
     </update>
 
-    <select id="selectCurrentSessionId" resultType="long">
-        SELECT current_session_id
-        FROM cafe_table
-        WHERE id = #{id}
+<!--    <select id="selectCurrentSessionId" resultType="long">-->
+<!--        SELECT current_session_id-->
+<!--        FROM cafe_table-->
+<!--        WHERE id = #{id}-->
+<!--    </select>-->
+
+    <!-- access_token 업데이트: updateAccessToken
+     기존 쿼리문에서의 변경 내역 id 값을 tableId로 변경 -->
+
+    <!-- current_session_id 조회 -->
+    <!-- resultType="org.example.board_cafe_kiosk_2603.domain.admin.table.CafeTable" -->
+    <select id="selectCurrentSessionId" resultType="java.lang.Long">
+        SELECT current_session_id FROM cafe_table
+        WHERE id = #{tableId}
     </select>
 
+    <!-- access_token 업데이트 -->
     <update id="updateAccessToken">
         UPDATE cafe_table
         SET access_token = #{accessToken}
-        WHERE id = #{id}
+        WHERE id = #{tableId}
     </update>
+
+    <!-- table_session에서 직접 활성 세션 ID 조회 -->
+    <!-- resultType="java.lang.Long" -->
+    <select id="selectActiveSessionByTableId" resultType="java.lang.Long">
+        SELECT id FROM table_session
+        WHERE table_id = #{tableId}
+          AND is_active = TRUE
+        ORDER BY check_in_time DESC
+        LIMIT 1
+    </select>
 
     <update id="resetAllTablesAtMidnight">
         /* 모든 테이블을 공석으로 만들고 세션 연결을 강제 해제 */

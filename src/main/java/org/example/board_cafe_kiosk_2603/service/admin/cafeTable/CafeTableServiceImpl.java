@@ -7,6 +7,7 @@ import org.example.board_cafe_kiosk_2603.domain.common.cafeTableSession.CafeTabl
 import org.example.board_cafe_kiosk_2603.dto.admin.table.CafeTableDTO;
 import org.example.board_cafe_kiosk_2603.dto.kiosk.order.OrderItemDTO;
 import org.example.board_cafe_kiosk_2603.mapper.admin.table.CafeTableMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CafeTableServiceImpl implements CafeTableService {
     private final CafeTableMapper cafeTableMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional(readOnly = true) // 상세 설명: 단순 조회 메서드이므로 성능 최적화를 위해 readOnly 적용
@@ -72,6 +74,7 @@ public class CafeTableServiceImpl implements CafeTableService {
                 cafeTableMapper.insertNewSession(newSession);
                 Long newSessionId = newSession.getId(); // DB에서 생성된 PK 획득
 
+                //
                 cafeTableMapper.updateTableStatusAndSession(id, "OCCUPIED", newSessionId);
                 log.info("성공: 세션 {}번 생성 및 테이블 매핑 완료", newSessionId);
                 break;
@@ -202,11 +205,43 @@ public class CafeTableServiceImpl implements CafeTableService {
         // 현재 비밀번호가 평문이므로 equals 비교
         // 추후 BCrypt 적용 시 -> if문을 아래 코드로 교체
         // !passwordEncoder.matches(password, cafeTable.getPassword())
-        if (!cafeTable.getPassword().equals(password)) {
-            log.warn("테이블 {} 비밀번호 불일치", tableNumber);
+//        if (!cafeTable.getPassword().equals(password)) {
+        if (!passwordEncoder.matches(password, cafeTable.getPassword())) {
+//            log.warn("테이블 {} 비밀번호 불일치", tableNumber);
+            log.warn("--- [CafeTableService] 비밀번호 불일치 | tableNumber: {} ---", tableNumber);
             return Optional.empty();
         }
 
         return Optional.of(cafeTable);
     }
+
+    @Override
+    public void updateAccessToken(int tableId, String accessToken) {
+        log.info("--- [CafeTableService] access_token 업데이트 | tableId: {} ---", tableId);
+        cafeTableMapper.updateAccessToken(tableId, accessToken);
+    }
+
+    @Override
+    public Long findCurrentSessionId(int tableId) {
+        log.info("--- [CafeTableService] current_session_id 조회 | tableId: {} ---", tableId);
+        Long sessionId = cafeTableMapper.selectCurrentSessionId(tableId);
+        log.info("--- [CafeTableService] 조회 결과 | sessionId: {} ---", sessionId);
+        return sessionId;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Long findActiveSessionByTableId(int tableId) {
+        log.info("--- [CafeTableService] table_session 활성 세션 조회 | tableId: {} ---", tableId);
+        return cafeTableMapper.selectActiveSessionByTableId(tableId);
+    }
+
+    @Override
+    public void syncTableWithSession(int tableId, Long sessionId) {
+        log.info("--- [CafeTableService] cafe_table 동기화 | tableId: {}, sessionId: {} ---",
+                tableId, sessionId);
+        // tableId를 그냥 넘기면 됨 - Mapper @Param("id")가 받음.
+        cafeTableMapper.updateTableStatusAndSession(tableId, "OCCUPIED", sessionId);
+    }
+
 }

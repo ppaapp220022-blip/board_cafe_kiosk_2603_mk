@@ -15,22 +15,22 @@ import java.util.*;
 
 /**
  * 키오스크 통합 컨트롤러
- *
+ * <p>
  * [로그인]
- *   GET  /kiosk/login            → 로그인 페이지
- *   POST /kiosk/login-process    → 로그인 처리 (테이블번호 + 비밀번호)
- *   GET  /kiosk/logout           → 로그아웃
- *
+ * GET  /kiosk/login            → 로그인 페이지
+ * POST /kiosk/login-process    → 로그인 처리 (테이블번호 + 비밀번호)
+ * GET  /kiosk/logout           → 로그아웃
+ * <p>
  * [진입 화면]
- *   GET /kiosk/screensaver       → 스크린세이버
- *   GET /kiosk/headcount         → 인원수 선택
- *   GET /kiosk/phone_login       → 전화번호 입력
- *
+ * GET /kiosk/screensaver       → 스크린세이버
+ * GET /kiosk/headcount         → 인원수 선택
+ * GET /kiosk/phone_login       → 전화번호 입력
+ * <p>
  * [메뉴 화면]
- *   GET /kiosk/games             → 게임 목록
- *   GET /kiosk/drinks            → 음료 목록
- *   GET /kiosk/food              → 음식 목록
- *   GET /kiosk/members           → 추가인원 목록
+ * GET /kiosk/games             → 게임 목록
+ * GET /kiosk/drinks            → 음료 목록
+ * GET /kiosk/food              → 음식 목록
+ * GET /kiosk/members           → 추가인원 목록
  */
 @Log4j2
 @Controller
@@ -67,6 +67,18 @@ public class kioskController {
         log.info("전화번호 입력 화면 - 테이블: {}", session.getAttribute("tableNumber"));
         return "kiosk/phone_login";
     }
+
+    // ===========================================================
+// 세션 시작 (로그인 성공 후 → 인원수 입력 화면)
+// ===========================================================
+    @GetMapping("/session/start")
+    public String sessionStart(HttpSession session, Model model) {
+        log.info("--- [KioskController] 인원수 입력 화면 진입 | tableNumber: {} ---",
+                session.getAttribute("tableNumber"));
+        model.addAttribute("tableNumber", session.getAttribute("tableNumber"));
+        return "kiosk/screensaver";
+    }
+
 
     // ===========================================================
     // [주연] -> 메뉴 화면 - 실제 DB 데이터

@@ -46,12 +46,14 @@ public interface CafeTableMapper {
     /**
      * [Select] 특정 테이블의 현재 세션 ID 포인터 조회
      */
-    Long selectCurrentSessionId(@Param("id") Integer id);
+//    Long selectCurrentSessionId(@Param("id") Integer id);
+    Long selectCurrentSessionId(@Param("tableId") Integer tableId);
 
     /**
      * [Update] 액세스 토큰(UUID) 개별 갱신
      */
-    int updateAccessToken(@Param("id") Integer id, @Param("accessToken") String accessToken);
+//    int updateAccessToken(@Param("id") Integer id, @Param("accessToken") String accessToken);
+    int updateAccessToken(@Param("tableId") Integer tableId, @Param("accessToken") String accessToken);
 
     /**
      * [Batch Update] 자정 시스템 초기화
@@ -86,6 +88,16 @@ public interface CafeTableMapper {
      */
     String selectAccessTokenById(@Param("id") Integer id);
 
+    // === 키오스크 로그인(세큐리티 관련 메서드) ===
     // 테이블 번호로 단건 조회 (로그인용), 주연
     Optional<CafeTable> findByTableNumber(int tableNumber);
+
+    // access_token 업데이트 (중복되는 메서드가 존재하므로 일시 주석처리)
+//    void updateAccessToken(@Param("tableId") Integer id, @Param("accessToken") String accessToken);
+
+    // current_session_id 조회 (중복되는 메서드가 존재하므로 일시 주석처리)
+//    Long SelectCurrentSessionId(@Param("tableId") Integer id);
+
+    // table_session에서 직접 활성 세션 ID 조회
+    Long selectActiveSessionByTableId(@Param("tableId") int tableId);
 }

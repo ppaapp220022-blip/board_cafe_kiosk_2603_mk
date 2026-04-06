@@ -35,7 +35,7 @@ public class ManagerController {
     @PostMapping
     @ResponseBody
     public ResponseEntity<String> createStaff(@RequestBody ManagerRequest managerRequest) {
-        log.info("새 직원 등록 요청: {}", managerRequest);
+        log.info("--- 새 직원 등록 요청: {} ---", managerRequest);
         managerService.createManager(managerRequest);
         return ResponseEntity.ok("success");
     }
@@ -47,16 +47,16 @@ public class ManagerController {
     public ResponseEntity<String> toggleStaffStatus(@RequestParam("id") Integer id,
                                                     @RequestParam("active") Boolean isActive) {
 
-        log.info("----- 직원 상태 변경 요청 시작 -----");
+        log.info("--- 직원 상태 변경 요청 시작 ---");
         log.info("요청 ID: {}, 변경할 상태: {}", id, isActive);
 
         try {
             // 서비스 계층을 통해 DB 업데이트
             managerService.updateActive(id, isActive);
-            log.info("DB 업데이트 성공");
+            log.info("--- DB 업데이트 성공 ---");
             return ResponseEntity.ok("success");
         } catch (Exception e) {
-            log.error("DB 업데이트 실패: {}", e.getMessage());
+            log.error("--- DB 업데이트 실패: {} ---", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("fail");
         }
     }
@@ -67,7 +67,7 @@ public class ManagerController {
     public ResponseEntity<Boolean> checkId(@RequestParam("loginId") String loginId) {
         // findByLoginId 결과가 있으면(present) 중복된 것이므로 false 반환 또는 존재 여부 반환
         boolean isDuplicate = managerService.isLoginIdDuplicate(loginId);
-        log.info("아이디 중복 체크 - ID: {}, 사용가능여부: {}", loginId, isDuplicate);
+        log.info("--- 아이디 중복 체크 - ID: {}, 사용가능여부: {} ---", loginId, isDuplicate);
         return ResponseEntity.ok(isDuplicate);
     }
 
@@ -77,7 +77,7 @@ public class ManagerController {
     public String profilePage(Model model, Principal principal) {
 
         if (principal == null) {
-            log.error("로그인 정보가 없습니다.");
+            log.error("--- 로그인 정보가 없습니다. ---");
             return "redirect:/login"; // 로그인 안 되어 있으면 리다이렉트
         }
 
@@ -86,7 +86,7 @@ public class ManagerController {
 
         // 2. 서비스 호출 (서비스에서 이미 ManagerResponse로 변환해서 줌)
         ManagerResponse manager = managerService.findByLoginId(loginId)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new RuntimeException("--- 사용자를 찾을 수 없습니다. ---"));
 
         // 3. 모델에 담기
         model.addAttribute("manager", manager);

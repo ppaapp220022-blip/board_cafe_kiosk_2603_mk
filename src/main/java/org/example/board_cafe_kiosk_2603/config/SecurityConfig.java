@@ -3,10 +3,14 @@ package org.example.board_cafe_kiosk_2603.config;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.security.KioskAuthorizationManager;
+import org.example.board_cafe_kiosk_2603.security.KioskUserDetailsService;
+import org.example.board_cafe_kiosk_2603.security.ManagerUserDetailsService;
 import org.example.board_cafe_kiosk_2603.security.handler.Handler403;
+import org.example.board_cafe_kiosk_2603.security.handler.KioskLoginSuccessHandler;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -14,6 +18,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
 import javax.sql.DataSource;
 
@@ -22,85 +28,122 @@ import javax.sql.DataSource;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final DataSource dataSource;  // 데이터베이스 이용
+    private final DataSource dataSource;  // DB 연결 정보 (Remember-Me용)
+    private final KioskUserDetailsService kioskUserDetailsService;  // 키오스크 로그인 로직
+    private final KioskLoginSuccessHandler kioskLoginSuccessHandler;  // 키오스크 로그인 성공 시 처리
+    private final ManagerUserDetailsService managerUserDetailsService;  // 관리자 로그인 로직
 
+    // ── Chain 1: 키오스크 (/kiosk/**) ──────────────────────────
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    @Order(1)
+    public SecurityFilterChain kioskChain(HttpSecurity http) throws Exception {
+        log.info("--- [SecurityConfig] Kiosk Security Chain 구성 시작 ---");
+
+        http.securityMatcher("/kiosk/**")
+                .userDetailsService(kioskUserDetailsService)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/kiosk/login", "/kiosk/login-process").permitAll()
+                        // ★ 수정: hasAnyRole 대신 KioskAuthorizationManager 적용
+                        //         → 테이블 번호 기반 URL 접근 제어 실제로 동작
+//                        .anyRequest().access(new KioskAuthorizationManager())
+                        // ★ 기존: .anyRequest().access(new KioskAuthorizationManager())
+                        // ★ 수정: ROLE_TABLE 권한이 있다면 테이블 번호 검사 없이 통과
+                        .anyRequest().hasRole("TABLE")
+                )
+                .formLogin(config -> config
+                        .loginPage("/kiosk/login")
+                        .loginProcessingUrl("/kiosk/login-process")
+                        .usernameParameter("tableNumber")
+                        .passwordParameter("password")
+                        .successHandler(kioskLoginSuccessHandler)
+                        .failureUrl("/kiosk/login?error")   // ← 추가
+                        .permitAll()
+                )
+                .rememberMe(remember -> remember
+                        .rememberMeParameter("remember-me")
+                        .tokenRepository(persistentTokenRepository())
+                        .tokenValiditySeconds(60 * 60 * 24 * 30) // 30일
+                        .userDetailsService(kioskUserDetailsService)
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/kiosk/logout")
+                        .logoutSuccessUrl("/kiosk/login")
+                        .deleteCookies("JSESSIONID", "remember-me")
+                )
+                .exceptionHandling(config -> config
+                        .accessDeniedHandler(accessDeniedHandler())
+                )
+                .csrf(AbstractHttpConfigurer::disable);
+
+        log.info("--- [SecurityConfig] Kiosk Security Chain 구성 완료 ---");
+        return http.build();
+    }
+
+    // ── Chain 2: 관리자 (그 외 전체) ──────────────────────────
+    @Bean
+    @Order(2)
+    public SecurityFilterChain adminChain(HttpSecurity http) throws Exception {
+        log.info("--- [SecurityConfig] Admin Security Chain 구성 시작 ---");
+
+        http.authorizeHttpRequests(auth -> auth
+                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                        .requestMatchers(
+                                "/common/login", "/common/logout",
+                                "/admin/login", "/admin/login-process",
+                                "/error"
+                        ).permitAll()
+                        // ROLE_TABLE(키오스크) 계정이 /admin/** 에 접근하지 못하도록 명시
+                        .requestMatchers("/admin/**").hasAnyRole("ADMIN", "STAFF")
+                        .anyRequest().authenticated()
+                )
+                // ★ 추가: adminChain 에 ManagerUserDetailsService 명시적 연결
+                .userDetailsService(managerUserDetailsService)
+                .formLogin(config -> config
+                        .loginPage("/common/login")
+                        .loginProcessingUrl("/admin/login-process")
+                        .usernameParameter("username")
+                        .passwordParameter("password")
+                        .defaultSuccessUrl("/admin/dashboard", true)
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/admin/logout")
+                        .logoutSuccessUrl("/common/login")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                )
+                .exceptionHandling(config -> config
+                        .accessDeniedHandler(accessDeniedHandler())
+                )
+                .csrf(AbstractHttpConfigurer::disable);
+
+        log.info("--- [SecurityConfig] Admin Security Chain 구성 완료 ---");
+        return http.build();
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        /* spring security의 설정을 담당 */
-        log.info("-----Security Config-----");
-
-        // 1. 권한 설정 (요청 경로별 접근 제한)
-        httpSecurity.authorizeHttpRequests(auth -> auth
-                // [정적 리소스] CSS, JS, Images 등은 인증 없이 허용
-                .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-
-                // [공통/로그인] 역할 선택 페이지 및 각 로그인 관련 경로는 모두 허용
-                .requestMatchers("/common/login",
-                        "/common/logout",
-                        "/admin/login",
-                        "/admin/login-process",
-                        "/kiosk/login",
-                        "/error" // Security에서 막혀서 로그인 페이지로 리다이렉트돼서 /error 경로를 허용해서 에러 페이지가 제대로 표시
-                        ).permitAll()
-
-                // [키오스크 전용] /kiosk/로 시작하는 모든 경로는 TABLE 권한 필수
-                .requestMatchers("/kiosk/**").access(new KioskAuthorizationManager()) // 아래 설명
-                // [관리자 전용] /admin/으로 시작하는 모든 경로는 ADMIN 또는 STAFF 권한 필수
-                .requestMatchers("/admin/**").hasAnyRole("ADMIN", "STAFF")
-                // [그 외] 나머지 모든 요청은 로그인(인증)된 사용자만 접근 가능
-                .anyRequest().authenticated()
-        );
-
-        // 2. 폼 로그인 설정 (관리자 대시보드 로그인용)
-        // Spring Security에서 폼 기반 로그인을 설정
-        httpSecurity.formLogin(config -> {
-            config.loginPage("/common/login")  // 미인증 사용자가 접근 시 이동할 페이지
-                    .loginProcessingUrl("/admin/login-process") // HTML Form의 action과 일치
-                    .usernameParameter("username")          // HTML input의 name="username"
-                    .passwordParameter("password")          // HTML input의 name="password"
-                    .defaultSuccessUrl("/admin/dashboard", true) // 로그인 성공 시 '무조건' 대시보드로 이동
-                    .permitAll();
-        });
-
-
-        // 5. 로그아웃 설정
-        httpSecurity.logout(logout -> logout
-                .logoutUrl("/admin/logout")  // 로그아웃 처리 경로
-                .logoutSuccessUrl("/common/login") // 로그아웃 시 역할 선택창으로
-                .invalidateHttpSession(true)  // 세션 무효화
-                .deleteCookies("JSESSIONID")  // 쿠키 삭제
-        );
-
-        // 3. CSRF 토큰 비활성화 (개발단계)
-//        httpSecurity.csrf(csrf -> csrf.disable());
-        httpSecurity.csrf(AbstractHttpConfigurer::disable);
-
-        // 4. 예외 처리 (Handler403 설정)
-        httpSecurity.exceptionHandling(config -> {
-            config.accessDeniedHandler(accessDeniedHandler());
-        });
-
-        return httpSecurity.build();
+    public PersistentTokenRepository persistentTokenRepository() {
+        log.info("--- [SecurityConfig] PersistentTokenRepository(Remember-Me DB 저장소) 초기화 ---");
+        JdbcTokenRepositoryImpl repo = new JdbcTokenRepositoryImpl();
+        repo.setDataSource(dataSource);
+        // 테이블명 커스텀 설정
+        repo.setCreateTableOnStartup(false);
+        return repo;
     }
 
     @Bean
     public AccessDeniedHandler accessDeniedHandler() {
+        log.info("--- [SecurityConfig] AccessDeniedHandler(Handler403) 등록 ---");
         return new Handler403();
-        // 얘를 config에 등록해줘야함
     }
 
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        /* Spring Security에서 정적 리소스나 보안 필터 제외 대상을 설정할 때 사용 */
-        log.info("-----web configure-----");
+    // -> 제거: webSecurityCustomizer (adminChain의 permitAll과 중복)
+    //   Spring Security 6.x 권장 방식인 체인 내 permitAll() 로 대체됨
 
-        // 정적 파일 경로에 시큐리티 적용을 안함
-        return (web -> web.ignoring().
-                requestMatchers(PathRequest.toStaticResources().atCommonLocations()));
-    }
+//    @Bean
+//    public WebSecurityCustomizer webSecurityCustomizer() {
+//        log.info("-----web configure-----");
+//        return web -> web.ignoring()
+//                .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+//    }
 }

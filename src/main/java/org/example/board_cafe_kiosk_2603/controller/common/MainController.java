@@ -46,7 +46,7 @@ public class MainController {
     @GetMapping("/admin/login")
     public String adminKiosk() {
         log.info("관리자 -> 로그인 ...");
-        return "/login/admin_login";
+        return "login/admin_login";
     }
 
     @GetMapping("/kiosk/login")
@@ -55,14 +55,14 @@ public class MainController {
 
         HttpSession session = request.getSession(false);
 
-        // [차단] 관리자 로그인 상태에서 키오스크 접근 차단
-        if (session != null && session.getAttribute("SPRING_SECURITY_CONTEXT") != null) {
-            log.warn("관리자 로그인 상태에서 키오스크 접근 차단");
-            redirectAttributes.addFlashAttribute("error",
-                    "관리자로 로그인된 상태입니다. 먼저 관리자 로그아웃 후 시도해주세요.");
-            return "redirect:/common/login";
-        }
-        return "/login/kiosk_login";
+//        // [차단] 관리자 로그인 상태에서 키오스크 접근 차단
+//        if (session != null && session.getAttribute("SPRING_SECURITY_CONTEXT") != null) {
+//            log.warn("관리자 로그인 상태에서 키오스크 접근 차단");
+//            redirectAttributes.addFlashAttribute("error",
+//                    "관리자로 로그인된 상태입니다. 먼저 관리자 로그아웃 후 시도해주세요.");
+//            return "redirect:/common/login";
+//        }
+        return "login/kiosk_login";
     }
 
     // ===== ⛔️ 디버깅용 ⛔️ =====
@@ -78,11 +78,11 @@ public class MainController {
     }
     // ===== //⛔️ 디버깅용 ⛔️ =====
 
-    @PostMapping("/logout")
-    public String adminLogoutPage() {
-        log.info("admin 로그인 -> 로그아웃 ...");
-        return "redirect:/common/login";
-    }
+//    @PostMapping("/logout")
+//    public String adminLogoutPage() {
+//        log.info("admin 로그인 -> 로그아웃 ...");
+//        return "redirect:/common/login";
+//    }
 
     // ===========================================================
     // 키오스크 POST 처리 흐름
@@ -206,9 +206,9 @@ public class MainController {
     // 관리자
     // ===========================================================
 
-    @PostMapping("/admin/login-process")
-    public String adminLoginProcess() {
-        log.info("관리자 로그인 처리 중... 대시보드로 이동합니다.");
-        return "redirect:/admin/dashboard";
-    }
+//    @PostMapping("/admin/login-process")
+//    public String adminLoginProcess() {
+//        log.info("관리자 로그인 처리 중... 대시보드로 이동합니다.");
+//        return "redirect:/admin/dashboard";
+//    }
 }

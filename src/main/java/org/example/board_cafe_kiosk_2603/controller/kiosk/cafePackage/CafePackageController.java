@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.domain.common.cafeTableSession.CafeTableSession;
+import org.example.board_cafe_kiosk_2603.service.admin.cafeTable.CafeTableService;
 import org.example.board_cafe_kiosk_2603.service.admin.cafeTable.TableSessionAdminService;
 import org.example.board_cafe_kiosk_2603.service.kiosk.cafePackage.CafePackageService;
 import org.example.board_cafe_kiosk_2603.service.kiosk.tableSession.TableSessionKioskService;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -27,6 +29,7 @@ import java.util.Map;
 public class CafePackageController {
 
     private final CafePackageService cafePackageService;
+    private final CafeTableService cafeTableService;
     private final TableSessionKioskService tableSessionKioskService;
     private final TableSessionAdminService tableSessionAdminService;
 
@@ -37,7 +40,8 @@ public class CafePackageController {
     @GetMapping("/package_selection")
     public String packageSelectionPage(HttpSession session, Model model) {
         // URL 파라미터 대신 세션에서 꺼내기
-        Integer tableNumber = (Integer) session.getAttribute("tableId");
+//        Integer tableNumber = (Integer) session.getAttribute("tableId");
+        Integer tableNumber = (Integer) session.getAttribute("tableNumber");
         Integer partySize = (Integer) session.getAttribute("partySize");
 
         model.addAttribute("tableNumber", tableNumber);
@@ -59,8 +63,13 @@ public class CafePackageController {
             HttpSession session) {
 
         int packageId = ((Number) req.get("packageId")).intValue();
-        Integer tableId   = (Integer) session.getAttribute("tableId");
+//        Integer tableId   = (Integer) session.getAttribute("tableId");
+        // 수정
+        Integer tableNumber = (Integer) session.getAttribute("tableNumber");
         Integer partySize = (Integer) session.getAttribute("partySize");
+
+        log.info("패키지 선택 요청 | tableNumber: {}, packageId: {}, partySize: {}",
+                tableNumber, packageId, partySize);
 
         var pkg = cafePackageService.getById(packageId);
 
@@ -72,16 +81,26 @@ public class CafePackageController {
         }
 
         // 활성 세션 있으면 DB 인원수로 HTTP 세션 덮어씌우기
-        CafeTableSession activeSession = tableSessionAdminService.getActiveSession(tableId);
+//        CafeTableSession activeSession = tableSessionAdminService.getActiveSession(tableId);
+
+        // 수정 2: tableNumber 기준으로 활성 세션 조회
+        CafeTableSession activeSession = tableSessionAdminService.getActiveSession(tableNumber);
+
         if (activeSession != null) {
+            // 기존 활성 세션 존재 -> DB 인원수로 덮어씌우기
             session.setAttribute("partySize", activeSession.getInitialGuestCnt());
             log.info("기존 활성 세션 존재 - DB 인원수로 덮어씌움: {}명",
                     activeSession.getInitialGuestCnt());
         } else {
             // 활성 세션 없으면 새로 생성
-            tableSessionKioskService.createSession(tableId, packageId, partySize);
-            log.info("table_session 생성 완료 - tableId: {}, packageId: {}, partySize: {}",
-                    tableId, packageId, partySize);
+//            tableSessionKioskService.createSession(tableId, packageId, partySize);
+//            log.info("table_session 생성 완료 - tableId: {}, packageId: {}, partySize: {}",
+//                    tableId, packageId, partySize);
+            // ✅ 수정 3: createSession 반환값(sessionId)으로 cafe_table 동기화
+            Long newSessionId = tableSessionKioskService.createSession(tableNumber, packageId, partySize);
+            cafeTableService.syncTableWithSession(tableNumber, newSessionId);
+            log.info("table_session 생성 + cafe_table 동기화 완료 | tableNumber: {}, sessionId: {}",
+                    tableNumber, newSessionId);
         }
 
         // 세션에 패키지 정보 저장

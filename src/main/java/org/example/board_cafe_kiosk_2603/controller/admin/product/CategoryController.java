@@ -12,14 +12,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 카테고리 CRUD REST 컨트롤러 (Admin 전용)
+ * 카테고리 CRUD 컨트롤러 (Admin 전용)
  * 기본 경로: /admin/categories
  */
 @Log4j2
 @Controller
 @RequestMapping("/admin/categories")
 @RequiredArgsConstructor
-public class CategoryController {  /** ⛔️ 수정 필요함 */
+public class CategoryController {
+
+    /** ⚠️ 카테고리 CRUD 확장 대비용 controller ⚠️ */
 
     private final CategoryService categoryService;
 

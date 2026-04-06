@@ -26,9 +26,6 @@ import java.util.List;
 @RequestMapping("/admin/product/menu")
 @RequiredArgsConstructor
 public class MenuController {
-    /**
-     * ⛔️ 수정 필요함
-     */
 
     private final MenuService menuService;
     private final CategoryService categoryService;

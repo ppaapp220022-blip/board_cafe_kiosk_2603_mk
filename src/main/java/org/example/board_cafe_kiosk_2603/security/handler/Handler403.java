@@ -15,6 +15,8 @@ import java.io.IOException;
 @Log4j2
 public class Handler403 implements AccessDeniedHandler {
 
+    /* 키오스크 계정이 관리자 페이지에 접속하려 할때 발생하는 403 Forbidden(권한 거부) 상황 처리하는 커스텀 핸들러 */
+
     @Override
     public void handle(HttpServletRequest request,
                        HttpServletResponse response,
@@ -38,9 +40,15 @@ public class Handler403 implements AccessDeniedHandler {
 
         // 일반 request
         // <form> 방식으로 데이터가 처리되는 경우 로그인 페이지로 리다이렉트
-        if (!isJsonRequest) {
-            // 로그인 페이지로 보냄
-            response.sendRedirect("/common/login?error=ACCESS_DENIED");
-        }
+//        if (!isJsonRequest) {
+//            // 로그인 페이지로 보냄
+//            response.sendRedirect("/common/login?error=ACCESS_DENIED");
+//        }
+
+        // 키오스크/관리자 리다이렉트 분기
+        String redirectUrl = request.getRequestURI().startsWith("/kiosk")
+                ? "/kiosk/login"
+                : "/common/login?error=ACCESS_DENIED";
+        response.sendRedirect(redirectUrl);
     }
 }

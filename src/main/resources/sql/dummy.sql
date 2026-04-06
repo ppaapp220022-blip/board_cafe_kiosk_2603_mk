@@ -25,18 +25,30 @@ VALUES ('admin', '$2a$10$I/U.nHfsL/6wBqXAJV1A3u0KwyHn9wiOVRK7ZVI6rAptphEgRW1Qi',
 -- 2. cafe_table (물리적 테이블 8개)
 -- ============================================================
 INSERT INTO `cafe_table` (`table_number`, `password`, `status`, `access_token`, `current_session_id`)
-VALUES (1, '1111', 'OCCUPIED', 'a1b2c3d4-e5f6-7890-abcd-ef1234567801', NULL),
-       (2, '2222', 'OCCUPIED', 'a1b2c3d4-e5f6-7890-abcd-ef1234567802', NULL),
-       (3, '3333', 'EMPTY', 'a1b2c3d4-e5f6-7890-abcd-ef1234567803', NULL),
-       (4, '4444', 'EMPTY', 'a1b2c3d4-e5f6-7890-abcd-ef1234567804', NULL),
-       (5, '5555', 'OCCUPIED', 'a1b2c3d4-e5f6-7890-abcd-ef1234567805', NULL),
-       (6, '6666', 'CLEANING', 'a1b2c3d4-e5f6-7890-abcd-ef1234567806', NULL),
-       (7, '7777', 'EMPTY', 'a1b2c3d4-e5f6-7890-abcd-ef1234567807', NULL),
-       (8, '8888', 'OCCUPIED', 'a1b2c3d4-e5f6-7890-abcd-ef1234567808', NULL),
-       (9, '9999', 'EMPTY', 'a1b2c3d4-e5f6-7890-abcd-ef1234567809', NULL),
-       (10, '1010', 'EMPTY', 'a1b2c3d4-e5f6-7890-abcd-ef1234567810', NULL),
-       (11, '1011', 'EMPTY', 'a1b2c3d4-e5f6-7890-abcd-ef1234567811', NULL),
-       (12, '1012', 'EMPTY', 'a1b2c3d4-e5f6-7890-abcd-ef1234567812', NULL);
+VALUES (1, '$2a$12$6.m99XxVXQhLA.kW.pV.8.yAkQtntwMG6zJ2XEzCYdIt6F92AHZoa', 'OCCUPIED', 'a1b2c3d4-e5f6-7890-abcd-ef1234567801', NULL),
+       (2, '$2a$12$jMyxkDnEXF6zTzs.6odIHuCtzfR35EDFxZmflbbamUHc9drejGipa', 'OCCUPIED', 'a1b2c3d4-e5f6-7890-abcd-ef1234567802', NULL),
+       (3, '$2a$12$wPexDR2riZFgwKTtj925FOXZFGPaf6U13GkiNK4Gd43M.1hltvlBS', 'EMPTY', 'a1b2c3d4-e5f6-7890-abcd-ef1234567803', NULL),
+       (4, '$2a$12$6UqwKwlaRu05xPzlTbzBQeC68kViy7OrQscQQq.MzUiMyV9eyOlcO', 'EMPTY', 'a1b2c3d4-e5f6-7890-abcd-ef1234567804', NULL),
+       (5, '$2a$12$BoILW/Dwdq267pCpVPlxWuKsjctBoWy1Jz8XY9KHJiA/v86.pPxYe', 'OCCUPIED', 'a1b2c3d4-e5f6-7890-abcd-ef1234567805', NULL),
+       (6, '$2a$12$EKiULQjPsNUuxtwfm1K9V.tmr1lkGAUZTzdKkFXiKRGt8N.oC2qwq', 'CLEANING', 'a1b2c3d4-e5f6-7890-abcd-ef1234567806', NULL),
+       (7, '$2a$12$epx2tbnDEk1tuGNOcYu1/.Ciww5olY7rULAIuiUEkn1CLGU1zLV3u', 'EMPTY', 'a1b2c3d4-e5f6-7890-abcd-ef1234567807', NULL),
+       (8, '$2a$12$LANNhG93KYJLa7QpyB5t1uJ.pQBpy7CUFg8r8J.9WAX6ARxsNZzJC', 'OCCUPIED', 'a1b2c3d4-e5f6-7890-abcd-ef1234567808', NULL),
+       (9, '$2a$12$fHPOFdBDC9dlEIeR648aTeGAIEsK9SBC8UgsCq7vcV2KF6dMk6WDi', 'EMPTY', 'a1b2c3d4-e5f6-7890-abcd-ef1234567809', NULL),
+       (10, '$2a$12$A13LCSatRIIpBFoKiTNyLep7invKMx2KUClmbX28sHYLzEwK4Y4ui', 'EMPTY', 'a1b2c3d4-e5f6-7890-abcd-ef1234567810', NULL),
+       (11, '$2a$12$YoAiJOrZMD4Kk/9lHYi1BOjV2Y3kFSeslzr44L75nfKt6cEOCrgNa', 'EMPTY', 'a1b2c3d4-e5f6-7890-abcd-ef1234567811', NULL),
+       (12, '$2a$12$wXHXtdMIS3U7ASVzH1K4T.nbxE5X5nTcNbdv8BHk4zLOcIDSpv0pu', 'EMPTY', 'a1b2c3d4-e5f6-7890-abcd-ef1234567812', NULL);
+-- 1 : 1111
+-- 2 : 2222
+-- 3 : 3333
+-- 4 : 4444
+-- 5 : 5555
+-- 6 : 6666
+-- 7 : 7777
+-- 8 : 8888
+-- 9 : 9999
+-- 10 : 1010
+-- 11 : 1011
+-- 12 : 1012
 
 -- ============================================================
 -- 3. customer (등록 고객)

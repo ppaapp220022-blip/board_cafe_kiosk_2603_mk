@@ -61,6 +61,9 @@ dependencies {
     // spring Batch
     implementation 'org.springframework.boot:spring-boot-starter-batch'
     testImplementation 'org.springframework.batch:spring-batch-test'
+
+    // solapi - 카카오 알림톡/SMS 메시지 발송 서비스를 사용하기 위한 라이브러리 의존성
+    implementation 'com.solapi:sdk:1.0.3'
 }
 
 tasks.named('test') {

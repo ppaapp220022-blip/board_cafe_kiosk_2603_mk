@@ -81,7 +81,12 @@
   <h2>Table Setup</h2>
   <p class="subtitle">Staff Only - Initialize Kiosk</p>
 
-  <form action="/kiosk/login" method="POST">
+  <div th:if="${param.error}" style="color:red; margin-bottom:15px;">
+    테이블 번호 또는 비밀번호가 올바르지 않습니다.
+  </div>
+
+<!--  <form action="/kiosk/login" method="POST">-->
+  <form th:action="@{/kiosk/login-process}" method="post">
     <div class="input-group">
       <span class="label">Table Number</span>
       <input type="number" name="tableNumber" class="no-icon" placeholder="Enter table number (1-10)" min="1" max="10" required>
@@ -94,6 +99,8 @@
         <input type="password" name="password" placeholder="Enter admin password" required>
       </div>
     </div>
+
+    <input type="hidden" name="remember-me" value="true"/>
 
     <button type="submit" class="btn-primary">Initialize Table</button>
   </form>

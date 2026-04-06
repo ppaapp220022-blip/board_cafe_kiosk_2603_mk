@@ -29,6 +29,16 @@ public interface CafeTableService {
     /* 알림 확인 처리 */
     void markMessagesAsRead(Integer tableId);
 
+    // 키오스크 로그인
     // 키오스크 로그인: 테이블 번호 + 비밀번호 검증 후 테이블 반환
     Optional<CafeTable> login(int tableNumber, String password);
+
+    void updateAccessToken(int tableId, String accessToken);
+    Long findCurrentSessionId(int tableId);
+
+    // table_session 직접 조회
+    Long findActiveSessionByTableId(int tableId);
+    // 불일치 복구
+    void syncTableWithSession(int tableId, Long sessionId);
+
 }
