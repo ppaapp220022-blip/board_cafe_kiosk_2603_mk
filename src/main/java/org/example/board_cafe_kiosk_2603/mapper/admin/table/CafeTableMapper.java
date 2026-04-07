@@ -100,4 +100,14 @@ public interface CafeTableMapper {
 
     // table_session에서 직접 활성 세션 ID 조회
     Long selectActiveSessionByTableId(@Param("tableId") int tableId);
+
+    /**
+     * 특정 세션 ID에 해당하는 모든 메시지를 읽음 처리
+     */
+    int updateMessagesReadStatusBySessionId(@Param("sessionId") Long sessionId);
+
+    /**
+     * [Batch Update] 모든 미확인 메시지 일괄 읽음 처리
+     */
+    int updateAllMessagesReadStatus();
 }

@@ -83,6 +83,10 @@ public class CafeTableServiceImpl implements CafeTableService {
                 /* 주 설명: [퇴실/결제] 현재 이용 중인 세션 마감 및 테이블 포인터 해제 */
                 Long currentSessionId = cafeTableMapper.selectCurrentSessionId(id);
                 if (currentSessionId != null) {
+                    // 퇴실하는 세션의 모든 메시지 읽음 처리
+                    cafeTableMapper.updateMessagesReadStatusBySessionId(currentSessionId);
+                    log.info("성공: 세션 {}번 종료로 인한 미확인 메시지 자동 읽음 처리", currentSessionId);
+
                     cafeTableMapper.closeSession(currentSessionId);
                     log.info("성공: 세션 {}번 이용 이력 마감 완료", currentSessionId);
                 }
@@ -93,6 +97,8 @@ public class CafeTableServiceImpl implements CafeTableService {
                 break;
 
             case "EMPTY":
+                // EMPTY 전환 시에도 혹시 남아있을지 모를 테이블 기준 알림 청소
+                cafeTableMapper.updateMessagesReadStatus(id);
                 /* 주 설명: [청소 완료] 다음 손님 대기 상태로 전환 */
                 cafeTableMapper.updateTableStatusAndSession(id, "EMPTY", null);
                 log.info("성공: 테이블 EMPTY 상태 전환 완료");
@@ -108,6 +114,9 @@ public class CafeTableServiceImpl implements CafeTableService {
         /* 주 설명: UUID를 생성하여 특정 테이블의 access_token 단독 갱신 */
         String newToken = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         // 상세 설명: 주석 내용(8자리 짧은 토큰)과 일치하도록 substring(0, 8)로 유지함
+
+        // 토큰 새로 뽑을 때 해당 테이블 알림 전부 읽음 처리
+        cafeTableMapper.updateMessagesReadStatus(id);
 
         cafeTableMapper.updateAccessToken(id, newToken);
         log.info("테이블 ID: {} 새 토큰 발급 완료: {}", id, newToken);
@@ -127,7 +136,11 @@ public class CafeTableServiceImpl implements CafeTableService {
         int closedSessions = cafeTableMapper.updateAllActiveSessions();
         log.info("자정 데이터 리셋 - 활성 세션 {}개 강제 종료 완료", closedSessions);
 
-        // 2. 전체 테이블 공석 처리 및 연결 해제
+        // 2. 모든 미확인 메시지 일괄 읽음 처리
+        int updatedMessages = cafeTableMapper.updateAllMessagesReadStatus();
+        log.info("미확인 메시지 {}건 읽음 처리 완료", updatedMessages);
+
+        // 3. 전체 테이블 공석 처리 및 연결 해제
         // 상세 설명: for문으로 건건이 쿼리하는 대신, Mapper에 등록된 일괄 업데이트 쿼리를 호출하여 통신 횟수 및 부하 최소화
         int resetTables = cafeTableMapper.resetAllTablesAtMidnight();
         log.info("자정 데이터 리셋 - 전체 테이블 공석(EMPTY) 및 매핑 해제 완료 (적용 건수: {})", resetTables);

@@ -145,4 +145,19 @@
         WHERE table_number = #{tableNumber}
     </select>
 
+    <!-- Session ID 비움 처리 시 메크로 메세지 is_read = true 로 변경 -->
+    <update id="updateMessagesReadStatusBySessionId">
+        UPDATE table_message
+        SET is_read = TRUE
+        WHERE table_id = (SELECT table_id FROM table_session WHERE id = #{sessionId})
+          AND is_read = FALSE
+    </update>
+
+    <!-- 현재 활성화된 모든 메시지"를 한꺼번에 읽음 처리 (마감용) -->
+    <update id="updateAllMessagesReadStatus">
+        UPDATE table_message
+        SET is_read = TRUE
+        WHERE is_read = FALSE
+    </update>
+
 </mapper>
