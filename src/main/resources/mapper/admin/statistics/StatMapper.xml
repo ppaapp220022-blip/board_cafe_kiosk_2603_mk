@@ -12,30 +12,42 @@
         INSERT INTO daily_sales_summary (stat_date, total_revenue, order_count, visit_count, avg_usage_time)
         SELECT
             #{targetDate},
-            IFNULL(SUM(ts.total_amount), 0),
-            /* 주문 건수: 단순 카운트이므로 서브쿼리 유지 (성능 영향 미미) */
-            (SELECT COUNT(*) FROM orders
-             WHERE ordered_at >= #{targetDate}
-               AND ordered_at <![CDATA[ < ]]> DATE_ADD(#{targetDate}, INTERVAL 1 DAY)
-               AND status NOT IN ('PENDING', 'CANCELLED')),
+            /* 1. payment 테이블의 실제 결제 완료 금액(DONE) 합계 */
+            IFNULL(SUM(p.final_amount), 0),
 
-            /* [핵심] 방문자 수: 초기 인원 + JOIN으로 계산된 추가 인원 수량 */
+            /* 2. 해당 날짜에 결제 완료된 세션에 포함된 모든 주문 건수 */
+            (SELECT COUNT(*) FROM orders o
+                                      JOIN payment p2 ON o.session_id = p2.session_id
+             WHERE p2.status = 'DONE'
+               AND p2.paid_at >= #{targetDate}
+               AND p2.paid_at <![CDATA[ < ]]> DATE_ADD(#{targetDate}, INTERVAL 1 DAY)),
+
+            /* 3. 방문자 수: 세션 초기 인원 + 추가 인원(GUEST 카테고리) 수량 */
             IFNULL(SUM(ts.initial_guest_cnt + IFNULL(extra.extra_qty, 0)), 0),
 
+            /* 4. 평균 이용 시간 */
             IFNULL(AVG(TIMESTAMPDIFF(MINUTE, ts.check_in_time, ts.check_out_time)), 0)
-        FROM table_session ts
-                 /* INNER JOIN을 사용해 '인원 추가' 항목만 미리 합산한 파생 테이블을 연결 */
+        FROM payment p
+                 INNER JOIN table_session ts ON p.session_id = ts.id
                  LEFT JOIN (
+            /* GUEST 카테고리(인원 추가) 수량 미리 합산 */
             SELECT o.session_id, SUM(oi.quantity) as extra_qty
             FROM order_item oi
                      INNER JOIN orders o ON oi.order_id = o.id
-            WHERE oi.menu_name = '인원 추가 (1명)'
-              AND o.status NOT IN ('PENDING', 'CANCELLED')
+                     INNER JOIN menu m ON oi.menu_id = m.id
+                     INNER JOIN category c ON m.category_id = c.id
+            WHERE c.type = 'GUEST'
+              AND o.status = 'COMPLETED'
             GROUP BY o.session_id
-        ) extra ON ts.id = extra.session_id
-        WHERE ts.check_out_time >= #{targetDate}
-          AND ts.check_out_time <![CDATA[ < ]]> DATE_ADD(#{targetDate}, INTERVAL 1 DAY)
-          AND ts.is_active = FALSE
+        ) extra ON p.session_id = extra.session_id
+        WHERE p.status = 'DONE'
+          AND p.paid_at >= #{targetDate}
+          AND p.paid_at <![CDATA[ < ]]> DATE_ADD(#{targetDate}, INTERVAL 1 DAY)
+        ON DUPLICATE KEY UPDATE
+                             total_revenue = VALUES(total_revenue),
+                             order_count = VALUES(order_count),
+                             visit_count = VALUES(visit_count),
+                             avg_usage_time = VALUES(avg_usage_time)
     </insert>
 
     <delete id="deleteItemSalesHistory">
@@ -52,15 +64,18 @@
             SUM(oi.price * oi.quantity)
         FROM order_item oi
                  INNER JOIN orders o ON oi.order_id = o.id
+                 INNER JOIN payment p ON o.session_id = p.session_id
                  INNER JOIN menu m ON oi.menu_id = m.id
                  INNER JOIN category c ON m.category_id = c.id
-        WHERE o.ordered_at >= #{targetDate}
-          AND o.ordered_at <![CDATA[ < ]]> DATE_ADD(#{targetDate}, INTERVAL 1 DAY)
-          AND o.status NOT IN ('PENDING', 'CANCELLED')
-            /* 🚫 통계용 히스토리 필터링: '인원 추가' 메뉴와 'game' 카테고리는 매출 통계에서 제외 */
-          AND m.name != '인원 추가 (1명)'
-          AND c.type != 'game'
+        WHERE p.status = 'DONE'
+          AND p.paid_at >= #{targetDate}
+          AND p.paid_at <![CDATA[ < ]]> DATE_ADD(#{targetDate}, INTERVAL 1 DAY)
+            /* 🚫 '인원 추가(GUEST)'와 '게임 대여(GAME)'는 매출 통계에서 제외 */
+          AND c.type NOT IN ('GUEST', 'GAME')
         GROUP BY oi.menu_id, c.type
+        ON DUPLICATE KEY UPDATE
+                             sales_qty = VALUES(sales_qty),
+                             sales_amount = VALUES(sales_amount)
     </insert>
 
     <select id="getWeeklyStats" resultType="org.example.board_cafe_kiosk_2603.dto.admin.statistics.DailySalesDTO">
@@ -103,6 +118,20 @@
         FROM item_sales_history
         WHERE stat_date = #{targetDate}
         GROUP BY category
+    </select>
+
+    <select id="getTopGamesByMonth" resultType="org.example.board_cafe_kiosk_2603.dto.admin.statistics.GameStatsDTO">
+        SELECT
+            g.name AS gameName,
+            COUNT(gh.id) AS rentCount
+        FROM game_history gh
+                 INNER JOIN game_item gi ON gh.game_item_id = gi.id
+                 INNER JOIN game g ON gi.game_id = g.id
+        WHERE YEAR(gh.rented_at) = YEAR(#{targetDate})
+          AND MONTH(gh.rented_at) = MONTH(#{targetDate})
+        GROUP BY g.id, g.name
+        ORDER BY rentCount DESC
+        LIMIT #{limit}
     </select>
 
 </mapper>

@@ -3,6 +3,7 @@ package org.example.board_cafe_kiosk_2603.controller.admin.statistics;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.dto.admin.statistics.DailySalesDTO;
+import org.example.board_cafe_kiosk_2603.dto.admin.statistics.GameStatsDTO;
 import org.example.board_cafe_kiosk_2603.service.admin.statistics.StatService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -88,6 +89,11 @@ public class StatController {
         // 6. 해당 기간(7일) 동안의 일일 평균 매출액
         log.info("weeklyAvgRevenue : {}", weeklyAvg);
         response.put("weeklyAvgRevenue", weeklyAvg);
+
+        // 7. 월간 인기 보드게임 TOP 5
+        List<GameStatsDTO> topGames = statService.getTopGamesByMonth(targetDate, 5);
+        log.info("topGames : {}", topGames);
+        response.put("topGames", topGames);
 
         return ResponseEntity.ok(response);
     }

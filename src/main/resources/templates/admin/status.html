@@ -142,9 +142,16 @@
     </div>
   </div>
 
-  <div class="best-seller-card" id="best-seller-container">
-    <div class="chart-title">베스트 셀러 (TOP 5)</div>
-    <div class="text-center py-4">데이터를 불러오는 중...</div>
+  <div class="chart-row" style="margin-top: 20px;">
+    <div class="best-seller-card" id="best-seller-container" style="margin-top: 0;">
+      <div class="chart-title">메뉴 베스트 셀러 (TOP 5)</div>
+      <div class="text-center py-4">데이터를 불러오는 중...</div>
+    </div>
+
+    <div class="best-seller-card" id="top-games-container" style="margin-top: 0;">
+      <div class="chart-title" id="top-games-title">월간 인기 보드게임 (TOP 5)</div>
+      <div class="text-center py-4">데이터를 불러오는 중...</div>
+    </div>
   </div>
 </th:block>
 
@@ -191,7 +198,10 @@
         }
 
         // 4. 베스트 셀러 업데이트
-        updateBestSellers(data.topMenus);
+        updateBestSellers(data.topMenus, date);
+
+        // 5. 월간 인기 게임 업데이트
+        updateTopGames(data.topGames, date);
 
         // 1. 주간 일평균 (서버에서 계산한 값)
         document.getElementById('stat-daily-avg').innerText = '₩' + (data.weeklyAvgRevenue || 0).toLocaleString();
@@ -204,21 +214,29 @@
       }
     }
 
-    function updateBestSellers(menus) {
+    // 일간 메뉴 베스트 셀러 리스트 렌더링 함수
+    function updateBestSellers(menus, targetDateStr) {
       const container = document.getElementById('best-seller-container');
-      let html = '<div class="chart-title">베스트 셀러 (TOP 5)</div>';
+
+      // 날짜 파싱 (예: 4월 7일)
+      const dateObj = new Date(targetDateStr);
+      const monthStr = dateObj.getMonth() + 1;
+      const dayStr = dateObj.getDate();
+
+      // 차트 타이틀에 날짜 동적 적용
+      let html = `<div class="chart-title">${monthStr}월 ${dayStr}일 메뉴 베스트 셀러 (TOP 5)</div>`;
 
       if (!menus || menus.length === 0) {
         html += '<div style="text-align:center; padding:30px; color:#999;">판매 데이터가 없습니다.</div>';
       } else {
         menus.forEach((item, index) => {
           html += `
-                  <div class="seller-item">
-                      <div class="rank-badge">${index + 1}</div>
-                      <div class="item-name">${item.menuName}</div>
-                      <div class="item-count">${item.salesQty}개 판매</div>
-                      <div class="item-price">₩${item.salesAmount.toLocaleString()}</div>
-                  </div>`;
+              <div class="seller-item">
+                  <div class="rank-badge">${index + 1}</div>
+                  <div class="item-name">${item.menuName}</div>
+                  <div class="item-count">${item.salesQty}개 판매</div>
+                  <div class="item-price">₩${item.salesAmount.toLocaleString()}</div>
+              </div>`;
         });
       }
       container.innerHTML = html;
@@ -253,6 +271,29 @@
       initCharts();
       loadStatData(dateInput.value);
     });
+
+    // 월간 인기 게임 리스트 렌더링 함수
+    function updateTopGames(games, targetDateStr) {
+      const container = document.getElementById('top-games-container');
+      const dateObj = new Date(targetDateStr);
+      const monthStr = dateObj.getMonth() + 1; // 월 추출
+
+      let html = `<div class="chart-title">${monthStr}월 인기 보드게임 (TOP 5)</div>`;
+
+      if (!games || games.length === 0) {
+        html += '<div style="text-align:center; padding:30px; color:#999;">대여 데이터가 없습니다.</div>';
+      } else {
+        games.forEach((item, index) => {
+          html += `
+                  <div class="seller-item">
+                      <div class="rank-badge">${index + 1}</div>
+                      <div class="item-name">${item.gameName}</div>
+                      <div class="item-price">${item.rentCount}회 대여</div>
+                  </div>`;
+        });
+      }
+      container.innerHTML = html;
+    }
   </script>
 </th:block>
 </body>

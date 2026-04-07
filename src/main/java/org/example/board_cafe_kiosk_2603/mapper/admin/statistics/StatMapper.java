@@ -2,6 +2,7 @@ package org.example.board_cafe_kiosk_2603.mapper.admin.statistics;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.example.board_cafe_kiosk_2603.dto.admin.statistics.DailySalesDTO;
+import org.example.board_cafe_kiosk_2603.dto.admin.statistics.GameStatsDTO;
 import org.example.board_cafe_kiosk_2603.dto.admin.statistics.ItemSalesDTO;
 import org.apache.ibatis.annotations.Param;
 
@@ -46,4 +47,9 @@ public interface StatMapper {
      * - '인원 추가' 항목이 제외된 상태로 가장 많이 팔린 메뉴 순으로 정렬하여 반환합니다.
      **/
     List<ItemSalesDTO> getTopSellingMenuByDate(@Param("targetDate") LocalDate targetDate, @Param("limit") int limit);
+
+    /** * [조회] 기준 날짜가 속한 '월(Month)'의 인기 보드게임 TOP N 조회
+     * - game_history 테이블을 기반으로 대여 횟수가 많은 순으로 정렬합니다.
+     **/
+    List<GameStatsDTO> getTopGamesByMonth(@Param("targetDate") LocalDate targetDate, @Param("limit") int limit);
 }

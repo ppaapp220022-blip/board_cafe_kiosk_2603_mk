@@ -3,6 +3,7 @@ package org.example.board_cafe_kiosk_2603.service.admin.statistics;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.dto.admin.statistics.DailySalesDTO;
+import org.example.board_cafe_kiosk_2603.dto.admin.statistics.GameStatsDTO;
 import org.example.board_cafe_kiosk_2603.dto.admin.statistics.ItemSalesDTO;
 import org.example.board_cafe_kiosk_2603.mapper.admin.statistics.StatMapper;
 import org.springframework.stereotype.Service;
@@ -112,5 +113,14 @@ public class StatService {
         result.put("labels", labels);
         result.put("values", values);
         return result;
+    }
+
+    /**
+     * 조회 - 기준 날짜가 속한 월의 인기 보드게임 TOP N 조회 (대여 횟수 기준)
+     */
+    @Transactional(readOnly = true)
+    public List<GameStatsDTO> getTopGamesByMonth(LocalDate targetDate, int limit) {
+        log.info("--- StatService getTopGamesByMonth ---");
+        return statMapper.getTopGamesByMonth(targetDate, limit);
     }
 }
