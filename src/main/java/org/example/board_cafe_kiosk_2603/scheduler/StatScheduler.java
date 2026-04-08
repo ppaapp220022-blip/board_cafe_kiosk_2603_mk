@@ -48,4 +48,30 @@ public class StatScheduler {
             e.printStackTrace();
         }
     }
+
+    /**
+     * 수동 실행을 위한 메서드 - 테스트 코드에서 호출
+     */
+    public void runManualStatJob(LocalDate targetDate) {
+        log.info("[Batch Scheduler] 수동 통계 배치 작업 요청 확인 (대상일자: {})", targetDate);
+
+        // 파라미터 생성 (수동 실행 시에도 매번 새로운 JobInstance로 인식되도록 time 추가)
+        JobParameters jobParameters = new JobParametersBuilder()
+                .addString("targetDate", targetDate.toString())
+                .addLong("time", System.currentTimeMillis())
+                .toJobParameters();
+
+        try {
+            log.info("[Batch Scheduler] 수동 통계 배치 작업 시작...");
+
+            // Job 실행
+            jobLauncher.run(dailyRevenueJob, jobParameters);
+
+            log.info("[Batch Scheduler] 수동 통계 배치 작업 완료 성공! (대상일자: {})", targetDate);
+
+        } catch (Exception e) {
+            log.error("[Batch Scheduler] 수동 통계 배치 작업 중 오류 발생: {}", e.getMessage());
+            e.printStackTrace();
+        }
+    }
 }
