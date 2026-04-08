@@ -80,6 +80,39 @@
             background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
             color: #f44336; border-color: #ffccbc; animation: pulse-red 1s infinite;
         }
+
+        /* 새 주문 상태 박스 */
+        .order-status-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: #fff8f0;
+            color: #d85a30;
+            border: 1px solid #ffccba;
+            min-height: 40px;
+            max-width: 200px;
+        }
+
+        .order-status-box.hidden {
+            display: none;
+        }
+
+        .order-status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #d85a30;
+            animation: pulse-order 1.5s infinite;
+        }
+
+        @keyframes pulse-order {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
         @keyframes pulse-red { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
         .content { flex: 1; padding: 30px; overflow-y: auto; background-color: #f4f6f8; }
 
@@ -99,6 +132,58 @@
             position: fixed; bottom: 30px; right: 30px; background: #333; color: white;
             padding: 15px 25px; border-radius: 12px; z-index: 2000;
         }
+
+        /* --- 메뉴 그리드 --- */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        .menu-item {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .menu-item:not(.sold-out):hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+        .menu-item.sold-out { opacity: 0.5; }
+        .menu-img-area {
+            width: 100%; aspect-ratio: 4/3;
+            background: #f0f2f5;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+        .menu-img-area img { width: 100%; height: 100%; object-fit: cover; }
+        .placeholder-icon { width: 48px; height: 48px; color: #ccc; }
+        .menu-info-area {
+            padding: 16px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .menu-info-left { flex: 1; min-width: 0; }
+        .menu-name {
+            font-size: 1rem; font-weight: 600; color: #333;
+            margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .menu-price { font-size: 1rem; font-weight: 700; color: #007bff; }
+        .menu-price.free { color: #4caf50; }
+        .menu-info-right { margin-left: 12px; flex-shrink: 0; }
+        .add-direct-btn {
+            width: 44px; height: 44px; border-radius: 12px;
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white; border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .add-direct-btn:hover:not(:disabled) {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,123,255,0.4);
+        }
+        .add-direct-btn:disabled { cursor: not-allowed; }
+        .add-direct-btn i { width: 22px; height: 22px; }
     </style>
 </head>
 <body>
@@ -136,6 +221,10 @@
         <div class="header-right">
             <div class="timer-badge" id="timer-badge">
                 <i data-lucide="clock"></i><span id="timer-text">--:--</span>
+            </div>
+            <div class="order-status-box hidden" id="order-status-box">
+                <span class="order-status-dot"></span>
+                <span id="order-status-text">새 주문</span>
             </div>
             <button class="icon-btn cart" onclick="navigateCart()">
                 <i data-lucide="shopping-cart"></i>
@@ -214,9 +303,87 @@
         setTimeout(() => toast.remove(), 2000);
     }
 
+    async function addItemToCartDirect(btn) {
+        const item = btn.closest('.menu-item');
+        const menuName  = item.dataset.name;
+        const menuPrice = parseInt(item.dataset.price, 10);
+
+        try {
+            const res = await fetch('/kiosk/cart/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ menuName, menuPrice, quantity: 1 })
+            });
+            if (!res.ok) throw new Error('서버 오류 (' + res.status + ')');
+            const cart = await res.json();
+
+            const badge = document.getElementById('cart-badge');
+            const count = cart.cartCount ?? (cart.cartItems ? cart.cartItems.length : 0);
+            badge.textContent = count;
+            badge.style.display = count > 0 ? 'flex' : 'none';
+
+            showToast(menuName + ' 담겼습니다');
+        } catch (e) {
+            showToast('담기 실패: ' + e.message);
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         startTimer();
+        startOrderStatusWatcher();
     });
+
+    // 주문 상태 감시 함수
+    function startOrderStatusWatcher() {
+        const statusBox = document.getElementById('order-status-box');
+        const statusText = document.getElementById('order-status-text');
+        let lastOrderCount = 0;
+
+        function checkOrderStatus() {
+            fetch('/kiosk/order/active')
+                .then(response => response.json())
+                .then(orders => {
+                    if (!orders || orders.length === 0) {
+                        statusBox.classList.add('hidden');
+                        lastOrderCount = 0;
+                        return;
+                    }
+
+                    // 완료되지 않은 주문만 필터링
+                    const activeOrders = orders.filter(o => o.status !== 'COMPLETED' && o.status !== 'CANCELLED');
+
+                    if (activeOrders.length === 0) {
+                        statusBox.classList.add('hidden');
+                        lastOrderCount = 0;
+                        return;
+                    }
+
+                    // 주문 상태 텍스트 업데이트
+                    const statusTexts = {
+                        'ORDERED': '주문 완료',
+                        'CONFIRMED': '주문 확인중...',
+                        'COOKING': '조리 중...',
+                        'DELIVERING': '배달 시작',
+                        'COMPLETED': '완료',
+                        'CANCELLED': '취소'
+                    };
+
+                    const latestOrder = activeOrders[0];
+                    const statusLabel = statusTexts[latestOrder.status] || latestOrder.status;
+                    statusText.textContent = statusLabel;
+
+                    statusBox.classList.remove('hidden');
+                    lastOrderCount = activeOrders.length;
+                })
+                .catch(err => {
+                    console.error('주문 상태 확인 실패:', err);
+                });
+        }
+
+        // 초기 실행 및 5초마다 체크
+        checkOrderStatus();
+        setInterval(checkOrderStatus, 5000);
+    }
 </script>
 </body>
 </html>

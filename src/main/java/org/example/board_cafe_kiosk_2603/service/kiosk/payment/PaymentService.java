@@ -10,6 +10,7 @@ import org.example.board_cafe_kiosk_2603.domain.kiosk.cafePackage.CafePackage;
 import org.example.board_cafe_kiosk_2603.domain.kiosk.cart.Cart;
 import org.example.board_cafe_kiosk_2603.domain.kiosk.cart.CartItem;
 import org.example.board_cafe_kiosk_2603.domain.kiosk.order.OrderItem;
+import org.example.board_cafe_kiosk_2603.domain.kiosk.order.OrderStatus;
 import org.example.board_cafe_kiosk_2603.domain.kiosk.order.Orders;
 import org.example.board_cafe_kiosk_2603.domain.kiosk.payment.Payment;
 import org.example.board_cafe_kiosk_2603.dto.kiosk.cafePackage.CafePackageDTO;
@@ -37,6 +38,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Log4j2
 @Service
@@ -70,7 +72,12 @@ public class PaymentService {
 
     /**
      * 결제 준비 - 토스 결제창 호출 전 준비 단계
-     * 테이블, 세션, 장바구니 유효성 검증 후 결제 정보 반환
+     * 테이블, 세션, 주문 유효성 검증 후 결제 정보 반환
+     *
+     * [특징]
+     *   - 세션 내 여러 주문을 한 번의 결제로 처리 가능
+     *   - 패키지 요금 + 주문 금액 합산
+     *   - 포인트 사용 가능
      */
     public PaymentDTO preparePayment(int tableNumber, PaymentDTO request) {
         try {
@@ -88,20 +95,19 @@ public class PaymentService {
             }
             log.debug("sessionId: {}", session.getId());
 
-            Cart cart = cartMapper.findByTableId(tableId);
-            if (cart == null) {
-                return errorResponse("장바구니가 비어있습니다.");
+            // 세션 주문 목록 조회 (카트가 비어있어도 결제 가능)
+            List<Orders> sessionOrders = ordersMapper.findBySessionId(session.getId());
+            List<Orders> activeOrders = sessionOrders.stream()
+                    .filter(o -> !OrderStatus.CANCELLED.name().equals(o.getStatus()))
+                    .collect(Collectors.toList());
+            if (activeOrders.isEmpty()) {
+                return errorResponse("주문 내역이 없습니다.");
             }
-            log.debug("cartId: {}", cart.getId());
-
-            List<CartItem> items = cartItemMapper.findByCartId(cart.getId());
-            if (items.isEmpty()) {
-                return errorResponse("장바구니에 상품이 없습니다.");
-            }
-            log.debug("cartItems count: {}", items.size());
+            log.debug("activeOrders count: {}", activeOrders.size());
 
             // === Package 정보 조회 및 설정 ===
             CafePackageDTO cafePackage = null;
+            int pkgPrice = 0;
             if (session.getPackageId() != null) {
                 CafePackage pkg = cafePackageMapper.findById(session.getPackageId());
                 if (pkg != null) {
@@ -115,19 +121,21 @@ public class PaymentService {
                             .active(pkg.isActive())
                             .updatedAt(pkg.getUpdatedAt())
                             .build();
+                    pkgPrice = pkg.getBasePrice() * (session.getInitialGuestCnt() != null ? session.getInitialGuestCnt() : 1);
                     log.debug("Package selected - id: {}, name: {}, price: {}",
-                            cafePackage.getId(), cafePackage.getName(), cafePackage.getBasePrice());
+                            cafePackage.getId(), cafePackage.getName(), pkgPrice);
                 } else {
                     log.warn("Package not found - packageId: {}", session.getPackageId());
                 }
             }
 
-            int totalAmount = calculateTotal(items, session);
+            int menuTotal = activeOrders.stream().mapToInt(Orders::getTotalAmount).sum();
+            int totalAmount = pkgPrice + menuTotal;
             int pointUsed = request.getPointUsed() != null ? request.getPointUsed() : 0;
             int finalAmount = Math.max(totalAmount - pointUsed, 0);
 
             String orderIdToss = generateOrderId(tableNumber);
-            String orderName = buildOrderName(items);
+            String orderName = buildOrderNameFromOrders(activeOrders);
             String customerKey = generateCustomerKey(tableNumber, session.getId());
 
             PaymentDTO response = PaymentDTO.builder()
@@ -154,7 +162,12 @@ public class PaymentService {
 
     /**
      * 토스 결제 승인 및 DB 저장
-     * 토스 API 호출 후 주문, 결제 정보 저장 및 포인트 처리
+     * 토스 API 호출 후 세션의 모든 주문, 결제 정보 저장 및 포인트 처리
+     *
+     * [복수 주문 결제]
+     *   - 세션 내 여러 주문(Order)을 한 번의 결제(Payment)로 처리
+     *   - Payment.session_id가 유일하므로 세션당 최종 1회만 결제
+     *   - 포인트는 최신 주문을 기준으로 적립
      */
     @Transactional
     public PaymentDTO confirmPayment(String paymentKey, String orderIdToss,
@@ -175,33 +188,41 @@ public class PaymentService {
             // DB 데이터 조회
             Integer tableId = cartMapper.findCafeTableIdByTableNumber(tableNumber);
             CafeTableSession session = tableSessionMapper.findActiveByTableId(tableId);
-            Cart cart = cartMapper.findByTableId(tableId);
-            List<CartItem> cartItems = cartItemMapper.findByCartId(cart.getId());
 
-            // 금액 계산
-            int totalAmount = calculateTotal(cartItems, session);
+            // 세션 주문 목록으로 금액 계산
+            List<Orders> sessionOrders = ordersMapper.findBySessionId(session.getId());
+            List<Orders> activeOrders = sessionOrders.stream()
+                    .filter(o -> !OrderStatus.CANCELLED.name().equals(o.getStatus()))
+                    .collect(Collectors.toList());
+
+            int pkgPrice = 0;
+            if (session.getPackageId() != null) {
+                CafePackage pkg = cafePackageMapper.findById(session.getPackageId());
+                if (pkg != null) {
+                    pkgPrice = pkg.getBasePrice() * (session.getInitialGuestCnt() != null ? session.getInitialGuestCnt() : 1);
+                }
+            }
+            int menuTotal = activeOrders.stream().mapToInt(Orders::getTotalAmount).sum();
+            int totalAmount = pkgPrice + menuTotal;
             int finalAmount = Math.max(totalAmount - pointUsed, 0);
 
-            // 주문 생성
-            Orders order = createOrder(session, tableId, customerPhone, totalAmount);
-
-            // 주문 항목 생성
-            createOrderItems(order, cartItems);
+            // 최신 주문 ID 조회 (포인트 참조용)
+            int latestOrderId = activeOrders.stream()
+                    .mapToInt(Orders::getId)
+                    .max()
+                    .orElse(0);
 
             // 결제 생성 (토스 정보 포함)
             createPayment(session, finalAmount, paymentKey, orderIdToss, tossResponse, tableNumber);
 
             // 포인트 처리
-            int earnedPoints = processPoints(customerPhone, pointUsed, finalAmount, order.getId());
+            int earnedPoints = processPoints(customerPhone, pointUsed, finalAmount, latestOrderId);
 
-            // 장바구니 비우기
-            cartItemMapper.deleteAllByCartId(cart.getId());
-
-            log.info("결제 완료 - orderId: {}, amount: {}", order.getId(), finalAmount);
+            log.info("결제 완료 - latestOrderId: {}, amount: {}", latestOrderId, finalAmount);
 
             return PaymentDTO.builder()
                     .success(true)
-                    .orderId((long) order.getId())
+                    .orderId((long) latestOrderId)
                     .totalAmount(totalAmount)
                     .pointUsed(pointUsed)
                     .finalAmount(finalAmount)
@@ -295,12 +316,20 @@ public class PaymentService {
                 + (items.size() > 1 ? " and " + (items.size() - 1) + " more" : "");
     }
 
+    private String buildOrderNameFromOrders(List<Orders> orders) {
+        if (orders.isEmpty()) return "주문";
+        List<OrderItem> items = ordersMapper.findItemsByOrderId(orders.get(0).getId());
+        if (items.isEmpty()) return "주문";
+        int extra = orders.size() - 1;
+        return items.get(0).getMenuName() + (extra > 0 ? " 외 " + extra + "건" : "");
+    }
+
     private Orders createOrder(CafeTableSession session, Integer tableId, String customerPhone, int totalAmount) {
         Orders order = Orders.builder()
                 .sessionId(session.getId())
                 .tableId(tableId)
                 .customerPhone((customerPhone != null && !customerPhone.isBlank()) ? customerPhone : null)
-                .status("PAID")
+                .status(OrderStatus.ORDERED.name())
                 .totalAmount(totalAmount)
                 .build();
         ordersMapper.insertOrder(order);

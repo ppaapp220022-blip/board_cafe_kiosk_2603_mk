@@ -17,7 +17,7 @@
             (SELECT COUNT(*) FROM orders
              WHERE ordered_at >= #{targetDate}
                AND ordered_at <![CDATA[ < ]]> DATE_ADD(#{targetDate}, INTERVAL 1 DAY)
-               AND status NOT IN ('PENDING', 'CANCELLED')),
+               AND status NOT IN ('ORDERED', 'CANCELLED')),
 
             /* [핵심] 방문자 수: 초기 인원 + JOIN으로 계산된 추가 인원 수량 */
             IFNULL(SUM(ts.initial_guest_cnt + IFNULL(extra.extra_qty, 0)), 0),
@@ -30,7 +30,7 @@
             FROM order_item oi
                      INNER JOIN orders o ON oi.order_id = o.id
             WHERE oi.menu_name = '인원 추가 (1명)'
-              AND o.status NOT IN ('PENDING', 'CANCELLED')
+              AND o.status NOT IN ('ORDERED', 'CANCELLED')
             GROUP BY o.session_id
         ) extra ON ts.id = extra.session_id
         WHERE ts.check_out_time >= #{targetDate}
@@ -56,7 +56,7 @@
                  INNER JOIN category c ON m.category_id = c.id
         WHERE o.ordered_at >= #{targetDate}
           AND o.ordered_at <![CDATA[ < ]]> DATE_ADD(#{targetDate}, INTERVAL 1 DAY)
-          AND o.status NOT IN ('PENDING', 'CANCELLED')
+          AND o.status NOT IN ('ORDERED', 'CANCELLED')
             /* 🚫 통계용 히스토리 필터링: '인원 추가' 메뉴와 'game' 카테고리는 매출 통계에서 제외 */
           AND m.name != '인원 추가 (1명)'
           AND c.type != 'game'

@@ -34,6 +34,9 @@ public interface OrdersMapper {
     // 테이블 ID로 최근 주문 조회
     Orders findLatestByTableId(int tableId);
 
+    // 상태별 주문 목록 조회 (관리자용)
+    List<Orders> findByStatus(String status);
+
     // 주문 ID로 아이템 목록 조회
     List<OrderItem> findItemsByOrderId(int orderId);
 

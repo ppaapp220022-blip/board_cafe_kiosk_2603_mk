@@ -309,20 +309,15 @@
       height: 20px;
     }
 
-    .btn-payment {
+    .btn-menu {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
       flex: 2;
     }
 
-    .btn-payment:hover:not(:disabled) {
+    .btn-menu:hover {
       transform: translateY(-2px);
       box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
-    }
-
-    .btn-payment:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
     }
 
     .btn-back {
@@ -420,6 +415,108 @@
         padding: 15px;
       }
     }
+
+    /* 상태 관리 섹션 */
+    .status-control-item {
+      background: #f9f9f9;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid #eee;
+    }
+
+    .status-control-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .status-control-label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .status-control-name {
+      font-weight: 600;
+      color: #333;
+      font-size: 0.95rem;
+    }
+
+    .status-control-current {
+      font-size: 0.8rem;
+      color: #888;
+    }
+
+    .status-control-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .status-btn {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .status-btn-ordered {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffc107;
+    }
+
+    .status-btn-ordered:hover {
+      background: #ffc107;
+    }
+
+    .status-btn-confirmed {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #17a2b8;
+    }
+
+    .status-btn-confirmed:hover {
+      background: #17a2b8;
+      color: white;
+    }
+
+    .status-btn-cooking {
+      background: #fde8e8;
+      color: #721c24;
+      border: 1px solid #dc3545;
+    }
+
+    .status-btn-cooking:hover {
+      background: #dc3545;
+      color: white;
+    }
+
+    .status-btn-delivering {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #28a745;
+    }
+
+    .status-btn-delivering:hover {
+      background: #28a745;
+      color: white;
+    }
+
+    .status-btn-completed {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #17a2b8;
+    }
+
+    .status-btn-completed:hover {
+      background: #17a2b8;
+      color: white;
+    }
   </style>
 </head>
 <body>
@@ -465,6 +562,17 @@
       주문 내역
     </div>
     <div id="order-items">
+      <!-- JavaScript로 동적 생성 -->
+    </div>
+  </div>
+
+  <!-- 주문 상태 관리 (admin용) -->
+  <div class="card" id="admin-controls" style="display: none;">
+    <div class="card-header">
+      <i data-lucide="sliders"></i>
+      주문 상태 관리
+    </div>
+    <div id="order-status-controls">
       <!-- JavaScript로 동적 생성 -->
     </div>
   </div>
@@ -522,18 +630,18 @@
 
   <!-- 버튼 -->
   <div class="button-group">
-    <button class="btn btn-payment" id="payment-btn" onclick="goToPayment()">
-      <i data-lucide="credit-card"></i>
-      <span id="payment-btn-text">결제하기</span>
+    <button class="btn btn-menu" onclick="goToMenu()">
+      <i data-lucide="utensils"></i>
+      메뉴로 돌아가기
     </button>
-    <button class="btn btn-back" onclick="goBack()">
-      <i data-lucide="arrow-left"></i>
-      돌아가기
+    <button class="btn btn-back" onclick="goToCart()">
+      <i data-lucide="shopping-cart"></i>
+      장바구니
     </button>
   </div>
 </div>
 
-<script>
+<script th:inline="javascript">
   lucide.createIcons({
     attrs: { 'stroke-width': 2.5 }
   });
@@ -551,6 +659,7 @@
     renderOrderItems();
     renderOrderTime();
     updateStatusDisplay();
+    initAdminControls();  // 관리자 컨트롤 초기화
     pollOrderStatus();  // 주문 상태 실시간 폴링
   });
 
@@ -559,11 +668,11 @@
     const itemsContainer = document.getElementById('order-items');
     const items = orderData.items || [];
 
-    itemsContainer.innerHTML = items.map(item => `
+    itemsContainer.innerHTML = items.map((item, index) => `
             <div class="order-item">
                 <div class="item-info">
                     <div class="item-name">${item.menuName}</div>
-                    <div class="item-qty">수량: ${item.quantity}개</div>
+                    <div class="item-qty">수량: ${item.quantity}개 · <span class="item-status" data-index="${index}">주문 완료</span></div>
                 </div>
                 <div class="item-price">
                     ₩${(item.price * item.quantity).toLocaleString()}
@@ -595,39 +704,33 @@
 
     // 상태별 아이콘 및 진행률
     const statusConfig = {
-      'PENDING': {
+      'ORDERED': {
         icon: 'clock',
-        text: '결제 대기 중...',
+        text: '주문 완료! 관리자 확인 중...',
         progress: 20,
         color: 'ff9800'
-      },
-      'PAID': {
-        icon: 'credit-card',
-        text: '결제 완료! 관리자 확인 중...',
-        progress: 40,
-        color: '2196f3'
       },
       'CONFIRMED': {
         icon: 'check-circle',
         text: '주문 확인! 조리 시작...',
-        progress: 60,
-        color: '4caf50'
+        progress: 40,
+        color: '2196f3'
       },
       'COOKING': {
         icon: 'flame',
         text: '조리 중입니다...',
-        progress: 75,
+        progress: 65,
         color: 'ff5722'
       },
       'DELIVERING': {
-        icon: 'truck',
-        text: '준비 완료! 서빙 중...',
-        progress: 90,
+        icon: 'package-check',
+        text: '배달 준비 중...',
+        progress: 85,
         color: '9c27b0'
       },
       'COMPLETED': {
         icon: 'check-circle-2',
-        text: '주문 완료!',
+        text: '완료!',
         progress: 100,
         color: '4caf50'
       },
@@ -639,7 +742,7 @@
       }
     };
 
-    const config = statusConfig[status] || statusConfig['PENDING'];
+    const config = statusConfig[status] || statusConfig['ORDERED'];
 
     // 아이콘 업데이트
     statusIcon.innerHTML = `<i data-lucide="${config.icon}"></i>`;
@@ -690,40 +793,24 @@
   // ===== 상태별 텍스트 =====
   function getStatusText(status) {
     const texts = {
-      'PENDING': '결제 대기',
-      'PAID': '결제 완료',
+      'ORDERED':   '주문 완료',
       'CONFIRMED': '주문 확인',
-      'COOKING': '조리 중',
-      'DELIVERING': '서빙 중',
+      'COOKING':   '조리 중',
+      'DELIVERING': '배달 준비',
       'COMPLETED': '완료',
       'CANCELLED': '취소'
     };
     return texts[status] || '상태 확인';
   }
 
-  // ===== 결제하기 버튼 =====
-  function goToPayment() {
-    const payBtn = document.getElementById('payment-btn');
-    const payBtnText = document.getElementById('payment-btn-text');
-
-    // 결제 버튼 비활성화
-    payBtn.disabled = true;
-    payBtnText.innerHTML = '<span class="spinner"></span>결제 준비 중...';
-
-    // 결제 페이지로 이동 (orderId 전달)
-    setTimeout(() => {
-      window.location.href = `/kiosk/checkout?orderId=${orderId}`;
-    }, 1000);
+  // ===== 메뉴로 돌아가기 =====
+  function goToMenu() {
+    window.location.href = `/kiosk/menu?tableNumber=${tableNumber}`;
   }
 
-  // ===== 돌아가기 =====
-  function goBack() {
-    // 이전 페이지로 또는 메뉴로 이동
-    if (document.referrer) {
-      history.back();
-    } else {
-      window.location.href = '/kiosk/screensaver';
-    }
+  // ===== 장바구니로 이동 =====
+  function goToCart() {
+    window.location.href = '/kiosk/cart';
   }
 
   // ===== 토스트 알림 =====
@@ -734,6 +821,78 @@
     document.body.appendChild(toast);
 
     setTimeout(() => toast.remove(), 2500);
+  }
+
+  // ===== 상태 관리 함수 =====
+  function initAdminControls() {
+    // 관리자 모드 확인 (URL 파라미터 또는 세션)
+    const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
+    const adminControlsDiv = document.getElementById('admin-controls');
+
+    if (!isAdmin) {
+      return;  // 일반 사용자는 상태 관리 UI 미표시
+    }
+
+    adminControlsDiv.style.display = 'block';
+
+    // 상태 목록
+    const statuses = [
+      { key: 'ORDERED', label: '주문 완료' },
+      { key: 'CONFIRMED', label: '주문 확인' },
+      { key: 'COOKING', label: '조리 중' },
+      { key: 'DELIVERING', label: '배달 준비' },
+      { key: 'COMPLETED', label: '완료' }
+    ];
+
+    const controlsContainer = document.getElementById('order-status-controls');
+    controlsContainer.innerHTML = statuses.map(status => {
+      const isActive = status.key === currentStatus;
+      const buttons = statuses
+        .filter(s => s.key !== status.key)
+        .map(s => `
+          <button class="status-btn status-btn-${s.key.toLowerCase()}"
+                  onclick="changeOrderStatus('${s.key}')">
+            → ${s.label}
+          </button>
+        `).join('');
+
+      return `
+        <div class="status-control-item">
+          <div class="status-control-label">
+            <div class="status-control-name">${status.label}</div>
+            <div class="status-control-current">${isActive ? '● 현재 상태' : ''}</div>
+          </div>
+          <div class="status-control-buttons">
+            ${buttons}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // 주문 상태 변경
+  async function changeOrderStatus(newStatus) {
+    try {
+      const response = await fetch(`/kiosk/order/${orderId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        currentStatus = newStatus;
+        updateStatusDisplay();
+        initAdminControls();  // UI 새로고침
+        showToast(`✓ 상태 변경: ${getStatusText(newStatus)}`);
+      } else {
+        showToast(`✗ 상태 변경 실패: ${data.message}`);
+      }
+    } catch (error) {
+      console.error('상태 변경 오류:', error);
+      showToast('상태 변경 중 오류가 발생했습니다.');
+    }
   }
 </script>
 

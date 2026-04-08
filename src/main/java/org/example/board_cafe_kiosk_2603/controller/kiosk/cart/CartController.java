@@ -12,6 +12,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 /**
  * 장바구니 페이지 + REST API.
  *
@@ -54,14 +56,25 @@ public class CartController {
         return ResponseEntity.ok(cartService.getCart(tableNumber));
     }
 
-    @PostMapping("/add")
+    @PostMapping(value = "/add")
     @ResponseBody
-    public ResponseEntity<CartDTO> addToCart(@RequestBody CartItemDTO item,
+    public ResponseEntity<?> addToCart(@RequestBody CartItemDTO item,
                                              HttpSession session) {
-        Integer tableNumber = tableNumber(session);
-        if (tableNumber == null) return ResponseEntity.badRequest().build();
-        log.info("장바구니 추가 - 테이블: {}, 메뉴: {} x{}", tableNumber, item.getMenuName(), item.getQuantity());
-        return ResponseEntity.ok(cartService.addItem(tableNumber, item));
+        try {
+            Integer tableNumber = tableNumber(session);
+            if (tableNumber == null) {
+                log.warn("--- [CartController] tableNumber가 null입니다 ---");
+                return ResponseEntity.badRequest().body(Map.of("success", false, "message", "테이블 정보 없음"));
+            }
+            log.info("장바구니 추가 요청 - 테이블: {}, 메뉴: {} (₩{}), 수량: {}", 
+                    tableNumber, item.getMenuName(), item.getMenuPrice(), item.getQuantity());
+            CartDTO result = cartService.addItem(tableNumber, item);
+            log.info("장바구니 추가 완료 - 결과: {}", result.getMessage());
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("장바구니 추가 중 오류 발생", e);
+            return ResponseEntity.status(500).body(Map.of("success", false, "message", e.getMessage()));
+        }
     }
 
     @PutMapping("/update")

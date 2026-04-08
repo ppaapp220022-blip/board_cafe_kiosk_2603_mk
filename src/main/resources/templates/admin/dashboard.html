@@ -22,13 +22,54 @@
             /* --- 테이블 그리드 및 카드 스타일 --- */
             .table-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
             .table-card {
-                background: white; border-radius: 16px; height: 180px; padding: 24px;
+                background: white; border-radius: 16px; height: auto; min-height: 180px; padding: 24px;
                 display: flex; flex-direction: column; justify-content: space-between;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); border: 2px solid transparent;
                 transition: all 0.2s ease; cursor: pointer; position: relative;
             }
             .table-card:hover { transform: translateY(-4px); box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1); }
             .table-card.selected { border: 2px solid #4285f4; background-color: #f8faff; }
+
+            /* 주문 상태 배지 */
+            .order-status-badge {
+                display: none;  /* ✅ 기본값으로 모두 숨김 */
+                padding: 4px 12px;
+                border-radius: 12px;
+                font-size: 12px;
+                font-weight: bold;
+                margin-top: 8px;
+                animation: pulse 1.5s infinite;
+            }
+
+            .order-status-badge.ordered {
+                background: #fff3cd;
+                color: #856404;
+            }
+
+            .order-status-badge.confirmed {
+                background: #d1ecf1;
+                color: #0c5460;
+            }
+
+            .order-status-badge.cooking {
+                background: #fde8e8;
+                color: #721c24;
+            }
+
+            .order-status-badge.delivering {
+                background: #d4edda;
+                color: #155724;
+            }
+
+            .order-status-badge.completed {
+                background: #d4edda;
+                color: #155724;
+            }
+
+            @keyframes pulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.7; }
+            }
 
             /* --- 알림 점(Alert Dot) 스타일 --- */
             .alert-dot {
@@ -61,26 +102,82 @@
                 backdrop-filter: blur(4px);
             }
             .modal-content {
-                background: white; width: 420px; border-radius: 20px; padding: 30px;
-                transform: translateY(-20px); transition: 0.3s;
+                background: white; width: 550px; border-radius: 20px; padding: 30px;
+                transform: translateY(-20px); transition: 0.3s; max-height: 90vh; overflow-y: auto;
             }
-            .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-weight: bold; font-size: 20px;}
+            .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; font-weight: bold; font-size: 20px;}
             .close-btn { cursor: pointer; font-size: 28px; border: none; background: none; line-height: 1; }
 
-            .order-list { margin-top: 15px; max-height: 180px; overflow-y: auto; border: 1px solid #eee; border-radius: 12px; padding: 12px; background: #f9f9f9; }
-            .order-item { display: flex; justify-content: space-between; font-size: 14px; padding: 8px 0; border-bottom: 1px solid #eee; }
-            .order-item:last-child { border-bottom: none; }
+            .order-list {
+                margin-top: 15px;
+                max-height: 350px;
+                overflow-y: auto;
+                border: 1px solid #eee;
+                border-radius: 12px;
+                padding: 12px;
+                background: #f9f9f9;
+            }
 
-            /* 버튼 레이아웃 - 2x2 가변형 */
+            .order-item-wrapper {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                padding: 12px 0;
+                border-bottom: 1px solid #eee;
+            }
+
+            .order-item-wrapper:last-child {
+                border-bottom: none;
+            }
+
+            .order-item-header {
+                display: flex;
+                justify-content: space-between;
+                font-weight: 500;
+                align-items: center;
+            }
+
+            .order-item-name {
+                flex: 1;
+            }
+
+            .order-item-price {
+                font-weight: bold;
+                color: #333;
+            }
+
+            .order-item-actions {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .order-status-label {
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 12px;
+                font-weight: bold;
+                white-space: nowrap;
+            }
+
+            .order-action-buttons {
+                display: flex;
+                gap: 6px;
+                flex-wrap: wrap;
+            }
+
+            /* 버튼 레이아웃 - 2x2 균등 정렬 */
             .action-group {
                 display: flex;
                 flex-wrap: wrap;
                 gap: 10px;
                 margin-top: 25px;
+                justify-content: space-between;
             }
 
             .action-group .btn {
-                flex: 1 1 calc(50% - 10px);
+                flex: 0 1 calc(50% - 5px);
                 padding: 15px;
                 border: none;
                 border-radius: 10px;
@@ -88,15 +185,20 @@
                 cursor: pointer;
                 font-size: 14px;
                 transition: all 0.2s;
+                min-width: 0;
+                /* ✅ 모든 버튼 중앙 정렬 */
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
 
             .btn-pay { background: #ea4335; color: white; }    /* 결제완료: 빨강 */
             .btn-status { background: #28a745; color: white; } /* 상태변경: 초록 */
+            .btn-order-status { background: #9c27b0; color: white; } /* 주문상태변경: 보라 */
             .btn-msg { background: #fbbc05; color: white; }    /* 요청확인: 노랑 */
             .btn-close {
                 background: #f1f3f4;
                 color: #3c4043;
-                flex-grow: 1; /* 요청확인 없을 때 꽉 차게 */
             }
 
             .btn:hover { opacity: 0.9; transform: scale(0.98); }
@@ -106,6 +208,65 @@
                 background: #fff9c4; border-left: 5px solid #fbc02d;
                 padding: 15px; margin-bottom: 20px; border-radius: 12px;
                 font-size: 14px; color: #5d4037; display: none;
+            }
+
+            /* --- 신규 주문 강력한 알림 모달 스타일 --- */
+            #newOrderNotificationModal {
+                animation: slideInDown 0.3s ease-out;
+            }
+
+            @keyframes slideInDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-50px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            @keyframes pulse-yellow {
+                0%, 100% { box-shadow: 0 0 30px rgba(255, 204, 0, 0.5); }
+                50% { box-shadow: 0 0 50px rgba(255, 204, 0, 0.8); }
+            }
+
+            #newOrderNotificationModal .modal-content {
+                animation: pulse-yellow 1s infinite;
+            }
+            margin-bottom: 24px;
+            background: #fff8e1;
+            border: 2px solid #ffcc02;
+            border-radius: 16px;
+            padding: 20px 24px;
+            display: none;
+            }
+            #pending-orders-section.has-orders { display: block; }
+            .pending-section-header {
+                display: flex; align-items: center; gap: 10px;
+                font-size: 16px; font-weight: 700; color: #e65100; margin-bottom: 14px;
+            }
+            .pending-badge {
+                background: #e65100; color: white; font-size: 12px; font-weight: 700;
+                padding: 2px 8px; border-radius: 20px;
+            }
+            .pending-order-card {
+                background: white; border-radius: 12px; padding: 16px;
+                margin-bottom: 10px; border: 1px solid #ffe082;
+                display: flex; justify-content: space-between; align-items: center; gap: 12px;
+            }
+            .pending-order-card:last-child { margin-bottom: 0; }
+            .pending-order-info { flex: 1; }
+            .pending-order-title { font-weight: 700; font-size: 14px; color: #3c4043; margin-bottom: 4px; }
+            .pending-order-items { font-size: 12px; color: #5f6368; }
+            .pending-order-actions { display: flex; gap: 8px; }
+            .btn-pending-confirm {
+                padding: 8px 16px; background: #4285f4; color: white;
+                border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;
+            }
+            .btn-pending-cancel {
+                padding: 8px 12px; background: #f1f3f4; color: #ea4335;
+                border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
             }
 
             /* --- 전체 리셋 버튼 전용 디자인 (회색/다크 계열) --- */
@@ -157,6 +318,16 @@
         </div>
     </div>
 
+    <!-- 신규 주문 알림 -->
+    <div id="pending-orders-section">
+        <div class="pending-section-header">
+            🔔 신규 주문 대기
+            <span class="pending-badge" id="pending-count">0</span>
+        </div>
+        <div id="pending-orders-list"></div>
+    </div>
+
+
     <div class="table-grid">
         <div th:each="table : ${tables}"
              class="table-card"
@@ -165,6 +336,7 @@
              th:data-num="${table.tableNumber}"
              th:data-status="${table.status}"
              th:data-token="${table.accessToken}"
+             th:data-latestorder="pending"
              onclick="openTableModal(this)">
 
             <div class="alert-dot"></div>
@@ -176,6 +348,17 @@
                 <span th:if="${table.status == 'OCCUPIED'}" style="color: #4285f4;">이용 중</span>
                 <span th:if="${table.status == 'CLEANING'}" style="color: #fbbc04;">청소 중</span>
             </div>
+
+            <!-- 주문 상태 배지 (이용 중일 때만 표시) -->
+            <th:block th:if="${table.status == 'OCCUPIED'}">
+                <div class="order-status-container" style="margin-top: 8px;">
+                    <span class="order-status-badge" data-status="ORDERED">주문 완료</span>
+                    <span class="order-status-badge" data-status="CONFIRMED">주문 확인</span>
+                    <span class="order-status-badge" data-status="COOKING">조리 중</span>
+                    <span class="order-status-badge" data-status="DELIVERING">배달 준비</span>
+                    <span class="order-status-badge" data-status="COMPLETED">완료</span>
+                </div>
+            </th:block>
 
             <div class="time-info" style="font-size: 12px; color: #5f6368; display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 10px; border-top: 1px dashed #eee;">
                 <span th:if="${table.status == 'OCCUPIED' and table.guestCount != null}"
@@ -215,8 +398,9 @@
 
                 <div class="action-group">
                     <button class="btn btn-pay" onclick="handlePayment()">💰 결제완료</button>
-                    <button class="btn btn-status" onclick="handleStatusUpdate()">🔄 상태변경</button>
-                    <button class="btn btn-msg" id="readBtn" onclick="handleReadMessage()" style="display:none;">✉️ 요청확인</button>
+                    <button class="btn btn-status" onclick="handleStatusUpdate()">🔄 테이블정리</button>
+                    <button class="btn btn-order-status" id="orderStatusBtn" onclick="changeAllOrdersStatus()" style="display:none;">📋 주문상태변경</button>
+                    <button class="btn btn-msg" id="readBtn" onclick="handleReadMessage()" style="display:none;">✉️ 고객요청</button>
                     <button class="btn btn-close" onclick="closeTableModal()">닫기</button>
                 </div>
             </div>
@@ -224,6 +408,9 @@
     </div>
 
     <th:block layout:fragment="script">
+        <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+        <script th:src="@{/js/websocket.js}"></script>
         <script th:inline="javascript">
             let currentTableId = null;
             let currentTableStatus = null;
@@ -235,22 +422,89 @@
                 if (btn) btn.style.display = 'none';
             }
 
-            // 기존 CSS를 건드리지 않기 위해 JS 내에서 인라인 스타일로 상태 버튼 렌더링
+            // 주문 상태 변경 메서드
             function renderOrders(orders) {
                 const listDiv = document.getElementById('orderList');
                 const priceSpan = document.getElementById('totalPrice');
                 let sum = 0;
+                let latestStatus = 'ORDERED';
 
                 if (!listDiv || !priceSpan) return;
 
-                if (!orders || orders.length === 0) {
-                    listDiv.innerHTML = '<div class="order-item" style="color:#999; display:flex; justify-content:center; border:none;">진행 중인 주문이 없습니다.</div>';
+                // 🚨 강력한 디버깅: 전체 orders 객체를 출력
+                console.log('🚨 ==== renderOrders 호출 ====');
+                console.log('📥 받은 데이터 타입:', typeof orders);
+                console.log('📥 받은 데이터:', JSON.stringify(orders, null, 2));
+                console.log('📥 배열 여부:', Array.isArray(orders));
+                console.log('📥 배열 길이:', orders?.length);
+                if (orders && orders.length > 0) {
+                    console.log('📥 첫 번째 아이템 전체:', JSON.stringify(orders[0], null, 2));
+                    console.log('📥 첫 번째 아이템 키:', Object.keys(orders[0]));
+                }
+                console.log('🚨 ==== 끝 ====\n');
+
+                // 응답이 배열이 아니면 items 속성 확인
+                let orderItems = orders;
+                if (!Array.isArray(orders)) {
+                    if (orders?.items) {
+                        orderItems = orders.items;
+                        console.log('📌 orders.items 사용:', orderItems);
+                    } else if (orders?.orderItems) {
+                        orderItems = orders.orderItems;
+                        console.log('📌 orders.orderItems 사용:', orderItems);
+                    } else {
+                        console.warn('⚠️ 배열로 변환할 수 없음');
+                        orderItems = [];
+                    }
+                }
+
+                if (!orderItems || orderItems.length === 0) {
+                    listDiv.innerHTML = '<div style="color:#999; display:flex; justify-content:center; padding: 20px; border:none;">진행 중인 주문이 없습니다.</div>';
                     priceSpan.innerText = '0원';
                     return;
                 }
 
-                listDiv.innerHTML = orders.map(item => {
-                    const itemTotal = item.price * item.quantity;
+                // 최신 주문 상태 찾기 - 가장 진행된 상태 찾기
+                let statuses = {
+                    'ORDERED': 1,
+                    'CONFIRMED': 2,
+                    'COOKING': 3,
+                    'DELIVERING': 4,
+                    'COMPLETED': 5
+                };
+
+                let maxLevel = 0;
+                for (let order of orderItems) {
+                    if (order.status && order.status !== 'CANCELLED') {
+                        const level = statuses[order.status] || 0;
+                        if (level > maxLevel) {
+                            maxLevel = level;
+                            latestStatus = order.status;
+                        }
+                    }
+                }
+
+                console.log('📊 주문 상태 분석:', {
+                    totalOrders: orderItems.length,
+                    latestStatus,
+                    maxLevel
+                });
+                listDiv.innerHTML = orderItems.map(item => {
+                    // ✅ 백엔드 응답 구조에 맞는 정확한 필드명
+                    // order_item 테이블: id, order_id, menu_id, menu_name, price, quantity
+                    const menuName = item.menu_name || item.menuName || '상품명 없음';
+                    const quantity = item.quantity || 0;
+                    const price = item.price || 0;
+                    const itemTotal = price * quantity;
+
+                    // 디버깅 로그
+                    console.log('📦 주문 항목:', {
+                        menuName,
+                        quantity,
+                        price,
+                        itemTotal,
+                        status: item.status
+                    });
 
                     if (item.status !== 'CANCELLED') {
                         sum += itemTotal;
@@ -262,43 +516,41 @@
                     let actionHtml = '';
 
                     const orderId = item.id || item.orderId;
-                    const currentStatus = item.status || 'PAID';
+                    const currentStatus = item.status || 'ORDERED';
 
                     // 인라인 스타일 정의
-                    const btnBase = "padding: 5px 10px; border-radius: 6px; border: none; font-size: 12px; cursor: pointer; font-weight: 600;";
+                    const btnBase = "padding: 6px 12px; border-radius: 6px; border: none; font-size: 11px; cursor: pointer; font-weight: 600; transition: all 0.2s;";
                     const btnNext = btnBase + " background: #4285f4; color: white;";
                     const btnCancel = btnBase + " background: #f1f3f4; color: #ea4335;";
 
                     switch(currentStatus) {
-                        case 'PENDING':
-                            statusText = '결제대기'; badgeBg = '#f1f3f4'; badgeColor = '#5f6368';
-                            actionHtml = `<button style="${btnCancel}" onclick="updateOrderStatus(${orderId}, 'CANCELLED')">취소</button>`;
-                            break;
-                        case 'PAID':
-                            statusText = '결제완료'; badgeBg = '#e8f0fe'; badgeColor = '#1a73e8';
+                        case 'ORDERED':
+                            statusText = '주문 완료'; badgeBg = '#fff3cd'; badgeColor = '#856404';
                             actionHtml = `
-                                <button style="${btnNext}" onclick="updateOrderStatus(${orderId}, 'CONFIRMED')">주방확인</button>
+                                <button style="${btnNext}" onclick="updateOrderStatus(${orderId}, 'CONFIRMED')">확인</button>
                                 <button style="${btnCancel}" onclick="updateOrderStatus(${orderId}, 'CANCELLED')">취소</button>`;
                             break;
                         case 'CONFIRMED':
-                            statusText = '주방확인'; badgeBg = '#fef7e0'; badgeColor = '#b06000';
+                            statusText = '주문 확인'; badgeBg = '#d1ecf1'; badgeColor = '#0c5460';
                             actionHtml = `
-                                <button style="${btnNext}" onclick="updateOrderStatus(${orderId}, 'COOKING')">조리시작</button>
+                                <button style="${btnNext}" onclick="updateOrderStatus(${orderId}, 'COOKING')">조리</button>
                                 <button style="${btnCancel}" onclick="updateOrderStatus(${orderId}, 'CANCELLED')">취소</button>`;
                             break;
                         case 'COOKING':
-                            statusText = '조리중'; badgeBg = '#fce8e6'; badgeColor = '#c5221f';
-                            actionHtml = `<button style="${btnNext}" onclick="updateOrderStatus(${orderId}, 'DELIVERING')">서빙시작</button>`;
+                            statusText = '조리 중'; badgeBg = '#fde8e8'; badgeColor = '#721c24';
+                            actionHtml = `
+                                <button style="${btnNext}" onclick="updateOrderStatus(${orderId}, 'DELIVERING')">배달</button>
+                                <button style="${btnCancel}" onclick="updateOrderStatus(${orderId}, 'CANCELLED')">취소</button>`;
                             break;
                         case 'DELIVERING':
-                            statusText = '서빙중'; badgeBg = '#e6f4ea'; badgeColor = '#137333';
-                            actionHtml = `<button style="${btnNext}" onclick="updateOrderStatus(${orderId}, 'COMPLETED')">완료처리</button>`;
+                            statusText = '배달 준비'; badgeBg = '#d4edda'; badgeColor = '#155724';
+                            actionHtml = `<button style="${btnNext}" onclick="updateOrderStatus(${orderId}, 'COMPLETED')">완료</button>`;
                             break;
                         case 'COMPLETED':
-                            statusText = '서빙완료'; badgeBg = '#f1f3f4'; badgeColor = '#5f6368';
+                            statusText = '완료'; badgeBg = '#c8e6c9'; badgeColor = '#1b5e20';
                             break;
                         case 'CANCELLED':
-                            statusText = '주문취소'; badgeBg = '#f1f3f4'; badgeColor = '#ea4335';
+                            statusText = '취소됨'; badgeBg = '#ffcdd2'; badgeColor = '#c62828';
                             break;
                         default:
                             statusText = currentStatus;
@@ -308,14 +560,14 @@
                     const textStyle = isCancelled ? 'text-decoration: line-through; color: #999;' : '';
 
                     return `
-                    <div class="order-item" style="display: flex; flex-direction: column; gap: 10px; padding: 12px 0;">
-                        <div style="display: flex; justify-content: space-between; font-weight: 500;">
-                            <span style="${textStyle}">${item.menuName} x ${item.quantity}</span>
-                            <span style="${textStyle}">${itemTotal.toLocaleString()}원</span>
+                    <div class="order-item-wrapper">
+                        <div class="order-item-header">
+                            <span class="order-item-name" style="${textStyle}">${menuName} x ${quantity}</span>
+                            <span class="order-item-price" style="${textStyle}">${itemTotal.toLocaleString()}원</span>
                         </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; background: ${badgeBg}; color: ${badgeColor}; ${isCancelled ? 'text-decoration: line-through;' : ''}">${statusText}</span>
-                            <div style="display: flex; gap: 6px;">
+                        <div class="order-item-actions">
+                            <span class="order-status-label" style="background: ${badgeBg}; color: ${badgeColor}; ${isCancelled ? 'text-decoration: line-through;' : ''}">${statusText}</span>
+                            <div class="order-action-buttons">
                                 ${actionHtml}
                             </div>
                         </div>
@@ -323,40 +575,106 @@
                 }).join('');
 
                 priceSpan.innerText = sum.toLocaleString() + '원';
+
+                // 테이블 카드의 주문 상태 배지 업데이트
+                console.log('🎯 배지 업데이트:', { currentTableId, latestStatus });
+                updateTableCardOrderStatus(latestStatus);
+
+                // 주문 상태 변경 버튼 표시 여부 결정
+                updateOrderStatusButton();
             }
 
-            // 주문 상태 변경 API 호출 함수 추가
-            async function updateOrderStatus(orderId, nextStatus) {
-                if (!orderId) {
-                    alert('주문 번호를 찾을 수 없습니다.');
+            // 테이블 카드의 주문 상태 배지 업데이트
+            function updateTableCardOrderStatus(status) {
+                console.log('🔍 updateTableCardOrderStatus 호출:', { currentTableId, status });
+
+                const selectedCard = document.querySelector(`.table-card[data-id="${currentTableId}"]`);
+                if (!selectedCard) {
+                    console.warn('❌ 테이블 카드를 찾을 수 없음:', currentTableId);
                     return;
                 }
 
-                let confirmMsg = '주문 상태를 변경하시겠습니까?';
-                if (nextStatus === 'CANCELLED') confirmMsg = '정말 이 주문을 취소하시겠습니까? (복구 불가)';
-                else if (nextStatus === 'CONFIRMED') confirmMsg = '주문 내역을 주방에서 확인하셨습니까?';
-                else if (nextStatus === 'COOKING') confirmMsg = '조리를 시작하시겠습니까?';
-                else if (nextStatus === 'DELIVERING') confirmMsg = '서빙을 시작하시겠습니까?';
-                else if (nextStatus === 'COMPLETED') confirmMsg = '서빙 완료 처리하시겠습니까?';
+                const container = selectedCard.querySelector('.order-status-container');
+                if (!container) {
+                    console.warn('⚠️ order-status-container를 찾을 수 없음');
+                    return;
+                }
 
-                if (!confirm(confirmMsg)) return;
+                // 모든 배지 숨기기
+                container.querySelectorAll('.order-status-badge').forEach(badge => {
+                    badge.style.display = 'none';
+                    console.log('🔇 배지 숨김:', badge.getAttribute('data-status'));
+                });
 
-                try {
-                    const response = await fetch(`/admin/orders/${orderId}/status`, {
-                        method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ status: nextStatus })
+                // 해당 상태의 배지만 표시
+                const badge = container.querySelector(`.order-status-badge[data-status="${status}"]`);
+                if (badge) {
+                    badge.style.display = 'inline-block';  // ✅ inline-block 명시
+                    console.log('✅ 배지 표시됨:', status);
+                } else {
+                    console.warn('⚠️ 해당 상태의 배지를 찾을 수 없음:', status);
+                    // 모든 배지 출력 (디버깅용)
+                    container.querySelectorAll('.order-status-badge').forEach(b => {
+                        console.log('  - 사용 가능한 배지:', b.getAttribute('data-status'));
                     });
+                }
+            }
 
-                    if (response.ok) {
-                        await fetchActiveOrders();
-                    } else {
-                        const res = await response.json();
-                        alert("❌ " + (res.error || "주문 상태 변경에 실패했습니다."));
+            // 모든 주문의 상태를 함께 변경하는 함수
+            async function changeAllOrdersStatus() {
+                const orders = document.querySelectorAll('.order-item-wrapper');
+                let hasActiveOrder = false;
+
+                for (let orderItem of orders) {
+                    const statusLabel = orderItem.querySelector('.order-status-label');
+                    if (!statusLabel) continue;
+
+                    const currentStatus = statusLabel.textContent.trim();
+                    if (currentStatus === '완료' || currentStatus === '취소됨') continue;
+
+                    hasActiveOrder = true;
+
+                    // 상태에 따라 다음 상태 결정
+                    let nextStatus = '';
+                    if (currentStatus === '주문 완료') nextStatus = 'CONFIRMED';
+                    else if (currentStatus === '주문 확인') nextStatus = 'COOKING';
+                    else if (currentStatus === '조리 중') nextStatus = 'DELIVERING';
+                    else if (currentStatus === '배달 준비') nextStatus = 'COMPLETED';
+
+                    if (nextStatus) {
+                        const buttons = orderItem.querySelectorAll('.order-action-buttons button');
+                        const firstButton = buttons[0];
+                        if (firstButton) {
+                            firstButton.click();
+                            await new Promise(r => setTimeout(r, 300));
+                        }
                     }
-                } catch (err) {
-                    console.error(err);
-                    alert("서버와 통신 중 오류가 발생했습니다.");
+                }
+
+                if (!hasActiveOrder) {
+                    alert('변경 가능한 주문이 없습니다.');
+                }
+            }
+
+            // 주문 상태 변경 버튼 표시 여부 결정
+            function updateOrderStatusButton() {
+                const btn = document.getElementById('orderStatusBtn');
+                const orders = document.querySelectorAll('.order-item-wrapper');
+                let hasActiveOrder = false;
+
+                for (let order of orders) {
+                    const statusLabel = order.querySelector('.order-status-label');
+                    if (statusLabel) {
+                        const status = statusLabel.textContent.trim();
+                        if (status !== '완료' && status !== '취소됨') {
+                            hasActiveOrder = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (btn) {
+                    btn.style.display = hasActiveOrder ? 'inline-flex' : 'none';
                 }
             }
 
@@ -368,15 +686,13 @@
                 const tableNum = element.getAttribute('data-num');
                 const hasMsg = element.classList.contains('has-msg');
 
+                console.log('📂 모달 열기:', { currentTableId, currentTableStatus, tableNum });
+
                 const modalTitle = document.getElementById('modalTitle');
                 if (modalTitle) modalTitle.innerText = 'Table ' + tableNum;
                 hideMessageBox();
 
-                if (currentTableStatus === 'OCCUPIED') { await fetchActiveOrders(); }
-                else { renderOrders([]); }
-
-                if (hasMsg) { await fetchUnreadMessages(); }
-
+                // 모달 표시
                 const modal = document.getElementById('tableModal');
                 if (modal) {
                     modal.style.display = 'flex';
@@ -385,6 +701,15 @@
                         if (content) content.style.transform = 'translateY(0)';
                     }, 10);
                 }
+
+                // 이용 중 상태면 주문 조회
+                if (currentTableStatus === 'OCCUPIED') {
+                    subscribeToTableOrders(parseInt(currentTableId));
+                } else {
+                    renderOrders([]);
+                }
+
+                if (hasMsg) { await fetchUnreadMessages(); }
             }
 
             function closeTableModal() {
@@ -394,6 +719,9 @@
                     const content = modal.querySelector('.modal-content');
                     if (content) content.style.transform = 'translateY(-20px)';
                 }
+                // WebSocket 구독 취소
+                unsubscribeFromOrders();
+
                 document.querySelectorAll('.table-card').forEach(c => c.classList.remove('selected'));
                 currentTableId = null;
                 currentTableStatus = null;
@@ -428,9 +756,17 @@
                     const response = await fetch(`/admin/dashboard/${currentTableId}/orders`);
                     if (response.ok) {
                         const orders = await response.json();
+                        console.log('📨 백엔드 응답 데이터:', orders);
+                        console.log('🔍 첫번째 주문:', orders[0]);
                         renderOrders(orders);
-                    } else { renderOrders([]); }
-                } catch (err) { renderOrders([]); }
+                    } else {
+                        console.error('❌ API 응답 실패:', response.status);
+                        renderOrders([]);
+                    }
+                } catch (err) {
+                    console.error('❌ fetchActiveOrders 에러:', err);
+                    renderOrders([]);
+                }
             }
 
             async function callUpdateStatus(status) {
@@ -493,6 +829,154 @@
                     if (response.ok) { location.reload(); }
                 } catch (err) { console.error(err); }
             }
+
+            function renderPendingOrders(orders) {
+                const section = document.getElementById('pending-orders-section');
+                const list = document.getElementById('pending-orders-list');
+                const badge = document.getElementById('pending-count');
+
+                console.log('📋 renderPendingOrders 호출:', { ordersLength: orders?.length, orders });
+
+                if (!orders || orders.length === 0) {
+                    section.classList.remove('has-orders');
+                    console.log('✅ 신규 주문 없음');
+                    return;
+                }
+
+                section.classList.add('has-orders');
+                badge.innerText = orders.length;
+
+                list.innerHTML = orders.map((order, idx) => {
+                    console.log(`📦 신규 주문 #${idx}:`, JSON.stringify(order, null, 2));
+
+                    // OrdersDTO 필드 매핑
+                    // orders.items = OrderItemDTO[]
+                    // OrderItemDTO: { id, orderId, menuId, menuName, price, quantity }
+                    const items = order.items || order.orderItems || [];
+                    const itemSummary = items
+                        .map(i => {
+                            const menuName = i.menu_name || i.menuName || '상품';
+                            const qty = i.quantity || i.qty || 0;
+                            return `${menuName} x${qty}`;
+                        })
+                        .join(', ');
+
+                    // OrdersDTO 필드
+                    const tableId = order.tableId || order.table_id || '?';
+                    const totalAmount = order.totalAmount || order.total_amount || 0;
+                    const orderId = order.id;
+
+                    console.log(`✅ 주문 #${idx} 매핑:`, {
+                        orderId,
+                        tableId,
+                        totalAmount,
+                        itemCount: items.length
+                    });
+
+                    return `
+                    <div class="pending-order-card">
+                        <div class="pending-order-info">
+                            <div class="pending-order-title">
+                                Table #${tableId} &nbsp;·&nbsp; ₩${totalAmount.toLocaleString()}
+                            </div>
+                            <div class="pending-order-items">${itemSummary || '항목 없음'}</div>
+                        </div>
+                        <div class="pending-order-actions">
+                            <button class="btn-pending-confirm"
+                                    onclick="confirmPendingOrder(${orderId})">주문 확인</button>
+                            <button class="btn-pending-cancel"
+                                    onclick="cancelPendingOrder(${orderId})">취소</button>
+                        </div>
+                    </div>`;
+                }).join('');
+
+                console.log('✅ 신규 주문', orders.length, '개 렌더링 완료');
+            }
+
+            async function confirmPendingOrder(orderId) {
+                try {
+                    console.log('📋 주문 확인 요청:', { orderId });
+
+                    const response = await fetch(`/kiosk/order/${orderId}/status`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ status: 'CONFIRMED' })
+                    });
+
+                    console.log('📊 응답 상태:', response.status);
+
+                    if (response.ok) {
+                        console.log('✅ 주문 확인 성공');
+                        // 폴링으로 데이터 새로고침
+                        await fetchPendingOrders();
+                        alert('주문이 확인되었습니다.');
+                    } else {
+                        const errorData = await response.json().catch(() => ({}));
+                        console.error('❌ 주문 확인 실패:', response.status, errorData);
+                        alert('주문 확인에 실패했습니다: ' + (errorData.message || response.statusText));
+                    }
+                } catch (err) {
+                    console.error('❌ confirmPendingOrder 에러:', err);
+                    alert('서버 통신 오류: ' + err.message);
+                }
+            }
+
+            async function cancelPendingOrder(orderId) {
+                if (!confirm('주문을 취소하시겠습니까?')) return;
+
+                try {
+                    console.log('🗑️ 주문 취소 요청:', { orderId });
+
+                    const response = await fetch(`/admin/orders/${orderId}/status`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ status: 'CANCELLED' })
+                    });
+
+                    console.log('📊 응답 상태:', response.status);
+
+                    if (response.ok) {
+                        console.log('✅ 주문 취소 성공');
+                        await fetchPendingOrders();
+                        alert('주문이 취소되었습니다.');
+                    } else {
+                        const errorData = await response.json().catch(() => ({}));
+                        console.error('❌ 주문 취소 실패:', response.status, errorData);
+                        alert('주문 취소에 실패했습니다: ' + (errorData.message || response.statusText));
+                    }
+                } catch (err) {
+                    console.error('❌ cancelPendingOrder 에러:', err);
+                    alert('서버 통신 오류: ' + err.message);
+                }
+            }
+
+            // 페이지 로드 시 신규 주문 폴링 시작
+            document.addEventListener('DOMContentLoaded', () => {
+                console.log('🚀 페이지 로드 완료 - 초기화 시작');
+
+                // 신규 주문 폴링 시작
+                console.log('📡 신규 주문 폴링 시작');
+                fetchPendingOrders();
+
+                // 3. 주기적 폴링 (5초마다)
+                const pendingOrdersInterval = setInterval(() => {
+                    console.log('⏰ 신규 주문 폴링 (주기)');
+                    fetchPendingOrders();
+                }, 5000);
+
+                // 페이지 떠날 때 폴링 중지
+                window.addEventListener('beforeunload', () => {
+                    clearInterval(pendingOrdersInterval);
+                });
+
+                console.log('✅ 초기화 완료');
+            });
         </script>
     </th:block>
 </th:block>

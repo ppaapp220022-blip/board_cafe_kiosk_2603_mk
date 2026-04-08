@@ -43,11 +43,33 @@ public class SecurityConfig {
                 .userDetailsService(kioskUserDetailsService)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/kiosk/login", "/kiosk/login-process").permitAll()
-                        // ★ 수정: hasAnyRole 대신 KioskAuthorizationManager 적용
-                        //         → 테이블 번호 기반 URL 접근 제어 실제로 동작
-//                        .anyRequest().access(new KioskAuthorizationManager())
-                        // ★ 기존: .anyRequest().access(new KioskAuthorizationManager())
-                        // ★ 수정: ROLE_TABLE 권한이 있다면 테이블 번호 검사 없이 통과
+                        // 신규 주문 조회 및 주문 API
+                        .requestMatchers(
+                                "/kiosk/order/pending",
+                                "/kiosk/order/create",
+                                "/kiosk/order/api/**",
+                                "/kiosk/order/latest",
+                                "/kiosk/order/active",
+                                "/kiosk/order/session/**"
+                        ).permitAll()
+
+                        // PATCH, DELETE 요청도 인증 불필요
+                        .requestMatchers("/kiosk/order/**").permitAll()
+
+                        // WebSocket
+                        .requestMatchers("/ws/**", "/app/**")
+                        .permitAll()
+
+                        // JS 파일
+                        .requestMatchers("/js/**", "/css/**", "/images/**").permitAll()
+
+                        // 카트 관련 (TABLE 역할 필요)
+                        .requestMatchers(
+                                "/kiosk/cart/add",
+                                "/kiosk/cart/update",
+                                "/kiosk/cart/clear",
+                                "/kiosk/cart/items"
+                        ).hasRole("TABLE")
                         .anyRequest().hasRole("TABLE")
                 )
                 .formLogin(config -> config
@@ -90,7 +112,12 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/common/login", "/common/logout",
                                 "/admin/login", "/admin/login-process",
-                                "/error"
+                                "/error",
+                                "/ws/**",  // WebSocket 엔드포인트
+                                "/app/**",  // WebSocket /app/** 경로
+                                "/kiosk/order/**",  // 관리자 대시보드용 신규 주문 조회
+                                "/admin/orders/**",
+                                "/js/**", "/css/**", "/images/**" // JS, css, 이미지 파일
                         ).permitAll()
                         // ROLE_TABLE(키오스크) 계정이 /admin/** 에 접근하지 못하도록 명시
                         .requestMatchers("/admin/**").hasAnyRole("ADMIN", "STAFF")
@@ -115,7 +142,11 @@ public class SecurityConfig {
                 .exceptionHandling(config -> config
                         .accessDeniedHandler(accessDeniedHandler())
                 )
-                .csrf(AbstractHttpConfigurer::disable);
+                // WebSocket은 CSRF 보호 불필요
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/ws/**", "/app/**")
+                        .ignoringRequestMatchers("/admin/orders/**")
+                );
 
         log.info("--- [SecurityConfig] Admin Security Chain 구성 완료 ---");
         return http.build();
@@ -135,6 +166,14 @@ public class SecurityConfig {
     public AccessDeniedHandler accessDeniedHandler() {
         log.info("--- [SecurityConfig] AccessDeniedHandler(Handler403) 등록 ---");
         return new Handler403();
+    }
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        // 정적 리소스들이 위치하는 경로를 시큐리티 체크에서 제외
+        return (web) -> web.ignoring()
+                .requestMatchers(PathRequest.toStaticResources().atCommonLocations())
+                .requestMatchers("/js/**", "/css/**", "/images/**", "/favicon.ico");
     }
 
     // -> 제거: webSecurityCustomizer (adminChain의 permitAll과 중복)
