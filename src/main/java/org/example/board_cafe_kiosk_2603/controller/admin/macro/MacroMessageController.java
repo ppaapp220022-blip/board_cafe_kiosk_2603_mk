@@ -82,4 +82,27 @@ public class MacroMessageController {
 
         return ResponseEntity.ok().build();
     }
+
+    // 매크로 등록 API
+    @ResponseBody
+    @PostMapping("/api/create")
+    public ResponseEntity<?> createMacro(@RequestBody Map<String, String> data) {
+        String direction = data.get("direction");
+        String messageText = data.get("messageText");
+
+        if (direction == null || messageText == null || messageText.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("입력값이 올바르지 않습니다.");
+        }
+
+        macroMessageService.createMacro(direction, messageText);
+        return ResponseEntity.ok(Map.of("message", "성공적으로 등록되었습니다."));
+    }
+
+    // 매크로 삭제 API (Soft Delete)
+    @ResponseBody
+    @DeleteMapping("/api/delete/{id}")
+    public ResponseEntity<?> deleteMacro(@PathVariable Integer id) {
+        macroMessageService.deleteMacro(id);
+        return ResponseEntity.ok(Map.of("message", "삭제 처리되었습니다."));
+    }
 }

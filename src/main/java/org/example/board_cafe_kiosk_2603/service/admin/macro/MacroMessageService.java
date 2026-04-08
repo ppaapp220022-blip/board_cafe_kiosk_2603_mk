@@ -11,4 +11,8 @@ public interface MacroMessageService {
     void sendMessage(Integer tableId, Integer macroId);
     // session이 활성화 되어 있는 전체 티이블에 공지
     void sendToAllActiveTables(Integer macroId);
+    // 메세지 등록
+    void createMacro(String direction, String messageText);
+    // 메세지 비활성화 처리
+    void deleteMacro(Integer id);
 }

@@ -12,4 +12,10 @@ public interface MacroMessageMapper {
 
     // 상세 조회를 위해 추가
     MacroMessage findById(Integer id);
+
+    // 메세지 등록
+    void insertMacro(MacroMessage macroMessage);
+
+    // Soft Delete 용도
+    void deactivateMacro(Integer id);
 }

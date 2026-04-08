@@ -25,4 +25,15 @@
         WHERE id = #{id}
     </select>
 
+    <insert id="insertMacro">
+        INSERT INTO macro_message (direction, message_text, is_active)
+        VALUES (#{direction}, #{messageText}, TRUE)
+    </insert>
+
+    <update id="deactivateMacro">
+        UPDATE macro_message
+        SET is_active = FALSE
+        WHERE id = #{id}
+    </update>
+
 </mapper>

@@ -74,4 +74,19 @@ public class MacroMessageServiceImpl implements MacroMessageService {
         }
         log.info("📢 총 {}개 테이블에 전체 메시지 전송 완료!", tableIds.size());
     }
+
+    @Override
+    @Transactional
+    public void createMacro(String direction, String messageText) {
+        MacroMessage newMacro = new MacroMessage(null, direction, messageText, true);
+        macroMessageMapper.insertMacro(newMacro);
+        log.info("새 매크로 등록 완료: [{}] {}", direction, messageText);
+    }
+
+    @Override
+    @Transactional
+    public void deleteMacro(Integer id) {
+        macroMessageMapper.deactivateMacro(id);
+        log.info("매크로 삭제(비활성화) 완료: ID {}", id);
+    }
 }
