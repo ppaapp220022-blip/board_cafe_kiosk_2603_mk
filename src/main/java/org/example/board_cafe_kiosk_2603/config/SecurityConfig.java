@@ -51,7 +51,7 @@ public class SecurityConfig {
     @Bean
     @Order(1)
     public SecurityFilterChain kioskChain(HttpSecurity http) throws Exception {
-        log.info("▶ [SecurityConfig][kioskChain] 키오스크 체인 구성 시작");
+        log.info("--- [SecurityConfig] Kiosk Security Chain 구성 시작 ---");
 
         http
                 .securityMatcher("/kiosk/**")
@@ -59,7 +59,21 @@ public class SecurityConfig {
                     log.info("  [kioskChain] 권한 규칙 설정: 정적리소스·로그인 URL → permitAll, 나머지 → ROLE_TABLE");
                     auth
                             // 로그인 관련 URL 허용
-                            .requestMatchers("/kiosk/login", "/kiosk/login-process").permitAll()
+                            .requestMatchers("/kiosk/login",
+                                    "/kiosk/login-process",
+                                    "/kiosk/order/pending", // 신규 주문 조회 및 주문 API
+                                    "/kiosk/order/create",
+                                    "/kiosk/order/api/**",
+                                    "/kiosk/order/latest",
+                                    "/kiosk/order/active",
+                                    "/kiosk/order/session/**",
+                                    "/kiosk/order/**",  // PATCH, DELETE 요청도 인증 불필요
+                                    "/ws/**", "/app/**", // WebSocket
+                                    "/kiosk/cart/add",  // 카트 관련 (TABLE 역할 필요)
+                                    "/kiosk/cart/update",
+                                    "/kiosk/cart/clear",
+                                    "/kiosk/cart/items"
+                            ).permitAll()
                             // 나머지 키오스크 영역 → TABLE 권한 필요
                             .anyRequest().hasRole("TABLE");
                 })
@@ -98,7 +112,7 @@ public class SecurityConfig {
                 // 개발단계, csrf 비활성화
                 .csrf(AbstractHttpConfigurer::disable);
 
-        log.info("◀ [SecurityConfig][kioskChain] 키오스크 체인 구성 완료");
+        log.info("--- [SecurityConfig] Kiosk Security Chain 구성 완료 ---");
         return http.build();
     }
 
@@ -106,7 +120,7 @@ public class SecurityConfig {
     @Bean
     @Order(2)
     public SecurityFilterChain adminChain(HttpSecurity http) throws Exception {
-        log.info("▶ [SecurityConfig][adminChain] 관리자 체인 구성 시작");
+        log.info("--- [SecurityConfig] Admin Security Chain 구성 시작 ---");
 
         http
                 .securityMatcher(
@@ -130,7 +144,11 @@ public class SecurityConfig {
                                     "/error",
                                     "/login/verifyEmail",
                                     "/login/verifyEmailOtp",
-                                    "/login/sendOtp"
+                                    "/login/sendOtp",
+                                    "/ws/**",  // WebSocket 엔드포인트
+                                    "/app/**",  // WebSocket /app/** 경로
+                                    "/kiosk/order/**",  // 관리자 대시보드용 신규 주문 조회
+                                    "/admin/orders/**"
                             ).permitAll()
                             // 관리자 영역 → ADMIN 또는 STAFF 권한 필요
                             .requestMatchers("/admin/**").hasAnyRole("ADMIN", "STAFF", "SUPER")
@@ -148,6 +166,7 @@ public class SecurityConfig {
                             .passwordParameter("password")
                             .successHandler(managerLoginSuccessHandler)
                             .failureUrl("/common/login?error")
+                            .defaultSuccessUrl("/admin/dashboard", true)
                             .permitAll();
                 })
                 .logout(logout -> {
@@ -170,9 +189,13 @@ public class SecurityConfig {
                             });
                 })
                 // 개발단계, csrf 비활성화
-                .csrf(AbstractHttpConfigurer::disable);
+//                .csrf(AbstractHttpConfigurer::disable);
+                // WebSocket은 CSRF 보호 불필요
+                .csrf(csrf -> csrf
+                                .ignoringRequestMatchers("/ws/**", "/app/**")
+                                .ignoringRequestMatchers("/admin/orders/**"));
 
-        log.info("◀ [SecurityConfig][adminChain] 관리자 체인 구성 완료");
+        log.info("--- [SecurityConfig] Admin Security Chain 구성 완료 ---");
         return http.build();
     }
 

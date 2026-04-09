@@ -76,6 +76,15 @@
         LIMIT 1
     </select>
 
+    <!-- 상태별 주문 목록 조회 (관리자용) -->
+    <select id="findByStatus"
+            resultType="org.example.board_cafe_kiosk_2603.domain.kiosk.order.Orders">
+        SELECT id, session_id, table_id, customer_phone, status, total_amount, ordered_at
+        FROM orders
+        WHERE status = #{status}
+        ORDER BY ordered_at ASC
+    </select>
+
     <!-- 주문 ID로 아이템 목록 조회 -->
     <select id="findItemsByOrderId"
             resultType="org.example.board_cafe_kiosk_2603.domain.kiosk.order.OrderItem">

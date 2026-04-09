@@ -34,7 +34,6 @@ import java.util.Map;
 @RequestMapping("/kiosk/order")
 @RequiredArgsConstructor
 public class OrderController {
-
     private final OrderService orderService;
     private final KioskPageService kioskPageService;
 
@@ -48,7 +47,7 @@ public class OrderController {
      *
      * 주문 상태 확인 페이지
      * - 주문 내용 표시
-     * - 상태 실시간 표시 (PENDING → PAID → CONFIRMED → ...)
+     * - 상태 실시간 표시
      * - 결제로 진행하기 버튼
      */
     @GetMapping("/{orderId}")
@@ -71,7 +70,7 @@ public class OrderController {
         model.addAttribute("tableNumber", tableNumber);
         model.addAttribute("statusDisplay", getStatusDisplay(order.getStatus()));
 
-        return "kiosk/order-detail";
+        return "kiosk/order_detail";
     }
 
     // ===========================================================
@@ -91,58 +90,84 @@ public class OrderController {
      * 응답: {
      *   "success": true,
      *   "id": 123,
-     *   "status": "PENDING",
-     *   "totalAmount": 15000,
-     *   "items": [...]
+     *   "status": "ORDERED",
      * }
      */
-//    @PostMapping("/create")
-//    @ResponseBody
-//    public ResponseEntity<OrdersDTO> createOrder(
-//            @RequestBody OrderCreateRequest request,
-//            HttpSession session) {
-//        Integer tableNumber = (Integer) session.getAttribute("tableNumber");
-//
-//        if (tableNumber == null) {
-//            log.warn("테이블 번호 없음 - 주문 생성 실패");
-//            return ResponseEntity.badRequest()
-//                    .body(OrdersDTO.builder()
-//                            .success(false)
-//                            .message("테이블 정보가 없습니다.")
-//                            .build());
-//        }
-//
-//        log.info("주문 생성 요청 - tableNumber: {}, totalAmount: {}, customerPhone: {}",
-//                tableNumber, request.getTotalAmount(), request.getCustomerPhone());
-//
-//        try {
-//            OrdersDTO result = orderService.createOrderFromCart(
-//                    tableNumber,sessionId,
-//                    request.getCustomerPhone(),
-//                    request.getTotalAmount()
-//            );
-//
-//            if (result.isSuccess()) {
-//                log.info("주문 생성 성공 - orderId: {}, status: {}, totalAmount: {}",
-//                        result.getId(), result.getStatus(), result.getTotalAmount());
-//                return ResponseEntity.ok(result);
-//            } else {
-//                log.warn("주문 생성 실패 - message: {}", result.getMessage());
-//                return ResponseEntity.badRequest().body(result);
-//            }
-//        } catch (Exception e) {
-//            log.error("주문 생성 중 예외 발생", e);
-//            return ResponseEntity.internalServerError()
-//                    .body(OrdersDTO.builder()
-//                            .success(false)
-//                            .message("주문 생성 중 오류가 발생했습니다: " + e.getMessage())
-//                            .build());
-//        }
-//    }
+    @PostMapping("/create")
+    @ResponseBody
+    public ResponseEntity<OrdersDTO> createOrder(
+            @RequestBody OrderCreateRequest request,
+            HttpSession session) {
+        Integer tableNumber = (Integer) session.getAttribute("tableNumber");
+
+        if (tableNumber == null) {
+            log.warn("테이블 번호 없음 - 주문 생성 실패");
+            return ResponseEntity.badRequest()
+                    .body(OrdersDTO.builder()
+                            .success(false)
+                            .message("테이블 정보가 없습니다.")
+                            .build());
+        }
+
+        try {
+            log.info("주문 생성 요청 - tableNumber: {}, totalAmount: {}, customerPhone: {}",
+                    tableNumber, request.getTotalAmount(), request.getCustomerPhone());
+
+            OrdersDTO result = orderService.createOrderFromCart(
+                    tableNumber,
+                    request.getCustomerPhone(),
+                    request.getTotalAmount()
+            );
+
+            if (result.isSuccess()) {
+                log.info("주문 생성 성공 - orderId: {}, status: {}, totalAmount: {}",
+                        result.getId(), result.getStatus(), result.getTotalAmount());
+                return ResponseEntity.ok(result);
+            } else {
+                log.warn("주문 생성 실패 - message: {}", result.getMessage());
+                return ResponseEntity.badRequest().body(result);
+            }
+        } catch (Exception e) {
+            log.error("주문 생성 중 예외 발생", e);
+            return ResponseEntity.internalServerError()
+                    .body(OrdersDTO.builder()
+                            .success(false)
+                            .message("주문 생성 중 오류가 발생했습니다: " + e.getMessage())
+                            .build());
+        }
+    }
 
     // ===========================================================
     // REST API - 조회
     // ===========================================================
+
+    /**
+     * 신규 주문 목록 조회 (PENDING 상태)
+     * GET /kiosk/order/pending
+     *
+     * 관리자 대시보드에서 신규 주문 알림 조회용
+     */
+    @GetMapping("/pending")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getPendingOrders() {
+        log.info("신규 주문 목록 조회");
+        try {
+            List<OrdersDTO> orders = orderService.getNewOrders();
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "orders", orders,
+                    "count", orders.size()
+            ));
+        } catch (Exception e) {
+            log.error("신규 주문 조회 실패", e);
+            return ResponseEntity.internalServerError()
+                    .body(Map.of(
+                            "success", false,
+                            "message", "신규 주문 조회 실패"
+                    ));
+        }
+    }
 
     /**
      * 주문 단건 조회 (JSON)
@@ -166,7 +191,7 @@ public class OrderController {
         Integer tableNumber = (Integer) session.getAttribute("tableNumber");
         if (tableNumber == null) return ResponseEntity.badRequest().build();
         log.info("최근 주문 조회 - tableNumber: {}", tableNumber);
-        OrdersDTO result = orderService.getLatestOrder(tableNumber);
+        OrdersDTO result = orderService.getLatestOrderByTableNumber(tableNumber);
         return result.isSuccess() ? ResponseEntity.ok(result) : ResponseEntity.notFound().build();
     }
 
@@ -178,7 +203,20 @@ public class OrderController {
     @ResponseBody
     public List<OrdersDTO> getOrdersBySession(@PathVariable long sessionId) {
         log.info("세션 주문 목록 조회 - sessionId: {}", sessionId);
-        return orderService.getOrdersBySession(sessionId);
+        return orderService.getOrdersBySessionId(sessionId);
+    }
+
+    /**
+     * 현재 활성 세션의 주문 목록 조회 (장바구니 진입 버튼용)
+     * GET /kiosk/order/active
+     */
+    @GetMapping("/active")
+    @ResponseBody
+    public ResponseEntity<List<OrdersDTO>> getActiveOrders(HttpSession session) {
+        Integer tableNumber = (Integer) session.getAttribute("tableNumber");
+        if (tableNumber == null) return ResponseEntity.ok(List.of());
+        log.info("활성 세션 주문 조회 - tableNumber: {}", tableNumber);
+        return ResponseEntity.ok(orderService.getActiveSessionOrders(tableNumber));
     }
 
     // ===========================================================
@@ -188,14 +226,12 @@ public class OrderController {
     /**
      * 주문 상태 변경
      * PATCH /kiosk/order/{orderId}/status
-     * body: { "status": "PAID" }
-     *
+     * body: { "status": "ORDERED" }
      * 상태 전이 규칙:
-     * - PENDING → PAID (결제 완료)
-     * - PAID → CONFIRMED (관리자 확인)
-     * - CONFIRMED → COOKING (조리 시작)
-     * - COOKING → DELIVERING (서빙 시작)
-     * - DELIVERING → COMPLETED (서빙 완료)
+     * - ORDERED   → CONFIRMED (주문확인)
+     * - CONFIRMED → COOKING   (조리시작)
+     * - COOKING   → DELIVERING(서빙시작)
+     * - DELIVERING→ COMPLETED (서빙완료)
      * - (모든 상태) → CANCELLED (취소)
      */
     @PatchMapping("/{orderId}/status")
@@ -230,11 +266,10 @@ public class OrderController {
      */
     private String getStatusDisplay(String status) {
         return switch (status) {
-            case "PENDING" -> "주문 대기 중...";
-            case "PAID" -> "주문 완료! 관리자 확인 중...";
+            case "ORDERED"   -> "주문 완료! 관리자 확인 중...";
             case "CONFIRMED" -> "주문 확인! 조리 시작...";
-            case "COOKING" -> "조리 중입니다...";
-            case "DELIVERING" -> "준비 완료! 서빙 중...";
+            case "COOKING"   -> "조리 중입니다...";
+            case "DELIVERING"-> "조리 완료! 서빙 중...";
             case "COMPLETED" -> "서빙 완료!";
             case "CANCELLED" -> "주문 취소됨";
             default -> "상태 확인 중...";

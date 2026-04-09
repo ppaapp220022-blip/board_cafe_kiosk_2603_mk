@@ -1,690 +1,784 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>정산 - Board Game Cafe</title>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://js.tosspayments.com/v2/standard"></script>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    <meta charset="UTF-8">
+    <title>정산 - Board Game Cafe</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://js.tosspayments.com/v2/standard"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    body {
-      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      overflow: hidden;
-      background-color: #f4f6f8;
-    }
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #f4f6f8;
+        }
 
-    .container {
-      width: 100%;
-      max-width: 700px;
-      padding: 20px;
-      box-sizing: border-box;
-      max-height: 95vh;
-      overflow-y: auto;
-    }
+        .container {
+            width: 100%;
+            max-width: 700px;
+            padding: 20px;
+            box-sizing: border-box;
+            max-height: 95vh;
+            overflow-y: auto;
+        }
 
-    .container::-webkit-scrollbar { width: 8px; }
-    .container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-    .container::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 10px; }
-    .container::-webkit-scrollbar-thumb:hover { background: #888; }
+        .container::-webkit-scrollbar {
+            width: 8px;
+        }
 
-    .page-title {
-      font-size: 2rem;
-      margin: 0 0 24px 0;
-      color: #111;
-      text-align: center;
-      font-weight: 700;
-    }
+        .container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
 
-    .card {
-      background: white;
-      border-radius: 24px;
-      padding: 28px;
-      margin-bottom: 16px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    }
+        .container::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
 
-    .card-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 1.2rem;
-      font-weight: bold;
-      margin-bottom: 18px;
-      color: #333;
-    }
+        .container::-webkit-scrollbar-thumb:hover {
+            background: #888;
+        }
 
-    .card-header i { width: 26px; height: 26px; color: #007bff; }
+        .page-title {
+            font-size: 2rem;
+            margin: 0 0 24px 0;
+            color: #111;
+            text-align: center;
+            font-weight: 700;
+        }
 
-    /* 주문 내역 */
-    .order-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 13px 0;
-      border-bottom: 1px solid #f0f0f0;
-      font-size: 1.05rem;
-      color: #333;
-    }
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 28px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
 
-    .order-item:last-child { border-bottom: none; }
-    .order-qty { color: #888; font-size: 0.95rem; margin-left: 6px; }
-    .price { color: #007bff; font-weight: bold; }
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 18px;
+            color: #333;
+        }
 
-    .summary-divider {
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid #eaeaea;
-      display: flex;
-      justify-content: space-between;
-      color: #888;
-      font-size: 1.1rem;
-    }
+        .card-header i {
+            width: 26px;
+            height: 26px;
+            color: #007bff;
+        }
 
-    /* 세션 정보 */
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      font-size: 1.05rem;
-      color: #333;
-    }
+        /* 주문 내역 */
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 13px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 1.05rem;
+            color: #333;
+        }
 
-    .info-row:last-child { margin-bottom: 0; }
+        .order-item:last-child {
+            border-bottom: none;
+        }
 
-    .info-label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: #888;
-    }
+        .order-qty {
+            color: #888;
+            font-size: 0.95rem;
+            margin-left: 6px;
+        }
 
-    .info-label i { width: 18px; height: 18px; }
+        .price {
+            color: #007bff;
+            font-weight: bold;
+        }
 
-    /* 포인트 카드 */
-    .point-card {
-      background: linear-gradient(135deg, #fff8e1 0%, #fff3cd 100%);
-      border: 1px solid #ffe082;
-      border-radius: 20px;
-      padding: 20px 24px;
-      margin-bottom: 16px;
-    }
+        .summary-divider {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #eaeaea;
+            display: flex;
+            justify-content: space-between;
+            color: #888;
+            font-size: 1.1rem;
+        }
 
-    .point-card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 14px;
-    }
+        /* 세션 정보 */
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 1.05rem;
+            color: #333;
+        }
 
-    .point-card-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 1.1rem;
-      font-weight: bold;
-      color: #e65100;
-    }
+        .info-row:last-child {
+            margin-bottom: 0;
+        }
 
-    .point-card-title i { width: 22px; height: 22px; }
+        .info-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #888;
+        }
 
-    .point-balance-badge {
-      background: #ff9800;
-      color: white;
-      padding: 5px 14px;
-      border-radius: 20px;
-      font-size: 0.95rem;
-      font-weight: 700;
-    }
+        .info-label i {
+            width: 18px;
+            height: 18px;
+        }
 
-    .point-input-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+        /* 포인트 카드 */
+        .point-card {
+            background: linear-gradient(135deg, #fff8e1 0%, #fff3cd 100%);
+            border: 1px solid #ffe082;
+            border-radius: 20px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+        }
 
-    .point-input {
-      flex: 1;
-      padding: 12px 16px;
-      border: 2px solid #ffe082;
-      border-radius: 12px;
-      font-size: 1rem;
-      background: white;
-      color: #333;
-      outline: none;
-      transition: border-color 0.2s;
-    }
+        .point-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
 
-    .point-input:focus { border-color: #ff9800; }
+        .point-card-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #e65100;
+        }
 
-    .point-apply-btn {
-      padding: 12px 20px;
-      background: #ff9800;
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-size: 0.95rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.2s;
-      white-space: nowrap;
-    }
+        .point-card-title i {
+            width: 22px;
+            height: 22px;
+        }
 
-    .point-apply-btn:hover { background: #f57c00; }
+        .point-balance-badge {
+            background: #ff9800;
+            color: white;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
 
-    .point-reset-btn {
-      padding: 12px 16px;
-      background: #f0f2f5;
-      color: #888;
-      border: none;
-      border-radius: 12px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
+        .point-input-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
 
-    .point-reset-btn:hover { background: #e0e2e7; }
+        .point-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #ffe082;
+            border-radius: 12px;
+            font-size: 1rem;
+            background: white;
+            color: #333;
+            outline: none;
+            transition: border-color 0.2s;
+        }
 
-    .point-applied-msg {
-      margin-top: 10px;
-      font-size: 0.9rem;
-      color: #e65100;
-      font-weight: 600;
-      display: none;
-    }
+        .point-input:focus {
+            border-color: #ff9800;
+        }
 
-    .no-point-msg {
-      font-size: 0.95rem;
-      color: #888;
-      text-align: center;
-      padding: 8px 0;
-    }
+        .point-apply-btn {
+            padding: 12px 20px;
+            background: #ff9800;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
 
-    /* 최종 금액 */
-    .amount-breakdown {
-      margin-bottom: 16px;
-    }
+        .point-apply-btn:hover {
+            background: #f57c00;
+        }
 
-    .amount-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 0;
-      font-size: 1.05rem;
-      color: #555;
-      border-bottom: 1px solid #f0f0f0;
-    }
+        .point-reset-btn {
+            padding: 12px 16px;
+            background: #f0f2f5;
+            color: #888;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
 
-    .amount-row:last-child { border-bottom: none; }
-    .amount-row.discount { color: #f44336; }
-    .amount-row.discount span:last-child { font-weight: 700; }
+        .point-reset-btn:hover {
+            background: #e0e2e7;
+        }
 
-    .final-box {
-      background: #eef6ff;
-      border: 2px solid #d0e4ff;
-      border-radius: 20px;
-      padding: 24px 28px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
+        .point-applied-msg {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #e65100;
+            font-weight: 600;
+            display: none;
+        }
 
-    .final-box-label { font-size: 1.3rem; font-weight: bold; color: #333; }
+        .no-point-msg {
+            font-size: 0.95rem;
+            color: #888;
+            text-align: center;
+            padding: 8px 0;
+        }
 
-    .final-box-amount {
-      font-size: 2.8rem;
-      font-weight: 800;
-      color: #007bff;
-    }
+        /* 최종 금액 */
+        .amount-breakdown {
+            margin-bottom: 16px;
+        }
 
-    /* 버튼 */
-    .button-group { display: flex; gap: 14px; margin-top: 4px; }
+        .amount-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            font-size: 1.05rem;
+            color: #555;
+            border-bottom: 1px solid #f0f0f0;
+        }
 
-    .pay-btn, .back-btn {
-      flex: 1;
-      padding: 22px;
-      border: none;
-      border-radius: 20px;
-      font-size: 1.1rem;
-      font-weight: bold;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      transition: all 0.2s ease;
-    }
+        .amount-row:last-child {
+            border-bottom: none;
+        }
 
-    .pay-btn {
-      background: #007bff;
-      color: white;
-      box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3);
-    }
+        .amount-row.discount {
+            color: #f44336;
+        }
 
-    .pay-btn:hover { background: #0056b3; box-shadow: 0 10px 25px rgba(0, 123, 255, 0.4); }
-    .pay-btn:active { transform: scale(0.98); }
-    .pay-btn:disabled { background: #b0c9f0; box-shadow: none; cursor: not-allowed; }
-    .pay-btn i, .back-btn i { width: 24px; height: 24px; }
+        .amount-row.discount span:last-child {
+            font-weight: 700;
+        }
 
-    .back-btn { background: #f0f2f5; color: #888; }
-    .back-btn:hover { background: #e0e2e7; color: #555; }
+        .final-box {
+            background: #eef6ff;
+            border: 2px solid #d0e4ff;
+            border-radius: 20px;
+            padding: 24px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
 
-    /* 토스트 */
-    .toast {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      background: #333;
-      color: white;
-      padding: 14px 22px;
-      border-radius: 12px;
-      z-index: 2000;
-      font-size: 0.95rem;
-      animation: slideInUp 0.3s ease;
-    }
+        .final-box-label {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+        }
 
-    @keyframes slideInUp {
-      from { transform: translateY(80px); opacity: 0; }
-      to   { transform: translateY(0);    opacity: 1; }
-    }
-  </style>
+        .final-box-amount {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: #007bff;
+        }
+
+        /* 버튼 */
+        .button-group {
+            display: flex;
+            gap: 14px;
+            margin-top: 4px;
+        }
+
+        .pay-btn, .back-btn {
+            flex: 1;
+            padding: 22px;
+            border: none;
+            border-radius: 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .pay-btn {
+            background: #007bff;
+            color: white;
+            box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3);
+        }
+
+        .pay-btn:hover {
+            background: #0056b3;
+            box-shadow: 0 10px 25px rgba(0, 123, 255, 0.4);
+        }
+
+        .pay-btn:active {
+            transform: scale(0.98);
+        }
+
+        .pay-btn:disabled {
+            background: #b0c9f0;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .pay-btn i, .back-btn i {
+            width: 24px;
+            height: 24px;
+        }
+
+        .back-btn {
+            background: #f0f2f5;
+            color: #888;
+        }
+
+        .back-btn:hover {
+            background: #e0e2e7;
+            color: #555;
+        }
+
+        /* 토스트 */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #333;
+            color: white;
+            padding: 14px 22px;
+            border-radius: 12px;
+            z-index: 2000;
+            font-size: 0.95rem;
+            animation: slideInUp 0.3s ease;
+        }
+
+        @keyframes slideInUp {
+            from {
+                transform: translateY(80px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
 </head>
 <body>
 
 <div class="container">
-  <h1 class="page-title">🧾 정산하기</h1>
+    <h1 class="page-title">🧾 정산하기</h1>
 
-  <!-- 주문 내역 -->
-  <div class="card" id="order-summary">
-    <div class="card-header"><i data-lucide="shopping-bag"></i> 주문 내역</div>
-  </div>
+    <!-- 주문 내역 -->
+    <div class="card" id="order-summary">
+        <div class="card-header"><i data-lucide="shopping-bag"></i> 주문 내역</div>
+    </div>
 
-  <!-- 세션 정보 -->
-  <div class="card">
-    <div class="card-header"><i data-lucide="clock"></i> 이용 정보</div>
-    <div class="info-row">
-      <span class="info-label"><i data-lucide="timer"></i> 이용 시간</span>
-      <span id="elapsed-time">계산 중...</span>
+    <!-- 세션 정보 -->
+    <div class="card">
+        <div class="card-header"><i data-lucide="clock"></i> 이용 정보</div>
+        <div class="info-row">
+            <span class="info-label"><i data-lucide="timer"></i> 이용 시간</span>
+            <span id="elapsed-time">계산 중...</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label"><i data-lucide="users"></i> 인원</span>
+            <span th:text="${partySize} + '명'">2명</span>
+        </div>
+        <!-- 패키지명 추가 -->
+        <div class="info-row" th:if="${packageName != null and packageName != ''}">
+            <span class="info-label"><i data-lucide="package"></i> 패키지</span>
+            <span th:text="${packageName}">패키지명</span>
+        </div>
+        <!-- 패키지 금액 추가 -->
+        <div class="info-row" th:if="${packageTotal > 0}">
+            <span class="info-label"><i data-lucide="tag"></i> 패키지 금액</span>
+            <span th:text="'₩' + ${#numbers.formatInteger(packageTotal, 0, 'COMMA')}">₩0</span>
+        </div>
     </div>
-    <div class="info-row">
-      <span class="info-label"><i data-lucide="users"></i> 인원</span>
-      <span th:text="${partySize} + '명'">2명</span>
-    </div>
-    <!-- 패키지명 추가 -->
-    <div class="info-row" th:if="${packageName != null and packageName != ''}">
-      <span class="info-label"><i data-lucide="package"></i> 패키지</span>
-      <span th:text="${packageName}">패키지명</span>
-    </div>
-    <!-- 패키지 금액 추가 -->
-    <div class="info-row" th:if="${packageTotal > 0}">
-      <span class="info-label"><i data-lucide="tag"></i> 패키지 금액</span>
-      <span th:text="'₩' + ${#numbers.formatInteger(packageTotal, 0, 'COMMA')}">₩0</span>
-    </div>
-  </div>
 
-  <!-- 포인트 사용 (전화번호 등록된 경우만 표시) -->
-  <div class="point-card" id="point-section"
-       th:if="${customerPhone != null and customerPhone != ''}">
-    <div class="point-card-header">
-      <div class="point-card-title">
-        <i data-lucide="star"></i> 포인트 사용
-      </div>
-      <span class="point-balance-badge"
-            th:text="'보유 ' + ${pointBalance} + 'P'">보유 0P</span>
+    <!-- 포인트 사용 (전화번호 등록된 경우만 표시) -->
+    <div class="point-card" id="point-section"
+         th:if="${customerPhone != null and customerPhone != ''}">
+        <div class="point-card-header">
+            <div class="point-card-title">
+                <i data-lucide="star"></i> 포인트 사용
+            </div>
+            <span class="point-balance-badge"
+                  th:text="'보유 ' + ${pointBalance} + 'P'">보유 0P</span>
+        </div>
+        <div class="point-input-row">
+            <input type="number" class="point-input" id="point-input"
+                   th:placeholder="'최대 ' + ${pointBalance} + 'P 사용 가능'"
+                   min="0" th:max="${pointBalance}"/>
+            <button class="point-apply-btn" onclick="applyPoint()">적용</button>
+            <button class="point-reset-btn" onclick="resetPoint()">취소</button>
+        </div>
+        <div class="point-applied-msg" id="point-applied-msg">
+            ✅ <span id="point-applied-amount">0</span>P 사용 적용됨
+        </div>
     </div>
-    <div class="point-input-row">
-      <input type="number" class="point-input" id="point-input"
-             th:placeholder="'최대 ' + ${pointBalance} + 'P 사용 가능'"
-             min="0" th:max="${pointBalance}"/>
-      <button class="point-apply-btn" onclick="applyPoint()">적용</button>
-      <button class="point-reset-btn" onclick="resetPoint()">취소</button>
-    </div>
-    <div class="point-applied-msg" id="point-applied-msg">
-      ✅ <span id="point-applied-amount">0</span>P 사용 적용됨
-    </div>
-  </div>
 
-  <!-- 포인트 미등록 안내 -->
-  <div class="point-card" th:if="${customerPhone == null or customerPhone == ''}">
-    <div class="point-card-title" style="margin-bottom: 8px;">
-      <i data-lucide="star"></i> 포인트
+    <!-- 포인트 미등록 안내 -->
+    <div class="point-card" th:if="${customerPhone == null or customerPhone == ''}">
+        <div class="point-card-title" style="margin-bottom: 8px;">
+            <i data-lucide="star"></i> 포인트
+        </div>
+        <p class="no-point-msg">전화번호를 등록하면 포인트를 적립하고 사용할 수 있어요.</p>
     </div>
-    <p class="no-point-msg">전화번호를 등록하면 포인트를 적립하고 사용할 수 있어요.</p>
-  </div>
 
-  <!-- 금액 상세 -->
-  <div class="card" id="amount-card">
-    <div class="card-header"><i data-lucide="receipt"></i> 결제 금액</div>
-    <div class="amount-breakdown">
-      <div class="amount-row">
-        <span>상품 합계</span>
-        <span id="subtotal-amount">₩0</span>
-      </div>
-      <div class="amount-row" id="over-charge-row" style="display:none;">
-        <span>초과 요금</span>
-        <span id="over-charge-amount" style="color:#f44336;font-weight:700;">₩0</span>
-      </div>
-      <div class="amount-row discount" id="point-discount-row" style="display:none;">
-        <span>포인트 할인</span>
-        <span id="point-discount-amount">-₩0</span>
-      </div>
+    <!-- 금액 상세 -->
+    <div class="card" id="amount-card">
+        <div class="card-header"><i data-lucide="receipt"></i> 결제 금액</div>
+        <div class="amount-breakdown">
+            <div class="amount-row">
+                <span>상품 합계</span>
+                <span id="subtotal-amount">₩0</span>
+            </div>
+            <div class="amount-row" id="over-charge-row" style="display:none;">
+                <span>초과 요금</span>
+                <span id="over-charge-amount" style="color:#f44336;font-weight:700;">₩0</span>
+            </div>
+            <div class="amount-row discount" id="point-discount-row" style="display:none;">
+                <span>포인트 할인</span>
+                <span id="point-discount-amount">-₩0</span>
+            </div>
+        </div>
+        <div class="final-box">
+            <span class="final-box-label">최종 결제 금액</span>
+            <span class="final-box-amount" id="final-total">₩0</span>
+        </div>
     </div>
-    <div class="final-box">
-      <span class="final-box-label">최종 결제 금액</span>
-      <span class="final-box-amount" id="final-total">₩0</span>
+
+    <!-- 토스페이먼츠 위젯 컨테이너 -->
+    <div class="card" id="toss-widget-card">
+        <div class="card-header"><i data-lucide="credit-card"></i> 결제 수단</div>
+        <div id="payment-widget" class="payment-widget" style="margin-bottom: 20px;"></div>
+        <div id="agreement" style="margin-top: 20px;"></div>
     </div>
-  </div>
 
-  <!-- 토스페이먼츠 위젯 컨테이너 -->
-  <div class="card" id="toss-widget-card">
-    <div class="card-header"><i data-lucide="credit-card"></i> 결제 수단</div>
-    <div id="payment-widget" class="payment-widget" style="margin-bottom: 20px;"></div>
-    <div id="agreement" style="margin-top: 20px;"></div>
-  </div>
-
-  <!-- 버튼 -->
-  <div class="button-group">
-    <button class="pay-btn" id="pay-btn" onclick="processPayment()">
-      <i data-lucide="credit-card"></i>
-      <span id="pay-btn-label">결제하기</span>
-    </button>
-    <button class="back-btn" onclick="history.back()">
-      <i data-lucide="arrow-left"></i> 돌아가기
-    </button>
-  </div>
+    <!-- 버튼 -->
+    <div class="button-group">
+        <button class="pay-btn" id="pay-btn" onclick="processPayment()">
+            <i data-lucide="credit-card"></i>
+            <span id="pay-btn-label">결제하기</span>
+        </button>
+        <button class="back-btn" onclick="history.back()">
+            <i data-lucide="arrow-left"></i> 돌아가기
+        </button>
+    </div>
 </div>
 
-<script>
-  lucide.createIcons({
-    attrs: { 'stroke-width': 2.5 }
-  });
+<script th:inline="javascript">
+    lucide.createIcons({
+        attrs: {'stroke-width': 2.5}
+    });
 
-  const packageName  = '[[${packageName}]]';
-  const partySize    = [[${partySize}]];
-  const pointBalance   = [[${pointBalance}]];
-  const packageTotal  = [[${packageTotal}]];   // 서버에서 받은 패키지 금액
-  const sessionStartTime = [[${sessionStartTime}]];
-  const tossClientKey  = 'test_ck_YOUR_CLIENT_KEY_HERE'; // TODO: 실제 클라이언트 키로 교체
-  const durationMinutes  = [[${durationMinutes}]];   // 패키지 이용 시간(분)
-  const extraPricePerMin = [[${extraPricePerMin}]];  // 분당 초과 요금
-  const tableNumber = /*[[${tableNumber}]]*/ 1;
-  const urlParams = new URLSearchParams(window.location.search);
-  const orderId = urlParams.get('orderId');  // ← 이 부분 추가!
+    const packageName = '[[${packageName}]]';
+    const partySize = [[${partySize}]];
+    const pointBalance = [[${pointBalance}]];
+    const packageTotal = [[${packageTotal}]];   // 서버에서 받은 패키지 금액
+    const sessionStartTime = [[${sessionStartTime}]];
+    const tossClientKey = 'test_ck_YOUR_CLIENT_KEY_HERE'; // TODO: 실제 클라이언트 키로 교체
+    const durationMinutes = [[${durationMinutes}]];   // 패키지 이용 시간(분)
+    const extraPricePerMin = [[${extraPricePerMin}]];  // 분당 초과 요금
+    const tableNumber = /*[[${tableNumber}]]*/ 1;
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get('orderId');  // ← 이 부분 추가!
 
-  let subtotalPrice = 0;
-  let appliedPoint = 0;
-  let pointBalance = 0;
-  let widgets;
-  let orderId_toss;  // 토스페이먼츠용
-  let orderName;
+    let subtotalPrice = 0;
+    let menuSubtotal = 0;
+    let appliedPoint = 0;
+    let pointBalance = 0;
+    let widgets;
+    let orderId_toss;  // 토스페이먼츠용
+    let orderName;
 
-  // ===== 페이지 로드 시 초기화 =====
-  document.addEventListener('DOMContentLoaded', async function() {
-      // 1. 주문 ID 표시 (선택사항)
-      if (orderId) {
-          const orderIdDisplay = document.getElementById('order-id-display');
-          if (orderIdDisplay) {
-              orderIdDisplay.innerText = `주문번호: ${orderId}`;
-          }
-      }
+    // ===== 페이지 로드 시 초기화 =====
+    document.addEventListener('DOMContentLoaded', async function () {
+        // 1. 주문 ID 표시 (선택사항)
+        if (orderId) {
+            const orderIdDisplay = document.getElementById('order-id-display');
+            if (orderIdDisplay) {
+                orderIdDisplay.innerText = `주문번호: ${orderId}`;
+            }
+        }
 
-      // 2. 기존 로직 실행
-      await Promise.all([
-          loadCheckout(),
-          fetchPointBalance()
-      ]);
+        // 2. 기존 로직 실행
+        await Promise.all([
+            loadCheckout(),
+            fetchPointBalance()
+        ]);
 
-      await initializeTossWidget();
+        await initializeTossWidget();
 
-      // ===== 이용 시간 계산 =====
-      function updateElapsedTime() {
-          if (!sessionStartTime) {
-              document.getElementById('elapsed-time').innerText = '0시간 0분';
-              return;
-          }
-          const elapsed = Math.floor((Date.now() - sessionStartTime) / 60000);
-          const hours = Math.floor(elapsed / 60);
-          const minutes = elapsed % 60;
-          document.getElementById('elapsed-time').innerText = `${hours}시간 ${minutes}분`;
+        // ===== 이용 시간 계산 =====
+        function updateElapsedTime() {
+            if (!sessionStartTime) {
+                document.getElementById('elapsed-time').innerText = '0시간 0분';
+                return;
+            }
+            const elapsed = Math.floor((Date.now() - sessionStartTime) / 60000);
+            const hours = Math.floor(elapsed / 60);
+            const minutes = elapsed % 60;
+            document.getElementById('elapsed-time').innerText = `${hours}시간 ${minutes}분`;
 
-          // 초과 요금 계산
-          if (durationMinutes && extraPricePerMin > 0) {
-              const overMinutes = elapsed - durationMinutes;
-              if (overMinutes > 0) {
-                  const overUnits = Math.ceil(overMinutes / 10); // 10분 단위 올림
-                  const overCharge = overUnits * extraPricePerMin * partySize;
-                  subtotalPrice = packageTotal + menuSubtotal + overCharge;
-                  updateAmounts();
+            // 초과 요금 계산
+            if (durationMinutes && extraPricePerMin > 0) {
+                const overMinutes = elapsed - durationMinutes;
+                if (overMinutes > 0) {
+                    const overUnits = Math.ceil(overMinutes / 10); // 10분 단위 올림
+                    const overCharge = overUnits * extraPricePerMin * partySize;
+                    subtotalPrice = packageTotal + menuSubtotal + overCharge;
+                    updateAmounts();
 
-                  // 초과 요금 표시
-                  document.getElementById('over-charge-row').style.display = 'flex';
-                  document.getElementById('over-charge-amount').innerText =
-                      `₩${overCharge.toLocaleString()} (+${overMinutes}분 초과)`;
-              }
-          }
-      }
+                    // 초과 요금 표시
+                    document.getElementById('over-charge-row').style.display = 'flex';
+                    document.getElementById('over-charge-amount').innerText =
+                        `₩${overCharge.toLocaleString()} (+${overMinutes}분 초과)`;
+                }
+            }
+        }
 
-      updateElapsedTime();
+        updateElapsedTime();
 
-      // ===== 페이지 로드 =====
-      document.addEventListener('DOMContentLoaded', () => {
-          loadCheckoutData();
-      });
+        // ===== 페이지 로드 =====
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCheckoutData();
+        });
 
-      // ===== 정산 페이지 데이터 로드 =====
-      async function loadCheckout() {
-          try {
-              const response = await fetch(`/kiosk/cart/items`);
-              const data = await response.json();
+        // ===== 정산 페이지 데이터 로드 (세션 주문 기반) =====
+        async function loadCheckout() {
+            try {
+                const response = await fetch(`/kiosk/order/active`);
+                const orders = await response.json();
+                renderCheckout(orders);
+            } catch (err) {
+                console.error('Checkout 로드 실패:', err);
+            }
+        }
 
-              if (data.success) {
-                  renderCheckout(data.cartItems, data.totalPrice);
-              }
-          } catch (err) {
-              console.error('Checkout 로드 실패:', err);
-          }
-      }
+        // ===== 포인트 잔액 조회 =====
+        async function fetchPointBalance() {
+            try {
+                const response = await fetch(`/kiosk/point/balance?tableNumber=${tableNumber}`);
+                const data = await response.json();
+                pointBalance = data.balance || 0;
+                document.getElementById('point-balance').innerText = pointBalance.toLocaleString();
+            } catch (err) {
+                console.error('포인트 조회 실패:', err);
+            }
+        }
 
-      // ===== 포인트 잔액 조회 =====
-      async function fetchPointBalance() {
-          try {
-              const response = await fetch(`/kiosk/point/balance?tableNumber=${tableNumber}`);
-              const data = await response.json();
-              pointBalance = data.balance || 0;
-              document.getElementById('point-balance').innerText = pointBalance.toLocaleString();
-          } catch (err) {
-              console.error('포인트 조회 실패:', err);
-          }
-      }
+        // ===== 정산 내역 렌더링 =====
+        function renderCheckout(orders) {
+            const activeOrders = (orders || []).filter(o => o.status !== 'CANCELLED');
+            menuSubtotal = activeOrders.reduce((sum, o) => sum + o.totalAmount, 0);
+            subtotalPrice = packageTotal + menuSubtotal;
 
-      // ===== 정산 내역 렌더링 =====
-      function renderCheckout(cartItems, totalMenuPrice) {
-          menuSubtotal = totalMenuPrice;
-          subtotalPrice = packageTotal + menuSubtotal;
+            if (activeOrders.length === 0) {
+                document.getElementById('order-summary').innerHTML = `
+  <div class="card-header"><i data-lucide="shopping-bag"></i> 주문 내역</div>
+  <div style="text-align:center; color:#888; padding: 16px 0;">주문 내역이 없습니다.</div>`;
+                updateAmounts();
+                lucide.createIcons();
+                return;
+            }
 
-          const packageRow = /* 카페 패키지 정보 */
-              document.querySelector('.order-item[data-package]')
-                  ? document.querySelector('.order-item[data-package]').innerHTML
-                  : '';
-
-          const rows = cartItems.map(item => `
+            const rows = activeOrders.flatMap(order =>
+                order.items.map(item => `
       <div class="order-item">
         <div>
           <span>${item.menuName}</span>
           <span class="order-qty">x${item.quantity}</span>
         </div>
-        <div class="price">₩${(item.menuPrice * item.quantity).toLocaleString()}</div>
-      </div>`).join('');
+        <div class="price">₩${(item.price * item.quantity).toLocaleString()}</div>
+      </div>`)
+            ).join('');
 
-          document.getElementById('order-summary').innerHTML = `
+            document.getElementById('order-summary').innerHTML = `
   <div class="card-header"><i data-lucide="shopping-bag"></i> 주문 내역</div>
   ${rows}
-  ${emptyMsg}
   <div class="summary-divider">
     <span>메뉴 소계</span>
     <span>₩${menuSubtotal.toLocaleString()}</span>
   </div>`;
 
-          updateAmounts();
-          updateElapsedTime(); // 초과 요금 재계산 추가
-          lucide.createIcons();
-      }
+            updateAmounts();
+            updateElapsedTime();
+            lucide.createIcons();
+        }
 
-      // ===== 금액 업데이트 =====
-      function updateAmounts() {
-          const finalAmount = Math.max(subtotalPrice - appliedPoint, 0);
-          document.getElementById('subtotal-amount').innerText = `₩${subtotalPrice.toLocaleString()}`;
-          document.getElementById('final-total').innerText = `₩${finalAmount.toLocaleString()}`;
+        // ===== 금액 업데이트 =====
+        function updateAmounts() {
+            const finalAmount = Math.max(subtotalPrice - appliedPoint, 0);
+            document.getElementById('subtotal-amount').innerText = `₩${subtotalPrice.toLocaleString()}`;
+            document.getElementById('final-total').innerText = `₩${finalAmount.toLocaleString()}`;
 
-          const discountRow = document.getElementById('point-discount-row');
-          if (appliedPoint > 0) {
-              discountRow.style.display = 'flex';
-              document.getElementById('point-discount-amount').innerText = `-₩${appliedPoint.toLocaleString()}`;
-          } else {
-              discountRow.style.display = 'none';
-          }
-      }
+            const discountRow = document.getElementById('point-discount-row');
+            if (appliedPoint > 0) {
+                discountRow.style.display = 'flex';
+                document.getElementById('point-discount-amount').innerText = `-₩${appliedPoint.toLocaleString()}`;
+            } else {
+                discountRow.style.display = 'none';
+            }
+        }
 
-      // ===== 포인트 적용 =====
-      async function applyPoint() {
-          const input = document.getElementById('point-input');
-          const val = parseInt(input.value) || 0;
+        // ===== 포인트 적용 =====
+        async function applyPoint() {
+            const input = document.getElementById('point-input');
+            const val = parseInt(input.value) || 0;
 
-          if (val <= 0) {
-              showToast('1P 이상 입력해주세요.');
-              return;
-          }
-          if (val > pointBalance) {
-              showToast(`보유 포인트를 초과할 수 없습니다.`);
-              return;
-          }
+            if (val <= 0) {
+                showToast('1P 이상 입력해주세요.');
+                return;
+            }
+            if (val > pointBalance) {
+                showToast(`보유 포인트를 초과할 수 없습니다.`);
+                return;
+            }
 
-          appliedPoint = val;
-          updateAmounts();
+            appliedPoint = val;
+            updateAmounts();
 
-          if (widgets) {
-              await widgets.setAmount({
-                  currency: "KRW",
-                  value: subtotalPrice - appliedPoint
-              });
-          }
+            if (widgets) {
+                await widgets.setAmount({
+                    currency: "KRW",
+                    value: subtotalPrice - appliedPoint
+                });
+            }
 
-          document.getElementById('point-applied-amount').innerText = val.toLocaleString();
-          document.getElementById('point-applied-msg').style.display = 'block';
-          input.disabled = true;
-          showToast(`${val.toLocaleString()}P 적용되었습니다.`);
-      }
+            document.getElementById('point-applied-amount').innerText = val.toLocaleString();
+            document.getElementById('point-applied-msg').style.display = 'block';
+            input.disabled = true;
+            showToast(`${val.toLocaleString()}P 적용되었습니다.`);
+        }
 
-      // ===== 포인트 취소 =====
-      function resetPoint() {
-          appliedPoint = 0;
-          const input = document.getElementById('point-input');
-          input.value = '';
-          input.disabled = false;
-          document.getElementById('point-applied-msg').style.display = 'none';
-          updateAmounts();
-          updateWidgetAmount();
-      }
+        // ===== 포인트 취소 =====
+        function resetPoint() {
+            appliedPoint = 0;
+            const input = document.getElementById('point-input');
+            input.value = '';
+            input.disabled = false;
+            document.getElementById('point-applied-msg').style.display = 'none';
+            updateAmounts();
+            updateWidgetAmount();
+        }
 
-      if (widgets) {
-          await widgets.setAmount({
-              currency: "KRW",
-              value: subtotalPrice
-          });
-      }
+        if (widgets) {
+            await widgets.setAmount({
+                currency: "KRW",
+                value: subtotalPrice
+            });
+        }
 
 
-      // ===== 결제 처리 =====
-      function processPayment() {
-          if (subtotalPrice === 0) {
-              showToast('장바구니가 비어있습니다.');
-              return;
-          }
-          processTossPayment();
-      }
+        // ===== 결제 처리 =====
+        function processPayment() {
+            if (subtotalPrice === 0) {
+                showToast('장바구니가 비어있습니다.');
+                return;
+            }
+            processTossPayment();
+        }
 
-      // ===== 토스페이먼츠 초기화 =====
-      async function initializeTossWidget() {
-          try {
-              const prepRes = await fetch(`/kiosk/payment/prepare?tableNumber=${tableNumber}`, {
-                  method: 'POST',
-                  headers: {'Content-Type': 'application/json'},
-                  body: JSON.stringify({pointUsed: appliedPoint})
-              });
+        // ===== 토스페이먼츠 초기화 =====
+        async function initializeTossWidget() {
+            try {
+                const prepRes = await fetch(`/kiosk/payment/prepare?tableNumber=${tableNumber}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({pointUsed: appliedPoint})
+                });
 
-              const prepData = await prepRes.json();
-              if (!prepData.success) {
-                  console.error('결제 준비 실패:', prepData.message);
-                  showToast('결제 준비에 실패했습니다.');
-                  return;
-              }
+                const prepData = await prepRes.json();
+                if (!prepData.success) {
+                    console.error('결제 준비 실패:', prepData.message);
+                    showToast('결제 준비에 실패했습니다.');
+                    return;
+                }
 
-              orderId_toss = prepData.orderIdToss;
-              orderName = prepData.orderName;
-              const clientKey = prepData.clientKey;
-              const customerKey = prepData.customerKey;
+                orderId_toss = prepData.orderIdToss;
+                orderName = prepData.orderName;
+                const clientKey = prepData.clientKey;
+                const customerKey = prepData.customerKey;
 
-              const tossPayments = TossPayments(clientKey);
-              widgets = tossPayments.widgets({customerKey});
+                const tossPayments = TossPayments(clientKey);
+                widgets = tossPayments.widgets({customerKey});
 
-              await widgets.setAmount({
-                  currency: "KRW",
-                  value: subtotalPrice - appliedPoint
-              });
+                await widgets.setAmount({
+                    currency: "KRW",
+                    value: subtotalPrice - appliedPoint
+                });
 
-              await Promise.all([
-                  widgets.renderPaymentMethods({selector: "#payment-widget", variantKey: "DEFAULT"}),
-                  widgets.renderAgreement({selector: "#agreement", variantKey: "DEFAULT"})
-              ]);
+                await Promise.all([
+                    widgets.renderPaymentMethods({selector: "#payment-widget", variantKey: "DEFAULT"}),
+                    widgets.renderAgreement({selector: "#agreement", variantKey: "DEFAULT"})
+                ]);
 
-          } catch (err) {
-              console.error('위젯 초기화 오류:', err);
-              showToast('결제 준비 중 오류가 발생했습니다.');
-          }
-      }
+            } catch (err) {
+                console.error('위젯 초기화 오류:', err);
+                showToast('결제 준비 중 오류가 발생했습니다.');
+            }
+        }
 
-      // ===== 결제 요청 =====
-      async function processPayment() {
-          if (!widgets || !orderId_toss) {
-              showToast('결제 준비가 완료되지 않았습니다.');
-              return;
-          }
+        // ===== 결제 요청 =====
+        async function processPayment() {
+            if (!widgets || !orderId_toss) {
+                showToast('결제 준비가 완료되지 않았습니다.');
+                return;
+            }
 
-          const payBtn = document.getElementById('pay-btn');
-          payBtn.disabled = true;
-          document.getElementById('pay-btn-label').innerText = '결제 요청 중...';
+            const payBtn = document.getElementById('pay-btn');
+            payBtn.disabled = true;
+            document.getElementById('pay-btn-label').innerText = '결제 요청 중...';
 
-          try {
-              await widgets.requestPayment({
-                  orderId: orderId_toss,
-                  orderName: orderName,
-                  successUrl: window.location.origin + "/kiosk/toss/success",
-                  failUrl: window.location.origin + "/kiosk/toss/fail",
-              });
-          } catch (err) {
-              payBtn.disabled = false;
-              document.getElementById('pay-btn-label').innerText = '결제하기';
-              if (err.code !== 'USER_CANCEL') {
-                  showToast(err.message);
-              }
-          }
-      }
+            try {
+                await widgets.requestPayment({
+                    orderId: orderId_toss,
+                    orderName: orderName,
+                    successUrl: window.location.origin + "/kiosk/toss/success",
+                    failUrl: window.location.origin + "/kiosk/toss/fail",
+                });
+            } catch (err) {
+                payBtn.disabled = false;
+                document.getElementById('pay-btn-label').innerText = '결제하기';
+                if (err.code !== 'USER_CANCEL') {
+                    showToast(err.message);
+                }
+            }
+        }
 
-      // ===== 토스트 알림 =====
-      function showToast(msg) {
-          const toast = document.createElement('div');
-          toast.className = 'toast';
-          toast.innerText = msg;
-          document.body.appendChild(toast);
-          setTimeout(() => toast.remove(), 2500);
-      }
-  })
+        // ===== 토스트 알림 =====
+        function showToast(msg) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerText = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
+        }
+    })
 
 </script>
 </body>

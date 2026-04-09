@@ -506,6 +506,238 @@
             background: #0056b3;
         }
 
+        /* 진행 중인 주문 섹션 */
+        .active-orders-section {
+            background: #f0f7ff;
+            border-bottom: 2px solid #0066cc;
+            padding: 20px 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .active-orders-label {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #0066cc;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .active-orders-label i {
+            width: 20px;
+            height: 20px;
+        }
+
+        .orders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 12px;
+        }
+
+        .order-status-card {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            border: 1.5px solid #e0e0e0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .order-status-card:hover {
+            border-color: #0066cc;
+            box-shadow: 0 2px 8px rgba(0, 102, 204, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .order-number {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .status-ordered {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-confirmed {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-cooking {
+            background-color: #fde8e8;
+            color: #721c24;
+        }
+
+        .status-delivering {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-cancelled {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        /* 진행 상황 바 */
+        .progress-container {
+            margin-top: 8px;
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            position: relative;
+        }
+
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            position: relative;
+            z-index: 2;
+        }
+
+        .step-dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            border: 1.5px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            color: white;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-bottom: 2px;
+        }
+
+        .step-dot.active {
+            background: #0066cc;
+            border-color: #0052a3;
+        }
+
+        .step-dot.completed {
+            background: #28a745;
+            border-color: #1e7e34;
+        }
+
+        .step-label {
+            font-size: 0.65rem;
+            color: #666;
+            text-align: center;
+            line-height: 1.1;
+            max-width: 40px;
+        }
+
+        .step-label.active {
+            color: #0066cc;
+            font-weight: bold;
+        }
+
+        .step-label.completed {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        /* 진행 바 배경 */
+        .progress-bar-background {
+            position: absolute;
+            top: 9px;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e0e0e0;
+            z-index: 1;
+        }
+
+        .progress-bar-fill {
+            position: absolute;
+            top: 9px;
+            left: 0;
+            height: 1px;
+            background: #0066cc;
+            transition: width 0.4s ease;
+            z-index: 1;
+        }
+
+        .card-items {
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #eee;
+        }
+
+        .card-items-list {
+            list-style: none;
+            margin: 4px 0 0 0;
+            padding: 0;
+        }
+
+        .card-items-list li {
+            padding: 1px 0;
+            font-size: 0.7rem;
+            color: #555;
+        }
+
+        .order-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: white;
+            border: 1.5px solid #0066cc;
+            border-radius: 20px;
+            padding: 8px 14px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-weight: bold;
+            color: #0066cc;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .order-badge:hover {
+            background: #0066cc;
+            color: white;
+        }
+
+        .order-badge i {
+            width: 14px;
+            height: 14px;
+        }
+
         /* 토스트 알림 */
         .toast {
             position: fixed;
@@ -520,8 +752,14 @@
         }
 
         @keyframes slideInUp {
-            from { transform: translateY(100px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         /* 로딩 스피너 */
@@ -537,8 +775,12 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
@@ -555,6 +797,9 @@
     </button>
     <div class="table-info" th:text="'Table #' + ${tableNumber}">Table #5</div>
 </div>
+
+<!-- 진행 중인 주문 배지 -->
+<div id="active-orders-section" class="active-orders-section" style="display:none;"></div>
 
 <div class="content" id="cart-content">
     <!-- 동적 콘텐츠 -->
@@ -611,7 +856,7 @@
 
 <script>
     lucide.createIcons({
-        attrs: { 'stroke-width': 2.5 }
+        attrs: {'stroke-width': 2.5}
     });
 
     const tableNumber = /*[[${tableNumber}]]*/ 1;
@@ -625,8 +870,9 @@
     let currentTotalPrice = 0;
 
     // ===== 페이지 로드 시 장바구니 데이터 로드 =====
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         loadCart();
+        loadActiveOrders();
         startTimer();
     });
 
@@ -702,8 +948,8 @@
 
         fetch('/kiosk/cart/update', {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ menuName: menuName, menuPrice: menuPrice, quantity: newQty })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({menuName: menuName, menuPrice: menuPrice, quantity: newQty})
         })
             .then(response => response.json())
             .then(data => {
@@ -724,8 +970,8 @@
 
         fetch('/kiosk/cart/update', {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ menuName: menuName, menuPrice: menuPrice, quantity: 0 })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({menuName: menuName, menuPrice: menuPrice, quantity: 0})
         })
             .then(response => response.json())
             .then(data => {
@@ -744,7 +990,7 @@
     function clearCart() {
         if (!confirm('장바구니를 비우시겠습니까?')) return;
 
-        fetch('/kiosk/cart/clear', { method: 'DELETE' })
+        fetch('/kiosk/cart/clear', {method: 'DELETE'})
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -757,6 +1003,99 @@
                 showToast('비우기에 실패했습니다.');
             });
     }
+
+    // ===== 활성 세션 주문 목록 =====
+    function loadActiveOrders() {
+        fetch('/kiosk/order/active')
+            .then(response => response.json())
+            .then(orders => {
+                const section = document.getElementById('active-orders-section');
+                if (!orders || orders.length === 0) {
+                    section.style.display = 'none';
+                    return;
+                }
+
+                const statusText = {
+                    'ORDERED': '주문 완료',
+                    'CONFIRMED': '주문 확인중...',
+                    'COOKING': '조리 중...',
+                    'DELIVERING': '배달 시작',
+                    'COMPLETED': '완료',
+                    'CANCELLED': '취소'
+                };
+
+                const statusSteps = {
+                    'ORDERED': 0,
+                    'CONFIRMED': 1,
+                    'COOKING': 2,
+                    'DELIVERING': 3,
+                    'COMPLETED': 4,
+                    'CANCELLED': 4
+                };
+
+                const steps = ['주문', '주문확인', '조리시작', '서빙시작', '완료'];
+
+                const cards = orders.map(order => {
+                    const currentStep = statusSteps[order.status] || 0;
+                    const progressWidth = (currentStep / 4) * 100;
+                    const itemsList = order.items && order.items.length > 0
+                        ? order.items.map(item => `${item.menuName} x${item.quantity}`).join(', ')
+                        : '';
+
+                    return `
+                        <div class="order-status-card" onclick="window.location.href='/kiosk/order/${order.id}'">
+                            <div class="card-header">
+                                <span class="order-number">주문 #${order.id}</span>
+                                <span class="status-badge status-${order.status.toLowerCase()}">${statusText[order.status] || order.status}</span>
+                            </div>
+
+                            <div class="progress-container">
+                                <div class="progress-steps">
+                                    <div class="progress-bar-background"></div>
+                                    <div class="progress-bar-fill" style="width: ${progressWidth}%"></div>
+                                    ${steps.map((label, idx) => `
+                                        <div class="progress-step">
+                                            <div class="step-dot ${idx <= currentStep ? (idx === currentStep ? 'active' : 'completed') : ''}">
+                                                ${idx < currentStep ? '✓' : idx + 1}
+                                            </div>
+                                            <div class="step-label ${idx <= currentStep ? (idx === currentStep ? 'active' : 'completed') : ''}">${label}</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+
+                            ${itemsList ? `
+                                <div class="card-items">
+                                    <ul class="card-items-list">
+                                        ${order.items.map(item => `
+                                            <li>• ${item.menuName} x${item.quantity}</li>
+                                        `).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('');
+
+                section.innerHTML = `
+                    <div class="active-orders-label">
+                        <i data-lucide="package"></i>
+                        진행 중인 주문
+                    </div>
+                    <div class="orders-grid">
+                        ${cards}
+                    </div>
+                `;
+                section.style.display = 'flex';
+                lucide.createIcons();
+            })
+            .catch(err => console.error('주문 조회 실패:', err));
+    }
+
+    // ===== 주문 상태 실시간 업데이트 =====
+    setInterval(() => {
+        loadActiveOrders();
+    }, 5000); // 5초마다 업데이트
 
     // ========== 주문 확인 모달 함수들 ==========
 
@@ -815,7 +1154,7 @@
         try {
             const response = await fetch('/kiosk/order/create', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
                     tableNumber: tableNumber,
                     totalAmount: currentTotalPrice,

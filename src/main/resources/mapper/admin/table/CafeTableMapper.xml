@@ -129,7 +129,7 @@
         FROM orders o
                  JOIN order_item oi ON o.id = oi.order_id
         WHERE o.session_id = #{sessionId}
-          AND o.status NOT IN ('PAID', 'CANCELLED')
+          AND o.status NOT IN ('COMPLETED', 'CANCELLED')
         ORDER BY o.ordered_at DESC
     </select>
 

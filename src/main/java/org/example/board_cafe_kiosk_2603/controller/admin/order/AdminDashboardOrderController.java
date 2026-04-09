@@ -33,18 +33,13 @@ public class AdminDashboardOrderController {
     /**
      * 최신 주문 목록 조회 (모달용)
      * GET /admin/api/dashboard/orders/latest
-     *
-     * PAID 상태 이상의 주문들을 반환 (PENDING 제외)
-     *
      * @return 주문 목록
      */
     @GetMapping("/orders/latest")
     public ResponseEntity<Map<String, Object>> getLatestOrders() {
-        log.info("최신 주문 목록 조회");
+        log.info("신규 주문(ORDERED) 목록 조회");
         try {
-            // TODO: OrderService에서 최신 주문 목록을 조회하는 메서드 호출
-            // 현재는 임시로 빈 리스트 반환
-            List<OrdersDTO> orders = List.of();  // 실제: orderService.getLatestOrders()
+            List<OrdersDTO> orders = orderService.getNewOrders();
 
             return ResponseEntity.ok(Map.of(
                     "success", true,
@@ -52,7 +47,7 @@ public class AdminDashboardOrderController {
                     "count", orders.size()
             ));
         } catch (Exception e) {
-            log.error("최신 주문 조회 실패", e);
+            log.error("주문 조회 실패", e);
             return ResponseEntity.internalServerError()
                     .body(Map.of("success", false, "message", "조회 실패"));
         }
@@ -78,10 +73,10 @@ public class AdminDashboardOrderController {
      * PATCH /admin/api/dashboard/orders/{orderId}/status
      *
      * 상태 전이 규칙:
-     * - PAID → CONFIRMED (조리 준비)
-     * - CONFIRMED → COOKING (조리 시작)
-     * - COOKING → DELIVERING (서빙)
-     * - DELIVERING → COMPLETED (완료)
+     * - ORDERED   → CONFIRMED (주문확인)
+     * - CONFIRMED → COOKING   (조리시작)
+     * - COOKING   → DELIVERING(서빙시작)
+     * - DELIVERING→ COMPLETED (서빙완료)
      *
      * body: { "status": "CONFIRMED" }
      */
@@ -100,6 +95,7 @@ public class AdminDashboardOrderController {
 
         try {
             OrdersDTO result = orderService.updateStatus(orderId, newStatus);
+            // updateStatus() 내부에서 이미 웹소켓 호출
 
             if (result.isSuccess()) {
                 return ResponseEntity.ok(Map.of(
@@ -128,9 +124,9 @@ public class AdminDashboardOrderController {
      * GET /admin/api/dashboard/orders/{orderId}/next-status
      *
      * 응답: {
-     *   "currentStatus": "PAID",
+     *   "currentStatus": "ORDERED",
      *   "nextStatus": "CONFIRMED",
-     *   "buttonText": "조리 준비",
+     *   "buttonText": "주문 확인",
      *   "canChange": true
      * }
      */
@@ -167,13 +163,10 @@ public class AdminDashboardOrderController {
      */
     private String getNextStatusForTransition(String currentStatus) {
         return switch (currentStatus) {
-            case "PAID" -> "CONFIRMED";
+            case "ORDERED"   -> "CONFIRMED";
             case "CONFIRMED" -> "COOKING";
-            case "COOKING" -> "DELIVERING";
-            case "DELIVERING" -> "COMPLETED";
-            case "COMPLETED" -> "COMPLETED";  // 최종 상태
-            case "CANCELLED" -> "CANCELLED";  // 최종 상태
-            case "PENDING" -> "PAID";         // 특수 케이스
+            case "COOKING"   -> "DELIVERING";
+            case "DELIVERING"    -> "COMPLETED";
             default -> null;
         };
     }
@@ -183,13 +176,12 @@ public class AdminDashboardOrderController {
      */
     private String getButtonTextForStatus(String status) {
         return switch (status) {
-            case "PAID" -> "조리 준비";
-            case "CONFIRMED" -> "조리 시작";
-            case "COOKING" -> "서빙";
-            case "DELIVERING" -> "완료";
-            case "COMPLETED" -> "완료됨";
+            case "ORDERED"   -> "주문 완료";
+            case "CONFIRMED" -> "주문 확인";
+            case "COOKING"   -> "조리 시작";
+            case "DELIVERING"-> "서빙 시작";
+            case "COMPLETED" -> "서빙 완료";
             case "CANCELLED" -> "취소됨";
-            case "PENDING" -> "결제 완료";
             default -> "상태 변경";
         };
     }
@@ -199,12 +191,11 @@ public class AdminDashboardOrderController {
      */
     public static String getStatusDisplayName(String status) {
         return switch (status) {
-            case "PENDING" -> "결제 대기";
-            case "PAID" -> "주문완료";
-            case "CONFIRMED" -> "조리준비";
-            case "COOKING" -> "조리중";
-            case "DELIVERING" -> "서빙중";
-            case "COMPLETED" -> "완료";
+            case "ORDERED"   -> "주문완료";
+            case "CONFIRMED" -> "주문확인";
+            case "COOKING"   -> "조리중";
+            case "DELIVERING"-> "서빙중";
+            case "COMPLETED" -> "서빙완료";
             case "CANCELLED" -> "취소";
             default -> "상태확인";
         };
