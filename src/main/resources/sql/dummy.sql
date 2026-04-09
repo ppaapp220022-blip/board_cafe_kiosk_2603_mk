@@ -23,6 +23,7 @@ VALUES ('admin', '$2a$10$I/U.nHfsL/6wBqXAJV1A3u0KwyHn9wiOVRK7ZVI6rAptphEgRW1Qi',
 -- admin01 / 1111 / ADMIN / TRUE
 -- admin02 / 2222 / ADMIN / FALSE
 -- super / 1234 / ADMIN / TRUE
+-- pass / 1234 / SUPER / TRUE
 -- staff01 / 1111 / STAFF / TRUE
 -- staff02 / 2222 / STAFF / FALSE
 
