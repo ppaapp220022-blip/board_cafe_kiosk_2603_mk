@@ -2,6 +2,7 @@ package org.example.board_cafe_kiosk_2603.mapper.admin.policy;
 
 import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.domain.admin.policy.Policy;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageRequestDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,45 +14,63 @@ import static org.junit.jupiter.api.Assertions.*;
 @Log4j2
 @SpringBootTest
 class PolicyMapperTest {
+
     @Autowired
     private PolicyMapper policyMapper;
 
-    // ===== 전체 조회 (페이징 + 필터) =====
     @Test
-    void testFindAll() {
-        List<Policy> list = policyMapper.findAll(0, 8, "all"); // 1페이지, 8개
+    void testSelectList() {
+        PageRequestDTO pageRequestDTO = PageRequestDTO.builder()
+                .page(1)
+                .size(8)
+                .build();
+
+        List<Policy> list = policyMapper.selectList(pageRequestDTO);
         log.info("전체 패키지 수: {}", list.size());
         list.forEach(p -> log.info("패키지: {}", p));
         assertNotNull(list);
     }
 
-    // ===== 활성 필터 조회 =====
     @Test
-    void testFindAllActive() {
-        List<Policy> list = policyMapper.findAll(0, 8, "active");
+    void testSelectListActiveFilter() {
+        PageRequestDTO pageRequestDTO = PageRequestDTO.builder()
+                .page(1)
+                .size(8)
+                .filter("active")
+                .build();
+
+        List<Policy> list = policyMapper.selectList(pageRequestDTO);
         log.info("활성 패키지 수: {}", list.size());
         list.forEach(p -> log.info("활성 패키지: {}", p));
         assertTrue(list.stream().allMatch(Policy::isActive));
     }
 
-    // ===== 비활성 필터 조회 =====
     @Test
-    void testFindAllInactive() {
-        List<Policy> list = policyMapper.findAll(0, 8, "inactive");
+    void testSelectListInactiveFilter() {
+        PageRequestDTO pageRequestDTO = PageRequestDTO.builder()
+                .page(1)
+                .size(8)
+                .filter("inactive")
+                .build();
+
+        List<Policy> list = policyMapper.selectList(pageRequestDTO);
         log.info("비활성 패키지 수: {}", list.size());
         list.forEach(p -> log.info("비활성 패키지: {}", p));
         assertTrue(list.stream().noneMatch(Policy::isActive));
     }
 
-    // ===== 전체 개수 조회 =====
     @Test
-    void testCountAll() {
-        int count = policyMapper.countAll("all");
+    void testSelectCount() {
+        PageRequestDTO pageRequestDTO = PageRequestDTO.builder()
+                .page(1)
+                .size(8)
+                .build();
+
+        int count = policyMapper.selectCount(pageRequestDTO);
         log.info("전체 개수: {}", count);
         assertTrue(count >= 0);
     }
 
-    // ===== 단건 조회 =====
     @Test
     void testFindById() {
         Policy policy = policyMapper.findById(1);
@@ -59,7 +78,6 @@ class PolicyMapperTest {
         assertNotNull(policy);
     }
 
-    // ===== 등록 =====
     @Test
     void testInsert() {
         Policy policy = Policy.builder()
@@ -76,7 +94,6 @@ class PolicyMapperTest {
         assertTrue(policy.getId() > 0);
     }
 
-    // ===== 수정 =====
     @Test
     void testUpdate() {
         Policy policy = Policy.builder()
@@ -94,7 +111,6 @@ class PolicyMapperTest {
         assertEquals("수정된 패키지", updated.getName());
     }
 
-    // ===== 활성/비활성 토글 =====
     @Test
     void testUpdateStatus() {
         policyMapper.updateStatus(6, false);

@@ -1,9 +1,7 @@
 CREATE DATABASE IF NOT EXISTS `board_cafe_kiosk_2603`;
 USE `board_cafe_kiosk_2603`;
 
---  보드게임 카페 키오스크 시스템 — 최종 고도화 스키마
---  수정 사항: table_session 추가(22번), GUEST 카테고리 확장, 세션 기반 관계 재설정
---
+--  보드게임 카페 키오스크 시스템 — 최종 스키마
 --  테이블 목록 (총 22개)
 --  ┌─────┬─────────────────────┬────────────────────────────────────────────────┐
 --  │  #  │ 테이블명              │ 역할 (비고)                                     │
@@ -13,10 +11,10 @@ USE `board_cafe_kiosk_2603`;
 --  │  3  │ customer            │ 전화번호 등록 고객 (포인트 대상)                    │
 --  │  4  │ category            │ 메뉴·게임·인원(GUEST) 공통 카테고리                │
 --  │  5  │ cafe_package        │ 패키지 요금 정책                                 │
---  │  6  │ table_session       │ [NEW] 테이블 이용 히스토리 및 세션 관리 (핵심)       │
+--  │  6  │ table_session       │ 테이블 이용 히스토리 및 세션 관리 (핵심)             │
 --  │  7  │ menu                │ 음식·음료 및 추가인원 상품                         │
 --  │  8  │ orders              │ 주문 헤더 (session_id 외래키 추가)                │
---  │  9  │ orders              │ 주문 헤더 (session_id 외래키 추가)                │
+--  │  9  │ order_item          │ 주문 상세 항목                                   │
 --  │ 10  │ game                │ 보드게임 종목                                    │
 --  │ 11  │ game_item           │ 보드게임 실물 재고 (박스 단위)                      │
 --  │ 12  │ cart                │ 테이블별 장바구니 헤더                             │
@@ -29,6 +27,7 @@ USE `board_cafe_kiosk_2603`;
 --  │ 19  │ table_message       │ 통합 메시지 로그                                  │
 --  │ 20  │ item_sales_history  │ 일일 상품별 판매 통계                             │
 --  │ 21  │ daily_sales_summary │ 매장 전체 일별 매출 요약                           │
+--  │ 22  │ persistent_logins   │ Remember-Me Persistent 토큰 저장소               │
 --  └─────┴─────────────────────┴────────────────────────────────────────────────┘
 
 -- 1. manager
@@ -87,7 +86,7 @@ CREATE TABLE `cafe_package`
     `type`                ENUM ('HOURLY','FREE') NOT NULL COMMENT '요금제 유형',
     `duration_minutes`    INT                             DEFAULT NULL COMMENT ' 기본 제공 시간',
     `base_price`          INT                    NOT NULL DEFAULT 0 COMMENT '1인당 기본 요금',
-    `extra_price_per_min` DECIMAL(7, 2)                   DEFAULT NULL COMMENT '추가 10분당 요금',
+    `extra_price_per_min` INT                    DEFAULT NULL COMMENT '추가 10분당 요금',
     `is_active`           BOOLEAN                NOT NULL DEFAULT TRUE COMMENT '판매 상태',
     `updated_at`          TIMESTAMP              NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '정책 수정일'
 ) ENGINE = InnoDB
@@ -135,7 +134,7 @@ CREATE TABLE `orders`
     `session_id`     BIGINT                                                                                   NOT NULL COMMENT '방문 세션 ID (FK)',
     `table_id`       INT                                                                                      NOT NULL COMMENT '주문 테이블 (FK)',
     `customer_phone` VARCHAR(20)                                                                                       DEFAULT NULL COMMENT '주문자 연락처(포인트 적립용)',
-    `status`         ENUM ('PENDING', 'PAID', 'CONFIRMED', 'COOKING', 'DELIVERING', 'COMPLETED', 'CANCELLED') NOT NULL DEFAULT 'PENDING' COMMENT '주문 상태',
+    `status`         ENUM ('ORDERED', 'CONFIRMED', 'COOKING', 'DELIVERING', 'COMPLETED', 'CANCELLED') NOT NULL DEFAULT 'ORDERED' COMMENT '주문 상태',
     `total_amount`   INT                                                                                      NOT NULL DEFAULT 0 COMMENT '주문 총액',
     `ordered_at`     TIMESTAMP                                                                                NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '주문 일시',
     CONSTRAINT `fk_orders_session` FOREIGN KEY (`session_id`) REFERENCES `table_session` (`id`),
@@ -223,19 +222,24 @@ CREATE TABLE `game_history`
 -- 15. payment (토스페이먼츠 결제 정보 통합)
 CREATE TABLE `payment`
 (
-    `id`            INT                   NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '결제 고유 번호',
-    `session_id`    BIGINT                NOT NULL UNIQUE COMMENT '세션당 최종 1회 결제',
-    `status`        ENUM ('READY','DONE') NOT NULL DEFAULT 'READY' COMMENT '결제 상태',
-    `final_amount`  INT                   NOT NULL COMMENT '최종 실결제 금액',
-    `payment_key`   VARCHAR(200)                   UNIQUE COMMENT '토스 결제 키 (중복 결제 방지)',
-    `order_id_toss` VARCHAR(64)                    DEFAULT NULL COMMENT '토스용 주문번호',
-    `method`        VARCHAR(30)                    DEFAULT NULL COMMENT '결제 수단 (카드, 간편결제 등)',
-    `raw_response`  JSON                           DEFAULT NULL COMMENT '토스 API 응답 원문',
-    `approved_at`   TIMESTAMP                      DEFAULT NULL COMMENT '토스 승인 시각',
-    `paid_at`       TIMESTAMP                      DEFAULT NULL COMMENT '결제 완료 시각',
+    `id`             INT                   NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '결제 고유 번호',
+    `session_id`     BIGINT                NOT NULL UNIQUE COMMENT '세션당 최종 1회 결제',
+    `table_number`   INT                   NULL COMMENT '결제 당시 테이블 번호',
+    `status`         ENUM ('READY','DONE') NOT NULL DEFAULT 'READY' COMMENT '결제 상태',
+    `final_amount`   INT                   NOT NULL COMMENT '최종 실결제 금액',
+    `payment_key`    VARCHAR(200)                   UNIQUE COMMENT '토스 결제 키 (중복 결제 방지)',
+    `order_id_toss`  VARCHAR(64)                    DEFAULT NULL COMMENT '토스용 주문번호',
+    `method`         VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '결제 수단 (카드, 간편결제 등)',
+    `raw_response`   JSON                           DEFAULT NULL COMMENT '토스 API 응답 원문',
+    `approved_at`    TIMESTAMP                      DEFAULT NULL COMMENT '토스 승인 시각',
+    `paid_at`        TIMESTAMP                      DEFAULT NULL COMMENT '결제 완료 시각',
+    INDEX `idx_table_number` (`table_number`),
+    INDEX `idx_method` (`method`),
     CONSTRAINT `fk_payment_session` FOREIGN KEY (`session_id`) REFERENCES `table_session` (`id`)
 ) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4 COMMENT ='결제 헤더(session 단위 정산으로 변경)';
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci
+    COMMENT ='결제 헤더(session 단위 정산)';
 
 -- 16. point
 CREATE TABLE `point`
@@ -311,8 +315,20 @@ CREATE TABLE `daily_sales_summary`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT =' 매장 전체 일별 매출 요약 ';
 
+-- 22. persistent_logins
+CREATE TABLE persistent_logins
+(
+    series    VARCHAR(64)  NOT NULL,
+    username  VARCHAR(64)  NOT NULL,
+    token     VARCHAR(64)  NOT NULL,
+    last_used TIMESTAMP    NOT NULL,
+    PRIMARY KEY (series)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+    COMMENT = 'Spring Security Remember-Me Persistent 토큰 저장소. 관리자 전체 리셋 시 전체 삭제됨.';
+
 -- 사용자 생성 및 권한
 --
-# CREATE USER IF NOT EXISTS `admin`@`%` IDENTIFIED BY '0331';
-# GRANT ALL PRIVILEGES ON `board_cafe_kiosk_2603`.* TO `admin`@`%`;
-# FLUSH PRIVILEGES;
+CREATE USER IF NOT EXISTS `admin`@`%` IDENTIFIED BY '0331';
+GRANT ALL PRIVILEGES ON `board_cafe_kiosk_2603`.* TO `admin`@`%`;
+FLUSH PRIVILEGES;

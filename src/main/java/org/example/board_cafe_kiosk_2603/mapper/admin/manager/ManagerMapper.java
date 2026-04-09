@@ -3,28 +3,15 @@ package org.example.board_cafe_kiosk_2603.mapper.admin.manager;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.example.board_cafe_kiosk_2603.domain.admin.manager.Manager;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageRequestDTO;
 
 import java.util.List;
 import java.util.Optional;
 
 @Mapper
 public interface ManagerMapper {
-    // 전체 목록 조회 (페이징)
-    List<Manager> findAll(@Param("offset") int offset,
-                          @Param("limit") int limit,
-                          @Param("filter") String filter);
 
-
-    // 전체 개수
-    int countAll(@Param("filter") String filter);
-
-    // 활성화 개수
-    int countActive();
-
-    // 비활성호 개수
-    int countInactive();
-
-    // 로그인 ID로 단건 조회 (Security용)
+    // 로그인 ID로 단건 조회 (Security용)z
     Optional<Manager> findByLoginId(String loginId);
 
     // 직원 등록
@@ -37,4 +24,11 @@ public interface ManagerMapper {
     void updateProfileInfo(@Param("loginId") String loginId,
                            @Param("name") String name,
                            @Param("password") String password);
+
+    /*============= 페이징 =============== */
+    // 페이징 목록 조회
+    List<Manager> selectList(PageRequestDTO pageRequestDTO);
+
+    // 페이징 전체 개수 조회
+    int selectCount(PageRequestDTO pageRequestDTO);
 }

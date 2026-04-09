@@ -2,6 +2,8 @@ package org.example.board_cafe_kiosk_2603.service.admin.policy;
 
 import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.dto.admin.policy.PolicyDTO;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageRequestDTO;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageResponseDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,38 +18,59 @@ class PolicyServiceTest {
     @Autowired
     private PolicyService policyService;
 
-    // ===== 전체 조회 (페이징 + 필터) =====
+    // ===== 전체 조회 =====
     @Test
     void testGetAllPolicies() {
-        List<PolicyDTO> list = policyService.getAllPolicies(1, 8, "all"); // 1페이지, 8개
-        log.info("전체 패키지 수: {}", list.size());
-        list.forEach(p -> log.info("패키지: {} | {} | {}원 | 활성: {}",
+        PageRequestDTO pageRequestDTO = PageRequestDTO.builder()
+                .page(1)
+                .size(8)
+                .build();
+
+        PageResponseDTO<PolicyDTO> responseDTO = policyService.selectPagedPolicies(pageRequestDTO);
+        log.info("전체 패키지 수: {}", responseDTO.getTotal());
+        responseDTO.getDtoList().forEach(p -> log.info("패키지: {} | {} | {}원 | 활성: {}",
                 p.getName(), p.getDisplayTime(), p.getBasePrice(), p.isActive()));
-        assertNotNull(list);
+        assertNotNull(responseDTO.getDtoList());
     }
 
     // ===== 활성 필터 조회 =====
     @Test
-    void testGetAllPoliciesActive() {
-        List<PolicyDTO> list = policyService.getAllPolicies(1, 8, "active");
-        log.info("활성 패키지 수: {}", list.size());
-        assertTrue(list.stream().allMatch(PolicyDTO::isActive));
+    void testGetAllPoliciesActiveFilter() {
+        PageRequestDTO pageRequestDTO = PageRequestDTO.builder()
+                .page(1)
+                .size(8)
+                .filter("active")
+                .build();
+
+        PageResponseDTO<PolicyDTO> responseDTO = policyService.selectPagedPolicies(pageRequestDTO);
+        log.info("활성 패키지 수: {}", responseDTO.getTotal());
+        assertTrue(responseDTO.getDtoList().stream().allMatch(PolicyDTO::isActive));
     }
 
     // ===== 비활성 필터 조회 =====
     @Test
-    void testGetAllPoliciesInactive() {
-        List<PolicyDTO> list = policyService.getAllPolicies(1, 8, "inactive");
-        log.info("비활성 패키지 수: {}", list.size());
-        assertTrue(list.stream().noneMatch(PolicyDTO::isActive));
+    void testGetAllPoliciesInactiveFilter() {
+        PageRequestDTO pageRequestDTO = PageRequestDTO.builder()
+                .page(1)
+                .size(8)
+                .filter("inactive")
+                .build();
+
+        PageResponseDTO<PolicyDTO> responseDTO = policyService.selectPagedPolicies(pageRequestDTO);
+        log.info("비활성 패키지 수: {}", responseDTO.getTotal());
+        assertTrue(responseDTO.getDtoList().stream().noneMatch(PolicyDTO::isActive));
     }
 
-    // ===== 전체 개수 조회 =====
     @Test
-    void testCountAll() {
-        int count = policyService.countAll("all");
-        log.info("전체 개수: {}", count);
-        assertTrue(count >= 0);
+    void testSelectCount() {
+        PageRequestDTO pageRequestDTO = PageRequestDTO.builder()
+                .page(1)
+                .size(8)
+                .build();
+
+        PageResponseDTO<PolicyDTO> responseDTO = policyService.selectPagedPolicies(pageRequestDTO);
+        log.info("전체 개수: {}", responseDTO.getTotal());
+        assertTrue(responseDTO.getTotal() >= 0);
     }
 
     // ===== 단건 조회 =====
@@ -74,9 +97,14 @@ class PolicyServiceTest {
         log.info("등록 완료");
 
         // 전체 개수로 확인
-        int totalCount = policyService.countAll("all");
-        List<PolicyDTO> list = policyService.getAllPolicies(1, totalCount, "all");
-        assertTrue(list.stream().anyMatch(p -> p.getName().equals("서비스 테스트 패키지")));
+        PageRequestDTO pageRequestDTO = PageRequestDTO.builder()
+                .page(1)
+                .size(100)
+                .build();
+
+        PageResponseDTO<PolicyDTO> responseDTO = policyService.selectPagedPolicies(pageRequestDTO);
+        assertTrue(responseDTO.getDtoList().stream()
+                .anyMatch(p -> p.getName().equals("서비스 테스트 패키지")));
     }
 
     // ===== 수정 =====

@@ -5,6 +5,8 @@ import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.domain.admin.manager.Manager;
 import org.example.board_cafe_kiosk_2603.dto.admin.manager.ManagerRequest;
 import org.example.board_cafe_kiosk_2603.dto.admin.manager.ManagerResponse;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageRequestDTO;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageResponseDTO;
 import org.example.board_cafe_kiosk_2603.mapper.admin.manager.ManagerMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,29 +25,6 @@ public class ManagerServiceImpl implements ManagerService {
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
 
-    // 전체 목록 조회 (페이징)
-    @Override
-    public List<ManagerResponse> findAll(int page, int size, String filter) {
-        int offset = (page - 1) * size;
-        return managerMapper.findAll(offset, size, filter)
-                .stream()
-                .map(vo -> modelMapper.map(vo, ManagerResponse.class))
-                .collect(Collectors.toList());
-    }
-
-    // 전체 개수
-    @Override
-    public int countAll(String filter) {
-        return managerMapper.countAll(filter);
-    }
-
-    // 활성화 개수
-    @Override
-    public int countActive() { return managerMapper.countActive(); }
-
-    // 비활성화 개수
-    @Override
-    public int countInactive() { return managerMapper.countInactive(); }
 
     // 직원 등록 - Request → VO 변환 후 insert
     @Override
@@ -112,5 +91,26 @@ public class ManagerServiceImpl implements ManagerService {
         managerMapper.updateProfileInfo(loginId, newName, finalPassword);
 
         log.info("사용자 프로필 업데이트 완료: {}", loginId);
+    }
+
+    /*================페이징============== */
+    @Override
+    public PageResponseDTO<ManagerResponse> getPagedManagers(PageRequestDTO pageRequestDTO) {
+        List<ManagerResponse> dtoList = managerMapper.selectList(pageRequestDTO).stream()
+                .map(vo -> modelMapper.map(vo, ManagerResponse.class))
+                .collect(Collectors.toList());
+
+        int total = managerMapper.selectCount(pageRequestDTO);
+
+        return PageResponseDTO.<ManagerResponse>withAll()
+                .pageRequestDTO(pageRequestDTO)
+                .dtoList(dtoList)
+                .total(total)
+                .build();
+    }
+
+    @Override
+    public int getCount(PageRequestDTO pageRequestDTO) {
+        return managerMapper.selectCount(pageRequestDTO);
     }
 }

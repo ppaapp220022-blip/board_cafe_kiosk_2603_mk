@@ -2,25 +2,13 @@ package org.example.board_cafe_kiosk_2603.service.admin.manager;
 
 import org.example.board_cafe_kiosk_2603.dto.admin.manager.ManagerRequest;
 import org.example.board_cafe_kiosk_2603.dto.admin.manager.ManagerResponse;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageRequestDTO;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageResponseDTO;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface ManagerService {
-
-    // 전체 목록 조회 (페이징)
-    List<ManagerResponse> findAll(int page, int size, String filter);
-
-    // 전체 개수
-    int countAll(String filter);
-
-
-    // 활성화 개수
-    int countActive();
-
-    // 비활성화 개수
-    int countInactive();
-
 
     // 직원 등록
     void createManager(ManagerRequest request);
@@ -36,4 +24,11 @@ public interface ManagerService {
     Optional<ManagerResponse> findByLoginId(String loginId);
     // 프로필 수정용
     void updateProfile(String loginId, ManagerRequest request);
+
+    /*================페이징============== */
+    // 페이징 목록 조회
+    PageResponseDTO<ManagerResponse> getPagedManagers(PageRequestDTO pageRequestDTO);
+
+    // 조건별 개수 조회
+    int getCount(PageRequestDTO pageRequestDTO);
 }

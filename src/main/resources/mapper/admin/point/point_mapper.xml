@@ -4,12 +4,10 @@
 <mapper namespace="org.example.board_cafe_kiosk_2603.mapper.admin.point.PointMapper">
 
     <!-- ===== point 테이블 ===== -->
-
     <select id="findAll" resultType="org.example.board_cafe_kiosk_2603.domain.admin.point.Point">
         SELECT id, phone, balance, updated_at
         FROM point
         ORDER BY updated_at DESC
-        LIMIT #{limit} OFFSET #{offset}
     </select>
 
     <select id="findByPhone" resultType="org.example.board_cafe_kiosk_2603.domain.admin.point.Point">
@@ -53,4 +51,22 @@
         VALUES (#{pointId}, #{orderId}, #{type}, #{amount}, #{balanceAfter})
     </insert>
 
+    <!-- ============== 페이징 ================ -->
+    <select id="selectList" resultType="org.example.board_cafe_kiosk_2603.domain.admin.point.Point">
+        SELECT * FROM point
+        WHERE 1=1
+        <if test="keyword != null and keyword != ''">
+            AND phone LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        ORDER BY id DESC
+        LIMIT #{skip}, #{size}
+    </select>
+
+    <select id="selectCount" resultType="int">
+        SELECT COUNT(*) FROM point
+        WHERE 1=1
+        <if test="keyword != null and keyword != ''">
+            AND phone LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+    </select>
 </mapper>

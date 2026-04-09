@@ -7,6 +7,8 @@ import org.example.board_cafe_kiosk_2603.domain.admin.point.Point;
 import org.example.board_cafe_kiosk_2603.domain.admin.point.PointHistory;
 import org.example.board_cafe_kiosk_2603.dto.admin.point.PointAdminDTO;
 import org.example.board_cafe_kiosk_2603.dto.admin.point.PointHistoryDTO;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageRequestDTO;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageResponseDTO;
 import org.example.board_cafe_kiosk_2603.mapper.admin.point.CustomerMapper;
 import org.example.board_cafe_kiosk_2603.mapper.admin.point.PointMapper;
 import org.springframework.stereotype.Service;
@@ -27,9 +29,8 @@ public class PointService {
     // ===================================================
 
     /** 전체 포인트 계좌 목록 (관리자 화면용) */
-    public List<PointAdminDTO> getAllPoints(int page, int size) {
-        int offset = (page - 1) * size;
-        return pointMapper.findAll(offset, size).stream()
+    public List<PointAdminDTO> getAllPoints() {
+        return pointMapper.findAll().stream()
                 .map(PointAdminDTO::from)
                 .collect(Collectors.toList());
     }
@@ -152,5 +153,27 @@ public class PointService {
             point = pointMapper.findByPhone(phone);
         }
         return point;
+    }
+
+    /* 페이징 처리 */
+    public PageResponseDTO<PointAdminDTO> getPagedPoints(PageRequestDTO pageRequestDTO) {
+
+        // 1. DB에서 페이징 처리된 목록(VO/Domain) 가져오기
+        List<Point> voList = pointMapper.selectList(pageRequestDTO);
+
+        // 2. VO 리스트를 화면용 DTO 리스트로 변환
+        List<PointAdminDTO> dtoList = voList.stream()
+                .map(PointAdminDTO::from)
+                .collect(Collectors.toList());
+
+        // 3. 검색 조건에 맞는 전체 데이터 개수 조회 (페이징 버튼 계산용)
+        int total = pointMapper.selectCount(pageRequestDTO);
+
+        // 4. PageResponseDTO 생성 (작성하신 DTO의 생성자가 자동으로 start, end, prev, next 계산)
+        return PageResponseDTO.<PointAdminDTO>withAll()
+                .pageRequestDTO(pageRequestDTO)
+                .dtoList(dtoList)
+                .total(total)
+                .build();
     }
 }

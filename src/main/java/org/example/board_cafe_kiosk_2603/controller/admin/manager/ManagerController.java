@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.dto.admin.manager.ManagerRequest;
 import org.example.board_cafe_kiosk_2603.dto.admin.manager.ManagerResponse;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageRequestDTO;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageResponseDTO;
 import org.example.board_cafe_kiosk_2603.service.admin.manager.ManagerService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,30 +24,6 @@ public class ManagerController {
 
     private final ManagerService managerService;
     private static final int PAGE_SIZE = 8;
-
-    // 직원 목록 페이지
-    @GetMapping
-    public String staffPage(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "all") String filter,
-            Model model) {
-
-        int totalCount = managerService.countAll(filter);
-        int totalPages = (int) Math.ceil((double) totalCount / PAGE_SIZE);
-
-        if (page < 1) page = 1;
-        if (totalPages > 0 && page > totalPages) page = totalPages;
-
-        model.addAttribute("staffList",   managerService.findAll(page, PAGE_SIZE, filter));
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages",  totalPages);
-        model.addAttribute("totalCount",  managerService.countAll("all"));
-        model.addAttribute("totalActive", managerService.countAll("active"));
-        model.addAttribute("totalInactive", managerService.countAll("inactive"));
-        model.addAttribute("filter",      filter);
-        model.addAttribute("activePage",  "staffManagement");
-        return "admin/staff";
-    }
 
     // 직원 등록 (모달 폼 → Ajax)
     @PostMapping
@@ -117,5 +95,30 @@ public class ManagerController {
         // 보안을 위해 세션의 ID와 요청 ID가 일치하는지 확인하거나, 세션 ID를 우선 사용
         managerService.updateProfile(principal.getName(), request);
         return ResponseEntity.ok("success");
+    }
+
+    /*================페이징============== */
+    // 직원 목록 페이지
+    @GetMapping
+    public String staffPage(PageRequestDTO pageRequestDTO, Model model) {
+        log.info("--- 직원 목록 페이지 진입 ---");
+
+        PageResponseDTO<ManagerResponse> responseDTO = managerService.getPagedManagers(pageRequestDTO);
+
+        // 각 탭별 개수 조회
+        PageRequestDTO allReq      = PageRequestDTO.builder().page(1).size(1).build();
+        PageRequestDTO activeReq   = PageRequestDTO.builder().page(1).size(1).filter("active").build();
+        PageRequestDTO inactiveReq = PageRequestDTO.builder().page(1).size(1).filter("inactive").build();
+
+        model.addAttribute("responseDTO", responseDTO);
+        model.addAttribute("pageRequestDTO", pageRequestDTO);
+        // filter가 null이면 "all"로 기본값 설정
+        model.addAttribute("filter", pageRequestDTO.getFilter() != null ? pageRequestDTO.getFilter() : "all");
+        model.addAttribute("countAll",      managerService.getCount(allReq));
+        model.addAttribute("countActive",   managerService.getCount(activeReq));
+        model.addAttribute("countInactive", managerService.getCount(inactiveReq));
+        model.addAttribute("activePage", "staffManagement");
+
+        return "admin/staff";  // templates/admin/staff.html
     }
 }

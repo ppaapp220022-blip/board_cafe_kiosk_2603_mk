@@ -3,6 +3,7 @@ package org.example.board_cafe_kiosk_2603.mapper.admin;
 import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.domain.admin.point.Point;
 import org.example.board_cafe_kiosk_2603.domain.admin.point.PointHistory;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageRequestDTO;
 import org.example.board_cafe_kiosk_2603.mapper.admin.point.PointMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -58,16 +59,6 @@ class PointMapperTest {
     }
 
     @Test
-    @DisplayName("전체 포인트 계좌 목록 조회")
-    void findAll() {
-        pointMapper.insert(Point.builder().phone("010-9999-0003").balance(0).build());
-        pointMapper.insert(Point.builder().phone("010-9999-0004").balance(0).build());
-
-        List<Point> list = pointMapper.findAll(0, 8);
-        assertThat(list).hasSizeGreaterThanOrEqualTo(2);
-    }
-
-    @Test
     @DisplayName("전체 고객 수 및 총 잔액 집계 성공")
     void countAll_and_sumTotalBalance() {
         int before = pointMapper.countAll();
@@ -97,5 +88,47 @@ class PointMapperTest {
         assertThat(list.get(0).getType()).isEqualTo("EARN");
         assertThat(list.get(0).getAmount()).isEqualTo(1000);
         assertThat(list.get(0).getBalanceAfter()).isEqualTo(1000);
+    }
+
+    /*=============페이징==============*/
+    @Test
+    @DisplayName("페이징 포인트 목록 조회 성공")
+    void selectList() {
+        pointMapper.insert(Point.builder().phone("010-9999-0003").balance(0).build());
+        pointMapper.insert(Point.builder().phone("010-9999-0004").balance(0).build());
+
+        PageRequestDTO pageRequestDTO = PageRequestDTO.builder()
+                .page(1)
+                .size(10)
+                .build();
+
+        List<Point> list = pointMapper.selectList(pageRequestDTO);
+        assertThat(list).hasSizeGreaterThanOrEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("keyword로 전화번호 검색 조회 성공")
+    void selectList_withKeyword() {
+        pointMapper.insert(Point.builder().phone("010-9999-0007").balance(0).build());
+
+        PageRequestDTO pageRequestDTO = PageRequestDTO.builder()
+                .page(1)
+                .size(10)
+                .keyword("010-9999-0007")
+                .build();
+
+        List<Point> list = pointMapper.selectList(pageRequestDTO);
+        assertThat(list).hasSizeGreaterThanOrEqualTo(1);
+        assertThat(list.get(0).getPhone()).isEqualTo("010-9999-0007");
+    }
+
+    @Test
+    @DisplayName("전체 개수 조회 성공")
+    void selectCount() {
+        int before = pointMapper.selectCount(PageRequestDTO.builder().page(1).size(10).build());
+        pointMapper.insert(Point.builder().phone("010-9999-0008").balance(0).build());
+
+        int after = pointMapper.selectCount(PageRequestDTO.builder().page(1).size(10).build());
+        assertThat(after).isEqualTo(before + 1);
     }
 }

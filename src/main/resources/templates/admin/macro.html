@@ -32,19 +32,16 @@
         background: var(--primary-blue);
         color: white; }
 
-      .pagination {
-        display: flex; justify-content: center; align-items: center;
-        gap: 8px; margin-top: 24px;
-      }
-      .page-btn {
-        width: 40px; height: 40px; border-radius: 10px; border: 1px solid #E5E5EA;
-        background: white; font-size: 14px; font-weight: 600; cursor: pointer;
+      /* 페이지 */
+      .pagination .page-btn {
+        width: 40px; height: 40px; border-radius: 10px;
+        border: 1px solid #E5E5EA; background: white;
+        font-size: 14px; font-weight: 600; cursor: pointer;
         display: flex; align-items: center; justify-content: center;
-        color: var(--text-dark); transition: all 0.2s;
+        color: var(--text-dark); transition: all 0.2s; text-decoration: none;
       }
-      .page-btn:hover { background: #f1f3f4; }
-      .page-btn.active { background: var(--primary-blue); color: white; border-color: var(--primary-blue); }
-      .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+      .pagination .page-btn:hover { background: #f1f3f4; }
+      .pagination .page-btn.active { background: var(--primary-blue); color: white; border-color: var(--primary-blue); }
     </style>
   </th:block>
 </head>
@@ -57,231 +54,129 @@
     <button th:each="entry, stat : ${macroGroups}"
             class="tab-btn"
             th:classappend="${stat.first} ? 'active' : ''"
-            th:onclick="'openTab(event, \'content-' + ${stat.index} + '\')'"
+            th:data-direction="${entry.key}"
+            onclick="openTab(event, this.getAttribute('data-direction'))"
             th:text="${entry.key == 'STAFF_TO_TABLE' ? '직원 → 테이블' : (entry.key == 'TABLE_TO_STAFF' ? '테이블 → 직원' : entry.key)}">
     </button>
   </div>
 
   <div class="table-container">
-    <div th:each="entry, stat : ${macroGroups}"
-         th:id="'content-' + ${stat.index}"
-         class="tab-content"
-         th:style="${stat.first} ? 'display: block' : 'display: none'">
-
-      <table class="macro-massage-table">
-        <thead>
-        <tr><th>메시지 목록</th></tr>
-        </thead>
-        <tbody>
-        <tr th:each="macro : ${entry.value}"
-            class="macro-row"
-            th:attr="data-tab=${stat.index}">
-          <td class="messageText" th:text="${macro.messageText}">메시지 내용</td>
-        </tr>
-        </tbody>
-      </table>
-
-      <!-- 페이징 -->
-      <div class="pagination" th:id="'pagination-' + ${stat.index}"></div>
-    </div>
+    <table class="macro-massage-table">
+      <thead>
+      <tr><th>메시지 목록</th></tr>
+      </thead>
+      <tbody id="macroTableBody">
+      </tbody>
+    </table>
 
     <div th:if="${#maps.isEmpty(macroGroups)}"
          style="text-align: center; color: #aaa; padding: 40px;">
       등록된 매크로 메시지 내역이 없습니다.
     </div>
+    <!-- 페이징 -->
+    <div class="pagination" id="macroPagination" style="display:flex; justify-content:center; margin-top:20px; gap:8px; padding-bottom:15px;"></div>
   </div>
 </th:block>
 
 <th:block layout:fragment="scripts">
   <script>
-    const PAGE_SIZE = 10;
-    const tabPages = {};
+    /* =====================================================
+       현재 선택된 탭의 direction 값 (전역 변수)
+       예: 'STAFF_TO_TABLE', 'TABLE_TO_STAFF'
+       ===================================================== */
+    let currentDirection = '';
+    const currentSize = 10; // 한 페이지당 표시할 메시지 수
 
-    /** [핵심] 탭 전환 로직 */
-    function openTab(evt, tabId) {
-      const tabContents = document.getElementsByClassName("tab-content");
-      for (let i = 0; i < tabContents.length; i++) {
-        tabContents[i].style.display = "none";
+    /* =====================================================
+       페이지 로드 시 첫 번째 탭 자동 선택 및 데이터 로드
+       ===================================================== */
+    document.addEventListener('DOMContentLoaded', () => {
+      const firstBtn = document.querySelector('.tab-btn');
+      if (firstBtn) {
+        currentDirection = firstBtn.getAttribute('data-direction');
+        loadMacroList(currentDirection, 1);
       }
-      const tabBtns = document.getElementsByClassName("tab-btn");
-      for (let i = 0; i < tabBtns.length; i++) {
-        tabBtns[i].classList.remove("active");
-      }
-      document.getElementById(tabId).style.display = "block";
-      evt.currentTarget.classList.add("active");
+    });
+
+    /* =====================================================
+       탭 클릭 시 호출
+       - 선택된 탭 버튼 활성화
+       - 해당 direction의 1페이지 데이터 로드
+       ===================================================== */
+    function openTab(evt, direction) {
+      // 모든 탭 버튼 active 제거 후 클릭한 버튼만 활성화
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      evt.currentTarget.classList.add('active');
+
+      currentDirection = direction;
+      loadMacroList(direction, 1); // 탭 변경 시 항상 1페이지부터
     }
 
-    // ======= 페이징 렌더링 =======
-    function renderPaging(tabIndex) {
-      const rows = document.querySelectorAll(`.macro-row[data-tab="${tabIndex}"]`);
-      const totalRows = rows.length;
-      const totalPages = Math.ceil(totalRows / PAGE_SIZE);
-      const curPage = tabPages[tabIndex] || 1;
+    /* =====================================================
+       AJAX로 매크로 메시지 목록 조회
+       GET /admin/macro/list?direction=xxx&page=N&size=10
+       성공 시 테이블과 페이징 버튼을 갱신
+       ===================================================== */
+    function loadMacroList(direction, page) {
+      fetch(`/admin/macro/list?direction=${direction}&page=${page}&size=${currentSize}`)
+              .then(res => res.json())
+              .then(data => {
+                renderTable(data.dtoList);          // 테이블 내용 갱신
+                renderPagination(data, direction);  // 페이징 버튼 갱신
+              })
+              .catch(() => {
+                document.getElementById('macroTableBody').innerHTML =
+                        '<tr><td style="color:#aaa; text-align:center; padding:40px;">데이터를 불러오지 못했습니다.</td></tr>';
+              });
+    }
 
-      rows.forEach((row, i) => {
-        const rowPage = Math.floor(i / PAGE_SIZE) + 1;
-        row.style.display = rowPage === curPage ? '' : 'none';
-      });
-
-      const paginationDiv = document.getElementById(`pagination-${tabIndex}`);
-      if (totalPages <= 1) {
-        paginationDiv.innerHTML = '';
+    /* =====================================================
+       조회된 메시지 목록을 tbody에 렌더링
+       list가 비어있으면 안내 메시지 표시
+       ===================================================== */
+    function renderTable(list) {
+      const tbody = document.getElementById('macroTableBody');
+      if (!list || list.length === 0) {
+        tbody.innerHTML =
+                '<tr><td style="color:#aaa; text-align:center; padding:40px;">등록된 메시지가 없습니다.</td></tr>';
         return;
       }
+      tbody.innerHTML = list.map(item => `
+            <tr>
+                <td class="messageText">${item.messageText}</td>
+            </tr>
+        `).join('');
+    }
 
-      let html = `<button class="page-btn" ${curPage === 1 ? 'disabled' : ''}
-                onclick="movePage(${tabIndex}, ${curPage - 1})">‹</button>`;
+    /* =====================================================
+       페이징 버튼 렌더링
+       - data.prev: 이전 버튼 표시 여부
+       - data.next: 다음 버튼 표시 여부
+       - data.start ~ data.end: 표시할 페이지 번호 범위
+       - data.page: 현재 페이지 (active 처리)
+       ===================================================== */
+    function renderPagination(data, direction) {
+      const container = document.getElementById('macroPagination');
+      let html = '';
 
-      for (let i = 1; i <= totalPages; i++) {
-        html += `<button class="page-btn ${i === curPage ? 'active' : ''}"
-                    onclick="movePage(${tabIndex}, ${i})">${i}</button>`;
+      // 이전 버튼
+      if (data.prev) {
+        html += `<a class="page-btn" onclick="loadMacroList('${direction}', ${data.start - 1})">‹</a>`;
       }
 
-      html += `<button class="page-btn" ${curPage === totalPages ? 'disabled' : ''}
-                    onclick="movePage(${tabIndex}, ${curPage + 1})">›</button>`;
-
-      paginationDiv.innerHTML = html;
-    }
-
-    // ======== 페이지 이동 ========
-    function movePage(tabIndex, page) {
-      tabPages[tabIndex] = page;
-      renderPaging(tabIndex);
-    }
-
-    // ======= 초기화 =======
-    window.onload = () => {
-      const tabContents = document.getElementsByClassName("tab-content");
-      for (let i = 0; i < tabContents.length; i++) {
-        tabPages[i] = 1;
-        renderPaging(i)
+      // 페이지 번호 버튼
+      for (let i = data.start; i <= data.end; i++) {
+        html += `<a class="page-btn ${data.page === i ? 'active' : ''}"
+                        onclick="loadMacroList('${direction}', ${i})">${i}</a>`;
       }
+
+      // 다음 버튼
+      if (data.next) {
+        html += `<a class="page-btn" onclick="loadMacroList('${direction}', ${data.end + 1})">›</a>`;
+      }
+
+      container.innerHTML = html;
     }
-
-
-    // =============== 사용하지 않는 함수 =================
-
-    // /** [핵심] 현재 제어 중인 테이블 ID 및 데이터 전역 관리 */
-    // let currentTableId = null;
-    //
-    // /** [핵심] 모달 열기 및 데이터 연동 */
-    // function openTableModal(element) {
-    //   // 1. 선택 시각화 및 전역 ID 설정
-    //   document.querySelectorAll('.table-card').forEach(c => c.classList.remove('selected'));
-    //   element.classList.add('selected');
-    //
-    //   // 클릭한 카드의 data 속성에서 ID와 현재 상태를 정확히 가져옴
-    //   currentTableId = element.getAttribute('data-id');
-    //   const tableNum = element.getAttribute('data-num');
-    //   const status = element.getAttribute('data-status');
-    //
-    //   document.getElementById('modalTitle').innerText = 'Table ' + tableNum;
-    //
-    //   // 2. 이용 중(OCCUPIED)일 때만 샘플 주문 표시
-    //   if (status === 'OCCUPIED') {
-    //     const mockData = [
-    //       { name: '아메리카노', qty: 2, price: '8,000' },
-    //       { name: '보드게임 2시간', qty: 1, price: '10,000' }
-    //     ];
-    //     renderOrders(mockData);
-    //   } else {
-    //     renderOrders([]);
-    //   }
-    //
-    //   // 3. 모달 표시 및 애니메이션
-    //   const modal = document.getElementById('tableModal');
-    //   const modalContent = modal.querySelector('.modal-content');
-    //
-    //   modal.style.display = 'flex';
-    //   // 리플로우 강제 발생 후 애니메이션 적용
-    //   void modalContent.offsetWidth;
-    //   modalContent.style.transform = 'translateY(0)';
-    // }
-    //
-    // /** 모달 닫기 */
-    // function closeTableModal() {
-    //   const modal = document.getElementById('tableModal');
-    //   const modalContent = modal.querySelector('.modal-content');
-    //
-    //   modalContent.style.transform = 'translateY(-20px)';
-    //   setTimeout(() => {
-    //     modal.style.display = 'none';
-    //     document.querySelectorAll('.table-card').forEach(c => c.classList.remove('selected'));
-    //   }, 200);
-    // }
-    //
-    // /** 주문 내역 렌더링 */
-    // function renderOrders(orders) {
-    //   const listDiv = document.getElementById('orderList');
-    //   const priceSpan = document.getElementById('totalPrice');
-    //   let sum = 0;
-    //
-    //   if (!orders || orders.length === 0) {
-    //     listDiv.innerHTML = '<div class="order-item" style="color:#999;">주문 내역이 없습니다.</div>';
-    //     priceSpan.innerText = '0원';
-    //     return;
-    //   }
-    //
-    //   listDiv.innerHTML = orders.map(item => {
-    //     const numericPrice = parseInt(item.price.replace(/,/g, ''));
-    //     sum += numericPrice;
-    //     return `<div class="order-item">
-    //                         <span>${item.name} x ${item.qty}</span>
-    //                         <span>${item.price}원</span>
-    //                     </div>`;
-    //   }).join('');
-    //
-    //   priceSpan.innerText = sum.toLocaleString() + '원';
-    // }
-    //
-    // /** [핵심] 상태 변경 API 연동 (PATCH) */
-    // async function callUpdateStatus(status) {
-    //   if (!currentTableId) return;
-    //
-    //   try {
-    //     // 컨트롤러의 @RequestMapping("/admin/dashboard")와 @PatchMapping("/{id}/status")에 맞춤
-    //     const response = await fetch(`/admin/dashboard/${currentTableId}/status`, {
-    //       method: 'PATCH',
-    //       headers: { 'Content-Type': 'application/json' },
-    //       body: JSON.stringify({ status: status })
-    //     });
-    //
-    //     if (response.ok) {
-    //       location.reload(); // 성공 시 DB 값을 반영하기 위해 새로고침
-    //     } else {
-    //       alert("상태 변경 중 오류가 발생했습니다. (코드: " + response.status + ")");
-    //     }
-    //   } catch (err) {
-    //     console.error("통신 에러:", err);
-    //     alert("서버와 통신할 수 없습니다.");
-    //   }
-    // }
-    //
-    // /** 결제 완료 버튼: 결제 후 청소 단계로 자동 전환 */
-    // function handlePayment() {
-    //   if(confirm("결제를 완료하고 청소 상태로 변경하시겠습니까?")) {
-    //     callUpdateStatus('CLEANING');
-    //   }
-    // }
-    //
-    // /** [핵심] 상태 순환 로직: EMPTY -> OCCUPIED -> CLEANING -> EMPTY */
-    // async function handleStatusUpdate() {
-    //   if (!currentTableId) return;
-    //
-    //   // 현재 선택된 카드의 실제 데이터 상태를 다시 확인
-    //   const currentCard = document.querySelector(`.table-card[data-id="${currentTableId}"]`);
-    //   const currentStatus = currentCard.getAttribute('data-status');
-    //
-    //   let nextStatus = '';
-    //   if (currentStatus === 'EMPTY') nextStatus = 'OCCUPIED';
-    //   else if (currentStatus === 'OCCUPIED') nextStatus = 'CLEANING';
-    //   else if (currentStatus === 'CLEANING') nextStatus = 'EMPTY';
-    //   else nextStatus = 'EMPTY';
-    //
-    //   if (confirm(`상태를 [${nextStatus}]으로 변경하시겠습니까?`)) {
-    //     await callUpdateStatus(nextStatus);
-    //   }
-    // }
   </script>
 </th:block>
 </body>

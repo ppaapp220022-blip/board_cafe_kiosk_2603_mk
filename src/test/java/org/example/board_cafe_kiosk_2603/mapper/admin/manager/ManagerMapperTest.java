@@ -3,6 +3,7 @@ package org.example.board_cafe_kiosk_2603.mapper.admin.manager;
 import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.domain.admin.manager.Manager;
 import org.example.board_cafe_kiosk_2603.domain.admin.manager.RoleType;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageRequestDTO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,23 +56,6 @@ class ManagerMapperTest {
     }
 
     @Test
-    void findAllTest() {
-        List<Manager> result = managerMapper.findAll();
-
-        log.info("--- 전체 목록 조회 결과 확인 ---");
-
-        // 1. 개별 객체 정보를 하나씩 로그로 출력 (추천)
-        result.forEach(manager -> log.info("조회된 관리자: {}", manager));
-
-        // 2. 리스트 요약 정보 확인
-        boolean isListNotEmpty = !result.isEmpty();
-        log.info("목록이 비어있지 않음: {}", isListNotEmpty);
-        log.info("현재 총 관리자 수: {}", result.size());
-
-        Assertions.assertTrue(isListNotEmpty);
-    }
-
-    @Test
     void findByLoginIdTest() {
         String targetId = "test0002";
 
@@ -114,4 +98,56 @@ class ManagerMapperTest {
 
         Assertions.assertFalse(updated.isActive(), "isActive 상태가 false여야 합니다.");
     }
+    /*====================페이징===================== */
+    /** 전체 목록 페이징 조회 테스트 (filter 없음 = 전체) */
+    @Test
+    void selectListTest() {
+        PageRequestDTO pageRequestDTO = PageRequestDTO.builder()
+                .page(1)
+                .size(10)
+                .build();
+
+        List<Manager> result = managerMapper.selectList(pageRequestDTO);
+
+        log.info("--- 페이징 목록 조회 결과 확인 ---");
+        result.forEach(manager -> log.info("조회된 관리자: {}", manager));
+        log.info("조회된 수: {}", result.size());
+
+        Assertions.assertNotNull(result);
+    }
+
+    /** 활성화 직원만 조회 테스트 */
+    @Test
+    void selectListActiveFilterTest() {
+        PageRequestDTO pageRequestDTO = PageRequestDTO.builder()
+                .page(1)
+                .size(10)
+                .filter("active")
+                .build();
+
+        List<Manager> result = managerMapper.selectList(pageRequestDTO);
+
+        log.info("--- 활성화 필터 조회 결과 확인 ---");
+        result.forEach(manager -> log.info("조회된 관리자: {}, isActive: {}", manager.getName(), manager.isActive()));
+
+        // 모든 결과가 활성화 상태인지 확인
+        Assertions.assertTrue(result.stream().allMatch(Manager::isActive));
+    }
+
+    /** 전체 개수 조회 테스트 */
+    @Test
+    void selectCountTest() {
+        PageRequestDTO pageRequestDTO = PageRequestDTO.builder()
+                .page(1)
+                .size(10)
+                .build();
+
+        int count = managerMapper.selectCount(pageRequestDTO);
+
+        log.info("--- 전체 개수 조회 결과 확인 ---");
+        log.info("전체 직원 수: {}", count);
+
+        Assertions.assertTrue(count >= 0);
+    }
+
 }

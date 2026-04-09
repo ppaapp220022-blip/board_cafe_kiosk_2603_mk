@@ -4,6 +4,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.example.board_cafe_kiosk_2603.domain.admin.point.Point;
 import org.example.board_cafe_kiosk_2603.domain.admin.point.PointHistory;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageRequestDTO;
 
 import java.util.List;
 
@@ -13,8 +14,7 @@ public interface PointMapper {
     /* ===== point 테이블 ===== */
 
     // 전체 포인트 계좌 목록 조회 (관리자 화면)
-    // 페이징 조회
-    List<Point> findAll(@Param("offset") int offset, @Param("limit") int limit);
+    List<Point> findAll();
 
     // 전화번호로 포인트 계좌 조회
     Point findByPhone(String phone);
@@ -38,4 +38,11 @@ public interface PointMapper {
 
     // 포인트 이력 추가
     void insertHistory(PointHistory history);
+
+    /*=============== 페이징 ==============*/
+    // [페이징된 포인트 목록 조회]
+    List<Point> selectList(PageRequestDTO pageRequestDTO);
+
+    // [조건에 맞는 전체 데이터 개수 조회]
+    int selectCount(PageRequestDTO pageRequestDTO);
 }

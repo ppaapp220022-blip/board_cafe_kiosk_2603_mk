@@ -1,17 +1,12 @@
 package org.example.board_cafe_kiosk_2603.service.admin.policy;
 
 import org.example.board_cafe_kiosk_2603.dto.admin.policy.PolicyDTO;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageRequestDTO;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageResponseDTO;
 
 import java.util.List;
 
 public interface PolicyService {
-
-    // 전체 패키지 조회 (페이징 + 필터)
-    List<PolicyDTO> getAllPolicies(int page, int size, String filter);
-
-    // 전체 개수
-    int countAll(String filter);
-
     // ID로 단건 조회
     PolicyDTO getById(int id);
 
@@ -23,4 +18,10 @@ public interface PolicyService {
 
     // 활성/비활성 토글
     void updateStatus(int id, boolean active);
+
+    // 페이징
+    PageResponseDTO<PolicyDTO> selectPagedPolicies(PageRequestDTO pageRequestDTO);
+
+    // 탭별 개수
+    int getCount(PageRequestDTO pageRequestDTO);
 }

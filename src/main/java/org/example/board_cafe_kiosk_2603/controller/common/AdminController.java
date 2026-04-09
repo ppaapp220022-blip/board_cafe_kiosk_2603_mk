@@ -27,10 +27,8 @@ public class AdminController {
     private final PointService pointService;
 
     // 포인트 관리 페이지 이동 로직
-    @GetMapping("/points")
-    public String pointManagement(@RequestParam(defaultValue = "1") int page,
-                                  Model model) {
-
+//    @GetMapping("/points")
+//    public String pointManagement(Model model) {
 //        // 화면 확인을 위한 더미 데이터 (추후 DB 연동)
 //        List<Map<String, Object>> pointList = new ArrayList<>();
 //        pointList.add(Map.of("phone", "010-1234-5678", "balance", 12500, "updatedAt", LocalDateTime.now()));
@@ -46,22 +44,13 @@ public class AdminController {
 //        model.addAttribute("activePage", "pointManagement");
 //
 //        return "admin/point"; // templates/admin/point.html 호출
-        int pageSize   = 8;
-        int totalCount = pointService.getTotalCustomers();
-        int totalPages = (int) Math.ceil((double) totalCount / pageSize);
-
-        if (page < 1) page = 1;
-        if (totalPages > 0 && page > totalPages) page = totalPages;
-
-        model.addAttribute("pointList",      pointService.getAllPoints(page, pageSize));
-        model.addAttribute("totalCustomers", pointService.getTotalCustomers());
-        model.addAttribute("totalPoints",    pointService.getTotalPoints());
-        model.addAttribute("avgPoints",      pointService.getAvgPoints());
-        model.addAttribute("currentPage",    page);
-        model.addAttribute("totalPages",     totalPages);
-        model.addAttribute("activePage",     "pointManagement");
-        return "admin/point";
-    }
+//        model.addAttribute("pointList",      pointService.getAllPoints());
+//        model.addAttribute("totalCustomers", pointService.getTotalCustomers());
+//        model.addAttribute("totalPoints",    pointService.getTotalPoints());
+//        model.addAttribute("avgPoints",      pointService.getAvgPoints());
+//        model.addAttribute("activePage",     "pointManagement");
+//        return "admin/point";
+//    }
 
 //    @GetMapping("/status")
 //    public String stats(Model model) {

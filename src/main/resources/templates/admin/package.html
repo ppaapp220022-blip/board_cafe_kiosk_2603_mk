@@ -118,11 +118,17 @@
 
   <div class="tab-container">
     <button class="tab-button" th:classappend="${filter == 'all'} ? 'active'"
-            onclick="filterTable('all')">전체</button>
+            onclick="filterTable('all')">
+      전체 <span th:text="${countAll}"></span>
+    </button>
     <button class="tab-button" th:classappend="${filter == 'active'} ? 'active'"
-            onclick="filterTable('active')">적용 중</button>
+            onclick="filterTable('active')">
+      적용 중 <span th:text="${countActive}"></span>
+    </button>
     <button class="tab-button" th:classappend="${filter == 'inactive'} ? 'active'"
-            onclick="filterTable('inactive')">비활성</button>
+            onclick="filterTable('inactive')">
+      비활성 <span th:text="${countInactive}"></span>
+    </button>
   </div>
 
   <div class="table-container">
@@ -137,20 +143,21 @@
         <th style="text-align: right;">관리</th>
       </tr>
       </thead>
+
       <tbody id="policyTableBody">
-      <tr th:each="policy : ${policyList}"
+      <tr th:each="policy : ${responseDTO.dtoList}"
           th:data-id="${policy.id}"
           th:classappend="${!policy.active} ? 'is-disabled' : ''">
         <td th:text="${policy.name}">패키지명</td>
         <td th:text="${policy.displayTime}">1시간</td>
         <td th:text="${#numbers.formatInteger(policy.basePrice, 0, 'COMMA') + '원'}">5,000원</td>
         <td th:text="${policy.extraPricePerMin != null and policy.extraPricePerMin > 0}
-                       ? '10분당 ' + ${policy.extraPricePerMin} + '원'
-                       : '없음'">없음</td>
+                 ? '10분당 ' + ${policy.extraPricePerMin} + '원'
+                 : '없음'">없음</td>
         <td>
-            <span class="status-badge"
-                  th:classappend="${policy.active} ? 'status-active' : 'status-inactive'"
-                  th:text="${policy.active} ? '적용 중' : '비활성'">적용 중</span>
+      <span class="status-badge"
+            th:classappend="${policy.active} ? 'status-active' : 'status-inactive'"
+            th:text="${policy.active} ? '적용 중' : '비활성'">적용 중</span>
         </td>
         <td style="text-align: right;">
           <button th:if="${policy.active}"
@@ -225,27 +232,30 @@
       </div>
     </div>
   </div>
-  <div class="pagination" th:if="${totalPages > 1}">
-    <button class="page-btn"
-            th:disabled="${currentPage == 1}"
-            th:onclick="'movePage(' + (${currentPage} - 1) + ')'">‹</button>
+  <!-- 페이징 -->
+  <div class="pagination">
+    <a th:if="${responseDTO.prev}"
+       th:href="@{/admin/policy(page=${responseDTO.start - 1}, filter=${filter})}"
+       class="page-btn">‹</a>
 
-    <button th:each="i : ${#numbers.sequence(1, totalPages)}"
-            class="page-btn"
-            th:classappend="${i == currentPage} ? 'active'"
-            th:text="${i}"
-            th:onclick="'movePage(' + ${i} + ')'"></button>
+    <th:block th:each="num : ${#numbers.sequence(responseDTO.start, responseDTO.end)}">
+      <a th:href="@{/admin/policy(page=${num}, filter=${filter})}"
+         th:text="${num}"
+         th:class="${responseDTO.page == num} ? 'page-btn active' : 'page-btn'">
+      </a>
+    </th:block>
 
-    <button class="page-btn"
-            th:disabled="${currentPage == totalPages}"
-            th:onclick="'movePage(' + (${currentPage} + 1) + ')'">›</button>
+    <a th:if="${responseDTO.next}"
+       th:href="@{/admin/policy(page=${responseDTO.end + 1}, filter=${filter})}"
+       class="page-btn">›</a>
   </div>
+  <!-- /페이징 -->
 </th:block>
 
 <th:block layout:fragment="scripts">
   <script>
     const currentFilter = '[[${filter}]]';
-    const currentPage   = [[${currentPage}]];
+    const currentPage = [[${responseDTO.page}]];
 
     function openPolicyModal() { document.getElementById('policyModal').style.display = 'flex'; }
     function closePolicyModal(e) {
@@ -340,10 +350,6 @@
         timeRow.style.display  = '';
         extraRow.style.display = '';
       }
-    }
-
-    function movePage(page) {
-      window.location.href = `/admin/policy?page=${page}&filter=${currentFilter}`;
     }
 
     // ===== 토스트 =====

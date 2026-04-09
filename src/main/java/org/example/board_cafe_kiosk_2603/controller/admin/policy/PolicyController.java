@@ -3,6 +3,8 @@ package org.example.board_cafe_kiosk_2603.controller.admin.policy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.dto.admin.policy.PolicyDTO;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageRequestDTO;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageResponseDTO;
 import org.example.board_cafe_kiosk_2603.service.admin.policy.PolicyService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -19,30 +21,28 @@ import java.util.Objects;
 public class PolicyController {
 
     private final PolicyService policyService;
-    private static final int pageSize = 8;
 
     // ===========================================================
     // 페이지
     // ===========================================================
     @GetMapping
-    public String policyPage(@RequestParam(defaultValue = "1") int page,
-                             @RequestParam(defaultValue = "all") String filter,
-                             Model model) {
-        int totalCount = policyService.countAll(filter);
-        int totalPages = (int) Math.ceil((double) totalCount / pageSize);
+    public String policyPage(PageRequestDTO pageRequestDTO, Model model) {
+        PageResponseDTO<PolicyDTO> responseDTO = policyService.selectPagedPolicies(pageRequestDTO);
 
-        // 페이지 범위 보정
-        if (page < 1) page = 1;
-        if (totalPages > 0 && page > totalPages) page = totalPages;
+        // 각 탭별 개수 조회
+        PageRequestDTO allReq      = PageRequestDTO.builder().page(1).size(1).build();
+        PageRequestDTO activeReq   = PageRequestDTO.builder().page(1).size(1).filter("active").build();
+        PageRequestDTO inactiveReq = PageRequestDTO.builder().page(1).size(1).filter("inactive").build();
 
-        model.addAttribute("policyList",  policyService.getAllPolicies(page, pageSize, filter));
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages",  totalPages);
-        model.addAttribute("totalCount",  totalCount);
-        model.addAttribute("filter",      filter);
+        model.addAttribute("responseDTO", responseDTO);
+        model.addAttribute("pageRequestDTO", pageRequestDTO);
+        // filter가 null이면 "all"로 기본값 설정
+        model.addAttribute("filter", pageRequestDTO.getFilter() != null ? pageRequestDTO.getFilter() : "all");
+        model.addAttribute("countAll",      policyService.getCount(allReq));
+        model.addAttribute("countActive",   policyService.getCount(activeReq));
+        model.addAttribute("countInactive", policyService.getCount(inactiveReq));
+        model.addAttribute("activePage", "policyManagement");
 
-        log.info("패키지 관리 페이지 - filter: {}, page: {}/{}, 총 {}개",
-                filter, page, totalPages, totalCount);
         return "admin/package";
     }
 

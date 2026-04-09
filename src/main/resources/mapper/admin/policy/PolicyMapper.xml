@@ -2,29 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.example.board_cafe_kiosk_2603.mapper.admin.policy.PolicyMapper">
-    <!-- 전체 패키지 조회 (비활성 포함) 페이징 + 필터 -->
-    <select id="findAll" resultType="org.example.board_cafe_kiosk_2603.domain.admin.policy.Policy">
-        SELECT id, name, type, duration_minutes, base_price, extra_price_per_min,
-        is_active AS active, updated_at
-        FROM board_cafe_kiosk_2603.cafe_package
-        <where>
-            <if test="filter == 'active'">is_active = true</if>
-            <if test="filter == 'inactive'">is_active = false</if>
-        </where>
-        ORDER BY is_active DESC, id ASC
-        LIMIT #{limit} OFFSET #{offset}
-    </select>
-
-    <!-- 전체 개수 조회 -->
-    <select id="countAll" resultType="int">
-        SELECT COUNT(*)
-        FROM board_cafe_kiosk_2603.cafe_package
-        <where>
-            <if test="filter == 'active'">is_active = true</if>
-            <if test="filter == 'inactive'">is_active = false</if>
-        </where>
-    </select>
-
     <!-- ID로 단건 조회 -->
     <select id="findById" resultType="org.example.board_cafe_kiosk_2603.domain.admin.policy.Policy">
         SELECT id, name, type, duration_minutes, base_price, extra_price_per_min,
@@ -60,4 +37,32 @@
             updated_at = CURRENT_TIMESTAMP
         WHERE id = #{id}
     </update>
+
+    <!--============페이징============= -->
+    <select id="selectList" resultType="org.example.board_cafe_kiosk_2603.domain.admin.policy.Policy">
+        SELECT id, name, type, duration_minutes, base_price, extra_price_per_min,
+        is_active AS active, updated_at
+        FROM board_cafe_kiosk_2603.cafe_package
+        WHERE 1=1
+        <if test='filter != null and filter == "active"'>
+            AND is_active = true
+        </if>
+        <if test='filter != null and filter == "inactive"'>
+            AND is_active = false
+        </if>
+        ORDER BY is_active DESC, id ASC
+        LIMIT #{skip}, #{size}
+    </select>
+
+    <select id="selectCount" resultType="int">
+        SELECT COUNT(*)
+        FROM board_cafe_kiosk_2603.cafe_package
+        WHERE 1=1
+        <if test='filter != null and filter == "active"'>
+            AND is_active = true
+        </if>
+        <if test='filter != null and filter == "inactive"'>
+            AND is_active = false
+        </if>
+    </select>
 </mapper>

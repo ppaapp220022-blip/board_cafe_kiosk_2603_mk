@@ -50,21 +50,6 @@
 
             /* 실시간 메시지 스타일 */
             .status-msg { font-size: 12px; margin-top: 6px; min-height: 18px; font-weight: 500; }
-
-            /* 페이징 */
-            .pagination {
-                display: flex; justify-content: center; align-items: center;
-                gap: 8px; margin-top: 24px;
-            }
-            .page-btn {
-                width: 40px; height: 40px; border-radius: 10px; border: 1px solid #E5E5EA;
-                background: white; font-size: 14px; font-weight: 600; cursor: pointer;
-                display: flex; align-items: center; justify-content: center;
-                color: var(--text-dark); transition: all 0.2s;
-            }
-            .page-btn:hover { background: #f1f3f4; }
-            .page-btn.active { background: var(--primary-blue); color: white; border-color: var(--primary-blue); }
-            .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
         </style>
     </th:block>
 </head>
@@ -79,15 +64,15 @@
     <div class="tab-container">
         <div class="tab-item" th:classappend="${filter == 'all'} ? 'active'"
              onclick="filterTab('all')">
-            전체 <span class="tab-count" th:text="${totalCount}">0</span>
+            전체 <span class="tab-count" th:text="${countAll}">0</span>
         </div>
         <div class="tab-item" th:classappend="${filter == 'active'} ? 'active'"
              onclick="filterTab('active')">
-            활성화 <span class="tab-count" th:text="${totalActive}">0</span>
+            활성화 <span class="tab-count" th:text="${countActive}">0</span>
         </div>
         <div class="tab-item" th:classappend="${filter == 'inactive'} ? 'active'"
              onclick="filterTab('inactive')">
-            비활성화 <span class="tab-count" th:text="${totalInactive}">0</span>
+            비활성화 <span class="tab-count" th:text="${countInactive}">0</span>
         </div>
     </div>
 
@@ -104,7 +89,8 @@
             </tr>
             </thead>
             <tbody id="staffTableBody">
-            <tr th:each="staff : ${staffList}" th:classappend="${!staff.isActive} ? 'is-disabled'">
+            <tr th:each="staff : ${responseDTO.dtoList}"
+                th:classappend="${!staff.isActive} ? 'is-disabled'">
                 <td style="font-weight:600; color:var(--primary-blue);" th:text="${staff.loginId}"></td>
                 <td th:text="${staff.name}"></td>
                 <td>
@@ -112,33 +98,40 @@
                     <span th:unless="${staff.role.name() == 'ADMIN'}">👤 Staff</span>
                 </td>
                 <td>
-                    <span class="status-badge" th:classappend="${staff.isActive} ? 'status-active' : 'status-inactive'"
-                          th:text="${staff.isActive} ? '활성화' : '비활성'"></span>
+        <span class="status-badge"
+              th:classappend="${staff.isActive} ? 'status-active' : 'status-inactive'"
+              th:text="${staff.isActive} ? '활성화' : '비활성'"></span>
                 </td>
                 <td th:text="${#temporals.format(staff.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
                 <td style="text-align: right;">
-                    <button th:if="${staff.isActive}" class="btn-text text-danger" th:attr="onclick=|toggleStatus(this, ${staff.id})|">비활성화</button>
-                    <button th:unless="${staff.isActive}" class="btn-text text-active" th:attr="onclick=|toggleStatus(this, ${staff.id})|">활성화</button>
+                    <button th:if="${staff.isActive}" class="btn-text text-danger"
+                            th:attr="onclick=|toggleStatus(this, ${staff.id})|">비활성화</button>
+                    <button th:unless="${staff.isActive}" class="btn-text text-active"
+                            th:attr="onclick=|toggleStatus(this, ${staff.id})|">활성화</button>
                 </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(responseDTO.dtoList)}">
+                <td colspan="6" style="text-align:center; color:#aaa; padding:40px;">
+                    등록된 직원이 없습니다.</td>
             </tr>
             </tbody>
         </table>
-    </div>
+        <div style="display:flex; justify-content:center; margin-top:20px; gap:8px; padding-bottom:15px;">
+            <a th:if="${responseDTO.prev}"
+               th:href="@{/admin/staff(page=${responseDTO.start - 1}, filter=${filter})}"
+               class="btn-text">이전</a>
 
-    <div class="pagination" th:if="${totalPages > 1}">
-        <button class="page-btn"
-                th:disabled="${currentPage == 1}"
-                th:onclick="'movePage(' + (${currentPage} - 1) + ')'">‹</button>
+            <th:block th:each="num : ${#numbers.sequence(responseDTO.start, responseDTO.end)}">
+                <a th:href="@{/admin/staff(page=${num}, filter=${filter})}"
+                   th:text="${num}"
+                   th:class="${responseDTO.page == num} ? 'btn-primary' : 'btn-text'">
+                </a>
+            </th:block>
 
-        <button th:each="i : ${#numbers.sequence(1, totalPages)}"
-                class="page-btn"
-                th:classappend="${i == currentPage} ? 'active'"
-                th:text="${i}"
-                th:onclick="'movePage(' + ${i} + ')'"></button>
-
-        <button class="page-btn"
-                th:disabled="${currentPage == totalPages}"
-                th:onclick="'movePage(' + (${currentPage} + 1) + ')'">›</button>
+            <a th:if="${responseDTO.next}"
+               th:href="@{/admin/staff(page=${responseDTO.end + 1}, filter=${filter})}"
+               class="btn-text">다음</a>
+        </div>
     </div>
 
     <div id="staffModal" class="modal-overlay" onclick="closeStaffModal()">
@@ -178,15 +171,9 @@
 
 <th:block layout:fragment="scripts">
     <script>
-        const tableBody     = document.getElementById('staffTableBody');
-        const currentFilter =  '[[${filter}]]';
-        const currentPage   = [[${currentPage}]];
+        const tableBody = document.getElementById('staffTableBody');
         let isIdValid = false;
         let idCheckTimeout = null;
-
-        function movePage(page) {
-            window.location.href = `/admin/staff?page=${page}&filter=${currentFilter}`;
-        }
 
         /** [모달 제어] */
         function openStaffModal() {
@@ -274,10 +261,12 @@
         }
 
         /** [상태 토글] */
+        // toggleStatus 함수에서 reload 후 filter 유지
         function toggleStatus(btn, id) {
             const row = btn.closest('tr');
             const isCurrentlyActive = !row.classList.contains('is-disabled');
             const targetActiveState = !isCurrentlyActive;
+            const currentFilter = '[[${filter}]]';
 
             if (!confirm(targetActiveState ? "활성화하시겠습니까?" : "비활성화하시겠습니까?")) return;
 
@@ -291,14 +280,24 @@
                 body: params
             })
                 .then(res => {
-                    if (res.ok) location.reload();
+                    if (res.ok) location.href = `/admin/staff?page=1&filter=${currentFilter}`;
                     else alert("변경 실패");
                 });
         }
 
         /** [유틸리티: 필터, 정렬, 카운트] */
-        function filterTab(type) {
-            window.location.href = `/admin/staff?page=1&filter=${type}`;
+        // 탭 클릭 시 서버로 filter 파라미터 전달
+        function filterTab(filter) {
+            location.href = `/admin/staff?page=1&filter=${filter}`;
+        }
+
+        function updateCounts() {
+            const rows = tableBody.querySelectorAll('tr');
+            const total = rows.length;
+            const inactive = tableBody.querySelectorAll('tr.is-disabled').length;
+            document.getElementById('count-all').textContent = total;
+            document.getElementById('count-active').textContent = total - inactive;
+            document.getElementById('count-inactive').textContent = inactive;
         }
 
         window.onload = () => {
@@ -306,6 +305,7 @@
             const rows = Array.from(tableBody.querySelectorAll('tr'));
             rows.sort((a, b) => a.classList.contains('is-disabled') - b.classList.contains('is-disabled'));
             rows.forEach(row => tableBody.appendChild(row));
+            updateCounts();
         };
     </script>
 </th:block>
