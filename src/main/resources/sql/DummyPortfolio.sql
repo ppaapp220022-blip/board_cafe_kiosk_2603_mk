@@ -44,7 +44,7 @@ INSERT INTO `manager` (`login_id`, `password`, `name`, `email`, `role`, `is_acti
 VALUES
     ('admin',   '$2a$10$I/U.nHfsL/6wBqXAJV1A3u0KwyHn9wiOVRK7ZVI6rAptphEgRW1Qi', '김관리', 'admin@boardcafe.com',   'ADMIN', TRUE),
     ('admin02', '$2a$10$RySZbh.V/f9khlbVamY3O.Mg8uY9qbwNTbykKep1SqqtbZ9OMB4xe', '이관리', 'admin02@boardcafe.com', 'ADMIN', FALSE),
-    ('super',   '$2a$10$BTMMVv2aPEqCnTF4aWn7u.Tyuh.yruDyPVk1buElSdgCwbMUWOFRi', '박사장', 'super@boardcafe.com',   'ADMIN', TRUE),
+    ('super',   '$2a$10$BTMMVv2aPEqCnTF4aWn7u.Tyuh.yruDyPVk1buElSdgCwbMUWOFRi', '박사장', 'wndus6110@naver.com',   'ADMIN', TRUE),
     ('pass',    '$2a$10$BTMMVv2aPEqCnTF4aWn7u.Tyuh.yruDyPVk1buElSdgCwbMUWOFRi', '시연계정', 'example@naver.com',   'SUPER', TRUE),
     ('staff01', '$2a$10$VW29gAYZYxDRdWhNP.KYUOVAkPeS1DZYSrcxywKGdjGpx4z0QitDa', '최직원', 'staff01@boardcafe.com', 'STAFF', TRUE),
     ('staff02', '$2a$10$OhUaODvgez2RlesuWWlyXeMzwWRNhYvTrNjgOy07//KxK8sdWaDFG', '정직원', 'staff02@boardcafe.com', 'STAFF', TRUE),
@@ -61,14 +61,14 @@ VALUES
 -- ============================================================
 INSERT INTO `cafe_table` (`table_number`, `password`, `status`, `access_token`, `current_session_id`)
 VALUES
-    (1,  '$2a$12$6.m99XxVXQhLA.kW.pV.8.yAkQtntwMG6zJ2XEzCYdIt6F92AHZoa', 'OCCUPIED', NULL, NULL),
-    (2,  '$2a$12$jMyxkDnEXF6zTzs.6odIHuCtzfR35EDFxZmflbbamUHc9drejGipa', 'OCCUPIED', NULL, NULL),
+    (1,  '$2a$12$6.m99XxVXQhLA.kW.pV.8.yAkQtntwMG6zJ2XEzCYdIt6F92AHZoa', 'EMPTY', NULL, NULL),
+    (2,  '$2a$12$jMyxkDnEXF6zTzs.6odIHuCtzfR35EDFxZmflbbamUHc9drejGipa', 'EMPTY', NULL, NULL),
     (3,  '$2a$12$wPexDR2riZFgwKTtj925FOXZFGPaf6U13GkiNK4Gd43M.1hltvlBS', 'EMPTY',    NULL, NULL),
     (4,  '$2a$12$6UqwKwlaRu05xPzlTbzBQeC68kViy7OrQscQQq.MzUiMyV9eyOlcO', 'EMPTY',    NULL, NULL),
-    (5,  '$2a$12$BoILW/Dwdq267pCpVPlxWuKsjctBoWy1Jz8XY9KHJiA/v86.pPxYe', 'OCCUPIED', NULL, NULL),
-    (6,  '$2a$12$EKiULQjPsNUuxtwfm1K9V.tmr1lkGAUZTzdKkFXiKRGt8N.oC2qwq', 'CLEANING', NULL, NULL),
+    (5,  '$2a$12$BoILW/Dwdq267pCpVPlxWuKsjctBoWy1Jz8XY9KHJiA/v86.pPxYe', 'EMPTY', NULL, NULL),
+    (6,  '$2a$12$EKiULQjPsNUuxtwfm1K9V.tmr1lkGAUZTzdKkFXiKRGt8N.oC2qwq', 'EMPTY', NULL, NULL),
     (7,  '$2a$12$epx2tbnDEk1tuGNOcYu1/.Ciww5olY7rULAIuiUEkn1CLGU1zLV3u', 'EMPTY',    NULL, NULL),
-    (8,  '$2a$12$LANNhG93KYJLa7QpyB5t1uJ.pQBpy7CUFg8r8J.9WAX6ARxsNZzJC', 'OCCUPIED', NULL, NULL),
+    (8,  '$2a$12$LANNhG93KYJLa7QpyB5t1uJ.pQBpy7CUFg8r8J.9WAX6ARxsNZzJC', 'EMPTY', NULL, NULL),
     (9,  '$2a$12$fHPOFdBDC9dlEIeR648aTeGAIEsK9SBC8UgsCq7vcV2KF6dMk6WDi', 'EMPTY',    NULL, NULL),
     (10, '$2a$12$A13LCSatRIIpBFoKiTNyLep7invKMx2KUClmbX28sHYLzEwK4Y4ui', 'EMPTY',    NULL, NULL),
     (11, '$2a$12$YoAiJOrZMD4Kk/9lHYi1BOjV2Y3kFSeslzr44L75nfKt6cEOCrgNa', 'EMPTY',    NULL, NULL),
@@ -150,10 +150,10 @@ VALUES
     (8, 2, 4, CURDATE() + INTERVAL '12:00' HOUR_MINUTE, NULL, TRUE, 21000); -- id=9  table8
 
 -- OCCUPIED 테이블에 활성 세션 연결
-UPDATE `cafe_table` SET `current_session_id` = 6 WHERE `table_number` = 1;
-UPDATE `cafe_table` SET `current_session_id` = 7 WHERE `table_number` = 2;
-UPDATE `cafe_table` SET `current_session_id` = 8 WHERE `table_number` = 5;
-UPDATE `cafe_table` SET `current_session_id` = 9 WHERE `table_number` = 8;
+# UPDATE `cafe_table` SET `current_session_id` = 6 WHERE `table_number` = 1;
+# UPDATE `cafe_table` SET `current_session_id` = 7 WHERE `table_number` = 2;
+# UPDATE `cafe_table` SET `current_session_id` = 8 WHERE `table_number` = 5;
+# UPDATE `cafe_table` SET `current_session_id` = 9 WHERE `table_number` = 8;
 
 -- ============================================================
 -- 7. menu
