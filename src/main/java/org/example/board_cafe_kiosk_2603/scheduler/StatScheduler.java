@@ -23,7 +23,7 @@ public class StatScheduler {
     /**
      * 매일 오후 14:00:00에 Spring Batch Job 실행
      */
-    @Scheduled(cron = "0 0 14 * * *") // 초 분 시 일 월 요일
+    @Scheduled(cron = "0 6 14 * * *") // 초 분 시 일 월 요일
     public void runDailyStatJob() {
         try {
             // 1. 어제 날짜를 문자열로 준비

@@ -1,8 +1,8 @@
 package org.example.board_cafe_kiosk_2603.mapper.common.cafeTableSession;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.example.board_cafe_kiosk_2603.domain.common.cafeTableSession.CafeTableSession;
-import org.springframework.data.repository.query.Param;
 
 /**
  * table_session 테이블 전용 MyBatis Mapper.
