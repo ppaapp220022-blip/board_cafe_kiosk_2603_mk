@@ -9,6 +9,7 @@ import org.example.board_cafe_kiosk_2603.domain.common.cafeTableSession.CafeTabl
 import org.example.board_cafe_kiosk_2603.security.dto.KioskDTO;
 import org.example.board_cafe_kiosk_2603.service.admin.cafeTable.CafeTableService;
 import org.example.board_cafe_kiosk_2603.service.admin.cafeTable.TableSessionAdminService;
+import org.example.board_cafe_kiosk_2603.service.kiosk.cafePackage.CafePackageService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -31,6 +32,7 @@ public class KioskLoginSuccessHandler implements AuthenticationSuccessHandler {
     // ★ 추가: 재로그인 시 활성 세션 상세 정보(CafeTableSession 객체)를
     //         HTTP 세션에 복구하기 위해 주입
     private final TableSessionAdminService tableSessionAdminService;
+    private final CafePackageService cafePackageService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
@@ -128,7 +130,17 @@ public class KioskLoginSuccessHandler implements AuthenticationSuccessHandler {
             // ────────────────────────────────────────────────────
             request.getSession().setAttribute("partySize",        activeSession.getInitialGuestCnt());
             request.getSession().setAttribute("packageId",        activeSession.getPackageId());
-            request.getSession().setAttribute("sessionStartTime", activeSession.getCheckInTime());
+            long checkInMillis = activeSession.getCheckInTime()
+                    .atZone(java.time.ZoneId.systemDefault())
+                    .toInstant()
+                    .toEpochMilli();
+            request.getSession().setAttribute("sessionStartTime", checkInMillis);
+            if (activeSession.getPackageId() != null) {
+                var pkg = cafePackageService.getById(activeSession.getPackageId());
+                if (pkg != null) {
+                    request.getSession().setAttribute("durationMinutes", pkg.getDurationMinutes());
+                }
+            }
 
             log.info("--- [KioskLoginSuccess] 세션 정보 복구 완료 | " +
                             "partySize: {}, packageId: {}, checkInTime: {} ---",

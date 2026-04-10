@@ -163,6 +163,10 @@ public class CafeTableServiceImpl implements CafeTableService {
         // 1. [세션 확인] 해당 물리 테이블이 현재 가리키고 있는 활성 방문 세션(current_session_id)을 조회합니다.
         // 상세 설명: 테이블 상태가 'OCCUPIED'인 경우에만 유효한 ID가 존재하며, 'EMPTY'나 'CLEANING'일 경우 NULL이 반환됩니다.
         Long sessionId = cafeTableMapper.selectCurrentSessionId(tableId);
+        if (sessionId == null) {
+            // current_session_id가 비정상일 때를 대비해 table_session에서 활성 세션을 한번 더 조회
+            sessionId = cafeTableMapper.selectActiveSessionByTableId(tableId);
+        }
 
         // 2. [방어 로드] 세션 ID가 존재하지 않는 경우 (손님이 없는 테이블 등)
         // 상세 설명: 불필요하게 orders 테이블을 Join 하지 않도록 즉시 빈 리스트(ArrayList)를 생성하여 반환합니다.

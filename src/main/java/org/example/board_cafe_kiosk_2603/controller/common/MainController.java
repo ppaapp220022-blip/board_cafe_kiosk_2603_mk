@@ -130,15 +130,16 @@ public class MainController {
             return "redirect:/kiosk/menu";
         }
 
-        // 활성 세션 없으면 신규 생성
-        tableSessionKioskService.createSession(tableId, packageId, partySize);
+        // 활성 세션 없으면 신규 생성 후 cafe_table 동기화
+        Long newSessionId = tableSessionKioskService.createSession(tableId, packageId, partySize);
+        cafeTableService.syncTableWithSession(tableId, newSessionId);
 
         // ★ 추가: packageId를 세션에 저장
         //    기존 코드에서 누락되어 buildMenuModel()의 packageId가 항상 null이었음
         session.setAttribute("packageId", packageId);
 
-        log.info("table_session 생성 완료 — tableId: {}, packageId: {}, partySize: {}",
-                tableId, packageId, partySize);
+        log.info("table_session 생성 + cafe_table 동기화 완료 — tableId: {}, packageId: {}, partySize: {}, sessionId: {}",
+                tableId, packageId, partySize, newSessionId);
 
         return "redirect:/kiosk/menu";
     }
@@ -157,6 +158,24 @@ public class MainController {
         Object partySize = session.getAttribute("partySize");
         if (!(partySize instanceof Integer)) {
             log.warn("--- [MainController] /kiosk/menu 진입 시 partySize 없음 → /kiosk/session/start 리다이렉트 ---");
+            response.sendRedirect("/kiosk/session/start");
+            return null;
+        }
+
+        Object tableIdObj = session.getAttribute("tableId");
+        if (!(tableIdObj instanceof Integer tableId)) {
+            log.warn("--- [MainController] /kiosk/menu 진입 시 tableId 없음 → /kiosk/session/start 리다이렉트 ---");
+            response.sendRedirect("/kiosk/session/start");
+            return null;
+        }
+
+        CafeTableSession activeSession = tableSessionAdminService.getActiveSession(tableId);
+        if (activeSession == null) {
+            log.warn("--- [MainController] /kiosk/menu 진입 시 활성 세션 없음 → 세션 정리 후 /kiosk/session/start 리다이렉트 ---");
+            session.removeAttribute("partySize");
+            session.removeAttribute("packageId");
+            session.removeAttribute("sessionStartTime");
+            session.removeAttribute("durationMinutes");
             response.sendRedirect("/kiosk/session/start");
             return null;
         }

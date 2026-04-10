@@ -81,7 +81,6 @@
             color: #007bff;
         }
 
-        /* 주문 내역 */
         .order-item {
             display: flex;
             justify-content: space-between;
@@ -117,7 +116,6 @@
             font-size: 1.1rem;
         }
 
-        /* 세션 정보 */
         .info-row {
             display: flex;
             justify-content: space-between;
@@ -143,7 +141,6 @@
             height: 18px;
         }
 
-        /* 포인트 카드 */
         .point-card {
             background: linear-gradient(135deg, #fff8e1 0%, #fff3cd 100%);
             border: 1px solid #ffe082;
@@ -252,7 +249,6 @@
             padding: 8px 0;
         }
 
-        /* 최종 금액 */
         .amount-breakdown {
             margin-bottom: 16px;
         }
@@ -301,7 +297,6 @@
             color: #007bff;
         }
 
-        /* 버튼 */
         .button-group {
             display: flex;
             gap: 14px;
@@ -359,7 +354,6 @@
             color: #555;
         }
 
-        /* 토스트 */
         .toast {
             position: fixed;
             bottom: 30px;
@@ -406,12 +400,10 @@
             <span class="info-label"><i data-lucide="users"></i> 인원</span>
             <span th:text="${partySize} + '명'">2명</span>
         </div>
-        <!-- 패키지명 추가 -->
         <div class="info-row" th:if="${packageName != null and packageName != ''}">
             <span class="info-label"><i data-lucide="package"></i> 패키지</span>
             <span th:text="${packageName}">패키지명</span>
         </div>
-        <!-- 패키지 금액 추가 -->
         <div class="info-row" th:if="${packageTotal > 0}">
             <span class="info-label"><i data-lucide="tag"></i> 패키지 금액</span>
             <span th:text="'₩' + ${#numbers.formatInteger(packageTotal, 0, 'COMMA')}">₩0</span>
@@ -491,295 +483,288 @@
 </div>
 
 <script th:inline="javascript">
-    lucide.createIcons({
-        attrs: {'stroke-width': 2.5}
-    });
+    // ===== Lucide 아이콘 초기화 =====
+    lucide.createIcons({ attrs: { 'stroke-width': 2.5 } });
 
-    const packageName = '[[${packageName}]]';
-    const partySize = [[${partySize}]];
-    const pointBalance = [[${pointBalance}]];
-    const packageTotal = [[${packageTotal}]];   // 서버에서 받은 패키지 금액
-    const sessionStartTime = [[${sessionStartTime}]];
-    const tossClientKey = 'test_ck_YOUR_CLIENT_KEY_HERE'; // TODO: 실제 클라이언트 키로 교체
-    const durationMinutes = [[${durationMinutes}]];   // 패키지 이용 시간(분)
-    const extraPricePerMin = [[${extraPricePerMin}]];  // 분당 초과 요금
-    const tableNumber = /*[[${tableNumber}]]*/ 1;
+    // ===== Thymeleaf 서버 변수 =====
+    const packageName     = /*[[${packageName}]]*/ '';
+    const partySize       = /*[[${partySize}]]*/ 1;
+    const packageTotal    = /*[[${packageTotal}]]*/ 0;
+    const sessionStartTime = /*[[${sessionStartTime}]]*/ 0;
+    const durationMinutes = /*[[${durationMinutes}]]*/ 0;
+    const extraPricePerMin = /*[[${extraPricePerMin}]]*/ 0;
+    const tableNumber     = /*[[${tableNumber}]]*/ 1;
+
+    // Thymeleaf에서 전달받은 포인트 잔액 (서버 렌더링 값)
+    const initialPointBalance = /*[[${pointBalance}]]*/ 0;
+
+    // URL 파라미터
     const urlParams = new URLSearchParams(window.location.search);
-    const orderId = urlParams.get('orderId');  // ← 이 부분 추가!
+    const orderId   = urlParams.get('orderId');
 
-    let subtotalPrice = 0;
-    let menuSubtotal = 0;
-    let appliedPoint = 0;
-    let pointBalance = 0;
-    let widgets;
-    let orderId_toss;  // 토스페이먼츠용
-    let orderName;
+    // ===== 전역 상태 변수 =====
+    let subtotalPrice   = 0;
+    let menuSubtotal    = 0;
+    let appliedPoint    = 0;
+    let currentPointBalance = initialPointBalance;  // 중복 선언 제거, 이름 변경
+    let widgets         = null;
+    let orderId_toss    = null;
+    let orderName       = '';
+
+    // ===== 토스트 알림 =====
+    function showToast(msg) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerText = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2500);
+    }
+
+    // ===== 이용 시간 계산 =====
+    function updateElapsedTime() {
+        if (!sessionStartTime) {
+            document.getElementById('elapsed-time').innerText = '0시간 0분';
+            return;
+        }
+        const elapsed = Math.floor((Date.now() - sessionStartTime) / 60000);
+        const hours   = Math.floor(elapsed / 60);
+        const minutes = elapsed % 60;
+        document.getElementById('elapsed-time').innerText = `${hours}시간 ${minutes}분`;
+
+        // 초과 요금 계산
+        if (durationMinutes > 0 && extraPricePerMin > 0) {
+            const overMinutes = elapsed - durationMinutes;
+            if (overMinutes > 0) {
+                const overUnits  = Math.ceil(overMinutes / 10); // 10분 단위 올림
+                const overCharge = overUnits * extraPricePerMin * partySize;
+                subtotalPrice = packageTotal + menuSubtotal + overCharge;
+                updateAmounts();
+
+                document.getElementById('over-charge-row').style.display = 'flex';
+                document.getElementById('over-charge-amount').innerText =
+                    `₩${overCharge.toLocaleString()} (+${overMinutes}분 초과)`;
+            }
+        }
+    }
+
+    // ===== 금액 업데이트 =====
+    function updateAmounts() {
+        const finalAmount = Math.max(subtotalPrice - appliedPoint, 0);
+        document.getElementById('subtotal-amount').innerText = `₩${subtotalPrice.toLocaleString()}`;
+        document.getElementById('final-total').innerText     = `₩${finalAmount.toLocaleString()}`;
+
+        const discountRow = document.getElementById('point-discount-row');
+        if (appliedPoint > 0) {
+            discountRow.style.display = 'flex';
+            document.getElementById('point-discount-amount').innerText = `-₩${appliedPoint.toLocaleString()}`;
+        } else {
+            discountRow.style.display = 'none';
+        }
+    }
+
+    // ===== 위젯 금액 동기화 =====
+    async function updateWidgetAmount() {
+        if (widgets) {
+            await widgets.setAmount({
+                currency: "KRW",
+                value: Math.max(subtotalPrice - appliedPoint, 0)
+            });
+        }
+    }
+
+    // ===== 정산 데이터 로드 (세션 주문 기반) =====
+    async function loadCheckout() {
+        try {
+            const response = await fetch(`/kiosk/order/active`);
+            const orders   = await response.json();
+            renderCheckout(orders);
+        } catch (err) {
+            console.error('Checkout 로드 실패:', err);
+        }
+    }
+
+    // ===== 포인트 잔액 조회 =====
+    async function fetchPointBalance() {
+        try {
+            const response = await fetch(`/kiosk/point/balance?tableNumber=${tableNumber}`);
+            const data     = await response.json();
+            currentPointBalance = data.balance || 0;
+
+            // 포인트 잔액 뱃지 업데이트 (있으면)
+            const badge = document.querySelector('.point-balance-badge');
+            if (badge) {
+                badge.innerText = `보유 ${currentPointBalance.toLocaleString()}P`;
+            }
+        } catch (err) {
+            console.error('포인트 조회 실패:', err);
+        }
+    }
+
+    // ===== 정산 내역 렌더링 =====
+    function renderCheckout(orders) {
+        const activeOrders = (orders || []).filter(o => o.status !== 'CANCELLED');
+        menuSubtotal  = activeOrders.reduce((sum, o) => sum + o.totalAmount, 0);
+        subtotalPrice = packageTotal + menuSubtotal;
+
+        if (activeOrders.length === 0) {
+            document.getElementById('order-summary').innerHTML = `
+                <div class="card-header"><i data-lucide="shopping-bag"></i> 주문 내역</div>
+                <div style="text-align:center; color:#888; padding: 16px 0;">주문 내역이 없습니다.</div>`;
+            updateAmounts();
+            lucide.createIcons();
+            return;
+        }
+
+        const rows = activeOrders.flatMap(order =>
+            order.items.map(item => `
+                <div class="order-item">
+                    <div>
+                        <span>${item.menuName}</span>
+                        <span class="order-qty">x${item.quantity}</span>
+                    </div>
+                    <div class="price">₩${(item.price * item.quantity).toLocaleString()}</div>
+                </div>`)
+        ).join('');
+
+        document.getElementById('order-summary').innerHTML = `
+            <div class="card-header"><i data-lucide="shopping-bag"></i> 주문 내역</div>
+            ${rows}
+            <div class="summary-divider">
+                <span>메뉴 소계</span>
+                <span>₩${menuSubtotal.toLocaleString()}</span>
+            </div>`;
+
+        updateAmounts();
+        updateElapsedTime();
+        lucide.createIcons();
+    }
+
+    // ===== 포인트 적용 (전역 함수 — onclick에서 호출) =====
+    async function applyPoint() {
+        const input = document.getElementById('point-input');
+        const val   = parseInt(input.value) || 0;
+
+        if (val <= 0) {
+            showToast('1P 이상 입력해주세요.');
+            return;
+        }
+        if (val > currentPointBalance) {
+            showToast('보유 포인트를 초과할 수 없습니다.');
+            return;
+        }
+        if (val > subtotalPrice) {
+            showToast('결제 금액을 초과할 수 없습니다.');
+            return;
+        }
+
+        appliedPoint = val;
+        updateAmounts();
+        await updateWidgetAmount();
+
+        document.getElementById('point-applied-amount').innerText = val.toLocaleString();
+        document.getElementById('point-applied-msg').style.display = 'block';
+        input.disabled = true;
+        showToast(`${val.toLocaleString()}P 적용되었습니다.`);
+    }
+
+    // ===== 포인트 취소 (전역 함수 — onclick에서 호출) =====
+    async function resetPoint() {
+        appliedPoint = 0;
+        const input  = document.getElementById('point-input');
+        if (input) {
+            input.value    = '';
+            input.disabled = false;
+        }
+        document.getElementById('point-applied-msg').style.display = 'none';
+        updateAmounts();
+        await updateWidgetAmount();
+    }
+
+    // ===== 토스페이먼츠 위젯 초기화 =====
+    async function initializeTossWidget() {
+        try {
+            const prepRes = await fetch(`/kiosk/payment/prepare?tableNumber=${tableNumber}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pointUsed: appliedPoint })
+            });
+
+            const prepData = await prepRes.json();
+            if (!prepData.success) {
+                console.error('결제 준비 실패:', prepData.message);
+                showToast('결제 준비에 실패했습니다.');
+                return;
+            }
+
+            orderId_toss    = prepData.orderIdToss;
+            orderName       = prepData.orderName;
+            const cKey      = prepData.clientKey;
+            const customerKey = prepData.customerKey;
+
+            const tossPayments = TossPayments(cKey);
+            widgets = tossPayments.widgets({ customerKey });
+
+            await widgets.setAmount({
+                currency: "KRW",
+                value: Math.max(subtotalPrice - appliedPoint, 0)
+            });
+
+            await Promise.all([
+                widgets.renderPaymentMethods({ selector: "#payment-widget", variantKey: "DEFAULT" }),
+                widgets.renderAgreement({ selector: "#agreement", variantKey: "DEFAULT" })
+            ]);
+
+        } catch (err) {
+            console.error('위젯 초기화 오류:', err);
+            showToast('결제 준비 중 오류가 발생했습니다.');
+        }
+    }
+
+    // ===== 결제 처리 (전역 함수 — onclick에서 호출) =====
+    async function processPayment() {
+        if (subtotalPrice === 0) {
+            showToast('결제할 금액이 없습니다.');
+            return;
+        }
+        if (!widgets || !orderId_toss) {
+            showToast('결제 준비가 완료되지 않았습니다.');
+            return;
+        }
+
+        const payBtn = document.getElementById('pay-btn');
+        payBtn.disabled = true;
+        document.getElementById('pay-btn-label').innerText = '결제 요청 중...';
+
+        try {
+            await widgets.requestPayment({
+                orderId: orderId_toss,
+                orderName: orderName,
+                successUrl: window.location.origin + `/kiosk/toss/success?pointUsed=${appliedPoint}`,
+                failUrl: window.location.origin + "/kiosk/toss/fail",
+            });
+        } catch (err) {
+            payBtn.disabled = false;
+            document.getElementById('pay-btn-label').innerText = '결제하기';
+            if (err.code !== 'USER_CANCEL') {
+                showToast(err.message || '결제 요청 중 오류가 발생했습니다.');
+            }
+        }
+    }
 
     // ===== 페이지 로드 시 초기화 =====
     document.addEventListener('DOMContentLoaded', async function () {
-        // 1. 주문 ID 표시 (선택사항)
-        if (orderId) {
-            const orderIdDisplay = document.getElementById('order-id-display');
-            if (orderIdDisplay) {
-                orderIdDisplay.innerText = `주문번호: ${orderId}`;
-            }
-        }
-
-        // 2. 기존 로직 실행
+        // 주문 데이터 + 포인트 잔액 동시 로드
         await Promise.all([
             loadCheckout(),
             fetchPointBalance()
         ]);
 
-        await initializeTossWidget();
-
-        // ===== 이용 시간 계산 =====
-        function updateElapsedTime() {
-            if (!sessionStartTime) {
-                document.getElementById('elapsed-time').innerText = '0시간 0분';
-                return;
-            }
-            const elapsed = Math.floor((Date.now() - sessionStartTime) / 60000);
-            const hours = Math.floor(elapsed / 60);
-            const minutes = elapsed % 60;
-            document.getElementById('elapsed-time').innerText = `${hours}시간 ${minutes}분`;
-
-            // 초과 요금 계산
-            if (durationMinutes && extraPricePerMin > 0) {
-                const overMinutes = elapsed - durationMinutes;
-                if (overMinutes > 0) {
-                    const overUnits = Math.ceil(overMinutes / 10); // 10분 단위 올림
-                    const overCharge = overUnits * extraPricePerMin * partySize;
-                    subtotalPrice = packageTotal + menuSubtotal + overCharge;
-                    updateAmounts();
-
-                    // 초과 요금 표시
-                    document.getElementById('over-charge-row').style.display = 'flex';
-                    document.getElementById('over-charge-amount').innerText =
-                        `₩${overCharge.toLocaleString()} (+${overMinutes}분 초과)`;
-                }
-            }
-        }
-
+        // 이용 시간 표시
         updateElapsedTime();
 
-        // ===== 페이지 로드 =====
-        document.addEventListener('DOMContentLoaded', () => {
-            loadCheckoutData();
-        });
-
-        // ===== 정산 페이지 데이터 로드 (세션 주문 기반) =====
-        async function loadCheckout() {
-            try {
-                const response = await fetch(`/kiosk/order/active`);
-                const orders = await response.json();
-                renderCheckout(orders);
-            } catch (err) {
-                console.error('Checkout 로드 실패:', err);
-            }
-        }
-
-        // ===== 포인트 잔액 조회 =====
-        async function fetchPointBalance() {
-            try {
-                const response = await fetch(`/kiosk/point/balance?tableNumber=${tableNumber}`);
-                const data = await response.json();
-                pointBalance = data.balance || 0;
-                document.getElementById('point-balance').innerText = pointBalance.toLocaleString();
-            } catch (err) {
-                console.error('포인트 조회 실패:', err);
-            }
-        }
-
-        // ===== 정산 내역 렌더링 =====
-        function renderCheckout(orders) {
-            const activeOrders = (orders || []).filter(o => o.status !== 'CANCELLED');
-            menuSubtotal = activeOrders.reduce((sum, o) => sum + o.totalAmount, 0);
-            subtotalPrice = packageTotal + menuSubtotal;
-
-            if (activeOrders.length === 0) {
-                document.getElementById('order-summary').innerHTML = `
-  <div class="card-header"><i data-lucide="shopping-bag"></i> 주문 내역</div>
-  <div style="text-align:center; color:#888; padding: 16px 0;">주문 내역이 없습니다.</div>`;
-                updateAmounts();
-                lucide.createIcons();
-                return;
-            }
-
-            const rows = activeOrders.flatMap(order =>
-                order.items.map(item => `
-      <div class="order-item">
-        <div>
-          <span>${item.menuName}</span>
-          <span class="order-qty">x${item.quantity}</span>
-        </div>
-        <div class="price">₩${(item.price * item.quantity).toLocaleString()}</div>
-      </div>`)
-            ).join('');
-
-            document.getElementById('order-summary').innerHTML = `
-  <div class="card-header"><i data-lucide="shopping-bag"></i> 주문 내역</div>
-  ${rows}
-  <div class="summary-divider">
-    <span>메뉴 소계</span>
-    <span>₩${menuSubtotal.toLocaleString()}</span>
-  </div>`;
-
-            updateAmounts();
-            updateElapsedTime();
-            lucide.createIcons();
-        }
-
-        // ===== 금액 업데이트 =====
-        function updateAmounts() {
-            const finalAmount = Math.max(subtotalPrice - appliedPoint, 0);
-            document.getElementById('subtotal-amount').innerText = `₩${subtotalPrice.toLocaleString()}`;
-            document.getElementById('final-total').innerText = `₩${finalAmount.toLocaleString()}`;
-
-            const discountRow = document.getElementById('point-discount-row');
-            if (appliedPoint > 0) {
-                discountRow.style.display = 'flex';
-                document.getElementById('point-discount-amount').innerText = `-₩${appliedPoint.toLocaleString()}`;
-            } else {
-                discountRow.style.display = 'none';
-            }
-        }
-
-        // ===== 포인트 적용 =====
-        async function applyPoint() {
-            const input = document.getElementById('point-input');
-            const val = parseInt(input.value) || 0;
-
-            if (val <= 0) {
-                showToast('1P 이상 입력해주세요.');
-                return;
-            }
-            if (val > pointBalance) {
-                showToast(`보유 포인트를 초과할 수 없습니다.`);
-                return;
-            }
-
-            appliedPoint = val;
-            updateAmounts();
-
-            if (widgets) {
-                await widgets.setAmount({
-                    currency: "KRW",
-                    value: subtotalPrice - appliedPoint
-                });
-            }
-
-            document.getElementById('point-applied-amount').innerText = val.toLocaleString();
-            document.getElementById('point-applied-msg').style.display = 'block';
-            input.disabled = true;
-            showToast(`${val.toLocaleString()}P 적용되었습니다.`);
-        }
-
-        // ===== 포인트 취소 =====
-        function resetPoint() {
-            appliedPoint = 0;
-            const input = document.getElementById('point-input');
-            input.value = '';
-            input.disabled = false;
-            document.getElementById('point-applied-msg').style.display = 'none';
-            updateAmounts();
-            updateWidgetAmount();
-        }
-
-        if (widgets) {
-            await widgets.setAmount({
-                currency: "KRW",
-                value: subtotalPrice
-            });
-        }
-
-
-        // ===== 결제 처리 =====
-        function processPayment() {
-            if (subtotalPrice === 0) {
-                showToast('장바구니가 비어있습니다.');
-                return;
-            }
-            processTossPayment();
-        }
-
-        // ===== 토스페이먼츠 초기화 =====
-        async function initializeTossWidget() {
-            try {
-                const prepRes = await fetch(`/kiosk/payment/prepare?tableNumber=${tableNumber}`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({pointUsed: appliedPoint})
-                });
-
-                const prepData = await prepRes.json();
-                if (!prepData.success) {
-                    console.error('결제 준비 실패:', prepData.message);
-                    showToast('결제 준비에 실패했습니다.');
-                    return;
-                }
-
-                orderId_toss = prepData.orderIdToss;
-                orderName = prepData.orderName;
-                const clientKey = prepData.clientKey;
-                const customerKey = prepData.customerKey;
-
-                const tossPayments = TossPayments(clientKey);
-                widgets = tossPayments.widgets({customerKey});
-
-                await widgets.setAmount({
-                    currency: "KRW",
-                    value: subtotalPrice - appliedPoint
-                });
-
-                await Promise.all([
-                    widgets.renderPaymentMethods({selector: "#payment-widget", variantKey: "DEFAULT"}),
-                    widgets.renderAgreement({selector: "#agreement", variantKey: "DEFAULT"})
-                ]);
-
-            } catch (err) {
-                console.error('위젯 초기화 오류:', err);
-                showToast('결제 준비 중 오류가 발생했습니다.');
-            }
-        }
-
-        // ===== 결제 요청 =====
-        async function processPayment() {
-            if (!widgets || !orderId_toss) {
-                showToast('결제 준비가 완료되지 않았습니다.');
-                return;
-            }
-
-            const payBtn = document.getElementById('pay-btn');
-            payBtn.disabled = true;
-            document.getElementById('pay-btn-label').innerText = '결제 요청 중...';
-
-            try {
-                await widgets.requestPayment({
-                    orderId: orderId_toss,
-                    orderName: orderName,
-                    successUrl: window.location.origin + "/kiosk/toss/success",
-                    failUrl: window.location.origin + "/kiosk/toss/fail",
-                });
-            } catch (err) {
-                payBtn.disabled = false;
-                document.getElementById('pay-btn-label').innerText = '결제하기';
-                if (err.code !== 'USER_CANCEL') {
-                    showToast(err.message);
-                }
-            }
-        }
-
-        // ===== 토스트 알림 =====
-        function showToast(msg) {
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.innerText = msg;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 2500);
-        }
-    })
-
+        // 토스 위젯 초기화
+        await initializeTossWidget();
+    });
 </script>
 </body>
 </html>

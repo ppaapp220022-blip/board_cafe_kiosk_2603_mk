@@ -1,11 +1,14 @@
 /**
  * 관리자 대시보드 - 웹소켓 실시간 주문 동기화
- * ✅ 최소한의 코드만 추가 (기존 구조 유지)
+ *
+ * [제거된 항목]
+ * - currentTableId 선언 → dashboard.html에서 선언
+ * - openTableModal 래핑 → dashboard.html 원본 사용
+ * - closeTableModal 래핑 → dashboard.html 원본 사용
+ * - DOMContentLoaded 내 fetchPendingOrders 폴링 → dashboard.html에서 5초 폴링 수행
  */
 
 let stompClient = null;
-// let currentTableId = null;
-currentTableId = null;
 
 // ===================================================
 // 1. 웹소켓 연결 (자동 실행)
@@ -52,11 +55,10 @@ function subscribeToChannels() {
 
 function subscribeToTableOrders(tableId) {
     if (!stompClient || !stompClient.connected) {
-        console.warn('WebSocket 미연결');
+        console.warn('WebSocket 미연결 - REST 폴백');
+        if (typeof fetchActiveOrders === 'function') fetchActiveOrders();
         return;
     }
-
-    currentTableId = tableId;
 
     // 테이블별 주문 구독
     stompClient.subscribe(`/topic/orders/${tableId}`, function(message) {
@@ -71,7 +73,16 @@ function subscribeToTableOrders(tableId) {
 }
 
 // ===================================================
-// 4. 신규 주문 수신 처리
+// 4. 구독 해제
+// ===================================================
+
+function unsubscribeFromOrders() {
+    // 현재 구독 해제 로직 (필요 시 구독 ID 관리)
+    console.log('📴 주문 구독 해제');
+}
+
+// ===================================================
+// 5. 신규 주문 수신 처리
 // ===================================================
 
 function onNewOrder(order) {
@@ -195,18 +206,18 @@ function playNotificationSound() {
 }
 
 // ===================================================
-// 5. 주문 목록 업데이트 처리
+// 6. 주문 목록 업데이트 처리
 // ===================================================
 
 function onOrdersUpdated(orders, tableId) {
-    // 기존 렌더링 함수 호출
+    // dashboard.html의 renderOrders 함수 호출
     if (typeof renderOrders === 'function') {
         renderOrders(orders);
     }
 }
 
 // ===================================================
-// 6. 주문 상태 변경 API
+// 7. 주문 상태 변경 API
 // ===================================================
 
 async function updateOrderStatus(orderId, nextStatus) {
@@ -271,7 +282,7 @@ async function updateOrderStatus(orderId, nextStatus) {
 }
 
 // ===================================================
-// 7. 신규 주문 목록 폴링 (폴백)
+// 8. 신규 주문 목록 폴링 (REST 폴백)
 // ===================================================
 
 async function fetchPendingOrders() {
@@ -316,41 +327,9 @@ async function fetchPendingOrders() {
 }
 
 // ===================================================
-// 8. 초기화 (페이지 로드 시)
+// 9. 초기화 (페이지 로드 시) - WebSocket 연결만 담당
 // ===================================================
 
 document.addEventListener('DOMContentLoaded', () => {
     connectWebSocket();
-
-    // 신규 주문 폴링 (1분마다)
-    setInterval(fetchPendingOrders, 60000);
 });
-
-// ===================================================
-// 9. 기존 함수 확장 (대시보드에서 테이블 선택 시)
-// ===================================================
-
-// 기존 openTableModal 함수가 있으면 래핑
-const originalOpenTableModal = typeof openTableModal === 'function' ? openTableModal : null;
-
-window.openTableModal = function(tableId, tableStatus) {
-    if (originalOpenTableModal) {
-        originalOpenTableModal(tableId, tableStatus);
-    }
-
-    // ✅ 웹소켓 구독 추가
-    if (tableStatus === 'OCCUPIED') {
-        subscribeToTableOrders(tableId);
-    }
-};
-
-// 기존 closeTableModal 함수가 있으면 래핑
-const originalCloseTableModal = typeof closeTableModal === 'function' ? closeTableModal : null;
-
-window.closeTableModal = function() {
-    if (originalCloseTableModal) {
-        originalCloseTableModal();
-    }
-
-    currentTableId = null;
-};

@@ -58,7 +58,18 @@ public class KioskPageService {
     }
 
     public int getSessionDuration(HttpSession session) {
-        Long startTime = (Long) session.getAttribute("sessionStartTime");
+        Object rawStartTime = session.getAttribute("sessionStartTime");
+        Long startTime = null;
+        if (rawStartTime instanceof Long) {
+            startTime = (Long) rawStartTime;
+        } else if (rawStartTime instanceof Integer) {
+            startTime = ((Integer) rawStartTime).longValue();
+        } else if (rawStartTime instanceof java.time.LocalDateTime) {
+            startTime = ((java.time.LocalDateTime) rawStartTime)
+                    .atZone(java.time.ZoneId.systemDefault())
+                    .toInstant()
+                    .toEpochMilli();
+        }
         if (startTime == null) return 0;
         return (int) ((System.currentTimeMillis() - startTime) / 60000);
     }

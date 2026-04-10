@@ -12,7 +12,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -63,13 +62,19 @@ public class CafePackageController {
             HttpSession session) {
 
         int packageId = ((Number) req.get("packageId")).intValue();
-//        Integer tableId   = (Integer) session.getAttribute("tableId");
-        // 수정
+        Integer tableId = (Integer) session.getAttribute("tableId");
         Integer tableNumber = (Integer) session.getAttribute("tableNumber");
         Integer partySize = (Integer) session.getAttribute("partySize");
 
-        log.info("패키지 선택 요청 | tableNumber: {}, packageId: {}, partySize: {}",
-                tableNumber, packageId, partySize);
+        if (tableId == null || tableNumber == null || partySize == null) {
+            Map<String, Object> error = new LinkedHashMap<>();
+            error.put("success", false);
+            error.put("message", "세션 정보가 유효하지 않습니다. 다시 로그인해 주세요.");
+            return error;
+        }
+
+        log.info("패키지 선택 요청 | tableId: {}, tableNumber: {}, packageId: {}, partySize: {}",
+                tableId, tableNumber, packageId, partySize);
 
         var pkg = cafePackageService.getById(packageId);
 
@@ -81,10 +86,7 @@ public class CafePackageController {
         }
 
         // 활성 세션 있으면 DB 인원수로 HTTP 세션 덮어씌우기
-//        CafeTableSession activeSession = tableSessionAdminService.getActiveSession(tableId);
-
-        // 수정 2: tableNumber 기준으로 활성 세션 조회
-        CafeTableSession activeSession = tableSessionAdminService.getActiveSession(tableNumber);
+        CafeTableSession activeSession = tableSessionAdminService.getActiveSession(tableId);
 
         if (activeSession != null) {
             // 기존 활성 세션 존재 -> DB 인원수로 덮어씌우기
@@ -92,15 +94,11 @@ public class CafePackageController {
             log.info("기존 활성 세션 존재 - DB 인원수로 덮어씌움: {}명",
                     activeSession.getInitialGuestCnt());
         } else {
-            // 활성 세션 없으면 새로 생성
-//            tableSessionKioskService.createSession(tableId, packageId, partySize);
-//            log.info("table_session 생성 완료 - tableId: {}, packageId: {}, partySize: {}",
-//                    tableId, packageId, partySize);
-            // ✅ 수정 3: createSession 반환값(sessionId)으로 cafe_table 동기화
-            Long newSessionId = tableSessionKioskService.createSession(tableNumber, packageId, partySize);
-            cafeTableService.syncTableWithSession(tableNumber, newSessionId);
-            log.info("table_session 생성 + cafe_table 동기화 완료 | tableNumber: {}, sessionId: {}",
-                    tableNumber, newSessionId);
+            // 활성 세션 없으면 새로 생성 후 cafe_table 동기화
+            Long newSessionId = tableSessionKioskService.createSession(tableId, packageId, partySize);
+            cafeTableService.syncTableWithSession(tableId, newSessionId);
+            log.info("table_session 생성 + cafe_table 동기화 완료 | tableId: {}, tableNumber: {}, sessionId: {}",
+                    tableId, tableNumber, newSessionId);
         }
 
         // 세션에 패키지 정보 저장

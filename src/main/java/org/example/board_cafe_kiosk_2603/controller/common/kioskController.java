@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.domain.common.kioskItem;
+import org.example.board_cafe_kiosk_2603.service.admin.cafeTable.TableSessionAdminService;
 import org.example.board_cafe_kiosk_2603.service.admin.product.GameService;
 import org.example.board_cafe_kiosk_2603.service.admin.product.MenuService;
 import org.springframework.stereotype.Controller;
@@ -47,6 +48,7 @@ public class kioskController {
 
     private final GameService gameService;
     private final MenuService menuService;
+    private final TableSessionAdminService tableSessionAdminService;
 
     // ===========================================================
     // 진입 화면
@@ -97,6 +99,9 @@ public class kioskController {
     // 게임 목록 조회
     @GetMapping("/games")
     public String games(HttpSession session, Model model) {
+        String guardRedirect = guardActiveSession(session);
+        if (guardRedirect != null) return guardRedirect;
+
         initCart(session);
 
         List<kioskItem> items = gameService.getByIsActive(true).stream()
@@ -116,6 +121,9 @@ public class kioskController {
     // 음료 목록 조회
     @GetMapping("/drinks")
     public String drinks(HttpSession session, Model model) {
+        String guardRedirect = guardActiveSession(session);
+        if (guardRedirect != null) return guardRedirect;
+
         initCart(session);
 
         List<kioskItem> items = menuService.getByType("DRINK").stream()
@@ -139,6 +147,9 @@ public class kioskController {
     // 음식 목록 조회
     @GetMapping("/food")
     public String food(HttpSession session, Model model) {
+        String guardRedirect = guardActiveSession(session);
+        if (guardRedirect != null) return guardRedirect;
+
         initCart(session);
 
         List<kioskItem> items = menuService.getByType("FOOD").stream()
@@ -159,6 +170,9 @@ public class kioskController {
     // 추가인원 목록 조회
     @GetMapping("/members")
     public String members(HttpSession session, Model model) {
+        String guardRedirect = guardActiveSession(session);
+        if (guardRedirect != null) return guardRedirect;
+
         initCart(session);
 
         List<kioskItem> items = menuService.getByType("GUEST").stream()
@@ -232,5 +246,24 @@ public class kioskController {
             log.info("--- HttpSession, 새로운 장바구니(Cart) 생성 ---");
             session.setAttribute("cart", new ArrayList<>());
         }
+    }
+
+    private String guardActiveSession(HttpSession session) {
+        Object tableIdObj = session.getAttribute("tableId");
+        if (!(tableIdObj instanceof Integer tableId)) {
+            log.warn("--- [KioskController] 메뉴 탭 접근 차단: tableId 세션 없음 ---");
+            return "redirect:/kiosk/session/start";
+        }
+
+        if (tableSessionAdminService.getActiveSession(tableId) == null) {
+            log.warn("--- [KioskController] 메뉴 탭 접근 차단: 활성 세션 없음 (tableId: {}) ---", tableId);
+            session.removeAttribute("partySize");
+            session.removeAttribute("packageId");
+            session.removeAttribute("sessionStartTime");
+            session.removeAttribute("durationMinutes");
+            return "redirect:/kiosk/session/start";
+        }
+
+        return null;
     }
 }

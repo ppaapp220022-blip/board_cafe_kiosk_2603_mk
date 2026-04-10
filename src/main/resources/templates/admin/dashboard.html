@@ -32,7 +32,7 @@
 
             /* 주문 상태 배지 */
             .order-status-badge {
-                display: none;  /* ✅ 기본값으로 모두 숨김 */
+                display: none;
                 padding: 4px 12px;
                 border-radius: 12px;
                 font-size: 12px;
@@ -41,30 +41,11 @@
                 animation: pulse 1.5s infinite;
             }
 
-            .order-status-badge.ordered {
-                background: #fff3cd;
-                color: #856404;
-            }
-
-            .order-status-badge.confirmed {
-                background: #d1ecf1;
-                color: #0c5460;
-            }
-
-            .order-status-badge.cooking {
-                background: #fde8e8;
-                color: #721c24;
-            }
-
-            .order-status-badge.delivering {
-                background: #d4edda;
-                color: #155724;
-            }
-
-            .order-status-badge.completed {
-                background: #d4edda;
-                color: #155724;
-            }
+            .order-status-badge.ordered { background: #fff3cd; color: #856404; }
+            .order-status-badge.confirmed { background: #d1ecf1; color: #0c5460; }
+            .order-status-badge.cooking { background: #fde8e8; color: #721c24; }
+            .order-status-badge.delivering { background: #d4edda; color: #155724; }
+            .order-status-badge.completed { background: #d4edda; color: #155724; }
 
             @keyframes pulse {
                 0%, 100% { opacity: 1; }
@@ -126,9 +107,7 @@
                 border-bottom: 1px solid #eee;
             }
 
-            .order-item-wrapper:last-child {
-                border-bottom: none;
-            }
+            .order-item-wrapper:last-child { border-bottom: none; }
 
             .order-item-header {
                 display: flex;
@@ -137,14 +116,8 @@
                 align-items: center;
             }
 
-            .order-item-name {
-                flex: 1;
-            }
-
-            .order-item-price {
-                font-weight: bold;
-                color: #333;
-            }
+            .order-item-name { flex: 1; }
+            .order-item-price { font-weight: bold; color: #333; }
 
             .order-item-actions {
                 display: flex;
@@ -186,21 +159,16 @@
                 font-size: 14px;
                 transition: all 0.2s;
                 min-width: 0;
-                /* ✅ 모든 버튼 중앙 정렬 */
                 display: flex;
                 align-items: center;
                 justify-content: center;
             }
 
-            .btn-pay { background: #ea4335; color: white; }    /* 결제완료: 빨강 */
-            .btn-status { background: #28a745; color: white; } /* 상태변경: 초록 */
-            .btn-order-status { background: #9c27b0; color: white; } /* 주문상태변경: 보라 */
-            .btn-msg { background: #fbbc05; color: white; }    /* 요청확인: 노랑 */
-            .btn-close {
-                background: #f1f3f4;
-                color: #3c4043;
-                flex-grow: 1; /* 요청확인 없을 때 꽉 차게 */
-            }
+            .btn-pay { background: #ea4335; color: white; }
+            .btn-status { background: #28a745; color: white; }
+            .btn-order-status { background: #9c27b0; color: white; }
+            .btn-msg { background: #fbbc05; color: white; }
+            .btn-close { background: #f1f3f4; color: #3c4043; flex-grow: 1; }
 
             .btn:hover { opacity: 0.9; transform: scale(0.98); }
 
@@ -217,14 +185,8 @@
             }
 
             @keyframes slideInDown {
-                from {
-                    opacity: 0;
-                    transform: translateY(-50px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
+                from { opacity: 0; transform: translateY(-50px); }
+                to { opacity: 1; transform: translateY(0); }
             }
 
             @keyframes pulse-yellow {
@@ -235,12 +197,15 @@
             #newOrderNotificationModal .modal-content {
                 animation: pulse-yellow 1s infinite;
             }
-            margin-bottom: 24px;
-            background: #fff8e1;
-            border: 2px solid #ffcc02;
-            border-radius: 16px;
-            padding: 20px 24px;
-            display: none;
+
+            /* 신규 주문 대기 섹션 */
+            #pending-orders-section {
+                margin-bottom: 24px;
+                background: #fff8e1;
+                border: 2px solid #ffcc02;
+                border-radius: 16px;
+                padding: 20px 24px;
+                display: none;
             }
             #pending-orders-section.has-orders { display: block; }
             .pending-section-header {
@@ -270,7 +235,7 @@
                 border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
             }
 
-            /* --- 전체 리셋 버튼 전용 디자인 (회색/다크 계열) --- */
+            /* --- 전체 리셋 버튼 전용 디자인 --- */
             .btn-reset {
                 background: #5f6368;
                 color: white;
@@ -281,18 +246,11 @@
                 gap: 8px;
                 padding: 10px 18px;
                 height: fit-content;
-
-                /* --- [핵심] 브라우저 기본 테두리 제거 --- */
                 border: none;
-
-                /* 혹시 모를 폰트 두께 조절 */
                 font-weight: 600;
-
-                /* 부드러운 전환 효과 */
                 transition: all 0.2s ease;
             }
 
-            /* 포커스 시에도 아예 아무것도 안 보이게 하고 싶다면 */
             .btn-reset:focus {
                 outline: none;
                 box-shadow: none;
@@ -446,6 +404,7 @@
         <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
         <script th:src="@{/js/websocket.js}"></script>
         <script th:inline="javascript">
+
             let currentTableId = null;
             let currentTableStatus = null;
 
@@ -456,7 +415,85 @@
                 if (btn) btn.style.display = 'none';
             }
 
-            // 기존 CSS를 건드리지 않기 위해 JS 내에서 인라인 스타일로 상태 버튼 렌더링
+            /**
+             * 데이터 정규화: 다양한 응답 구조를 OrderItem 배열로 통일
+             *
+             * 가능한 응답 구조:
+             * 1) OrderItem[] - REST API 직접 응답 (이미 평탄화됨)
+             *    [{ id, menuName, price, quantity, status }]
+             *
+             * 2) Order[] - WebSocket 응답 (주문 단위, items 안에 상품 정보)
+             *    [{ id, tableId, status, totalAmount, items: [{ menuName, price, quantity }] }]
+             *
+             * 3) { items: [...] } 또는 { orderItems: [...] } - 래핑된 응답
+             */
+            function normalizeToOrderItems(rawData) {
+                // 1. 배열이 아니면 내부 배열 추출
+                let dataArray = rawData;
+                if (!Array.isArray(rawData)) {
+                    if (rawData?.items) dataArray = rawData.items;
+                    else if (rawData?.orderItems) dataArray = rawData.orderItems;
+                    else if (rawData?.orders) dataArray = rawData.orders;
+                    else return [];
+                }
+
+                if (!dataArray || dataArray.length === 0) return [];
+
+                // 2. 첫 번째 요소로 구조 판별
+                const sample = dataArray[0];
+                const hasNestedItems = sample.items || sample.orderItems;
+                const isAlreadyFlat = sample.menuName || sample.menu_name;
+
+                console.log(' 데이터 구조 판별:', {
+                    hasNestedItems: !!hasNestedItems,
+                    isAlreadyFlat: !!isAlreadyFlat,
+                    sampleKeys: Object.keys(sample)
+                });
+
+                // 3-A. 이미 평탄화된 OrderItem 배열
+                if (isAlreadyFlat && !hasNestedItems) {
+                    console.log('이미 평탄화된 OrderItem 배열');
+                    return dataArray;
+                }
+
+                // 3-B. Order 배열 → OrderItem 배열로 평탄화
+                console.log(' Order 배열 → OrderItem으로 평탄화');
+                const flattened = [];
+                for (const order of dataArray) {
+                    const orderStatus = order.status || 'ORDERED';
+                    const orderId = order.id || order.orderId;
+                    const children = order.items || order.orderItems || [];
+
+                    if (children.length > 0) {
+                        for (const child of children) {
+                            flattened.push({
+                                id: child.id || orderId,       // 개별 항목 ID, 없으면 주문 ID
+                                orderId: orderId,
+                                menuName: child.menuName || child.menu_name || '상품명 없음',
+                                menu_name: child.menu_name || child.menuName || '상품명 없음',
+                                price: child.price || 0,
+                                quantity: child.quantity || child.qty || 0,
+                                status: child.status || orderStatus  // 항목별 상태 없으면 주문 상태 상속
+                            });
+                        }
+                    } else {
+                        // items가 비어있는 주문 (상품 정보 없는 경우)
+                        flattened.push({
+                            id: orderId,
+                            orderId: orderId,
+                            menuName: order.menuName || order.menu_name || '상품명 없음',
+                            menu_name: order.menu_name || order.menuName || '상품명 없음',
+                            price: order.price || 0,
+                            quantity: order.quantity || 0,
+                            status: orderStatus
+                        });
+                    }
+                }
+
+                console.log(`✅ 평탄화 완료: ${dataArray.length}개 주문 → ${flattened.length}개 항목`);
+                return flattened;
+            }
+
             function renderOrders(orders) {
                 const listDiv = document.getElementById('orderList');
                 const priceSpan = document.getElementById('totalPrice');
@@ -465,46 +502,23 @@
 
                 if (!listDiv || !priceSpan) return;
 
-                // 🚨 강력한 디버깅: 전체 orders 객체를 출력
                 console.log('🚨 ==== renderOrders 호출 ====');
-                console.log('📥 받은 데이터 타입:', typeof orders);
                 console.log('📥 받은 데이터:', JSON.stringify(orders, null, 2));
-                console.log('📥 배열 여부:', Array.isArray(orders));
-                console.log('📥 배열 길이:', orders?.length);
-                if (orders && orders.length > 0) {
-                    console.log('📥 첫 번째 아이템 전체:', JSON.stringify(orders[0], null, 2));
-                    console.log('📥 첫 번째 아이템 키:', Object.keys(orders[0]));
-                }
-                console.log('🚨 ==== 끝 ====\n');
 
-                // 응답이 배열이 아니면 items 속성 확인
-                let orderItems = orders;
-                if (!Array.isArray(orders)) {
-                    if (orders?.items) {
-                        orderItems = orders.items;
-                        console.log('📌 orders.items 사용:', orderItems);
-                    } else if (orders?.orderItems) {
-                        orderItems = orders.orderItems;
-                        console.log('📌 orders.orderItems 사용:', orderItems);
-                    } else {
-                        console.warn('⚠️ 배열로 변환할 수 없음');
-                        orderItems = [];
-                    }
-                }
+                // ✅ 정규화: 어떤 구조든 OrderItem[] 로 통일
+                const orderItems = normalizeToOrderItems(orders);
 
-                if (!orderItems || orderItems.length === 0) {
+                console.log('📦 정규화된 주문 항목:', orderItems.length, '개');
+
+                if (orderItems.length === 0) {
                     listDiv.innerHTML = '<div style="color:#999; display:flex; justify-content:center; padding: 20px; border:none;">진행 중인 주문이 없습니다.</div>';
                     priceSpan.innerText = '0원';
                     return;
                 }
 
-                // 최신 주문 상태 찾기 - 가장 진행된 상태 찾기
+                // 최신 주문 상태 찾기
                 let statuses = {
-                    'ORDERED': 1,
-                    'CONFIRMED': 2,
-                    'COOKING': 3,
-                    'DELIVERING': 4,
-                    'COMPLETED': 5
+                    'ORDERED': 1, 'CONFIRMED': 2, 'COOKING': 3, 'DELIVERING': 4, 'COMPLETED': 5
                 };
 
                 let maxLevel = 0;
@@ -518,27 +532,11 @@
                     }
                 }
 
-                console.log('📊 주문 상태 분석:', {
-                    totalOrders: orderItems.length,
-                    latestStatus,
-                    maxLevel
-                });
                 listDiv.innerHTML = orderItems.map(item => {
-                    // ✅ 백엔드 응답 구조에 맞는 정확한 필드명
-                    // order_item 테이블: id, order_id, menu_id, menu_name, price, quantity
-                    const menuName = item.menu_name || item.menuName || '상품명 없음';
+                    const menuName = item.menuName || item.menu_name || '상품명 없음';
                     const quantity = item.quantity || 0;
                     const price = item.price || 0;
                     const itemTotal = price * quantity;
-
-                    // 디버깅 로그
-                    console.log('📦 주문 항목:', {
-                        menuName,
-                        quantity,
-                        price,
-                        itemTotal,
-                        status: item.status
-                    });
 
                     if (item.status !== 'CANCELLED') {
                         sum += itemTotal;
@@ -552,7 +550,6 @@
                     const orderId = item.id || item.orderId;
                     const currentStatus = item.status || 'ORDERED';
 
-                    // 인라인 스타일 정의
                     const btnBase = "padding: 6px 12px; border-radius: 6px; border: none; font-size: 11px; cursor: pointer; font-weight: 600; transition: all 0.2s;";
                     const btnNext = btnBase + " background: #4285f4; color: white;";
                     const btnCancel = btnBase + " background: #f1f3f4; color: #ea4335;";
@@ -594,7 +591,7 @@
                     const textStyle = isCancelled ? 'text-decoration: line-through; color: #999;' : '';
 
                     return `
-                    <div class="order-item-wrapper">
+                    <div class="order-item-wrapper" data-order-id="${orderId}" data-status="${currentStatus}">
                         <div class="order-item-header">
                             <span class="order-item-name" style="${textStyle}">${menuName} x ${quantity}</span>
                             <span class="order-item-price" style="${textStyle}">${itemTotal.toLocaleString()}원</span>
@@ -609,84 +606,78 @@
                 }).join('');
 
                 priceSpan.innerText = sum.toLocaleString() + '원';
-
-                // 테이블 카드의 주문 상태 배지 업데이트
-                console.log('🎯 배지 업데이트:', { currentTableId, latestStatus });
                 updateTableCardOrderStatus(latestStatus);
-
-                // 주문 상태 변경 버튼 표시 여부 결정
                 updateOrderStatusButton();
             }
 
             // 테이블 카드의 주문 상태 배지 업데이트
             function updateTableCardOrderStatus(status) {
-                console.log('🔍 updateTableCardOrderStatus 호출:', { currentTableId, status });
-
                 const selectedCard = document.querySelector(`.table-card[data-id="${currentTableId}"]`);
-                if (!selectedCard) {
-                    console.warn('❌ 테이블 카드를 찾을 수 없음:', currentTableId);
-                    return;
-                }
+                if (!selectedCard) return;
 
                 const container = selectedCard.querySelector('.order-status-container');
-                if (!container) {
-                    console.warn('⚠️ order-status-container를 찾을 수 없음');
-                    return;
-                }
+                if (!container) return;
 
-                // 모든 배지 숨기기
                 container.querySelectorAll('.order-status-badge').forEach(badge => {
                     badge.style.display = 'none';
-                    console.log('🔇 배지 숨김:', badge.getAttribute('data-status'));
                 });
 
-                // 해당 상태의 배지만 표시
                 const badge = container.querySelector(`.order-status-badge[data-status="${status}"]`);
                 if (badge) {
-                    badge.style.display = 'inline-block';  // ✅ inline-block 명시
-                    console.log('✅ 배지 표시됨:', status);
-                } else {
-                    console.warn('⚠️ 해당 상태의 배지를 찾을 수 없음:', status);
-                    // 모든 배지 출력 (디버깅용)
-                    container.querySelectorAll('.order-status-badge').forEach(b => {
-                        console.log('  - 사용 가능한 배지:', b.getAttribute('data-status'));
-                    });
+                    badge.style.display = 'inline-block';
                 }
             }
 
-            // 모든 주문의 상태를 함께 변경하는 함수
+            // 모든 주문의 상태를 다음 단계로 일괄 변경
             async function changeAllOrdersStatus() {
                 const orders = document.querySelectorAll('.order-item-wrapper');
-                let hasActiveOrder = false;
+                let activeOrders = [];
 
+                // 1. 변경 가능한 주문 수집
                 for (let orderItem of orders) {
                     const statusLabel = orderItem.querySelector('.order-status-label');
                     if (!statusLabel) continue;
 
-                    const currentStatus = statusLabel.textContent.trim();
-                    if (currentStatus === '완료' || currentStatus === '취소됨') continue;
+                    const currentStatusText = statusLabel.textContent.trim();
+                    if (currentStatusText === '완료' || currentStatusText === '취소됨') continue;
 
-                    hasActiveOrder = true;
+                    // data-order-id와 data-status에서 직접 읽기
+                    const orderId = orderItem.getAttribute('data-order-id');
+                    const currentStatus = orderItem.getAttribute('data-status');
+                    if (!orderId || !currentStatus) continue;
 
-                    // 상태에 따라 다음 상태 결정
-                    let nextStatus = '';
-                    if (currentStatus === '주문 완료') nextStatus = 'CONFIRMED';
-                    else if (currentStatus === '주문 확인') nextStatus = 'COOKING';
-                    else if (currentStatus === '조리 중') nextStatus = 'DELIVERING';
-                    else if (currentStatus === '배달 준비') nextStatus = 'COMPLETED';
+                    // 다음 상태 계산
+                    const next = typeof NEXT_STATUS !== 'undefined'
+                        ? NEXT_STATUS[currentStatus]
+                        : { 'ORDERED': 'CONFIRMED', 'CONFIRMED': 'COOKING', 'COOKING': 'DELIVERING', 'DELIVERING': 'COMPLETED' }[currentStatus];
 
-                    if (nextStatus) {
-                        const buttons = orderItem.querySelectorAll('.order-action-buttons button');
-                        const firstButton = buttons[0];
-                        if (firstButton) {
-                            firstButton.click();
-                            await new Promise(r => setTimeout(r, 300));
-                        }
+                    if (next) {
+                        activeOrders.push({ orderId: parseInt(orderId), currentStatus, nextStatus: next });
                     }
                 }
 
-                if (!hasActiveOrder) {
+                if (activeOrders.length === 0) {
                     alert('변경 가능한 주문이 없습니다.');
+                    return;
+                }
+
+                // 2. 한 번만 confirm
+                const summary = activeOrders.map(o => `#${o.orderId}: ${o.currentStatus} → ${o.nextStatus}`).join('\n');
+                if (!confirm(`다음 ${activeOrders.length}개 주문의 상태를 변경합니다:\n\n${summary}`)) return;
+
+                // 3. 순차 API 호출 (skipConfirm = true)
+                let successCount = 0;
+                for (const order of activeOrders) {
+                    await updateOrderStatus(order.orderId, order.nextStatus, true);
+                    successCount++;
+                    await new Promise(r => setTimeout(r, 200));
+                }
+
+                alert(`${successCount}개 주문 상태가 변경되었습니다.`);
+
+                // 4. 최신 데이터 새로고침
+                if (typeof fetchActiveOrders === 'function') {
+                    await fetchActiveOrders();
                 }
             }
 
@@ -720,13 +711,10 @@
                 const tableNum = element.getAttribute('data-num');
                 const hasMsg = element.classList.contains('has-msg');
 
-                console.log('📂 모달 열기:', { currentTableId, currentTableStatus, tableNum });
-
                 const modalTitle = document.getElementById('modalTitle');
                 if (modalTitle) modalTitle.innerText = 'Table ' + tableNum;
                 hideMessageBox();
 
-                // 모달 표시
                 const modal = document.getElementById('tableModal');
                 if (modal) {
                     modal.style.display = 'flex';
@@ -736,7 +724,7 @@
                     }, 10);
                 }
 
-                // 이용 중 상태면 주문 조회
+                // 이용 중 상태면 WebSocket 구독 (websocket.js의 함수 호출)
                 if (currentTableStatus === 'OCCUPIED') {
                     subscribeToTableOrders(parseInt(currentTableId));
                 } else {
@@ -753,8 +741,10 @@
                     const content = modal.querySelector('.modal-content');
                     if (content) content.style.transform = 'translateY(-20px)';
                 }
-                // WebSocket 구독 취소
-                unsubscribeFromOrders();
+                // WebSocket 구독 취소 (websocket.js의 함수 호출)
+                if (typeof unsubscribeFromOrders === 'function') {
+                    unsubscribeFromOrders();
+                }
 
                 document.querySelectorAll('.table-card').forEach(c => c.classList.remove('selected'));
                 currentTableId = null;
@@ -790,11 +780,8 @@
                     const response = await fetch(`/admin/dashboard/${currentTableId}/orders`);
                     if (response.ok) {
                         const orders = await response.json();
-                        console.log('📨 백엔드 응답 데이터:', orders);
-                        console.log('🔍 첫번째 주문:', orders[0]);
                         renderOrders(orders);
                     } else {
-                        console.error('❌ API 응답 실패:', response.status);
                         renderOrders([]);
                     }
                 } catch (err) {
@@ -865,14 +852,12 @@
             }
 
             /* =======================================
-             * 메세지 전송 모달 관련 로직 추가
+             * 메세지 전송 모달 관련 로직
              * ======================================= */
 
             function openMessageModal() {
                 const targetSelect = document.getElementById('targetTableSelect');
                 targetSelect.innerHTML = '<option value="">테이블을 선택하세요</option>';
-
-                // --- [추가] 전체 전송 옵션 삽입 ---
                 targetSelect.innerHTML += '<option value="ALL" style="font-weight:bold; color:#4285f4;">📢 이용 중인 전체 테이블</option>';
 
                 document.querySelectorAll('.table-card.status-occupied').forEach(card => {
@@ -900,12 +885,10 @@
                     const content = modal.querySelector('.modal-content');
                     if (content) content.style.transform = 'translateY(-20px)';
                 }
-                // 선택 값 초기화
                 document.getElementById('targetTableSelect').value = '';
                 document.getElementById('macroMessageSelect').value = '';
             }
 
-            // REST API로 매크로 메세지 목록(STAFF_TO_TABLE) 가져오기
             async function fetchMacroMessagesForAdmin() {
                 try {
                     const response = await fetch('/admin/macro/api?direction=STAFF_TO_TABLE');
@@ -913,22 +896,16 @@
                         throw new Error("HTTP error! status: " + response.status);
                     }
 
-                    // 변수명을 dataList로 변경하여 외부/내부 변수 충돌 방지
                     const dataList = await response.json();
-
                     const msgSelect = document.getElementById('macroMessageSelect');
                     if (!msgSelect) return;
 
-                    // 초기화
                     msgSelect.innerHTML = '<option value="">전송할 메세지를 선택하세요</option>';
 
                     if (dataList && dataList.length > 0) {
                         dataList.forEach(msg => {
-                            // 서버 DTO 필드명이 'id'인지 'macroMessageId'인지 로그 보고 맞춰야 함
-                            // 둘 다 대응할 수 있도록 처리
                             const realId = msg.id || msg.macroMessageId;
                             const text = msg.messageText || "내용 없음";
-
                             if (realId) {
                                 msgSelect.innerHTML += `<option value="${realId}">${text}</option>`;
                             }
@@ -939,7 +916,6 @@
                 }
             }
 
-            // 메세지 전송 실행
             async function submitMessage() {
                 const tableSelect = document.getElementById('targetTableSelect');
                 const messageSelect = document.getElementById('macroMessageSelect');
@@ -951,10 +927,8 @@
                     return alert('테이블과 메세지를 선택해주세요.');
                 }
 
-                // --- [수정] 전송 데이터 구성 로직 ---
                 const sendData = {
                     macroMessageId: Number(messageId),
-                    // tableId가 "ALL"이면 문자열 그대로, 아니면 숫자로 변환
                     tableId: (tableId === "ALL") ? "ALL" : Number(tableId)
                 };
 
@@ -962,13 +936,12 @@
                     const response = await fetch('/admin/macro/api/send', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(sendData) // 수정된 객체 전송
+                        body: JSON.stringify(sendData)
                     });
 
                     if (response.ok) {
                         alert(tableId === "ALL" ? '📢 전체 메세지가 전송되었습니다.' : '✅ 메세지가 전송되었습니다.');
                         closeMessageModal();
-                        // 전체 전송 시 화면 갱신을 위해 reload (선택사항)
                         if(tableId === "ALL") location.reload();
                     } else {
                         const errorData = await response.text();
@@ -985,11 +958,8 @@
                 const list = document.getElementById('pending-orders-list');
                 const badge = document.getElementById('pending-count');
 
-                console.log('📋 renderPendingOrders 호출:', { ordersLength: orders?.length, orders });
-
                 if (!orders || orders.length === 0) {
                     section.classList.remove('has-orders');
-                    console.log('✅ 신규 주문 없음');
                     return;
                 }
 
@@ -997,11 +967,6 @@
                 badge.innerText = orders.length;
 
                 list.innerHTML = orders.map((order, idx) => {
-                    console.log(`📦 신규 주문 #${idx}:`, JSON.stringify(order, null, 2));
-
-                    // OrdersDTO 필드 매핑
-                    // orders.items = OrderItemDTO[]
-                    // OrderItemDTO: { id, orderId, menuId, menuName, price, quantity }
                     const items = order.items || order.orderItems || [];
                     const itemSummary = items
                         .map(i => {
@@ -1011,17 +976,9 @@
                         })
                         .join(', ');
 
-                    // OrdersDTO 필드
                     const tableId = order.tableId || order.table_id || '?';
                     const totalAmount = order.totalAmount || order.total_amount || 0;
                     const orderId = order.id;
-
-                    console.log(`✅ 주문 #${idx} 매핑:`, {
-                        orderId,
-                        tableId,
-                        totalAmount,
-                        itemCount: items.length
-                    });
 
                     return `
                     <div class="pending-order-card">
@@ -1039,33 +996,21 @@
                         </div>
                     </div>`;
                 }).join('');
-
-                console.log('✅ 신규 주문', orders.length, '개 렌더링 완료');
             }
 
             async function confirmPendingOrder(orderId) {
                 try {
-                    console.log('📋 주문 확인 요청:', { orderId });
-
-                    const response = await fetch(`/kiosk/order/${orderId}/status`, {
+                    const response = await fetch(`/admin/api/dashboard/orders/${orderId}/status`, {
                         method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        },
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                         body: JSON.stringify({ status: 'CONFIRMED' })
                     });
 
-                    console.log('📊 응답 상태:', response.status);
-
                     if (response.ok) {
-                        console.log('✅ 주문 확인 성공');
-                        // 폴링으로 데이터 새로고침
                         await fetchPendingOrders();
                         alert('주문이 확인되었습니다.');
                     } else {
                         const errorData = await response.json().catch(() => ({}));
-                        console.error('❌ 주문 확인 실패:', response.status, errorData);
                         alert('주문 확인에 실패했습니다: ' + (errorData.message || response.statusText));
                     }
                 } catch (err) {
@@ -1078,26 +1023,17 @@
                 if (!confirm('주문을 취소하시겠습니까?')) return;
 
                 try {
-                    console.log('🗑️ 주문 취소 요청:', { orderId });
-
-                    const response = await fetch(`/admin/orders/${orderId}/status`, {
+                    const response = await fetch(`/admin/api/dashboard/orders/${orderId}/status`, {
                         method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        },
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                         body: JSON.stringify({ status: 'CANCELLED' })
                     });
 
-                    console.log('📊 응답 상태:', response.status);
-
                     if (response.ok) {
-                        console.log('✅ 주문 취소 성공');
                         await fetchPendingOrders();
                         alert('주문이 취소되었습니다.');
                     } else {
                         const errorData = await response.json().catch(() => ({}));
-                        console.error('❌ 주문 취소 실패:', response.status, errorData);
                         alert('주문 취소에 실패했습니다: ' + (errorData.message || response.statusText));
                     }
                 } catch (err) {
@@ -1106,26 +1042,9 @@
                 }
             }
 
-            // 페이지 로드 시 신규 주문 폴링 시작
+            // 페이지 로드 시 초기화 (WebSocket 연결은 websocket.js가 담당)
             document.addEventListener('DOMContentLoaded', () => {
-                console.log('🚀 페이지 로드 완료 - 초기화 시작');
-
-                // 신규 주문 폴링 시작
-                console.log('📡 신규 주문 폴링 시작');
-                fetchPendingOrders();
-
-                // 3. 주기적 폴링 (5초마다)
-                const pendingOrdersInterval = setInterval(() => {
-                    console.log('⏰ 신규 주문 폴링 (주기)');
-                    fetchPendingOrders();
-                }, 5000);
-
-                // 페이지 떠날 때 폴링 중지
-                window.addEventListener('beforeunload', () => {
-                    clearInterval(pendingOrdersInterval);
-                });
-
-                console.log('✅ 초기화 완료');
+                console.log('🚀 대시보드 UI 초기화 완료');
             });
         </script>
     </th:block>

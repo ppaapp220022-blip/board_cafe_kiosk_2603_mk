@@ -8,6 +8,16 @@
             useGeneratedKeys="true" keyProperty="id">
         INSERT INTO payment (session_id, table_number, status, final_amount, payment_key, order_id_toss, method, raw_response, approved_at, paid_at)
         VALUES (#{sessionId}, #{tableNumber}, #{status}, #{finalAmount}, #{paymentKey}, #{orderIdToss}, #{method}, #{rawResponse}, #{approvedAt}, #{paidAt})
+        ON DUPLICATE KEY UPDATE
+            table_number  = VALUES(table_number),
+            status        = VALUES(status),
+            final_amount  = VALUES(final_amount),
+            payment_key   = VALUES(payment_key),
+            order_id_toss = VALUES(order_id_toss),
+            method        = VALUES(method),
+            raw_response  = VALUES(raw_response),
+            approved_at   = VALUES(approved_at),
+            paid_at       = VALUES(paid_at)
     </insert>
 
     <!-- 결제 키로 조회 (중복 결제 방지) -->
