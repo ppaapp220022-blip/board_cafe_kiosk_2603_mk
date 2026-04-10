@@ -201,6 +201,9 @@ public class SecurityConfig {
                         .ignoringRequestMatchers("/login/**")
                         .ignoringRequestMatchers("/forgot-password/**")
                         .ignoringRequestMatchers("/admin/staff/**")
+                        // 아래 줄을 추가하여 대시보드 API들의 CSRF 검사를 건너뜁니다.
+                        .ignoringRequestMatchers("/admin/dashboard/**")
+                        .ignoringRequestMatchers("/admin/macro/**")
                 );
 
         log.info("--- [SecurityConfig] Admin Security Chain 구성 완료 ---");
