@@ -52,4 +52,7 @@ public interface StatMapper {
      * - game_history 테이블을 기반으로 대여 횟수가 많은 순으로 정렬합니다.
      **/
     List<GameStatsDTO> getTopGamesByMonth(@Param("targetDate") LocalDate targetDate, @Param("limit") int limit);
+
+    // 월간 인기 Top 5 메뉴 조회
+    List<ItemSalesDTO> findMonthlyTop5Items(@Param("yearMonth") String yearMonth);
 }

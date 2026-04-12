@@ -134,4 +134,16 @@
         LIMIT #{limit}
     </select>
 
+    <select id="findMonthlyTop5Items" resultType="org.example.board_cafe_kiosk_2603.dto.admin.statistics.ItemSalesDTO">
+        SELECT
+            m.name AS menuName,
+            SUM(ish.sales_qty) AS salesQty
+        FROM item_sales_history ish
+                 INNER JOIN menu m ON ish.product_id = m.id
+        WHERE DATE_FORMAT(ish.stat_date, '%Y-%m') = #{yearMonth}
+        GROUP BY ish.product_id, m.name
+        ORDER BY salesQty DESC
+        LIMIT 5
+    </select>
+
 </mapper>
