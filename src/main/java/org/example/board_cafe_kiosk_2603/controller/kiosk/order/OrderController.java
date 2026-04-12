@@ -52,10 +52,15 @@ public class OrderController {
      */
     @GetMapping("/{orderId}")
     public String orderDetailPage(@PathVariable int orderId, Model model, HttpSession session) {
-        Integer tableNumber = (Integer) session.getAttribute("tableNumber");
+        Integer tableNumber = sessionTableNumber(session);
         if (tableNumber == null) return "redirect:/kiosk";
 
         log.info("주문 상세 페이지 조회 - orderId: {}, tableNumber: {}", orderId, tableNumber);
+
+        if (!orderService.isOrderOwnedByTableNumber(orderId, tableNumber)) {
+            log.warn("주문 상세 접근 차단 - orderId: {}, tableNumber: {}", orderId, tableNumber);
+            return "redirect:/kiosk/cart";
+        }
 
         // 주문 정보 조회
         OrdersDTO order = orderService.getOrder(orderId);
@@ -98,7 +103,7 @@ public class OrderController {
     public ResponseEntity<OrdersDTO> createOrder(
             @RequestBody OrderCreateRequest request,
             HttpSession session) {
-        Integer tableNumber = (Integer) session.getAttribute("tableNumber");
+        Integer tableNumber = sessionTableNumber(session);
 
         if (tableNumber == null) {
             log.warn("테이블 번호 없음 - 주문 생성 실패");
@@ -175,7 +180,13 @@ public class OrderController {
      */
     @GetMapping("/api/{orderId}")
     @ResponseBody
-    public ResponseEntity<OrdersDTO> getOrderApi(@PathVariable int orderId) {
+    public ResponseEntity<OrdersDTO> getOrderApi(@PathVariable int orderId, HttpSession session) {
+        Integer tableNumber = sessionTableNumber(session);
+        if (tableNumber == null) return ResponseEntity.badRequest().build();
+        if (!orderService.isOrderOwnedByTableNumber(orderId, tableNumber)) {
+            log.warn("주문 API 접근 차단 - orderId: {}, tableNumber: {}", orderId, tableNumber);
+            return ResponseEntity.status(403).build();
+        }
         log.info("주문 조회 - orderId: {}", orderId);
         OrdersDTO result = orderService.getOrder(orderId);
         return result.isSuccess() ? ResponseEntity.ok(result) : ResponseEntity.notFound().build();
@@ -188,7 +199,7 @@ public class OrderController {
     @GetMapping("/latest")
     @ResponseBody
     public ResponseEntity<OrdersDTO> getLatestOrder(HttpSession session) {
-        Integer tableNumber = (Integer) session.getAttribute("tableNumber");
+        Integer tableNumber = sessionTableNumber(session);
         if (tableNumber == null) return ResponseEntity.badRequest().build();
         log.info("최근 주문 조회 - tableNumber: {}", tableNumber);
         OrdersDTO result = orderService.getLatestOrderByTableNumber(tableNumber);
@@ -201,9 +212,15 @@ public class OrderController {
      */
     @GetMapping("/session/{sessionId}")
     @ResponseBody
-    public List<OrdersDTO> getOrdersBySession(@PathVariable long sessionId) {
+    public ResponseEntity<List<OrdersDTO>> getOrdersBySession(@PathVariable long sessionId, HttpSession session) {
+        Integer tableNumber = sessionTableNumber(session);
+        if (tableNumber == null) return ResponseEntity.badRequest().build();
+        if (!orderService.isSessionOwnedByTableNumber(sessionId, tableNumber)) {
+            log.warn("세션 주문 목록 접근 차단 - sessionId: {}, tableNumber: {}", sessionId, tableNumber);
+            return ResponseEntity.status(403).build();
+        }
         log.info("세션 주문 목록 조회 - sessionId: {}", sessionId);
-        return orderService.getOrdersBySessionId(sessionId);
+        return ResponseEntity.ok(orderService.getOrdersBySessionId(sessionId));
     }
 
     /**
@@ -213,7 +230,7 @@ public class OrderController {
     @GetMapping("/active")
     @ResponseBody
     public ResponseEntity<List<OrdersDTO>> getActiveOrders(HttpSession session) {
-        Integer tableNumber = (Integer) session.getAttribute("tableNumber");
+        Integer tableNumber = sessionTableNumber(session);
         if (tableNumber == null) return ResponseEntity.ok(List.of());
         log.info("활성 세션 주문 조회 - tableNumber: {}", tableNumber);
         return ResponseEntity.ok(orderService.getActiveSessionOrders(tableNumber));
@@ -237,7 +254,14 @@ public class OrderController {
     @PatchMapping("/{orderId}/status")
     @ResponseBody
     public ResponseEntity<OrdersDTO> updateStatus(@PathVariable int orderId,
-                                                  @RequestBody Map<String, String> body) {
+                                                  @RequestBody Map<String, String> body,
+                                                  HttpSession session) {
+        Integer tableNumber = sessionTableNumber(session);
+        if (tableNumber == null) return ResponseEntity.badRequest().build();
+        if (!orderService.isOrderOwnedByTableNumber(orderId, tableNumber)) {
+            log.warn("주문 상태 변경 차단 - orderId: {}, tableNumber: {}", orderId, tableNumber);
+            return ResponseEntity.status(403).build();
+        }
         String status = body.get("status");
         if (status == null || status.isBlank()) return ResponseEntity.badRequest().build();
         log.info("주문 상태 변경 요청 - orderId: {}, status: {}", orderId, status);
@@ -251,7 +275,13 @@ public class OrderController {
      */
     @DeleteMapping("/{orderId}")
     @ResponseBody
-    public ResponseEntity<OrdersDTO> cancelOrder(@PathVariable int orderId) {
+    public ResponseEntity<OrdersDTO> cancelOrder(@PathVariable int orderId, HttpSession session) {
+        Integer tableNumber = sessionTableNumber(session);
+        if (tableNumber == null) return ResponseEntity.badRequest().build();
+        if (!orderService.isOrderOwnedByTableNumber(orderId, tableNumber)) {
+            log.warn("주문 취소 차단 - orderId: {}, tableNumber: {}", orderId, tableNumber);
+            return ResponseEntity.status(403).build();
+        }
         log.info("주문 취소 요청 - orderId: {}", orderId);
         OrdersDTO result = orderService.cancelOrder(orderId);
         return result.isSuccess() ? ResponseEntity.ok(result) : ResponseEntity.badRequest().body(result);
@@ -275,4 +305,18 @@ public class OrderController {
             default -> "상태 확인 중...";
         };
     }
+
+    private Integer sessionTableNumber(HttpSession session) {
+        Object raw = session.getAttribute("tableNumber");
+        if (raw == null) return null;
+        if (raw instanceof Integer n) return n;
+        try {
+            int parsed = Integer.parseInt(raw.toString());
+            session.setAttribute("tableNumber", parsed);
+            return parsed;
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
 }

@@ -62,6 +62,33 @@
             }
             .has-msg .alert-dot { display: block; animation: pulse-red 1.5s infinite; }
 
+            /* --- 주문 진행중 미니 배지 --- */
+            .order-mini-badge {
+                display: none;
+                align-items: center;
+                gap: 4px;
+                background: #e8f0fe;
+                color: #1a73e8;
+                border: 1px solid #c6dafc;
+                border-radius: 999px;
+                padding: 3px 8px;
+                font-size: 11px;
+                font-weight: 700;
+                margin-left: 6px;
+            }
+            .order-mini-badge.visible { display: inline-flex; }
+            .order-mini-badge .mini-dot {
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: #1a73e8;
+                animation: pulse-mini 1.4s infinite;
+            }
+            @keyframes pulse-mini {
+                0%, 100% { opacity: 1; transform: scale(1); }
+                50% { opacity: 0.6; transform: scale(1.25); }
+            }
+
             @keyframes pulse-red {
                 0% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(234, 67, 53, 0.7); }
                 70% { transform: scale(1.2); opacity: 0.8; box-shadow: 0 0 0 10px rgba(234, 67, 53, 0); }
@@ -74,7 +101,13 @@
             .table-card.status-cleaning { border-left: 8px solid #fbbc04; }
 
             .table-number { font-size: 22px; font-weight: 700; color: #3c4043; }
-            .status-text { font-size: 14px; font-weight: 600; }
+            .status-text {
+                font-size: 14px;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
 
             /* --- 모달 관련 스타일 --- */
             .modal-overlay {
@@ -231,7 +264,7 @@
              th:data-status="${table.status}"
              th:data-token="${table.accessToken}"
              th:data-latestorder="pending"
-             onclick="openTableModal(this)">
+            onclick="openTableModal(this)">
 
             <div class="alert-dot"></div>
 
@@ -245,11 +278,10 @@
 
             <th:block th:if="${table.status == 'OCCUPIED'}">
                 <div class="order-status-container" style="margin-top: 8px;">
-                    <span class="order-status-badge" data-status="ORDERED">주문 완료</span>
-                    <span class="order-status-badge" data-status="CONFIRMED">주문 확인</span>
-                    <span class="order-status-badge" data-status="COOKING">조리 중</span>
-                    <span class="order-status-badge" data-status="DELIVERING">배달 준비</span>
-                    <span class="order-status-badge" data-status="COMPLETED">완료</span>
+                    <div class="order-mini-badge" data-role="order-mini-badge">
+                        <span class="mini-dot"></span>
+                        <span class="mini-text">주문 진행중</span>
+                    </div>
                 </div>
             </th:block>
 
@@ -357,6 +389,37 @@
                     else { orderItems = []; }
                 }
 
+                // WebSocket에서 OrdersDTO[] 형태(주문 헤더 + items[])로 오는 경우를
+                // 모달 표시용 OrderItem[] 형태로 평탄화한다.
+                if (Array.isArray(orderItems) && orderItems.length > 0) {
+                    const sample = orderItems[0];
+                    const hasNestedItems = sample?.items || sample?.orderItems;
+                    const isFlatItem = sample?.menuName || sample?.menu_name;
+
+                    if (hasNestedItems && !isFlatItem) {
+                        const flattened = [];
+                        for (const order of orderItems) {
+                            const orderId = order.id || order.orderId;
+                            const orderStatus = order.status || 'ORDERED';
+                            const children = order.items || order.orderItems || [];
+
+                            if (!children.length) continue;
+                            for (const child of children) {
+                                flattened.push({
+                                    id: child.id || orderId,
+                                    orderId: orderId,
+                                    menu_name: child.menu_name || child.menuName,
+                                    menuName: child.menuName || child.menu_name,
+                                    quantity: child.quantity || child.qty || 0,
+                                    price: child.price || 0,
+                                    status: child.status || orderStatus
+                                });
+                            }
+                        }
+                        orderItems = flattened;
+                    }
+                }
+
                 if (!orderItems || orderItems.length === 0) {
                     listDiv.innerHTML = '<div style="color:#999; display:flex; justify-content:center; padding: 20px; border:none;">진행 중인 주문이 없습니다.</div>';
                     priceSpan.innerText = '0원';
@@ -388,7 +451,9 @@
                     let badgeColor = '#5f6368';
                     let actionHtml = '';
 
-                    const orderId = item.id || item.orderId;
+                    // 상태 변경 API는 "주문 ID(orders.id)"를 받아야 한다.
+                    // order_item.id가 먼저 들어오면 400/404가 발생하므로 orderId를 우선 사용.
+                    const orderId = item.orderId || item.id;
                     const currentStatus = item.status || 'ORDERED';
 
                     const btnBase = "padding: 6px 12px; border-radius: 6px; border: none; font-size: 11px; cursor: pointer; font-weight: 600; transition: all 0.2s;";
@@ -431,7 +496,7 @@
                     const textStyle = isCancelled ? 'text-decoration: line-through; color: #999;' : '';
 
                     return `
-                    <div class="order-item-wrapper">
+                    <div class="order-item-wrapper" data-order-id="${orderId}" data-status="${currentStatus}">
                         <div class="order-item-header">
                             <span class="order-item-name" style="${textStyle}">${menuName} x ${quantity}</span>
                             <span class="order-item-price" style="${textStyle}">${itemTotal.toLocaleString()}원</span>
@@ -454,13 +519,23 @@
 
                 const container = selectedCard.querySelector('.order-status-container');
                 if (!container) return;
+                const miniBadge = container.querySelector('[data-role="order-mini-badge"]');
+                const miniText = miniBadge ? miniBadge.querySelector('.mini-text') : null;
+                if (!miniBadge || !miniText) return;
 
-                container.querySelectorAll('.order-status-badge').forEach(badge => {
-                    badge.style.display = 'none';
-                });
+                if (!status || status === 'COMPLETED' || status === 'CANCELLED') {
+                    miniBadge.classList.remove('visible');
+                    return;
+                }
 
-                const badge = container.querySelector(`.order-status-badge[data-status="${status}"]`);
-                if (badge) badge.style.display = 'inline-block';
+                const miniLabels = {
+                    ORDERED: '주문 접수',
+                    CONFIRMED: '주문 확인',
+                    COOKING: '조리 중',
+                    DELIVERING: '배달 중'
+                };
+                miniText.textContent = miniLabels[status] || '주문 진행중';
+                miniBadge.classList.add('visible');
             }
 
             async function changeAllOrdersStatus() {
@@ -534,6 +609,9 @@
                 }
 
                 if (currentTableStatus === 'OCCUPIED') {
+                    // 모달 오픈 즉시 REST로 1회 로드해서 첫 화면 공백을 방지하고,
+                    // 이후 WebSocket 업데이트를 계속 수신한다.
+                    await fetchActiveOrders();
                     subscribeToTableOrders(parseInt(currentTableId));
                 } else {
                     renderOrders([]);
@@ -592,6 +670,76 @@
                     console.error('❌ fetchActiveOrders 에러:', err);
                     renderOrders([]);
                 }
+            }
+
+            function computeLatestOrderStatus(orderItems) {
+                if (!Array.isArray(orderItems) || orderItems.length === 0) return null;
+
+                const rank = {
+                    ORDERED: 1,
+                    CONFIRMED: 2,
+                    COOKING: 3,
+                    DELIVERING: 4,
+                    COMPLETED: 5
+                };
+
+                let latest = null;
+                let max = 0;
+                for (const item of orderItems) {
+                    const s = item?.status;
+                    if (!s || s === 'CANCELLED') continue;
+                    const r = rank[s] || 0;
+                    if (r >= max) {
+                        max = r;
+                        latest = s;
+                    }
+                }
+                return latest;
+            }
+
+            async function refreshTableCardOrderBadges() {
+                const cards = Array.from(document.querySelectorAll('.table-card.status-occupied'));
+                if (!cards.length) return;
+
+                await Promise.all(cards.map(async (card) => {
+                    const tableId = card.getAttribute('data-id');
+                    const container = card.querySelector('.order-status-container');
+                    if (!tableId || !container) return;
+
+                    try {
+                        const res = await fetch(`/admin/dashboard/${tableId}/orders`, {
+                            headers: { 'Accept': 'application/json' },
+                            credentials: 'same-origin'
+                        });
+                        if (!res.ok) return;
+
+                        const contentType = res.headers.get('content-type') || '';
+                        if (!contentType.includes('application/json')) return;
+
+                        const orderItems = await res.json();
+                        const latestStatus = computeLatestOrderStatus(orderItems);
+                        const miniBadge = container.querySelector('[data-role="order-mini-badge"]');
+                        const miniText = miniBadge ? miniBadge.querySelector('.mini-text') : null;
+
+                        if (!latestStatus || latestStatus === 'COMPLETED' || latestStatus === 'CANCELLED') {
+                            if (miniBadge) miniBadge.classList.remove('visible');
+                            return;
+                        }
+
+                        if (miniBadge && miniText) {
+                            const miniLabels = {
+                                ORDERED: '주문 접수',
+                                CONFIRMED: '주문 확인',
+                                COOKING: '조리 중',
+                                DELIVERING: '배달 중'
+                            };
+                            miniText.textContent = miniLabels[latestStatus] || '주문 진행중';
+                            miniBadge.classList.add('visible');
+                        }
+                    } catch (e) {
+                        console.error('테이블 카드 주문 상태 갱신 실패:', e);
+                    }
+                }));
             }
 
             async function callUpdateStatus(status) {
@@ -746,9 +894,10 @@
             // ✅ 누락되었던 fetchPendingOrders 함수 추가
             async function fetchPendingOrders() {
                 try {
-                    const response = await fetch('/admin/orders/pending');
+                    const response = await fetch('/kiosk/order/pending');
                     if (response.ok) {
-                        const orders = await response.json();
+                        const data = await response.json();
+                        const orders = Array.isArray(data) ? data : (data.orders || []);
                         renderPendingOrders(orders);
                     } else {
                         console.error('❌ 신규 주문 API 응답 실패:', response.status);
@@ -854,12 +1003,73 @@
 
             document.addEventListener('DOMContentLoaded', () => {
                 fetchPendingOrders();
+                refreshTableCardOrderBadges();
                 const pendingOrdersInterval = setInterval(() => {
                     fetchPendingOrders();
                 }, 5000);
+                const tableOrderBadgeInterval = setInterval(() => {
+                    refreshTableCardOrderBadges();
+                }, 5000);
+
+                async function pollTableSnapshot() {
+                    try {
+                        const res = await fetch('/admin/dashboard/tables', {
+                            headers: { 'Accept': 'application/json' },
+                            credentials: 'same-origin'
+                        });
+                        if (!res.ok) return;
+
+                        const contentType = res.headers.get('content-type') || '';
+                        if (!contentType.includes('application/json')) {
+                            // 세션 만료 등으로 로그인 HTML이 반환된 경우
+                            if (res.redirected && res.url) {
+                                window.location.href = res.url;
+                            }
+                            return;
+                        }
+
+                        const tables = await res.json();
+                        if (!Array.isArray(tables)) return;
+
+                        let changed = false;
+                        for (const t of tables) {
+                            const card = document.querySelector(`.table-card[data-id="${t.id}"]`);
+                            if (!card) continue;
+
+                            const currentStatus = card.getAttribute('data-status');
+                            const currentHasMsg = card.classList.contains('has-msg');
+                            const serverHasMsg = !!t.hasUnreadMessage;
+
+                            // 상태 변경 감지
+                            if (currentStatus !== t.status) {
+                                changed = true;
+                                break;
+                            }
+
+                            // 메시지 알림 점은 페이지 리로드 없이 즉시 반영
+                            if (currentHasMsg !== serverHasMsg) {
+                                if (serverHasMsg) card.classList.add('has-msg');
+                                else card.classList.remove('has-msg');
+                            }
+                        }
+
+                        // 모달이 열려있으면 사용자 작업 방해를 피하기 위해 갱신 보류
+                        const tableModal = document.getElementById('tableModal');
+                        const isModalOpen = tableModal && tableModal.style.display === 'flex';
+                        if (changed && !isModalOpen) {
+                            location.reload();
+                        }
+                    } catch (e) {
+                        console.error('❌ 테이블 상태 폴링 실패:', e);
+                    }
+                }
+
+                const tableSnapshotInterval = setInterval(pollTableSnapshot, 3000);
 
                 window.addEventListener('beforeunload', () => {
                     clearInterval(pendingOrdersInterval);
+                    clearInterval(tableOrderBadgeInterval);
+                    clearInterval(tableSnapshotInterval);
                 });
             });
         </script>

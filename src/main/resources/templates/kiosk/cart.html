@@ -1007,10 +1007,20 @@
     // ===== 활성 세션 주문 목록 =====
     function loadActiveOrders() {
         fetch('/kiosk/order/active')
-            .then(response => response.json())
+            .then(async response => {
+                if (!response.ok) return [];
+                const contentType = response.headers.get('content-type') || '';
+                if (!contentType.includes('application/json')) {
+                    if (response.redirected && response.url) {
+                        window.location.href = response.url;
+                    }
+                    return [];
+                }
+                return response.json();
+            })
             .then(orders => {
                 const section = document.getElementById('active-orders-section');
-                if (!orders || orders.length === 0) {
+                if (!Array.isArray(orders) || orders.length === 0) {
                     section.style.display = 'none';
                     return;
                 }

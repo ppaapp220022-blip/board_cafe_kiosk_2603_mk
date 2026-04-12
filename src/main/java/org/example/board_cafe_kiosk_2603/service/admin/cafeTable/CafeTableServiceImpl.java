@@ -240,6 +240,12 @@ public class CafeTableServiceImpl implements CafeTableService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public String getTableStatus(int tableId) {
+        return cafeTableMapper.selectStatusById(tableId);
+    }
+
+    @Override
     public Long findCurrentSessionId(int tableId) {
         log.info("--- [CafeTableService] current_session_id 조회 | tableId: {} ---", tableId);
         Long sessionId = cafeTableMapper.selectCurrentSessionId(tableId);

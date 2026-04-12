@@ -84,6 +84,12 @@
         WHERE id = #{tableId}
     </select>
 
+    <select id="selectStatusById" resultType="string">
+        SELECT status
+        FROM cafe_table
+        WHERE id = #{tableId}
+    </select>
+
     <!-- access_token 업데이트 -->
     <update id="updateAccessToken">
         UPDATE cafe_table
@@ -125,7 +131,8 @@
             oi.menu_id AS menuId,
             oi.menu_name AS menuName,
             oi.price,
-            oi.quantity
+            oi.quantity,
+            o.status AS status
         FROM orders o
                  JOIN order_item oi ON o.id = oi.order_id
         WHERE o.session_id = #{sessionId}

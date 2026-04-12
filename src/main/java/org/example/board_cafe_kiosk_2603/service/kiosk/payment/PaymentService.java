@@ -92,11 +92,8 @@ public class PaymentService {
                 return errorResponse("진행 중인 세션이 없습니다. 패키지를 먼저 선택해 주세요.");
             }
 
-            // 세션 주문 목록 조회
+            // 세션 주문 목록 조회 (패키지 단독 이용일 수 있으므로 빈 목록 허용)
             List<Orders> activeOrders = getActiveOrders(session.getId());
-            if (activeOrders.isEmpty()) {
-                return errorResponse("주문 내역이 없습니다.");
-            }
 
             // 패키지 정보 조회
             CafePackageDTO cafePackage = null;
@@ -200,10 +197,11 @@ public class PaymentService {
             }
 
             // 최신 주문 ID (포인트 참조용)
-            int latestOrderId = activeOrders.stream()
-                    .mapToInt(Orders::getId)
-                    .max()
-                    .orElse(0);
+            Long latestOrderId = activeOrders.stream()
+                    .map(Orders::getId)
+                    .max(Integer::compareTo)
+                    .map(Integer::longValue)
+                    .orElse(null);
 
             // 결제 정보 DB 저장
             createPayment(session, finalAmount, paymentKey, orderIdToss, tossResponse, tableNumber);
@@ -219,7 +217,7 @@ public class PaymentService {
 
             return PaymentDTO.builder()
                     .success(true)
-                    .orderId((long) latestOrderId)
+                    .orderId(latestOrderId)
                     .totalAmount(totalAmount)
                     .pointUsed(pointUsed)
                     .finalAmount(finalAmount)
@@ -339,9 +337,9 @@ public class PaymentService {
     }
 
     private String buildOrderNameFromOrders(List<Orders> orders) {
-        if (orders.isEmpty()) return "주문";
+        if (orders.isEmpty()) return "이용요금";
         List<OrderItem> items = ordersMapper.findItemsByOrderId(orders.get(0).getId());
-        if (items.isEmpty()) return "주문";
+        if (items.isEmpty()) return "이용요금";
         int extra = orders.size() - 1;
         return items.get(0).getMenuName() + (extra > 0 ? " 외 " + extra + "건" : "");
     }
@@ -385,17 +383,17 @@ public class PaymentService {
     /**
      * 포인트 사용 + 적립 처리
      */
-    private int processPoints(String customerPhone, int pointUsed, int finalAmount, int orderId) {
+    private int processPoints(String customerPhone, int pointUsed, int finalAmount, Long orderId) {
         int earnedPoints = 0;
 
         if (pointUsed > 0 && isValidPhone(customerPhone)) {
-            pointService.usePoint(customerPhone, pointUsed, (long) orderId);
+            pointService.usePoint(customerPhone, pointUsed, orderId);
             log.info("포인트 사용 - {}: -{}P", customerPhone, pointUsed);
         }
 
         if (isValidPhone(customerPhone) && finalAmount > 0) {
             earnedPoints = (int) Math.floor(finalAmount * EARN_RATE);
-            pointService.earnPoint(customerPhone, earnedPoints, (long) orderId);
+            pointService.earnPoint(customerPhone, earnedPoints, orderId);
             log.info("포인트 적립 - {}: +{}P", customerPhone, earnedPoints);
         }
 
@@ -407,12 +405,25 @@ public class PaymentService {
     }
 
     private void closeTableSessionAndSetCleaning(Integer tableId, Long sessionId) {
-        cafeTableMapper.updateMessagesReadStatusBySessionId(sessionId);
-        cafeTableMapper.closeSession(sessionId);
-        cafeTableMapper.updateTableStatusAndSession(tableId, "CLEANING", null);
+        int readUpdated = cafeTableMapper.updateMessagesReadStatusBySessionId(sessionId);
+        int closedRows = cafeTableMapper.closeSession(sessionId);
+        int statusRows = cafeTableMapper.updateTableStatusAndSession(tableId, "CLEANING", null);
 
-        log.info("결제 완료 후 세션 종료 및 상태 변경 완료 - tableId: {}, sessionId: {}, status: CLEANING",
-                tableId, sessionId);
+        String currentStatus = cafeTableMapper.selectStatusById(tableId);
+        Long currentSessionId = cafeTableMapper.selectCurrentSessionId(tableId);
+
+        // 간헐적인 반영 누락을 방지하기 위해 1회 재보정
+        if (!"CLEANING".equals(currentStatus) || currentSessionId != null) {
+            log.warn("결제 후 상태 반영 불일치 감지 - 재보정 시도 | tableId: {}, status: {}, currentSessionId: {}",
+                    tableId, currentStatus, currentSessionId);
+
+            cafeTableMapper.updateTableStatusAndSession(tableId, "CLEANING", null);
+            currentStatus = cafeTableMapper.selectStatusById(tableId);
+            currentSessionId = cafeTableMapper.selectCurrentSessionId(tableId);
+        }
+
+        log.info("결제 완료 후 세션 종료/상태 반영 결과 | tableId: {}, sessionId: {}, msgReadRows: {}, closeRows: {}, statusRows: {}, finalStatus: {}, finalCurrentSessionId: {}",
+                tableId, sessionId, readUpdated, closedRows, statusRows, currentStatus, currentSessionId);
     }
 
     private PaymentDTO errorResponse(String message) {

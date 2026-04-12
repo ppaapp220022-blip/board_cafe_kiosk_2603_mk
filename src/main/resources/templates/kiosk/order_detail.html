@@ -13,166 +13,232 @@
 
     body {
       font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-color: #f4f6f8;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      color: #333;
+    }
+
+    .status-banner {
+      background: #f0f7ff;
+      border-bottom: 2px solid #0066cc;
+      color: #0066cc;
+      text-align: center;
+      padding: 14px 20px;
+      font-size: 1rem;
+      font-weight: bold;
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 100vh;
-      overflow: hidden;
+      gap: 8px;
     }
 
-    .container {
-      width: 100%;
-      max-width: 600px;
-      padding: 40px;
+    .status-banner i {
+      width: 20px;
+      height: 20px;
+    }
+
+    .header {
       background: white;
-      border-radius: 40px;
-      box-shadow: 0 20px 80px rgba(0, 0, 0, 0.3);
-      text-align: center;
-      max-height: 95vh;
+      padding: 20px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #eaeaea;
+      gap: 16px;
+    }
+
+    .back-btn {
+      color: #007bff;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: bold;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: 0.2s;
+    }
+
+    .back-btn:hover {
+      color: #0056b3;
+    }
+
+    .back-btn i {
+      width: 22px;
+      height: 22px;
+    }
+
+    .header-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .order-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: white;
+      border: 1.5px solid #0066cc;
+      border-radius: 20px;
+      padding: 7px 12px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      color: #0066cc;
+    }
+
+    .order-badge i {
+      width: 14px;
+      height: 14px;
+    }
+
+    .content {
+      flex: 1;
+      padding: 28px 40px;
       overflow-y: auto;
     }
 
-    .container::-webkit-scrollbar {
+    .content::-webkit-scrollbar {
       width: 8px;
     }
 
-    .container::-webkit-scrollbar-track {
+    .content::-webkit-scrollbar-track {
       background: #f1f1f1;
       border-radius: 10px;
     }
 
-    .container::-webkit-scrollbar-thumb {
+    .content::-webkit-scrollbar-thumb {
       background: #c1c1c1;
       border-radius: 10px;
     }
 
-    .container::-webkit-scrollbar-thumb:hover {
+    .content::-webkit-scrollbar-thumb:hover {
       background: #888;
     }
 
-    /* 헤더 */
-    .header {
-      margin-bottom: 30px;
-    }
-
-    .order-number {
-      font-size: 0.95rem;
-      color: #888;
-      margin-bottom: 8px;
-    }
-
-    .order-number strong {
-      color: #007bff;
-      font-size: 1.1rem;
-      font-weight: bold;
-    }
-
-    .page-title {
-      font-size: 2rem;
-      color: #333;
-      margin-bottom: 10px;
-      font-weight: 700;
-    }
-
-    /* 상태 표시 영역 */
     .status-section {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 40px;
-      border-radius: 30px;
-      margin-bottom: 30px;
-      text-align: center;
+      background: #f0f7ff;
+      border: 1.5px solid #cfe6ff;
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .status-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .status-main {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
     }
 
     .status-icon {
-      width: 80px;
-      height: 80px;
-      margin: 0 auto 20px;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #0066cc;
+      color: white;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 50%;
       animation: pulse 2s ease-in-out infinite;
+      flex-shrink: 0;
     }
 
     .status-icon i {
-      width: 50px;
-      height: 50px;
-      stroke-width: 1.5;
+      width: 26px;
+      height: 26px;
     }
 
     @keyframes pulse {
-      0%, 100% {
-        transform: scale(1);
-        opacity: 1;
-      }
-      50% {
-        transform: scale(1.05);
-        opacity: 0.8;
-      }
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.04); opacity: 0.9; }
     }
 
     .status-text {
-      font-size: 1.5rem;
+      font-size: 1.2rem;
       font-weight: bold;
-      margin-bottom: 15px;
+      color: #0b4a85;
+      margin-bottom: 4px;
     }
 
     .status-subtext {
-      font-size: 0.95rem;
-      opacity: 0.9;
+      font-size: 0.9rem;
+      color: #5f7a95;
     }
 
-    /* 진행 상황 표시 */
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: bold;
+      background: #d1ecf1;
+      color: #0c5460;
+      white-space: nowrap;
+    }
+
     .progress-bar {
-      margin-top: 30px;
-      height: 6px;
-      background: rgba(255, 255, 255, 0.3);
-      border-radius: 10px;
+      height: 8px;
+      border-radius: 999px;
+      background: #d7e9fb;
       overflow: hidden;
+      margin-bottom: 8px;
     }
 
     .progress-fill {
       height: 100%;
-      background: white;
-      border-radius: 10px;
+      width: 20%;
+      background: #007bff;
+      border-radius: 999px;
       transition: width 0.3s ease;
     }
 
     .progress-labels {
       display: flex;
       justify-content: space-between;
-      margin-top: 10px;
-      font-size: 0.75rem;
-      opacity: 0.8;
+      color: #6b8196;
+      font-size: 0.72rem;
+      font-weight: 600;
     }
 
-    /* 주문 내역 */
     .card {
       background: white;
-      border: 1px solid #f0f0f0;
       border-radius: 20px;
-      padding: 25px;
-      margin-bottom: 20px;
+      padding: 24px;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
     }
 
     .card-header {
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       font-weight: bold;
-      margin-bottom: 18px;
       color: #333;
-      border-bottom: 2px solid #f0f0f0;
-      padding-bottom: 12px;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #f0f0f0;
     }
 
     .card-header i {
-      width: 24px;
-      height: 24px;
+      width: 20px;
+      height: 20px;
       color: #007bff;
     }
 
@@ -180,10 +246,9 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 10px;
       padding: 12px 0;
       border-bottom: 1px solid #f0f0f0;
-      font-size: 1rem;
-      color: #333;
     }
 
     .order-item:last-child {
@@ -192,34 +257,34 @@
 
     .item-info {
       flex: 1;
-      text-align: left;
+      min-width: 0;
     }
 
     .item-name {
       font-weight: bold;
+      color: #333;
       margin-bottom: 4px;
     }
 
     .item-qty {
       color: #888;
-      font-size: 0.85rem;
+      font-size: 0.88rem;
     }
 
     .item-price {
       color: #007bff;
       font-weight: bold;
-      min-width: 100px;
       text-align: right;
+      min-width: 95px;
     }
 
-    /* 주문 정보 */
     .info-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 0;
+      padding: 10px 0;
       border-bottom: 1px solid #f0f0f0;
-      font-size: 0.95rem;
+      gap: 10px;
     }
 
     .info-row:last-child {
@@ -231,74 +296,69 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      font-size: 0.95rem;
     }
 
     .info-label i {
-      width: 18px;
-      height: 18px;
+      width: 17px;
+      height: 17px;
     }
 
     .info-value {
       color: #333;
       font-weight: bold;
-    }
-
-    /* 가격 정보 */
-    .price-section {
-      background: #f8f9fa;
-      border-radius: 15px;
-      padding: 20px;
-      margin-bottom: 25px;
-    }
-
-    .price-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 0;
-      font-size: 1.1rem;
-      color: #333;
-    }
-
-    .price-row.total {
-      border-top: 2px solid #e0e0e0;
-      padding-top: 15px;
-      font-size: 1.4rem;
-      font-weight: bold;
-    }
-
-    .price-row.total .price-label {
-      color: #333;
-    }
-
-    .price-row.total .price-value {
-      color: #007bff;
-      font-size: 1.6rem;
-    }
-
-    .price-value {
-      color: #007bff;
-      font-weight: bold;
       text-align: right;
     }
 
-    /* 버튼 영역 */
+    .footer {
+      background: white;
+      border-top: 1px solid #eaeaea;
+      padding: 24px 40px;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .total-label {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .total-amount {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #007bff;
+    }
+
+    .subtotal-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      color: #666;
+      font-size: 0.95rem;
+    }
+
     .button-group {
       display: flex;
-      gap: 15px;
-      margin-top: 30px;
+      gap: 10px;
     }
 
     .btn {
       flex: 1;
-      padding: 18px;
+      padding: 16px;
       border: none;
       border-radius: 15px;
-      font-size: 1.1rem;
+      font-size: 1.06rem;
       font-weight: bold;
       cursor: pointer;
       transition: all 0.2s;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
@@ -310,20 +370,18 @@
     }
 
     .btn-menu {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #007bff;
       color: white;
-      flex: 2;
     }
 
     .btn-menu:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+      background: #0056b3;
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
     }
 
     .btn-back {
       background: #f0f2f5;
       color: #888;
-      flex: 1;
     }
 
     .btn-back:hover {
@@ -331,100 +389,15 @@
       color: #555;
     }
 
-    /* 상태별 아이콘 */
-    .status-pending {
-      color: #ff9800;
-    }
-
-    .status-paid {
-      color: #2196f3;
-    }
-
-    .status-confirmed {
-      color: #4caf50;
-    }
-
-    .status-cooking {
-      color: #ff5722;
-    }
-
-    .status-delivering {
-      color: #9c27b0;
-    }
-
-    .status-completed {
-      color: #4caf50;
-    }
-
-    /* 로딩 스피너 */
-    .spinner {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid rgba(255, 255, 255, 0.3);
-      border-top: 3px solid white;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-right: 10px;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    /* 토스트 알림 */
-    .toast {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      background: #333;
-      color: white;
-      padding: 15px 25px;
-      border-radius: 12px;
-      z-index: 2000;
-      animation: slideInUp 0.3s ease;
-    }
-
-    @keyframes slideInUp {
-      from { transform: translateY(100px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
-    /* 모바일 반응형 */
-    @media (max-width: 480px) {
-      .container {
-        padding: 20px;
-        border-radius: 20px;
-      }
-
-      .page-title {
-        font-size: 1.5rem;
-      }
-
-      .status-section {
-        padding: 25px;
-      }
-
-      .button-group {
-        flex-direction: column;
-        gap: 10px;
-      }
-
-      .btn {
-        padding: 15px;
-      }
-    }
-
-    /* 상태 관리 섹션 */
     .status-control-item {
       background: #f9f9f9;
       border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 12px;
+      padding: 14px;
+      margin-bottom: 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 10px;
       border: 1px solid #eee;
     }
 
@@ -451,17 +424,20 @@
 
     .status-control-buttons {
       display: flex;
-      gap: 8px;
+      gap: 7px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
     .status-btn {
-      padding: 8px 14px;
+      padding: 7px 11px;
       border: none;
       border-radius: 8px;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
+      white-space: nowrap;
     }
 
     .status-btn-ordered {
@@ -517,37 +493,111 @@
       background: #17a2b8;
       color: white;
     }
+
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: #333;
+      color: white;
+      padding: 15px 25px;
+      border-radius: 12px;
+      z-index: 2000;
+      animation: slideInUp 0.3s ease;
+    }
+
+    @keyframes slideInUp {
+      from {
+        transform: translateY(100px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .header {
+        padding: 16px 20px;
+      }
+
+      .content {
+        padding: 18px 16px;
+      }
+
+      .footer {
+        padding: 18px 16px;
+      }
+
+      .status-top {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      .total-amount {
+        font-size: 1.7rem;
+      }
+
+      .status-control-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .status-control-buttons {
+        justify-content: flex-start;
+      }
+    }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <!-- 헤더 -->
-  <div class="header">
-    <div class="order-number">
+<div class="status-banner">
+  <i data-lucide="package-check"></i>
+  주문 상태가 실시간으로 업데이트됩니다
+</div>
+
+<div class="header">
+  <button class="back-btn" onclick="goToMenu()">
+    <i data-lucide="arrow-left"></i>
+    메뉴로 돌아가기
+  </button>
+  <div class="header-info">
+    <span class="order-badge">
+      <i data-lucide="hash"></i>
       주문번호 <strong th:text="${orderId}">123</strong>
-    </div>
-    <h1 class="page-title">주문이 접수되었습니다!</h1>
+    </span>
+    <span class="order-badge">
+      <i data-lucide="table-2"></i>
+      테이블 <strong th:text="${tableNumber}">5</strong>
+    </span>
   </div>
+</div>
 
-  <!-- 상태 표시 -->
+<div class="content">
   <div class="status-section" th:classappend="'status-' + ${order.status.toLowerCase()}">
-    <div class="status-icon" id="status-icon">
-      <i data-lucide="clock"></i>
-    </div>
-    <div class="status-text" id="status-text" th:text="${statusDisplay}">
-      주문 확인중...
-    </div>
-    <div class="status-subtext">
-      실시간으로 상태가 업데이트됩니다
+    <div class="status-top">
+      <div class="status-main">
+        <div class="status-icon" id="status-icon">
+          <i data-lucide="clock"></i>
+        </div>
+        <div>
+          <div class="status-text" id="status-text" th:text="${statusDisplay}">주문 확인중...</div>
+          <div class="status-subtext">매장 준비 상황에 따라 변경될 수 있어요</div>
+        </div>
+      </div>
+      <div class="status-chip" id="status-chip">주문 완료</div>
     </div>
 
-    <!-- 진행 상황 바 -->
     <div class="progress-bar">
       <div class="progress-fill" id="progress-fill" style="width: 20%;"></div>
     </div>
     <div class="progress-labels">
-      <span>결제</span>
+      <span>주문</span>
       <span>확인</span>
       <span>조리</span>
       <span>서빙</span>
@@ -555,29 +605,22 @@
     </div>
   </div>
 
-  <!-- 주문 내역 -->
   <div class="card">
     <div class="card-header">
       <i data-lucide="shopping-bag"></i>
       주문 내역
     </div>
-    <div id="order-items">
-      <!-- JavaScript로 동적 생성 -->
-    </div>
+    <div id="order-items"></div>
   </div>
 
-  <!-- 주문 상태 관리 (admin용) -->
   <div class="card" id="admin-controls" style="display: none;">
     <div class="card-header">
       <i data-lucide="sliders"></i>
       주문 상태 관리
     </div>
-    <div id="order-status-controls">
-      <!-- JavaScript로 동적 생성 -->
-    </div>
+    <div id="order-status-controls"></div>
   </div>
 
-  <!-- 주문 정보 -->
   <div class="card">
     <div class="card-header">
       <i data-lucide="info"></i>
@@ -588,47 +631,34 @@
         <i data-lucide="table-2"></i>
         테이블
       </div>
-      <div class="info-value" th:text="'#' + ${tableNumber}">
-        #5
-      </div>
+      <div class="info-value" th:text="'#' + ${tableNumber}">#5</div>
     </div>
     <div class="info-row">
       <div class="info-label">
         <i data-lucide="clock"></i>
         주문 시간
       </div>
-      <div class="info-value" id="order-time">
-        <!-- JavaScript로 동적 생성 -->
-      </div>
+      <div class="info-value" id="order-time"></div>
     </div>
     <div class="info-row" th:if="${order.customerPhone != null}">
       <div class="info-label">
         <i data-lucide="phone"></i>
         연락처
       </div>
-      <div class="info-value" th:text="${order.customerPhone}">
-        <!-- 있을 경우만 표시 -->
-      </div>
+      <div class="info-value" th:text="${order.customerPhone}"></div>
     </div>
   </div>
+</div>
 
-  <!-- 가격 정보 -->
-  <div class="price-section">
-    <div class="price-row">
-      <span class="price-label">상품 소계</span>
-      <span class="price-value" id="subtotal" th:text="'₩' + ${#numbers.formatInteger(order.totalAmount, 0)}">
-                ₩15,000
-            </span>
-    </div>
-    <div class="price-row total">
-      <span class="price-label">결제액</span>
-      <span class="price-value" id="total" th:text="'₩' + ${#numbers.formatInteger(order.totalAmount, 0)}">
-                ₩15,000
-            </span>
-    </div>
+<div class="footer">
+  <div class="subtotal-row">
+    <span>상품 소계</span>
+    <span id="subtotal" th:text="'₩' + ${#numbers.formatInteger(order.totalAmount, 0)}">₩15,000</span>
   </div>
-
-  <!-- 버튼 -->
+  <div class="total-row">
+    <span class="total-label">결제액</span>
+    <span class="total-amount" id="total" th:text="'₩' + ${#numbers.formatInteger(order.totalAmount, 0)}">₩15,000</span>
+  </div>
   <div class="button-group">
     <button class="btn btn-menu" onclick="goToMenu()">
       <i data-lucide="utensils"></i>
@@ -646,42 +676,35 @@
     attrs: { 'stroke-width': 2.5 }
   });
 
-  // 서버에서 전달받은 데이터
   const orderId = /*[[${orderId}]]*/ 1;
   const tableNumber = /*[[${tableNumber}]]*/ 1;
   const orderData = /*[[${order}]]*/ {};
 
-  // 현재 상태
   let currentStatus = orderData.status || 'PENDING';
 
-  // ===== 페이지 로드 =====
   document.addEventListener('DOMContentLoaded', function() {
     renderOrderItems();
     renderOrderTime();
     updateStatusDisplay();
-    initAdminControls();  // 관리자 컨트롤 초기화
-    pollOrderStatus();  // 주문 상태 실시간 폴링
+    initAdminControls();
+    pollOrderStatus();
   });
 
-  // ===== 주문 아이템 렌더링 =====
   function renderOrderItems() {
     const itemsContainer = document.getElementById('order-items');
     const items = orderData.items || [];
 
     itemsContainer.innerHTML = items.map((item, index) => `
-            <div class="order-item">
-                <div class="item-info">
-                    <div class="item-name">${item.menuName}</div>
-                    <div class="item-qty">수량: ${item.quantity}개 · <span class="item-status" data-index="${index}">주문 완료</span></div>
-                </div>
-                <div class="item-price">
-                    ₩${(item.price * item.quantity).toLocaleString()}
-                </div>
-            </div>
-        `).join('');
+      <div class="order-item">
+        <div class="item-info">
+          <div class="item-name">${item.menuName}</div>
+          <div class="item-qty">수량: ${item.quantity}개 · <span class="item-status" data-index="${index}">주문 완료</span></div>
+        </div>
+        <div class="item-price">₩${(item.price * item.quantity).toLocaleString()}</div>
+      </div>
+    `).join('');
   }
 
-  // ===== 주문 시간 표시 =====
   function renderOrderTime() {
     const orderedAt = orderData.orderedAt;
     if (!orderedAt) {
@@ -695,107 +718,95 @@
     document.getElementById('order-time').innerText = `${hours}:${minutes}`;
   }
 
-  // ===== 상태 표시 업데이트 =====
   function updateStatusDisplay() {
     const status = currentStatus;
     const statusIcon = document.getElementById('status-icon');
     const statusText = document.getElementById('status-text');
     const progressFill = document.getElementById('progress-fill');
+    const statusChip = document.getElementById('status-chip');
 
-    // 상태별 아이콘 및 진행률
     const statusConfig = {
       'ORDERED': {
         icon: 'clock',
         text: '주문 완료! 관리자 확인 중...',
-        progress: 20,
-        color: 'ff9800'
+        short: '주문 완료',
+        progress: 20
       },
       'CONFIRMED': {
         icon: 'check-circle',
         text: '주문 확인! 조리 시작...',
-        progress: 40,
-        color: '2196f3'
+        short: '주문 확인',
+        progress: 40
       },
       'COOKING': {
         icon: 'flame',
         text: '조리 중입니다...',
-        progress: 65,
-        color: 'ff5722'
+        short: '조리 중',
+        progress: 65
       },
       'DELIVERING': {
         icon: 'package-check',
         text: '배달 준비 중...',
-        progress: 85,
-        color: '9c27b0'
+        short: '서빙 준비',
+        progress: 85
       },
       'COMPLETED': {
         icon: 'check-circle-2',
         text: '완료!',
-        progress: 100,
-        color: '4caf50'
+        short: '완료',
+        progress: 100
       },
       'CANCELLED': {
         icon: 'x-circle',
         text: '주문 취소됨',
-        progress: 0,
-        color: 'f44336'
+        short: '취소',
+        progress: 0
       }
     };
 
     const config = statusConfig[status] || statusConfig['ORDERED'];
 
-    // 아이콘 업데이트
     statusIcon.innerHTML = `<i data-lucide="${config.icon}"></i>`;
-
-    // 텍스트 업데이트
     statusText.innerText = config.text;
-
-    // 진행률 업데이트
+    statusChip.innerText = config.short;
     progressFill.style.width = config.progress + '%';
 
-    // 아이콘 재생성
     lucide.createIcons();
   }
 
-  // ===== 주문 상태 실시간 폴링 =====
   function pollOrderStatus() {
-    // 2초마다 상태 확인
     const pollInterval = setInterval(() => {
       fetch(`/kiosk/order/api/${orderId}`)
-              .then(response => response.json())
-              .then(data => {
-                if (data.success) {
-                  const newStatus = data.status;
-                  if (newStatus !== currentStatus) {
-                    console.log(`주문 상태 변경: ${currentStatus} → ${newStatus}`);
-                    currentStatus = newStatus;
-                    updateStatusDisplay();
-                    showToast(`✓ 상태 변경: ${getStatusText(newStatus)}`);
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const newStatus = data.status;
+            if (newStatus !== currentStatus) {
+              currentStatus = newStatus;
+              updateStatusDisplay();
+              showToast(`✓ 상태 변경: ${getStatusText(newStatus)}`);
 
-                    // 완료 또는 취소 상태면 폴링 중지
-                    if (newStatus === 'COMPLETED' || newStatus === 'CANCELLED') {
-                      clearInterval(pollInterval);
-                    }
-                  }
-                }
-              })
-              .catch(error => {
-                console.error('상태 조회 실패:', error);
-              });
-    }, 2000);  // 2초마다 확인
+              if (newStatus === 'COMPLETED' || newStatus === 'CANCELLED') {
+                clearInterval(pollInterval);
+              }
+            }
+          }
+        })
+        .catch(error => {
+          console.error('상태 조회 실패:', error);
+        });
+    }, 2000);
 
-    // 페이지 떠날 때 폴링 중지
     window.addEventListener('beforeunload', () => {
       clearInterval(pollInterval);
     });
   }
 
-  // ===== 상태별 텍스트 =====
   function getStatusText(status) {
     const texts = {
-      'ORDERED':   '주문 완료',
+      'ORDERED': '주문 완료',
       'CONFIRMED': '주문 확인',
-      'COOKING':   '조리 중',
+      'COOKING': '조리 중',
       'DELIVERING': '배달 준비',
       'COMPLETED': '완료',
       'CANCELLED': '취소'
@@ -803,17 +814,14 @@
     return texts[status] || '상태 확인';
   }
 
-  // ===== 메뉴로 돌아가기 =====
   function goToMenu() {
-    window.location.href = `/kiosk/menu?tableNumber=${tableNumber}`;
+    window.location.href = `/kiosk/drinks?tableNumber=${tableNumber}`;
   }
 
-  // ===== 장바구니로 이동 =====
   function goToCart() {
     window.location.href = '/kiosk/cart';
   }
 
-  // ===== 토스트 알림 =====
   function showToast(message) {
     const toast = document.createElement('div');
     toast.className = 'toast';
@@ -823,19 +831,16 @@
     setTimeout(() => toast.remove(), 2500);
   }
 
-  // ===== 상태 관리 함수 =====
   function initAdminControls() {
-    // 관리자 모드 확인 (URL 파라미터 또는 세션)
     const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
     const adminControlsDiv = document.getElementById('admin-controls');
 
     if (!isAdmin) {
-      return;  // 일반 사용자는 상태 관리 UI 미표시
+      return;
     }
 
     adminControlsDiv.style.display = 'block';
 
-    // 상태 목록
     const statuses = [
       { key: 'ORDERED', label: '주문 완료' },
       { key: 'CONFIRMED', label: '주문 확인' },
@@ -850,8 +855,7 @@
       const buttons = statuses
         .filter(s => s.key !== status.key)
         .map(s => `
-          <button class="status-btn status-btn-${s.key.toLowerCase()}"
-                  onclick="changeOrderStatus('${s.key}')">
+          <button class="status-btn status-btn-${s.key.toLowerCase()}" onclick="changeOrderStatus('${s.key}')">
             → ${s.label}
           </button>
         `).join('');
@@ -862,15 +866,12 @@
             <div class="status-control-name">${status.label}</div>
             <div class="status-control-current">${isActive ? '● 현재 상태' : ''}</div>
           </div>
-          <div class="status-control-buttons">
-            ${buttons}
-          </div>
+          <div class="status-control-buttons">${buttons}</div>
         </div>
       `;
     }).join('');
   }
 
-  // 주문 상태 변경
   async function changeOrderStatus(newStatus) {
     try {
       const response = await fetch(`/kiosk/order/${orderId}/status`, {
@@ -884,7 +885,7 @@
       if (data.success) {
         currentStatus = newStatus;
         updateStatusDisplay();
-        initAdminControls();  // UI 새로고침
+        initAdminControls();
         showToast(`✓ 상태 변경: ${getStatusText(newStatus)}`);
       } else {
         showToast(`✗ 상태 변경 실패: ${data.message}`);

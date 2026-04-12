@@ -68,10 +68,9 @@ public class PointService {
     /** 포인트 계좌 신규 생성 (이력 없음, 키오스크 신규 회원용) */
     @Transactional
     public void createAccount(String phone) {
-        if (pointMapper.findByPhone(phone) == null) {
-            pointMapper.insert(Point.builder().phone(phone).balance(0).build());
-            log.info("포인트 계좌 신규 생성 - 전화번호: {}", phone);
-        }
+        // 신규가입 시 customer + point를 함께 보장한다.
+        getOrCreatePoint(phone);
+        log.info("신규 회원 계정 준비 완료 - 전화번호: {}", phone);
     }
 
     // ===================================================

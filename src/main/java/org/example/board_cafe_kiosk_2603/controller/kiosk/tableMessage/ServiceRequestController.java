@@ -1,11 +1,13 @@
 package org.example.board_cafe_kiosk_2603.controller.kiosk.tableMessage;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.domain.kiosk.tableMessage.TableMessage;
 import org.example.board_cafe_kiosk_2603.mapper.kiosk.cart.CartMapper;
 import org.example.board_cafe_kiosk_2603.mapper.kiosk.tableMessage.TableMessageMapper;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
 
 import java.util.*;
 
@@ -35,12 +37,26 @@ public class ServiceRequestController {
     // ===========================================================
 
     @PostMapping("/kiosk/service-request")
-    public Map<String, Object> serviceRequest(
-            @RequestBody Map<String, Object> req) {
+    public ResponseEntity<Map<String, Object>> serviceRequest(
+            @RequestBody Map<String, Object> req,
+            HttpSession session) {
 
         String serviceType = (String) req.get("serviceType");
-        int tableNumber = toInt(req.get("tableNumber"));
+        int tableNumber = toInt(session.getAttribute("tableNumber"));
+        int requestedTableNumber = toInt(req.get("tableNumber"));
         Integer macroId = req.get("macroId") != null ? toInt(req.get("macroId")) : null;
+
+        if (tableNumber <= 0) {
+            Map<String, Object> error = new LinkedHashMap<>();
+            error.put("success", false);
+            error.put("message", "세션의 테이블 정보가 유효하지 않습니다.");
+            return ResponseEntity.badRequest().body(error);
+        }
+
+        if (requestedTableNumber > 0 && requestedTableNumber != tableNumber) {
+            log.warn("서비스 요청 tableNumber 불일치 감지 - 요청값: {}, 세션값: {} (세션값으로 처리)",
+                    requestedTableNumber, tableNumber);
+        }
 
         log.info("서비스 요청 - 테이블: {}, 내용: {}", tableNumber, serviceType);
 
@@ -51,13 +67,14 @@ public class ServiceRequestController {
         if (tableId == null) {
             res.put("success", false);
             res.put("message", "테이블을 찾을 수 없습니다.");
-            return res;
+            return ResponseEntity.badRequest().body(res);
         }
 
         // table_message 저장
         TableMessage message = TableMessage.builder()
                 .tableId(tableId)
                 .macroId(macroId)
+                .direction("TABLE_TO_STAFF")
                 .content(serviceType)
                 .build();
         tableMessageMapper.insert(message);
@@ -66,7 +83,7 @@ public class ServiceRequestController {
 
         res.put("success", true);
         res.put("message", serviceType + " 요청이 전송되었습니다.");
-        return res;
+        return ResponseEntity.ok(res);
     }
 
     // ===========================================================
@@ -124,11 +141,80 @@ public class ServiceRequestController {
     }
 
     // ===========================================================
+    // 키오스크 — 관리자 매크로 메시지 조회/읽음 처리
+    // ===========================================================
+
+    @GetMapping("/kiosk/messages/staff/unread")
+    public Map<String, Object> getUnreadStaffMessages(HttpSession session) {
+        Map<String, Object> res = new LinkedHashMap<>();
+
+        Object tableNumberObj = session.getAttribute("tableNumber");
+        Integer tableNumber = null;
+        if (tableNumberObj instanceof Integer n) {
+            tableNumber = n;
+        } else if (tableNumberObj != null) {
+            try {
+                tableNumber = Integer.parseInt(tableNumberObj.toString());
+                session.setAttribute("tableNumber", tableNumber);
+            } catch (NumberFormatException ignored) {
+                // 아래 공통 에러 처리
+            }
+        }
+
+        if (tableNumber == null) {
+            res.put("success", false);
+            res.put("message", "tableNumber 세션이 없습니다.");
+            res.put("messages", List.of());
+            return res;
+        }
+
+        Integer tableId = cartMapper.findCafeTableIdByTableNumber(tableNumber);
+        if (tableId == null) {
+            res.put("success", false);
+            res.put("message", "테이블을 찾을 수 없습니다.");
+            res.put("messages", List.of());
+            return res;
+        }
+
+        List<TableMessage> messages = tableMessageMapper.findUnreadStaffByTableId(tableId);
+        List<Map<String, Object>> payload = messages.stream()
+                .map(m -> {
+                    Map<String, Object> item = new LinkedHashMap<>();
+                    item.put("id", m.getId());
+                    item.put("content", m.getContent());
+                    item.put("createdAt", m.getCreatedAt());
+                    return item;
+                })
+                .toList();
+
+        res.put("success", true);
+        res.put("count", payload.size());
+        res.put("messages", payload);
+        return res;
+    }
+
+    @PatchMapping("/kiosk/messages/{id}/read")
+    public Map<String, Object> markMessageAsReadForKiosk(@PathVariable long id) {
+        tableMessageMapper.markAsRead(id);
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("success", true);
+        return res;
+    }
+
+    // ===========================================================
     // 헬퍼
     // ===========================================================
 
     private int toInt(Object val) {
         if (val == null) return 0;
-        return ((Number) val).intValue();
+        if (val instanceof Number number) {
+            return number.intValue();
+        }
+        try {
+            return Integer.parseInt(val.toString().trim());
+        } catch (NumberFormatException e) {
+            log.warn("숫자 변환 실패 - value: {}", val);
+            return 0;
+        }
     }
 }

@@ -343,6 +343,7 @@
     lucide.createIcons({attrs: {'stroke-width': 2.5}});
 
     /* Thymeleaf 인라인 변수 안전하게 가져오기 */
+    const TABLE_NUMBER = [[${tableNumber}]];
     const SESSION_START_TIME = [[${sessionStartTime}]];
     const DURATION_MINUTES   = [[${durationMinutes}]];
 
@@ -352,10 +353,33 @@
 
     function openServiceModal() { document.getElementById('serviceModal').classList.add('active'); }
     function closeServiceModal() { document.getElementById('serviceModal').classList.remove('active'); }
+    async function callService(serviceType) {
+        try {
+            const res = await fetch('/kiosk/service-request', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ serviceType, tableNumber: TABLE_NUMBER })
+            });
+            const data = await res.json().catch(() => ({ success: false }));
+            if (!res.ok || !data.success) {
+                throw new Error(data.message || ('서버 오류 (' + res.status + ')'));
+            }
+            closeServiceModal();
+            showToast(data.message || (serviceType + ' 요청이 전송되었습니다.'));
+        } catch (e) {
+            showToast('요청 실패: ' + e.message);
+        }
+    }
 
     function startTimer() {
         const timerText = document.getElementById('timer-text');
         const badge = document.getElementById('timer-badge');
+        const formatHoursMinutes = (ms) => {
+            const totalMinutes = Math.floor(ms / 60000);
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            return `${hours}시간 ${minutes}분`;
+        };
 
         if (!SESSION_START_TIME || !DURATION_MINUTES) {
             if (timerText) timerText.innerText = "자유이용";
@@ -368,15 +392,11 @@
             const now = Date.now();
             const remaining = endTime - now;
             if (remaining > 0) {
-                const mins = Math.floor(remaining / 60000);
-                const secs = Math.floor((remaining % 60000) / 1000);
-                timerText.innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+                timerText.innerText = formatHoursMinutes(remaining);
                 badge.classList.remove('overtime');
             } else {
                 const overtime = Math.abs(remaining);
-                const mins = Math.floor(overtime / 60000);
-                const secs = Math.floor((overtime % 60000) / 1000);
-                timerText.innerText = `+${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+                timerText.innerText = `+${formatHoursMinutes(overtime)}`;
                 badge.classList.add('overtime');
             }
         }
@@ -420,7 +440,42 @@
     document.addEventListener('DOMContentLoaded', () => {
         startTimer();
         startOrderStatusWatcher();
+        startStaffMacroWatcher();
     });
+
+    function startStaffMacroWatcher() {
+        async function checkStaffMessages() {
+            try {
+                const res = await fetch('/kiosk/messages/staff/unread', {
+                    headers: { 'Accept': 'application/json' },
+                    credentials: 'same-origin'
+                });
+                if (!res.ok) return;
+                const contentType = res.headers.get('content-type') || '';
+                if (!contentType.includes('application/json')) {
+                    if (res.redirected && res.url) window.location.href = res.url;
+                    return;
+                }
+                const data = await res.json();
+                const messages = Array.isArray(data?.messages) ? data.messages : [];
+                if (!messages.length) return;
+
+                for (const msg of messages) {
+                    if (msg?.content) {
+                        showToast('📨 ' + msg.content);
+                    }
+                    if (msg?.id) {
+                        await fetch(`/kiosk/messages/${msg.id}/read`, { method: 'PATCH' });
+                    }
+                }
+            } catch (err) {
+                console.error('메크로 메시지 확인 실패:', err);
+            }
+        }
+
+        checkStaffMessages();
+        setInterval(checkStaffMessages, 5000);
+    }
 
     // 주문 상태 감시 함수
     function startOrderStatusWatcher() {
@@ -430,9 +485,14 @@
 
         function checkOrderStatus() {
             fetch('/kiosk/order/active')
-                .then(response => response.json())
+                .then(async response => {
+                    if (!response.ok) return [];
+                    const contentType = response.headers.get('content-type') || '';
+                    if (!contentType.includes('application/json')) return [];
+                    return response.json();
+                })
                 .then(orders => {
-                    if (!orders || orders.length === 0) {
+                    if (!Array.isArray(orders) || orders.length === 0) {
                         statusBox.classList.add('hidden');
                         lastOrderCount = 0;
                         return;

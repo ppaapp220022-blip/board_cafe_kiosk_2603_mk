@@ -94,7 +94,8 @@ function onNewOrder(order) {
 function showNewOrderNotificationModal(order) {
     const modal = document.getElementById('newOrderNotificationModal');
     if (!modal) {
-        console.error('❌ newOrderNotificationModal을 찾을 수 없음');
+        // 대시보드 템플릿에 모달이 없는 버전도 있으므로 예외 없이 종료
+        console.warn('⚠️ newOrderNotificationModal 없음 - 모달 표시 생략');
         return;
     }
 
@@ -155,8 +156,10 @@ function closeNewOrderNotification() {
     const modal = document.getElementById('newOrderNotificationModal');
     if (modal) {
         const content = modal.querySelector('.modal-content');
-        content.style.transform = 'scale(0.8)';
-        content.style.opacity = '0';
+        if (content) {
+            content.style.transform = 'scale(0.8)';
+            content.style.opacity = '0';
+        }
         setTimeout(() => {
             modal.style.display = 'none';
             document.querySelectorAll('.table-card').forEach(card => {
@@ -214,6 +217,10 @@ function onOrdersUpdated(orders, tableId) {
     if (typeof renderOrders === 'function') {
         renderOrders(orders);
     }
+    // 대시보드 카드의 상단 주문 상태 배지도 최신화
+    if (typeof refreshTableCardOrderBadges === 'function') {
+        refreshTableCardOrderBadges();
+    }
 }
 
 // ===================================================
@@ -238,43 +245,86 @@ async function updateOrderStatus(orderId, nextStatus) {
     try {
         console.log('📝 주문 상태 변경 요청:', { orderId, nextStatus });
 
-        let response = await fetch(`/kiosk/order/${orderId}/status`, {
+        // 1) DB 기준 현재 상태/다음 상태를 먼저 조회해서 UI 지연으로 인한 오판을 방지
+        let statusToSend = nextStatus;
+        let currentStatusFromDb = null;
+        const nextStatusRes = await fetch(`/admin/api/dashboard/orders/${orderId}/next-status`, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' }
+        });
+
+        if (nextStatusRes.ok) {
+            const nextStatusData = await nextStatusRes.json();
+            currentStatusFromDb = nextStatusData.currentStatus || null;
+
+            if (!nextStatusData.canChange || !nextStatusData.nextStatus) {
+                console.warn('⚠️ 이미 변경 불가 상태:', nextStatusData);
+                if (typeof fetchActiveOrders === 'function') await fetchActiveOrders();
+                alert('이미 완료/취소된 주문입니다.');
+                return;
+            }
+
+            // UI에서 전달된 값보다 서버가 계산한 다음 상태를 우선 사용
+            if (statusToSend !== nextStatusData.nextStatus) {
+                console.warn('UI 상태와 DB 상태 불일치 - 서버 기준으로 교정', {
+                    uiNext: statusToSend,
+                    dbCurrent: currentStatusFromDb,
+                    dbNext: nextStatusData.nextStatus
+                });
+                statusToSend = nextStatusData.nextStatus;
+            }
+        }
+
+        // 2) 관리자 대시보드 전용 API로 상태 변경
+        let response = await fetch(`/admin/api/dashboard/orders/${orderId}/status`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            body: JSON.stringify({ status: nextStatus })
+            body: JSON.stringify({ status: statusToSend })
         });
-
-        console.log('📊 응답 상태:', response.status);
 
         if (response.ok) {
             console.log('✅ 주문 상태 변경 성공');
             if (typeof fetchActiveOrders === 'function') await fetchActiveOrders();
             alert('주문 상태가 변경되었습니다.');
-        } else {
-            console.warn('⚠️ 키오스크 API 실패, 관리자 API 시도');
-
-            response = await fetch(`/admin/orders/${orderId}/status`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({ status: nextStatus })
-            });
-
-            if (response.ok) {
-                console.log('✅ 주문 상태 변경 성공 (관리자 API)');
-                if (typeof fetchActiveOrders === 'function') await fetchActiveOrders();
-                alert('주문 상태가 변경되었습니다.');
-            } else {
-                const errorData = await response.json().catch(() => ({ message: response.statusText }));
-                console.error('❌ 상태 변경 실패:', response.status, errorData);
-                alert("❌ " + (errorData.message || errorData.error || "주문 상태 변경에 실패했습니다."));
-            }
+            return;
         }
+
+        // 3) 폴백: 기존 API 경로로 한 번 더 시도
+        console.warn('⚠️ 관리자 API 실패, 폴백 시도');
+        response = await fetch(`/admin/orders/${orderId}/status`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ status: statusToSend })
+        });
+
+        if (response.ok) {
+            console.log('✅ 주문 상태 변경 성공 (폴백)');
+            if (typeof fetchActiveOrders === 'function') await fetchActiveOrders();
+            alert('주문 상태가 변경되었습니다.');
+            return;
+        }
+
+        const errorData = await response.json().catch(() => ({ message: response.statusText }));
+        const errorMessage = errorData.message || errorData.error || "주문 상태 변경에 실패했습니다.";
+
+        // 4) 동시성 충돌(이미 같은 상태/다른 상태로 변경됨) 시 최신값으로 재조회 후 안내
+        if (typeof errorMessage === 'string' && errorMessage.includes('허용되지 않는 상태 전이')) {
+            console.warn('⚠️ 상태 전이 충돌 감지 - 최신 상태 재조회', {
+                orderId, statusToSend, currentStatusFromDb, errorMessage
+            });
+            if (typeof fetchActiveOrders === 'function') await fetchActiveOrders();
+            alert('다른 화면에서 먼저 상태가 변경되었습니다. 최신 상태로 갱신했습니다.');
+            return;
+        }
+
+        console.error('❌ 상태 변경 실패:', response.status, errorData);
+        alert("❌ " + errorMessage);
     } catch (err) {
         console.error('❌ updateOrderStatus 에러:', err);
         alert("서버와 통신 중 오류가 발생했습니다: " + err.message);

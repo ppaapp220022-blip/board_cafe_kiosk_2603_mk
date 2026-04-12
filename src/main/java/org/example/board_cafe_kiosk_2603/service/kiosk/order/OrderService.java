@@ -40,7 +40,7 @@ public class OrderService {
     // ===================================================
 
     @Transactional
-    public OrdersDTO createOrderFromCart(int tableNumber, String customerPhone, int totalAmount) {
+    public OrdersDTO createOrderFromCart(int tableNumber, String customerPhone, Integer requestedTotalAmount) {
         // tableNumber → tableId 변환
         Integer tableId = cartMapper.findCafeTableIdByTableNumber(tableNumber);
         if (tableId == null) {
@@ -70,16 +70,24 @@ public class OrderService {
             return OrdersDTO.builder().success(false).message("장바구니가 비어있습니다.").build();
         }
 
+        int serverTotalAmount = cartItems.stream()
+                .mapToInt(ci -> ci.getMenuPrice() * ci.getQuantity())
+                .sum();
+        if (requestedTotalAmount != null && requestedTotalAmount != serverTotalAmount) {
+            log.warn("주문 금액 불일치 감지 - tableNumber: {}, 요청금액: {}, 서버계산금액: {} (서버금액으로 처리)",
+                    tableNumber, requestedTotalAmount, serverTotalAmount);
+        }
+
         // 주문 생성
         Orders order = Orders.builder()
                 .sessionId(session.getId())
                 .tableId(tableId)
                 .customerPhone((customerPhone != null && !customerPhone.isBlank()) ? customerPhone : null)
                 .status(OrderStatus.ORDERED.name())
-                .totalAmount(totalAmount)
+                .totalAmount(serverTotalAmount)
                 .build();
         ordersMapper.insertOrder(order);
-        log.info(" 주문 생성 - orderId: {}, tableId: {}, amount: {}", order.getId(), tableId, totalAmount);
+        log.info(" 주문 생성 - orderId: {}, tableId: {}, amount: {}", order.getId(), tableId, serverTotalAmount);
 
         // 주문 항목 추가
         for (CartItem ci : cartItems) {
@@ -101,6 +109,24 @@ public class OrderService {
         broadcastNewOrder(result, tableId);
 
         return result;
+    }
+
+    public boolean isOrderOwnedByTableNumber(int orderId, int tableNumber) {
+        Orders order = ordersMapper.findByOrderId(orderId);
+        if (order == null) {
+            return false;
+        }
+        Integer tableId = cartMapper.findCafeTableIdByTableNumber(tableNumber);
+        return tableId != null && order.getTableId() == tableId;
+    }
+
+    public boolean isSessionOwnedByTableNumber(long sessionId, int tableNumber) {
+        var session = tableSessionMapper.findById(sessionId);
+        if (session == null) {
+            return false;
+        }
+        Integer tableId = cartMapper.findCafeTableIdByTableNumber(tableNumber);
+        return tableId != null && session.getTableId() == tableId;
     }
 
     // ===================================================
@@ -235,6 +261,7 @@ public class OrderService {
         return ordersMapper.findItemsByOrderId(orderId).stream()
                 .map(item -> OrderItemDTO.builder()
                         .id(item.getId())
+                        .orderId(item.getOrderId())
                         .menuId(item.getMenuId())
                         .menuName(item.getMenuName())
                         .price(item.getPrice())

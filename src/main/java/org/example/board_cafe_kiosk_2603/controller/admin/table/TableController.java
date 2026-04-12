@@ -35,6 +35,16 @@ public class TableController {
     }
 
     /**
+     * [GET] 대시보드 테이블 상태 폴링용 API
+     * 프론트에서 주기적으로 조회하여 상태가 바뀌면 화면을 새로고침합니다.
+     */
+    @ResponseBody
+    @GetMapping("/tables")
+    public ResponseEntity<List<CafeTableDTO>> getTablesSnapshot() {
+        return ResponseEntity.ok(cafeTableService.getAllTableStatus());
+    }
+
+    /**
      * [GET] 특정 테이블의 실시간 주문 항목 조회 (AJAX 호출용)
      * @param id 테이블 고유 ID
      * @return OrderItemDTO 리스트 (PAID/CANCELLED 제외된 순수 이용 내역)

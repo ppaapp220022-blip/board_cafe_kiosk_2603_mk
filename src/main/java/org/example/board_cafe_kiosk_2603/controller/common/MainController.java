@@ -11,7 +11,6 @@ import org.example.board_cafe_kiosk_2603.service.admin.cafeTable.CafeTableServic
 import org.example.board_cafe_kiosk_2603.service.admin.cafeTable.TableSessionAdminService;
 import org.example.board_cafe_kiosk_2603.service.kiosk.tableSession.TableSessionKioskService;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -127,7 +126,7 @@ public class MainController {
             session.setAttribute("packageId", activeSession.getPackageId()); // ★ 추가
             log.info("기존 활성 세션 존재 — 기존 인원수: {}명, packageId: {}",
                     activeSession.getInitialGuestCnt(), activeSession.getPackageId());
-            return "redirect:/kiosk/menu";
+            return "redirect:/kiosk/drinks";
         }
 
         // 활성 세션 없으면 신규 생성 후 cafe_table 동기화
@@ -141,7 +140,7 @@ public class MainController {
         log.info("table_session 생성 + cafe_table 동기화 완료 — tableId: {}, packageId: {}, partySize: {}, sessionId: {}",
                 tableId, packageId, partySize, newSessionId);
 
-        return "redirect:/kiosk/menu";
+        return "redirect:/kiosk/drinks";
     }
 
     /* [4단계] 메인 메뉴 페이지
@@ -151,17 +150,7 @@ public class MainController {
      */
     @GetMapping("/kiosk/menu")
     public String mainMenuPage(HttpSession session,
-                               Model model,
                                HttpServletResponse response) throws IOException {
-
-        // partySize 세션 유효성 검사
-        Object partySize = session.getAttribute("partySize");
-        if (!(partySize instanceof Integer)) {
-            log.warn("--- [MainController] /kiosk/menu 진입 시 partySize 없음 → /kiosk/session/start 리다이렉트 ---");
-            response.sendRedirect("/kiosk/session/start");
-            return null;
-        }
-
         Object tableIdObj = session.getAttribute("tableId");
         if (!(tableIdObj instanceof Integer tableId)) {
             log.warn("--- [MainController] /kiosk/menu 진입 시 tableId 없음 → /kiosk/session/start 리다이렉트 ---");
@@ -169,9 +158,10 @@ public class MainController {
             return null;
         }
 
-        CafeTableSession activeSession = tableSessionAdminService.getActiveSession(tableId);
-        if (activeSession == null) {
-            log.warn("--- [MainController] /kiosk/menu 진입 시 활성 세션 없음 → 세션 정리 후 /kiosk/session/start 리다이렉트 ---");
+        String tableStatus = cafeTableService.getTableStatus(tableId);
+        if (!"OCCUPIED".equals(tableStatus)) {
+            log.warn("--- [MainController] /kiosk/menu 진입 차단: 대시보드 상태가 OCCUPIED 아님 (tableId: {}, status: {}) ---",
+                    tableId, tableStatus);
             session.removeAttribute("partySize");
             session.removeAttribute("packageId");
             session.removeAttribute("sessionStartTime");
@@ -180,19 +170,36 @@ public class MainController {
             return null;
         }
 
-        log.info("키오스크 -> 메인 메뉴 화면 진입 | tableNumber: {}, partySize: {}, packageId: {}",
+        CafeTableSession activeSession = tableSessionAdminService.getActiveSession(tableId);
+        if (activeSession == null) {
+            Long recoverSessionId = cafeTableService.findActiveSessionByTableId(tableId);
+            if (recoverSessionId != null) {
+                cafeTableService.syncTableWithSession(tableId, recoverSessionId);
+                activeSession = tableSessionAdminService.getActiveSession(tableId);
+                log.warn("--- [MainController] OCCUPIED 상태-세션 불일치 복구 완료 (tableId: {}, sessionId: {}) ---",
+                        tableId, recoverSessionId);
+            } else {
+                log.warn("--- [MainController] OCCUPIED 상태지만 활성 세션 없음 (tableId: {}) - 대시보드 기준으로 메뉴 진입 허용 ---",
+                        tableId);
+            }
+        }
+
+        if (activeSession != null) {
+            session.setAttribute("partySize", activeSession.getInitialGuestCnt());
+            session.setAttribute("packageId", activeSession.getPackageId());
+            long checkInMillis = activeSession.getCheckInTime()
+                    .atZone(java.time.ZoneId.systemDefault())
+                    .toInstant()
+                    .toEpochMilli();
+            session.setAttribute("sessionStartTime", checkInMillis);
+        }
+
+        log.info("키오스크 -> 메뉴 진입 검증 완료(대시보드 기준) | tableNumber: {}, partySize: {}, packageId: {}",
                 session.getAttribute("tableNumber"),
-                partySize,
+                session.getAttribute("partySize"),
                 session.getAttribute("packageId"));
 
-        model.addAttribute("tableNumber",    session.getAttribute("tableNumber"));
-        model.addAttribute("partySize",      partySize);
-        model.addAttribute("packageId",      session.getAttribute("packageId"));      // ★ 추가
-        model.addAttribute("customerPhone",  session.getAttribute("customerPhone"));
-        model.addAttribute("sessionStartTime", session.getAttribute("sessionStartTime"));
-        model.addAttribute("durationMinutes",  session.getAttribute("durationMinutes"));
-
-        return "layout/kiosk_layout";
+        return "redirect:/kiosk/drinks";
     }
 
     // ===========================================================

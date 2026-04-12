@@ -4,9 +4,11 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.domain.common.kioskItem;
+import org.example.board_cafe_kiosk_2603.service.admin.cafeTable.CafeTableService;
 import org.example.board_cafe_kiosk_2603.service.admin.cafeTable.TableSessionAdminService;
 import org.example.board_cafe_kiosk_2603.service.admin.product.GameService;
 import org.example.board_cafe_kiosk_2603.service.admin.product.MenuService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -49,6 +51,7 @@ public class kioskController {
     private final GameService gameService;
     private final MenuService menuService;
     private final TableSessionAdminService tableSessionAdminService;
+    private final CafeTableService cafeTableService;
 
     // ===========================================================
     // 진입 화면
@@ -56,6 +59,15 @@ public class kioskController {
 
     @GetMapping("/screensaver")
     public String screensaver(HttpSession session, Model model) {
+        Object tableIdObj = session.getAttribute("tableId");
+        if (tableIdObj instanceof Integer tableId) {
+            String status = cafeTableService.getTableStatus(tableId);
+            if ("CLEANING".equals(status)) {
+                model.addAttribute("tableNumber", session.getAttribute("tableNumber"));
+                return "kiosk/cleaning_wait";
+            }
+        }
+
         model.addAttribute("tableNumber", session.getAttribute("tableNumber"));
         log.info("스크린세이버 접근 - 테이블: {}", session.getAttribute("tableNumber"));
         return "kiosk/screensaver";
@@ -63,6 +75,15 @@ public class kioskController {
 
     @GetMapping("/headcount")
     public String headcount(HttpSession session, Model model) {
+        Object tableIdObj = session.getAttribute("tableId");
+        if (tableIdObj instanceof Integer tableId) {
+            String status = cafeTableService.getTableStatus(tableId);
+            if ("CLEANING".equals(status)) {
+                model.addAttribute("tableNumber", session.getAttribute("tableNumber"));
+                return "kiosk/cleaning_wait";
+            }
+        }
+
         model.addAttribute("tableNumber", session.getAttribute("tableNumber"));
         log.info("인원수 선택 화면 - 테이블: {}", session.getAttribute("tableNumber"));
         return "kiosk/headcount";
@@ -83,8 +104,44 @@ public class kioskController {
     public String sessionStart(HttpSession session, Model model) {
         log.info("--- [KioskController] 인원수 입력 화면 진입 | tableNumber: {} ---",
                 session.getAttribute("tableNumber"));
+
+        Object tableIdObj = session.getAttribute("tableId");
+        if (tableIdObj instanceof Integer tableId) {
+            String status = cafeTableService.getTableStatus(tableId);
+            if ("CLEANING".equals(status)) {
+                model.addAttribute("tableNumber", session.getAttribute("tableNumber"));
+                return "kiosk/cleaning_wait";
+            }
+        }
+
         model.addAttribute("tableNumber", session.getAttribute("tableNumber"));
-        return "kiosk/headcount";
+        return "kiosk/screensaver";
+    }
+
+    @GetMapping("/table/status")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> tableStatus(HttpSession session) {
+        Object tableIdObj = session.getAttribute("tableId");
+        Map<String, Object> body = new LinkedHashMap<>();
+
+        if (!(tableIdObj instanceof Integer tableId)) {
+            body.put("success", false);
+            body.put("message", "tableId 세션이 없습니다.");
+            body.put("status", "UNKNOWN");
+            return ResponseEntity.ok(body);
+        }
+
+        String status = cafeTableService.getTableStatus(tableId);
+        if (status == null) {
+            body.put("success", false);
+            body.put("message", "테이블 상태를 찾을 수 없습니다.");
+            body.put("status", "UNKNOWN");
+            return ResponseEntity.ok(body);
+        }
+
+        body.put("success", true);
+        body.put("status", status);
+        return ResponseEntity.ok(body);
     }
 
     // ===========================================================
@@ -255,13 +312,28 @@ public class kioskController {
             return "redirect:/kiosk/session/start";
         }
 
-        if (tableSessionAdminService.getActiveSession(tableId) == null) {
-            log.warn("--- [KioskController] 메뉴 탭 접근 차단: 활성 세션 없음 (tableId: {}) ---", tableId);
+        String tableStatus = cafeTableService.getTableStatus(tableId);
+        if (!"OCCUPIED".equals(tableStatus)) {
+            log.warn("--- [KioskController] 메뉴 탭 접근 차단: 대시보드 상태가 OCCUPIED 아님 (tableId: {}, status: {}) ---",
+                    tableId, tableStatus);
             session.removeAttribute("partySize");
             session.removeAttribute("packageId");
             session.removeAttribute("sessionStartTime");
             session.removeAttribute("durationMinutes");
             return "redirect:/kiosk/session/start";
+        }
+
+        // 대시보드 기준(OCCUPIED)이면 진입 허용하되, 활성 세션 누락 시 자동 복구 시도
+        if (tableSessionAdminService.getActiveSession(tableId) == null) {
+            Long recoverSessionId = cafeTableService.findActiveSessionByTableId(tableId);
+            if (recoverSessionId != null) {
+                cafeTableService.syncTableWithSession(tableId, recoverSessionId);
+                log.warn("--- [KioskController] OCCUPIED 상태-세션 불일치 복구 완료 (tableId: {}, sessionId: {}) ---",
+                        tableId, recoverSessionId);
+            } else {
+                log.warn("--- [KioskController] OCCUPIED 상태지만 활성 세션 없음 (tableId: {}) - 대시보드 기준으로 진입 허용 ---",
+                        tableId);
+            }
         }
 
         return null;

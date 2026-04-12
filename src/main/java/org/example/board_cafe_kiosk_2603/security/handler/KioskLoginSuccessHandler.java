@@ -160,9 +160,9 @@ public class KioskLoginSuccessHandler implements AuthenticationSuccessHandler {
                 log.info("--- [KioskLoginSuccess] 기존 cart 유지 ---");
             }
 
-            // 진행 중인 세션 있음 → 메뉴 화면으로 이동
-            log.info("--- [KioskLoginSuccess] 활성 세션 존재 → /kiosk/menu 이동 ---");
-            response.sendRedirect("/kiosk/menu");
+            // 진행 중인 세션 있음 → 기본 메뉴 탭(음료)로 이동
+            log.info("--- [KioskLoginSuccess] 활성 세션 존재 → /kiosk/drinks 이동 ---");
+            response.sendRedirect("/kiosk/drinks");
 
         } else {
             // ────────────────────────────────────────────────────
