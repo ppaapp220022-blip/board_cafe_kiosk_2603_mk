@@ -5,6 +5,8 @@ import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.domain.admin.product.Game;
 import org.example.board_cafe_kiosk_2603.dto.admin.product.GameRequestDTO;
 import org.example.board_cafe_kiosk_2603.dto.admin.product.GameResponseDTO;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageRequestDTO;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageResponseDTO;
 import org.example.board_cafe_kiosk_2603.mapper.admin.product.GameMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -146,5 +148,30 @@ class GameServiceImpl implements GameService {
                 });
         int result = gameMapper.toggleActive(id);
         log.debug("게임 활성 상태 토글 결과 - affected rows: {}", result);
+    }
+
+    /*===========페이지=========== */
+    /** 전체 게임 목록 조회 - 페이징 */
+    @Override
+    public PageResponseDTO<GameResponseDTO> getAll(PageRequestDTO pageRequestDTO) {
+        log.debug("GameServiceImpl.getAll(paged) 실행");
+        List<GameResponseDTO> list = gameMapper.findAllPaged(pageRequestDTO);
+        int total = gameMapper.countAll();
+        log.debug("조회된 게임 수: {}, 전체: {}", list.size(), total);
+        return new PageResponseDTO<>(pageRequestDTO, total, list);
+    }
+
+    /** category_id 기준 게임 목록 조회 - 페이징 */
+    @Override
+    public PageResponseDTO<GameResponseDTO> getByCategoryId(int categoryId, PageRequestDTO pageRequestDTO) {
+        log.debug("GameServiceImpl.getByCategoryId(paged) 실행 - categoryId: {}", categoryId);
+        List<GameResponseDTO> list = gameMapper.findByCategoryIdPaged(categoryId, pageRequestDTO);
+        int total = gameMapper.countByCategoryId(categoryId);
+        log.debug("조회된 게임 수 (categoryId={}): {}, 전체: {}", categoryId, list.size(), total);
+        return PageResponseDTO.<GameResponseDTO>withAll()
+                .pageRequestDTO(pageRequestDTO)
+                .dtoList(list)
+                .total(total)
+                .build();
     }
 }

@@ -2,6 +2,8 @@ package org.example.board_cafe_kiosk_2603.service.admin.product;
 
 import org.example.board_cafe_kiosk_2603.dto.admin.product.MenuRequestDTO;
 import org.example.board_cafe_kiosk_2603.dto.admin.product.MenuResponseDTO;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageRequestDTO;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageResponseDTO;
 
 import java.util.List;
 
@@ -36,10 +38,19 @@ public interface MenuService {
     /** 메뉴 판매 상태 토글 */
     void toggleAvailable(int id);
 
-    //
     /** category type 기준 메뉴 목록 반환 (FOOD / DRINK / GUEST) */
     List<MenuResponseDTO> getByType(String type);
 
     /** 소프트 삭제 여부 기준 메뉴 목록 반환 (숨김 탭용) */
     List<MenuResponseDTO> getByIsDeleted(boolean isDeleted);
+
+    /*========페이지=======*/
+    /** category type 기준 메뉴 목록 반환 - 페이징 */
+    PageResponseDTO<MenuResponseDTO> getByType(String type, PageRequestDTO pageRequestDTO);
+
+    /** category type + category_id 기준 메뉴 목록 반환 - 페이징 */
+    PageResponseDTO<MenuResponseDTO> getByTypeAndCategoryId(String type, int categoryId, PageRequestDTO pageRequestDTO);
+
+    /** 소프트 삭제 여부 기준 메뉴 목록 반환 - 페이징 (숨김 탭용) */
+    PageResponseDTO<MenuResponseDTO> getByIsDeleted(boolean isDeleted, PageRequestDTO pageRequestDTO);
 }

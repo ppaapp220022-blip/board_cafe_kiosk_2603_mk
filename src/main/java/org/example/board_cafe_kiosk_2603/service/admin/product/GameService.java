@@ -3,6 +3,8 @@ package org.example.board_cafe_kiosk_2603.service.admin.product;
 
 import org.example.board_cafe_kiosk_2603.dto.admin.product.GameRequestDTO;
 import org.example.board_cafe_kiosk_2603.dto.admin.product.GameResponseDTO;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageRequestDTO;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageResponseDTO;
 
 import java.util.List;
 
@@ -33,4 +35,11 @@ public interface GameService {
 
     /** 게임 활성 상태 토글 */
     void toggleActive(int id);
+
+    /*============페이지=============*/
+    /** 전체 게임 목록 - 페이징 */
+    PageResponseDTO<GameResponseDTO> getAll(PageRequestDTO pageRequestDTO);
+
+    /** category_id 기준 게임 목록 - 페이징 */
+    PageResponseDTO<GameResponseDTO> getByCategoryId(int categoryId, PageRequestDTO pageRequestDTO);
 }

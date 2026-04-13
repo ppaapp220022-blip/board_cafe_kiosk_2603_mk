@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.domain.admin.product.CategoryType;
 import org.example.board_cafe_kiosk_2603.dto.admin.product.*;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageRequestDTO;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageResponseDTO;
 import org.example.board_cafe_kiosk_2603.service.admin.product.CategoryService;
 import org.example.board_cafe_kiosk_2603.service.admin.product.GameItemService;
 import org.example.board_cafe_kiosk_2603.service.admin.product.GameService;
@@ -35,25 +37,28 @@ public class GameController {
     /* 게임 전체 목록 조회 */
     // 카테고리별 필터링 기능 포함
     @GetMapping
-    public String getAll(@RequestParam(required = false) Integer categoryId, Model model) {
-        log.info("--- 게임 목록 조회 : (categoryId Filter: {}) ---", categoryId);
+    public String getAll(@RequestParam(required = false) Integer categoryId,
+                         PageRequestDTO pageRequestDTO,
+                         Model model) {
+        log.info("--- 게임 목록 조회 : (categoryId Filter: {}, page: {}) ---", categoryId, pageRequestDTO.getPage());
 
         try {
             // 카테고리 필터 적용: categoryId 있으면 해당 카테고리만, 없으면 전체
-            List<GameResponseDTO> gameList = (categoryId != null)
-                    ? gameService.getByCategoryId(categoryId)
-                    : gameService.getAll();
+            PageResponseDTO<GameResponseDTO> pageResponse = (categoryId != null)
+                    ? gameService.getByCategoryId(categoryId, pageRequestDTO)
+                    : gameService.getAll(pageRequestDTO);
 
             // 게임 탭에서 사용할 카테고리 목록 (GAME 타입만)
             List<CategoryResponseDTO> categoryList = categoryService.getByType(CategoryType.GAME);
 
-            model.addAttribute("gameList", gameList);
+            model.addAttribute("pageResponse", pageResponse);
             model.addAttribute("categoryList", categoryList);
-            model.addAttribute("selectedCategoryId", categoryId);   // 뷰에서 활성 버튼 판단에 사용
+            model.addAttribute("selectedCategoryId", categoryId);
+            model.addAttribute("pageRequestDTO", pageRequestDTO);
             model.addAttribute("activePage", "productReg");
             model.addAttribute("activeTab", "game");
 
-            log.info("게임 목록 조회 성공 - 건수: {}", gameList.size());
+            log.info("게임 목록 조회 성공 - 건수: {}, 전체: {}", pageResponse.getDtoList().size(), pageResponse.getTotal());
         } catch (Exception e) {
             log.error("--- 게임 목록 조회 중 오류 발생: {} ---", e.getMessage());
         }
