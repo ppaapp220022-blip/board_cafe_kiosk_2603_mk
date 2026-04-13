@@ -68,10 +68,9 @@ public class PointService {
     /** 포인트 계좌 신규 생성 (이력 없음, 키오스크 신규 회원용) */
     @Transactional
     public void createAccount(String phone) {
-        if (pointMapper.findByPhone(phone) == null) {
-            pointMapper.insert(Point.builder().phone(phone).balance(0).build());
-            log.info("포인트 계좌 신규 생성 - 전화번호: {}", phone);
-        }
+        // 신규가입 시 customer + point를 함께 보장한다.
+        getOrCreatePoint(phone);
+        log.info("신규 회원 계정 준비 완료 - 전화번호: {}", phone);
     }
 
     // ===================================================
@@ -80,6 +79,17 @@ public class PointService {
 
     @Transactional
     public void earnPoint(String phone, int amount, Long orderId) {
+        if (amount <= 0) {
+            return;
+        }
+
+        // 같은 주문에서 포인트 사용(USE)이 있었다면 적립(EARN) 금지
+        if (orderId != null && pointMapper.countUseHistoryByOrderId(orderId) > 0) {
+            String message = "포인트 사용이 포함된 주문은 적립할 수 없습니다. orderId: " + orderId;
+            log.warn("포인트 적립 차단 - {} phone: {}", message, phone);
+            throw new IllegalStateException(message);
+        }
+
         Point point = getOrCreatePoint(phone);
 
         int newBalance = point.getBalance() + amount;

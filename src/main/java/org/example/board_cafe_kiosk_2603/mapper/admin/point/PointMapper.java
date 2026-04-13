@@ -39,6 +39,9 @@ public interface PointMapper {
     // 포인트 이력 추가
     void insertHistory(PointHistory history);
 
+    // 주문 단위 포인트 사용 이력 존재 여부
+    int countUseHistoryByOrderId(@Param("orderId") Long orderId);
+
     /*=============== 페이징 ==============*/
     // [페이징된 포인트 목록 조회]
     List<Point> selectList(PageRequestDTO pageRequestDTO);

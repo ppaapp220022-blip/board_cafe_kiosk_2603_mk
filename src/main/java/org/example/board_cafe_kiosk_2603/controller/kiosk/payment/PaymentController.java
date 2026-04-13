@@ -61,7 +61,6 @@ public class PaymentController {
             @RequestParam("tableNumber") int tableNumber,
             @RequestBody @Valid PaymentDTO request,
             HttpSession session) {
-
         log.info("토스 결제 준비 요청 - tableNumber: {}", tableNumber);
 
         // 포인트 사용액을 세션에 저장 (success 콜백에서 사용)

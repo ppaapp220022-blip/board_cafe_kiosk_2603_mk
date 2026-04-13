@@ -12,9 +12,11 @@ import lombok.NoArgsConstructor;
 public class OrderItemDTO {
 
     private int     id;
+    private Integer orderId;
     private Integer menuId;
     private String  menuName;
     private int     price;
     private int     quantity;
+    private String  status;
 }
 

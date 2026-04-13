@@ -44,6 +44,7 @@ public class MacroMessageServiceImpl implements MacroMessageService {
     }
 
     @Override
+    @Transactional
     public void sendMessage(Integer tableId, Integer macroId) {
         log.info("--- MacroMessageServiceImpl sendMessage: Table {}, Macro {} ---", tableId, macroId);
 

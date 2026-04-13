@@ -55,6 +55,11 @@ public interface CafeTableMapper {
     Long selectCurrentSessionId(@Param("tableId") Integer tableId);
 
     /**
+     * [Select] 특정 테이블의 현재 상태 조회 (EMPTY/OCCUPIED/CLEANING)
+     */
+    String selectStatusById(@Param("tableId") Integer tableId);
+
+    /**
      * [Update] 액세스 토큰(UUID) 개별 갱신
      */
 //    int updateAccessToken(@Param("id") Integer id, @Param("accessToken") String accessToken);

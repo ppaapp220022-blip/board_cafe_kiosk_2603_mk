@@ -56,24 +56,14 @@ public class SecurityConfig {
         http
                 .securityMatcher("/kiosk/**")
                 .authorizeHttpRequests(auth -> {
-                    log.info("  [kioskChain] 권한 규칙 설정: 정적리소스·로그인 URL → permitAll, 나머지 → ROLE_TABLE");
+                    log.info("  [kioskChain] 권한 규칙 설정: 로그인 URL permitAll, 관리자 주문 모니터링 URL은 ADMIN/STAFF/SUPER, 나머지 → ROLE_TABLE");
                     auth
                             // 로그인 관련 URL 허용
                             .requestMatchers("/kiosk/login",
-                                    "/kiosk/login-process",
-                                    "/kiosk/order/pending", // 신규 주문 조회 및 주문 API
-                                    "/kiosk/order/create",
-                                    "/kiosk/order/api/**",
-                                    "/kiosk/order/latest",
-                                    "/kiosk/order/active",
-                                    "/kiosk/order/session/**",
-                                    "/kiosk/order/**",  // PATCH, DELETE 요청도 인증 불필요
-                                    "/ws/**", "/app/**", // WebSocket
-                                    "/kiosk/cart/add",  // 카트 관련 (TABLE 역할 필요)
-                                    "/kiosk/cart/update",
-                                    "/kiosk/cart/clear",
-                                    "/kiosk/cart/items"
+                                    "/kiosk/login-process"
                             ).permitAll()
+                            // 관리자 대시보드의 신규 주문 모니터링용
+                            .requestMatchers("/kiosk/order/pending").hasAnyRole("ADMIN", "STAFF", "SUPER")
                             // 나머지 키오스크 영역 → TABLE 권한 필요
                             .anyRequest().hasRole("TABLE");
                 })

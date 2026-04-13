@@ -51,6 +51,13 @@
         VALUES (#{pointId}, #{orderId}, #{type}, #{amount}, #{balanceAfter})
     </insert>
 
+    <select id="countUseHistoryByOrderId" resultType="int">
+        SELECT COUNT(*)
+        FROM point_history
+        WHERE order_id = #{orderId}
+          AND type = 'USE'
+    </select>
+
     <!-- ============== 페이징 ================ -->
     <select id="selectList" resultType="org.example.board_cafe_kiosk_2603.domain.admin.point.Point">
         SELECT * FROM point

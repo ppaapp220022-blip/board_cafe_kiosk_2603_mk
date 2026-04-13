@@ -18,6 +18,9 @@ public interface TableMessageMapper {
     // 관리자용: 테이블별 메시지 조회
     List<TableMessage> findByTableId(@Param("tableId") int tableId);
 
+    // 키오스크용: 관리자 -> 테이블 미확인 메시지 조회
+    List<TableMessage> findUnreadStaffByTableId(@Param("tableId") int tableId);
+
     // 읽음 처리
     void markAsRead(@Param("id") long id);
 

@@ -38,8 +38,6 @@ public class CafePackageController {
 
     @GetMapping("/package_selection")
     public String packageSelectionPage(HttpSession session, Model model) {
-        // URL 파라미터 대신 세션에서 꺼내기
-//        Integer tableNumber = (Integer) session.getAttribute("tableId");
         Integer tableNumber = (Integer) session.getAttribute("tableNumber");
         Integer partySize = (Integer) session.getAttribute("partySize");
 
@@ -102,6 +100,7 @@ public class CafePackageController {
         }
 
         // 세션에 패키지 정보 저장
+        session.setAttribute("packageId",          pkg.getId());
         session.setAttribute("selectedPackageId",    pkg.getId());
         session.setAttribute("selectedPackageName",  pkg.getName());
         session.setAttribute("selectedPackagePrice", pkg.getBasePrice());

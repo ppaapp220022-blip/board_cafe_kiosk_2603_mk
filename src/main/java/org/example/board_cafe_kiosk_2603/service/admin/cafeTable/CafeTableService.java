@@ -34,6 +34,7 @@ public interface CafeTableService {
     Optional<CafeTable> login(int tableNumber, String password);
 
     void updateAccessToken(int tableId, String accessToken);
+    String getTableStatus(int tableId);
     Long findCurrentSessionId(int tableId);
 
     // table_session 직접 조회

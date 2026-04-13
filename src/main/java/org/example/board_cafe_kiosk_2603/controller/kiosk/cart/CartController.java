@@ -39,7 +39,7 @@ public class CartController {
     @GetMapping
     public String cartPage(HttpSession session, Model model) {
         Integer tableNumber = tableNumber(session);
-        if (tableNumber == null) return "redirect:/kiosk";
+        if (tableNumber == null) return "redirect:/kiosk/session/start";
         kioskPageService.buildCartModel(model, tableNumber, session);
         return "kiosk/cart";
     }
