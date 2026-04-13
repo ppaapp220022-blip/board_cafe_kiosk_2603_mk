@@ -6,6 +6,8 @@ import org.example.board_cafe_kiosk_2603.domain.admin.product.CategoryType;
 import org.example.board_cafe_kiosk_2603.dto.admin.product.CategoryResponseDTO;
 import org.example.board_cafe_kiosk_2603.dto.admin.product.MenuRequestDTO;
 import org.example.board_cafe_kiosk_2603.dto.admin.product.MenuResponseDTO;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageRequestDTO;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageResponseDTO;
 import org.example.board_cafe_kiosk_2603.service.admin.product.CategoryService;
 import org.example.board_cafe_kiosk_2603.service.admin.product.MenuService;
 import org.example.board_cafe_kiosk_2603.util.FileUploadUtil;
@@ -35,11 +37,13 @@ public class MenuController {
 
     /* 메뉴 목록 조회 */
     // tab 파라미터(food, drink, guest, hidden)에 따라 데이터 분기 처리
+    // 페이징 포함
     @GetMapping
     public String getList(@RequestParam(defaultValue = "food") String tab,
                           @RequestParam(required = false) Integer categoryId,
+                          PageRequestDTO pageRequestDTO,
                           Model model) {
-        log.info("--- 메뉴 목록 조회 요청 (Tab: {}, CategoryID Filter: {}) ---", tab, categoryId);
+        log.info("--- 메뉴 목록 조회 요청 (Tab: {}, CategoryID Filter: {}, page: {}) ---", tab, categoryId, pageRequestDTO.getPage());
 
         // 탭 기준으로 기본 목록 조회
         // (소프트 삭제된 데이터는 hidden 탭에서만 조회)
@@ -89,7 +93,7 @@ public class MenuController {
             CategoryType type = switch (tab) {
                 case "drink" -> CategoryType.DRINK;
                 case "guest" -> CategoryType.GUEST;
-                default      -> CategoryType.FOOD;
+                default -> CategoryType.FOOD;
             };
             categoryList = categoryService.getByType(type);
         }

@@ -65,7 +65,7 @@
                 background: #e2e8f0;
             }
 
-            /* ── 카테고리 필터 바 ── */
+            /* 카테고리 필터 바 */
             .category-filter {
                 display: flex;
                 align-items: center;
@@ -251,6 +251,39 @@
                 color: #94a3b8;
                 padding: 40px;
             }
+
+            /* 페이징 */
+            .pagination {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 6px;
+                padding: 20px 0 10px;
+            }
+
+            .page-link {
+                padding: 7px 13px;
+                border-radius: 8px;
+                border: 1px solid var(--border-color);
+                background: white;
+                color: #64748b;
+                font-size: 14px;
+                font-weight: 600;
+                text-decoration: none;
+                transition: 0.2s;
+            }
+
+            .page-link:hover {
+                border-color: var(--primary-blue);
+                color: var(--primary-blue);
+                background: #eff6ff;
+            }
+
+            .page-link.active {
+                background: var(--primary-blue);
+                border-color: var(--primary-blue);
+                color: white;
+            }
         </style>
     </th:block>
 </head>
@@ -282,24 +315,18 @@
            th:classappend="${activeTab == 'hidden'} ? ' active'">🎲 게임 숨김</a>
     </div>
 
-    <!--
-        ── 카테고리 필터 바 ──
-        컨트롤러에서 categoryList(List<CategoryDto>)와
-        selectedCategoryId(Long, 없으면 null)를 모델에 담아주세요.
-
-        URL 예시: /admin/product/game?categoryId=3
-    -->
+    <!-- 카테고리 필터 바 -->
     <div class="category-filter" th:if="${categoryList != null and not #lists.isEmpty(categoryList)}">
         <span class="category-filter-label">카테고리</span>
 
         <!-- 전체 버튼 -->
-        <a th:href="@{/admin/product/game}"
+        <a th:href="@{/admin/product/game(size=${pageRequestDTO.size})}"
            th:classappend="${selectedCategoryId == null} ? ' active'"
            class="cat-btn">전체</a>
 
         <!-- 카테고리 버튼 목록 -->
         <a th:each="cat : ${categoryList}"
-           th:href="@{/admin/product/game(categoryId=${cat.id})}"
+           th:href="@{/admin/product/game(categoryId=${cat.id}, size=${pageRequestDTO.size})}"
            th:text="${cat.name}"
            th:classappend="${selectedCategoryId != null and selectedCategoryId == cat.id} ? ' active'"
            class="cat-btn"></a>
@@ -327,11 +354,11 @@
             </thead>
             <tbody id="productList">
 
-            <tr th:if="${gameList == null or #lists.isEmpty(gameList)}" class="empty-row">
+            <tr th:if="${pageResponse.dtoList == null or #lists.isEmpty(pageResponse.dtoList)}" class="empty-row">
                 <td colspan="5">등록된 게임이 없습니다.</td>
             </tr>
 
-            <tr th:each="game : ${gameList}">
+            <tr th:each="game : ${pageResponse.dtoList}">
                 <td>
                     <div class="prod-info">
                         <div class="prod-thumb">🎲</div>
@@ -348,7 +375,6 @@
                 <td>
                     <span th:text="${game.gameItemCount} + '개'"></span>
                 </td>
-                <!-- 재고 0이면 무조건 '재고 없음', active=false면 '대여 불가', 그 외 '대여 가능' -->
                 <td>
                     <span th:class="${game.gameItemCount == 0} ? 'status-badge badge-soldout'
                                    : (${game.active} ? 'status-badge badge-active' : 'status-badge badge-soldout')"
@@ -375,6 +401,8 @@
                               th:action="@{/admin/product/game/{id}/toggle-active(id=${game.id})}"
                               method="post" style="display:inline;">
                             <input type="hidden" name="categoryId" th:value="${selectedCategoryId}">
+                            <input type="hidden" name="page" th:value="${pageResponse.page}">
+                            <input type="hidden" name="size" th:value="${pageResponse.size}">
                             <button type="submit" class="btn-table"
                                     th:classappend="${game.active} ? 'btn-hide' : 'btn-instock'"
                                     th:text="${game.active} ? '👁️ 숨기기' : '✅ 표시'">
@@ -393,6 +421,26 @@
             </tr>
             </tbody>
         </table>
+
+        <!-- 페이징 -->
+        <div class="pagination">
+            <!-- 이전 버튼 -->
+            <a th:if="${pageResponse.prev}"
+               th:href="@{/admin/product/game(page=${pageResponse.start - 1}, size=${pageResponse.size}, categoryId=${selectedCategoryId})}"
+               class="page-link">◀</a>
+
+            <!-- 페이지 번호 버튼 -->
+            <a th:each="i : ${#numbers.sequence(pageResponse.start, pageResponse.end)}"
+               th:href="@{/admin/product/game(page=${i}, size=${pageResponse.size}, categoryId=${selectedCategoryId})}"
+               th:text="${i}"
+               th:classappend="${pageResponse.page == i} ? ' active'"
+               class="page-link"></a>
+
+            <!-- 다음 버튼 -->
+            <a th:if="${pageResponse.next}"
+               th:href="@{/admin/product/game(page=${pageResponse.end + 1}, size=${pageResponse.size}, categoryId=${selectedCategoryId})}"
+               class="page-link">▶</a>
+        </div>
     </div>
 
 </th:block>

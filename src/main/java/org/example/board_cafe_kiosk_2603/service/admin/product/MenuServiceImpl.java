@@ -5,6 +5,8 @@ import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.domain.admin.product.Menu;
 import org.example.board_cafe_kiosk_2603.dto.admin.product.MenuRequestDTO;
 import org.example.board_cafe_kiosk_2603.dto.admin.product.MenuResponseDTO;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageRequestDTO;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageResponseDTO;
 import org.example.board_cafe_kiosk_2603.mapper.admin.product.MenuMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -14,7 +16,6 @@ import java.util.NoSuchElementException;
 
 /**
  * MenuService 구현체
- * ModelMapper를 사용하여 Domain ↔ DTO 변환 처리
  */
 @Log4j2
 @Service
@@ -24,9 +25,7 @@ public class MenuServiceImpl implements MenuService {
     private final MenuMapper menuMapper;
     private final ModelMapper modelMapper;
 
-    /**
-     * 전체 메뉴 목록 조회 (소프트 삭제 제외)
-     */
+    /** 전체 메뉴 목록 조회 (소프트 삭제 제외) */
     @Override
     public List<MenuResponseDTO> getAll() {
         log.debug("MenuServiceImpl.getAll() 실행");
@@ -35,9 +34,7 @@ public class MenuServiceImpl implements MenuService {
         return list;
     }
 
-    /**
-     * category_id 기준 메뉴 목록 조회
-     */
+    /** category_id 기준 메뉴 목록 조회 */
     @Override
     public List<MenuResponseDTO> getByCategoryId(int categoryId) {
         log.debug("MenuServiceImpl.getByCategoryId() 실행 - categoryId: {}", categoryId);
@@ -46,9 +43,7 @@ public class MenuServiceImpl implements MenuService {
         return list;
     }
 
-    /**
-     * category type 기준 메뉴 목록 조회 (FOOD / DRINK / GUEST)
-     */
+    /** category type 기준 메뉴 목록 조회 (FOOD / DRINK / GUEST) */
     @Override
     public List<MenuResponseDTO> getByType(String type) {
         log.debug("MenuServiceImpl.getByType() 실행 - type: {}", type);
@@ -57,9 +52,8 @@ public class MenuServiceImpl implements MenuService {
         return list;
     }
 
-    /**
-     * 소프트 삭제 여부 기준 메뉴 목록 조회 (숨김 탭용)
-     */
+
+    /** 소프트 삭제 여부 기준 메뉴 목록 조회 (숨김 탭용) */
     @Override
     public List<MenuResponseDTO> getByIsDeleted(boolean isDeleted) {
         log.debug("MenuServiceImpl.getByIsDeleted() 실행 - isDeleted: {}", isDeleted);
@@ -68,9 +62,7 @@ public class MenuServiceImpl implements MenuService {
         return list;
     }
 
-    /**
-     * 판매 가능 여부 기준 메뉴 목록 조회
-     */
+    /** 판매 가능 여부 기준 메뉴 목록 조회 */
     @Override
     public List<MenuResponseDTO> getByIsAvailable(boolean isAvailable) {
         log.debug("MenuServiceImpl.getByIsAvailable() 실행 - isAvailable: {}", isAvailable);
@@ -79,9 +71,7 @@ public class MenuServiceImpl implements MenuService {
         return list;
     }
 
-    /**
-     * PK로 메뉴 단건 조회
-     */
+    /** PK로 메뉴 단건 조회 */
     @Override
     public MenuResponseDTO getById(int id) {
         log.debug("MenuServiceImpl.getById() 실행 - id: {}", id);
@@ -92,9 +82,7 @@ public class MenuServiceImpl implements MenuService {
                 });
     }
 
-    /**
-     * 메뉴 등록 - Builder 패턴으로 Menu VO 생성
-     */
+    /** 메뉴 등록 */
     @Override
     public void register(MenuRequestDTO dto) {
         log.debug("MenuServiceImpl.register() 실행 - dto: {}", dto);
@@ -110,9 +98,7 @@ public class MenuServiceImpl implements MenuService {
         log.debug("메뉴 등록 결과 - affected rows: {}, generated id: {}", result, menu.getId());
     }
 
-    /**
-     * 메뉴 수정 - Builder로 id 포함 Menu VO 재생성
-     */
+    /** 메뉴 수정 */
     @Override
     public void modify(int id, MenuRequestDTO dto) {
         log.debug("MenuServiceImpl.modify() 실행 - id: {}, dto: {}", id, dto);
@@ -134,9 +120,7 @@ public class MenuServiceImpl implements MenuService {
         log.debug("메뉴 수정 결과 - affected rows: {}", result);
     }
 
-    /**
-     * 메뉴 소프트 삭제 (is_deleted = true, 숨김처리)
-     */
+    /** 메뉴 소프트 삭제 (is_deleted = true) */
     @Override
     public void remove(int id) {
         log.debug("MenuServiceImpl.remove() 실행 - id: {}", id);
@@ -149,9 +133,7 @@ public class MenuServiceImpl implements MenuService {
         log.debug("메뉴 소프트 삭제 결과 - affected rows: {}", result);
     }
 
-    /**
-     * 메뉴 복원 (is_deleted = false)
-     */
+    /** 메뉴 복원 (is_deleted = false) */
     @Override
     public void restore(int id) {
         log.debug("MenuServiceImpl.restore() 실행 - id: {}", id);
@@ -164,9 +146,7 @@ public class MenuServiceImpl implements MenuService {
         log.debug("메뉴 복원 결과 - affected rows: {}", result);
     }
 
-    /**
-     * 메뉴 판매 상태 토글 (is_available 반전)
-     */
+    /** 메뉴 판매 상태 토글 */
     @Override
     public void toggleAvailable(int id) {
         log.debug("MenuServiceImpl.toggleAvailable() 실행 - id: {}", id);
@@ -178,4 +158,37 @@ public class MenuServiceImpl implements MenuService {
         int result = menuMapper.toggleAvailable(id);
         log.debug("메뉴 판매 상태 토글 결과 - affected rows: {}", result);
     }
+
+    /*=====페이지=======*/
+    /** category type 기준 메뉴 목록 조회 - 페이징 */
+    @Override
+    public PageResponseDTO<MenuResponseDTO> getByType(String type, PageRequestDTO pageRequestDTO) {
+        log.debug("MenuServiceImpl.getByType(paged) 실행 - type: {}", type);
+        List<MenuResponseDTO> list = menuMapper.findByTypePaged(type, pageRequestDTO);
+        int total = menuMapper.countByType(type);
+        log.debug("조회된 메뉴 수 (type={}): {}, 전체: {}", type, list.size(), total);
+        return new PageResponseDTO<>(pageRequestDTO, total, list);
+    }
+
+    /** category type + category_id 기준 메뉴 목록 조회 - 페이징 */
+    @Override
+    public PageResponseDTO<MenuResponseDTO> getByTypeAndCategoryId(String type, int categoryId, PageRequestDTO pageRequestDTO) {
+        log.debug("MenuServiceImpl.getByTypeAndCategoryId(paged) 실행 - type: {}, categoryId: {}", type, categoryId);
+        List<MenuResponseDTO> list = menuMapper.findByTypeAndCategoryIdPaged(type, categoryId, pageRequestDTO);
+        int total = menuMapper.countByTypeAndCategoryId(type, categoryId);
+        log.debug("조회된 메뉴 수 (type={}, categoryId={}): {}, 전체: {}", type, categoryId, list.size(), total);
+        return new PageResponseDTO<>(pageRequestDTO, total, list);
+    }
+
+    /** 소프트 삭제 여부 기준 메뉴 목록 조회 - 페이징 (숨김 탭용) */
+    @Override
+    public PageResponseDTO<MenuResponseDTO> getByIsDeleted(boolean isDeleted, PageRequestDTO pageRequestDTO) {
+        log.debug("MenuServiceImpl.getByIsDeleted(paged) 실행 - isDeleted: {}", isDeleted);
+        List<MenuResponseDTO> list = menuMapper.findByIsDeletedPaged(isDeleted, pageRequestDTO);
+        int total = menuMapper.countByIsDeleted(isDeleted);
+        log.debug("조회된 메뉴 수 (isDeleted={}): {}, 전체: {}", isDeleted, list.size(), total);
+        return new PageResponseDTO<>(pageRequestDTO, total, list);
+    }
+
+
 }

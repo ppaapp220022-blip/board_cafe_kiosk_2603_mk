@@ -42,18 +42,18 @@ VALUES
 --           7=7777, 8=8888, 9=9999, 10=1010, 11=1011, 12=1012
 INSERT INTO `cafe_table` (`table_number`, `password`, `status`, `access_token`, `current_session_id`)
 VALUES
-    (1,  '$2a$12$6.m99XxVXQhLA.kW.pV.8.yAkQtntwMG6zJ2XEzCYdIt6F92AHZoa', 'OCCUPIED', NULL, NULL),
-    (2,  '$2a$12$jMyxkDnEXF6zTzs.6odIHuCtzfR35EDFxZmflbbamUHc9drejGipa', 'OCCUPIED', NULL, NULL),
-    (3,  '$2a$12$wPexDR2riZFgwKTtj925FOXZFGPaf6U13GkiNK4Gd43M.1hltvlBS', 'EMPTY',    NULL, NULL),
-    (4,  '$2a$12$6UqwKwlaRu05xPzlTbzBQeC68kViy7OrQscQQq.MzUiMyV9eyOlcO', 'EMPTY',    NULL, NULL),
-    (5,  '$2a$12$BoILW/Dwdq267pCpVPlxWuKsjctBoWy1Jz8XY9KHJiA/v86.pPxYe', 'OCCUPIED', NULL, NULL),
-    (6,  '$2a$12$EKiULQjPsNUuxtwfm1K9V.tmr1lkGAUZTzdKkFXiKRGt8N.oC2qwq', 'CLEANING', NULL, NULL),
-    (7,  '$2a$12$epx2tbnDEk1tuGNOcYu1/.Ciww5olY7rULAIuiUEkn1CLGU1zLV3u', 'EMPTY',    NULL, NULL),
-    (8,  '$2a$12$LANNhG93KYJLa7QpyB5t1uJ.pQBpy7CUFg8r8J.9WAX6ARxsNZzJC', 'OCCUPIED', NULL, NULL),
-    (9,  '$2a$12$fHPOFdBDC9dlEIeR648aTeGAIEsK9SBC8UgsCq7vcV2KF6dMk6WDi', 'EMPTY',    NULL, NULL),
-    (10, '$2a$12$A13LCSatRIIpBFoKiTNyLep7invKMx2KUClmbX28sHYLzEwK4Y4ui', 'EMPTY',    NULL, NULL),
-    (11, '$2a$12$YoAiJOrZMD4Kk/9lHYi1BOjV2Y3kFSeslzr44L75nfKt6cEOCrgNa', 'EMPTY',    NULL, NULL),
-    (12, '$2a$12$wXHXtdMIS3U7ASVzH1K4T.nbxE5X5nTcNbdv8BHk4zLOcIDSpv0pu', 'EMPTY',    NULL, NULL);
+    (1,  '$2a$12$6.m99XxVXQhLA.kW.pV.8.yAkQtntwMG6zJ2XEzCYdIt6F92AHZoa', 'OCCUPIED', 'a1b2c3d4-0001-4000-8000-table00000001', NULL),
+    (2,  '$2a$12$jMyxkDnEXF6zTzs.6odIHuCtzfR35EDFxZmflbbamUHc9drejGipa', 'OCCUPIED', 'a1b2c3d4-0002-4000-8000-table00000002', NULL),
+    (3,  '$2a$12$wPexDR2riZFgwKTtj925FOXZFGPaf6U13GkiNK4Gd43M.1hltvlBS', 'EMPTY',    NULL,                                   NULL),
+    (4,  '$2a$12$6UqwKwlaRu05xPzlTbzBQeC68kViy7OrQscQQq.MzUiMyV9eyOlcO', 'EMPTY',    NULL,                                   NULL),
+    (5,  '$2a$12$BoILW/Dwdq267pCpVPlxWuKsjctBoWy1Jz8XY9KHJiA/v86.pPxYe', 'OCCUPIED', 'a1b2c3d4-0005-4000-8000-table00000005', NULL),
+    (6,  '$2a$12$EKiULQjPsNUuxtwfm1K9V.tmr1lkGAUZTzdKkFXiKRGt8N.oC2qwq', 'CLEANING', 'a1b2c3d4-0006-4000-8000-table00000006', NULL),
+    (7,  '$2a$12$epx2tbnDEk1tuGNOcYu1/.Ciww5olY7rULAIuiUEkn1CLGU1zLV3u', 'EMPTY',    NULL,                                   NULL),
+    (8,  '$2a$12$LANNhG93KYJLa7QpyB5t1uJ.pQBpy7CUFg8r8J.9WAX6ARxsNZzJC', 'OCCUPIED', 'a1b2c3d4-0008-4000-8000-table00000008', NULL),
+    (9,  '$2a$12$fHPOFdBDC9dlEIeR648aTeGAIEsK9SBC8UgsCq7vcV2KF6dMk6WDi', 'EMPTY',    NULL,                                   NULL),
+    (10, '$2a$12$A13LCSatRIIpBFoKiTNyLep7invKMx2KUClmbX28sHYLzEwK4Y4ui', 'EMPTY',    NULL,                                   NULL),
+    (11, '$2a$12$YoAiJOrZMD4Kk/9lHYi1BOjV2Y3kFSeslzr44L75nfKt6cEOCrgNa', 'EMPTY',    NULL,                                   NULL),
+    (12, '$2a$12$wXHXtdMIS3U7ASVzH1K4T.nbxE5X5nTcNbdv8BHk4zLOcIDSpv0pu', 'EMPTY',    NULL,                                   NULL);
 
 -- ============================================================
 -- 3. customer (등록 고객)

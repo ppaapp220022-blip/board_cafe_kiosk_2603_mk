@@ -1,8 +1,10 @@
 package org.example.board_cafe_kiosk_2603.mapper.admin.product;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.example.board_cafe_kiosk_2603.domain.admin.product.Game;
 import org.example.board_cafe_kiosk_2603.dto.admin.product.GameResponseDTO;
+import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageRequestDTO;
 
 import java.util.List;
 import java.util.Optional;
@@ -36,4 +38,19 @@ public interface GameMapper {
 
     /** 게임 활성 상태 토글 (is_active 반전) */
     int toggleActive(int id);
+
+    /*==============페이지=============*/
+    /**전체 게임 목록 조회 - 페이징 */
+    List<GameResponseDTO> findAllPaged(PageRequestDTO pageRequestDTO);
+
+    /** 전체 게임 수 */
+    int countAll();
+
+    /** category_id 기준 게임 목록 조회 - 페이징 */
+    List<GameResponseDTO> findByCategoryIdPaged(@Param("categoryId") int categoryId,
+                                                @Param("pageRequestDTO") PageRequestDTO pageRequestDTO);
+
+    /** category_id 기준 게임 수 */
+    int countByCategoryId(int categoryId);
+
 }

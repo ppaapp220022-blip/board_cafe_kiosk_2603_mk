@@ -100,6 +100,12 @@
             .btn-hide    { color: #64748b; }
             .btn-add-product { background: var(--primary-blue); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; text-decoration: none; }
             .empty-row td { text-align: center; color: #94a3b8; padding: 40px; }
+
+            /* 페이징 */
+            .pagination { display: flex; justify-content: center; align-items: center; gap: 6px; padding: 20px 0 10px; }
+            .page-link { padding: 7px 13px; border-radius: 8px; border: 1px solid var(--border-color); background: white; color: #64748b; font-size: 14px; font-weight: 600; text-decoration: none; transition: 0.2s; }
+            .page-link:hover { border-color: var(--primary-blue); color: var(--primary-blue); background: #eff6ff; }
+            .page-link.active { background: var(--primary-blue); border-color: var(--primary-blue); color: white; }
         </style>
     </th:block>
 </head>
@@ -149,13 +155,13 @@
         <span class="category-filter-label">카테고리</span>
 
         <!-- 전체 버튼 -->
-        <a th:href="@{/admin/product/menu(tab=${activeTab})}"
+        <a th:href="@{/admin/product/menu(tab=${activeTab}, size=${pageRequestDTO.size})}"
            th:classappend="${selectedCategoryId == null} ? ' active'"
            class="cat-btn">전체</a>
 
         <!-- 카테고리 버튼 목록 -->
         <a th:each="cat : ${categoryList}"
-           th:href="@{/admin/product/menu(tab=${activeTab}, categoryId=${cat.id})}"
+           th:href="@{/admin/product/menu(tab=${activeTab}, categoryId=${cat.id}, size=${pageRequestDTO.size})}"
            th:text="${cat.name}"
            th:classappend="${selectedCategoryId != null and selectedCategoryId == cat.id} ? ' active'"
            class="cat-btn"></a>
@@ -182,10 +188,12 @@
             </tr>
             </thead>
             <tbody id="productList">
-            <tr th:if="${menuList == null or #lists.isEmpty(menuList)}" class="empty-row">
+<!--            <tr th:if="${menuList == null or #lists.isEmpty(menuList)}" class="empty-row">-->
+            <tr th:if="${pageResponse.dtoList == null or #lists.isEmpty(pageResponse.dtoList)}" class="empty-row">
                 <td colspan="5">등록된 메뉴가 없습니다.</td>
             </tr>
-            <tr th:each="menu : ${menuList}">
+<!--            <tr th:each="menu : ${menuList}">-->
+            <tr th:each="menu : ${pageResponse.dtoList}">
                 <td>
                     <div class="prod-info">
                         <div class="prod-thumb"
@@ -223,6 +231,8 @@
                             <input type="hidden" name="tab"        th:value="${activeTab}"/>
                             <!-- 카테고리 필터 유지 -->
                             <input type="hidden" name="categoryId" th:value="${selectedCategoryId}"/>
+                            <input type="hidden" name="page"       th:value="${pageResponse.page}"/>
+                            <input type="hidden" name="size"       th:value="${pageResponse.size}"/>
                             <button type="submit" class="btn-table"
                                     th:classappend="${menu.isAvailable} ? 'btn-soldout' : 'btn-instock'"
                                     th:text="${menu.isAvailable} ? '🚫 품절' : '✅ 입고'"></button>
@@ -241,6 +251,8 @@
                               method="post" style="display:inline;">
                             <input type="hidden" name="tab"        th:value="${activeTab}"/>
                             <input type="hidden" name="categoryId" th:value="${selectedCategoryId}"/>
+                            <input type="hidden" name="page"       th:value="${pageResponse.page}"/>
+                            <input type="hidden" name="size"       th:value="${pageResponse.size}"/>
                             <button type="submit" class="btn-table btn-hide">👁️ 숨기기</button>
                         </form>
 
@@ -255,6 +267,23 @@
             </tr>
             </tbody>
         </table>
+
+        <!-- 페이징 -->
+        <div class="pagination">
+            <a th:if="${pageResponse.prev}"
+               th:href="@{/admin/product/menu(tab=${activeTab}, page=${pageResponse.start - 1}, size=${pageResponse.size}, categoryId=${selectedCategoryId})}"
+               class="page-link">◀</a>
+
+            <a th:each="i : ${#numbers.sequence(pageResponse.start, pageResponse.end)}"
+               th:href="@{/admin/product/menu(tab=${activeTab}, page=${i}, size=${pageResponse.size}, categoryId=${selectedCategoryId})}"
+               th:text="${i}"
+               th:classappend="${pageResponse.page == i} ? ' active'"
+               class="page-link"></a>
+
+            <a th:if="${pageResponse.next}"
+               th:href="@{/admin/product/menu(tab=${activeTab}, page=${pageResponse.end + 1}, size=${pageResponse.size}, categoryId=${selectedCategoryId})}"
+               class="page-link">▶</a>
+        </div>
     </div>
 
     <!-- ===== 숨김 탭 (카테고리 필터 없음) ===== -->
@@ -270,10 +299,12 @@
             </tr>
             </thead>
             <tbody id="productList_hidden">
-            <tr th:if="${menuList == null or #lists.isEmpty(menuList)}" class="empty-row">
+<!--            <tr th:if="${menuList == null or #lists.isEmpty(menuList)}" class="empty-row">-->
+<tr th:if="${pageResponse.dtoList == null or #lists.isEmpty(pageResponse.dtoList)}" class="empty-row">
                 <td colspan="5">숨김 처리된 상품이 없습니다.</td>
             </tr>
-            <tr th:each="menu : ${menuList}">
+<!--            <tr th:each="menu : ${menuList}">-->
+<tr th:each="menu : ${pageResponse.dtoList}">
                 <td>
                     <div class="prod-info">
                         <div class="prod-thumb">🔒</div>
@@ -304,6 +335,8 @@
                         <form sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
                               th:action="@{/admin/product/menu/{id}/restore(id=${menu.id})}"
                               method="post" style="display:inline;">
+                            <input type="hidden" name="page" th:value="${pageResponse.page}"/>
+                            <input type="hidden" name="size" th:value="${pageResponse.size}"/>
                             <button type="submit" class="btn-table btn-instock">🔓 다시 표시</button>
                         </form>
 
@@ -318,6 +351,23 @@
             </tr>
             </tbody>
         </table>
+
+        <!-- 페이징 -->
+        <div class="pagination">
+            <a th:if="${pageResponse.prev}"
+               th:href="@{/admin/product/menu(tab='hidden', page=${pageResponse.start - 1}, size=${pageResponse.size})}"
+               class="page-link">◀</a>
+
+            <a th:each="i : ${#numbers.sequence(pageResponse.start, pageResponse.end)}"
+               th:href="@{/admin/product/menu(tab='hidden', page=${i}, size=${pageResponse.size})}"
+               th:text="${i}"
+               th:classappend="${pageResponse.page == i} ? ' active'"
+               class="page-link"></a>
+
+            <a th:if="${pageResponse.next}"
+               th:href="@{/admin/product/menu(tab='hidden', page=${pageResponse.end + 1}, size=${pageResponse.size})}"
+               class="page-link">▶</a>
+        </div>
     </div>
 
 </th:block>
