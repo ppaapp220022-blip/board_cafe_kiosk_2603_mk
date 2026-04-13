@@ -8,249 +8,47 @@
     <title>Macro Management</title>
     <th:block layout:fragment="head-extra">
         <style>
-            .page-title {
-                font-size: 28px;
-                font-weight: 700;
-                margin-bottom: 24px;
-            }
-
-            .table-container {
-                background: white;
-                border-radius: 15px;
-                padding: 10px;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            }
-
-            .macro-massage-table {
-                width: 100%;
-                border-collapse: collapse;
-            }
-
-            .macro-massage-table th {
-                text-align: left;
-                padding: 15px 20px;
-                border-bottom: 2px solid #f8f9fa;
-                color: #666;
-                font-size: 13px;
-                font-weight: 600;
-            }
-
-            .macro-massage-table td {
-                padding: 18px 20px;
-                border-bottom: 1px solid #f8f9fa;
-                font-size: 15px;
-            }
-
-            .macro-massage-table tr:hover {
-                background-color: #f8fbff;
-            }
-
-            .messageText {
-                font-weight: 600;
-                color: #333;
-            }
-
-            /* 탭 버튼 스타일 */
-            .tabs {
-                display: flex;
-                gap: 10px;
-                margin-bottom: 30px;
-                background: white;
-                padding: 8px;
-                border-radius: 12px;
-                width: fit-content;
-                box-shadow: var(--card-shadow);
-            }
-
-            .tab-btn {
-                padding: 10px 25px;
-                border-radius: 8px;
-                border: none;
-                cursor: pointer;
-                font-weight: 600;
-                background: transparent;
-                color: #666;
-                transition: 0.2s;
-            }
-
-            .tab-btn.active {
-                background: var(--primary-blue);
-                color: white;
-            }
-
-            .pagination {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                gap: 8px;
-                margin-top: 24px;
-            }
-
-            .page-btn {
-                width: 40px;
-                height: 40px;
-                border-radius: 10px;
-                border: 1px solid #E5E5EA;
-                background: white;
-                font-size: 14px;
-                font-weight: 600;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: var(--text-dark);
-                transition: all 0.2s;
-            }
-
-            .page-btn:hover {
-                background: #f1f3f4;
-            }
-
-            .page-btn.active {
-                background: var(--primary-blue);
-                color: white;
-                border-color: var(--primary-blue);
-            }
-
-            .page-btn:disabled {
-                opacity: 0.4;
-                cursor: not-allowed;
-            }
-
-            /* 1. 상단 헤더 (타이틀 + 등록 버튼 나란히 배치) */
-            .page-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 24px;
-            }
-
-            .page-title {
-                margin: 0;
-            }
-
-            /* 기존 margin-bottom 제거 */
-
-            /* 2. 버튼 스타일 */
-            .btn-add {
-                background: var(--primary-blue, #007bff);
-                color: white;
-                padding: 10px 20px;
-                border-radius: 8px;
-                border: none;
-                font-weight: 600;
-                cursor: pointer;
-                transition: 0.2s;
-            }
-
-            .btn-add:hover {
-                background: #0056b3;
-            }
-
-            .btn-delete {
-                background: #ff4d4f;
-                color: white;
-                padding: 6px 12px;
-                border-radius: 6px;
-                border: none;
-                font-size: 13px;
-                cursor: pointer;
-            }
-
-            .btn-delete:hover {
-                background: #d9363e;
-            }
-
-            .btn-cancel {
-                background: #f1f3f4;
-                border: none;
-                padding: 10px 20px;
-                border-radius: 8px;
-                cursor: pointer;
-            }
-
-            /* 3. 모달(팝업창) 스타일 */
-            .modal-overlay {
-                display: none;
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.5);
-                z-index: 1000;
-                justify-content: center;
-                align-items: center;
-            }
-
-            .modal-content {
-                background: white;
-                padding: 30px;
-                border-radius: 15px;
-                width: 400px;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            }
-
-            .modal-content h3 {
-                margin-top: 0;
-                margin-bottom: 20px;
-                color: #333;
-            }
-
-            .form-group {
-                margin-bottom: 15px;
-            }
-
-            .form-group label {
-                display: block;
-                margin-bottom: 8px;
-                font-weight: 600;
-                font-size: 14px;
-                color: #555;
-            }
-
-            .form-control {
-                width: 100%;
-                padding: 10px;
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                box-sizing: border-box;
-                font-size: 14px;
-            }
-
-            .form-control:focus {
-                outline: none;
-                border-color: var(--primary-blue, #007bff);
-            }
-
-            .modal-actions {
-                display: flex;
-                justify-content: flex-end;
-                gap: 10px;
-                margin-top: 25px;
-            }
+            /* 스타일은 기존과 동일하므로 생략하지 않고 유지합니다 */
+            .page-title { font-size: 28px; font-weight: 700; margin-bottom: 24px; }
+            .table-container { background: white; border-radius: 15px; padding: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
+            .macro-massage-table { width: 100%; border-collapse: collapse; }
+            .macro-massage-table th { text-align: left; padding: 15px 20px; border-bottom: 2px solid #f8f9fa; color: #666; font-size: 13px; font-weight: 600; }
+            .macro-massage-table td { padding: 18px 20px; border-bottom: 1px solid #f8f9fa; font-size: 15px; }
+            .macro-massage-table tr:hover { background-color: #f8fbff; }
+            .messageText { font-weight: 600; color: #333; }
+            .tabs { display: flex; gap: 10px; margin-bottom: 30px; background: white; padding: 8px; border-radius: 12px; width: fit-content; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
+            .tab-btn { padding: 10px 25px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; background: transparent; color: #666; transition: 0.2s; }
+            .tab-btn.active { background: #007bff; color: white; }
+            .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 24px; }
+            .page-btn { width: 40px; height: 40px; border-radius: 10px; border: 1px solid #E5E5EA; background: white; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+            .page-btn.active { background: #007bff; color: white; border-color: #007bff; }
+            .btn-add { background: #007bff; color: white; padding: 10px 20px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; }
+            .btn-delete { background: #ff4d4f; color: white; padding: 6px 12px; border-radius: 6px; border: none; font-size: 13px; cursor: pointer; }
+            .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000; justify-content: center; align-items: center; }
+            .modal-content { background: white; padding: 30px; border-radius: 15px; width: 400px; }
+            .form-control { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+            .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
+            .btn-cancel { background: #f1f3f4; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
         </style>
-    </th:block>
-    
-    </style>
     </th:block>
 </head>
 
 <body>
 <th:block layout:fragment="content">
-    <div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
         <h1 class="page-title">💬 매크로 메시지 관리</h1>
-        <button class="btn-add" onclick="openAddModal()">+ 새 매크로 등록</button>
+        <button id="btnAddMacro" class="btn-add" onclick="openAddModal()">+ 새 매크로 등록</button>
     </div>
 
     <div class="tabs">
         <button th:each="entry, stat : ${macroGroups}"
                 class="tab-btn"
                 th:classappend="${stat.first} ? 'active' : ''"
-                th:onclick="'openTab(event, \'content-' + ${stat.index} + '\')'"
+                th:data-dir="${entry.key}"
+                th:data-tid="'content-' + ${stat.index}"
+                onclick="openTab(event)"
                 th:text="${entry.key == 'STAFF_TO_TABLE' ? '직원 → 테이블' : (entry.key == 'TABLE_TO_STAFF' ? '테이블 → 직원' : entry.key)}">
         </button>
-        <!--        th:data-direction="${entry.key}" onclick="openTab(event, this.getAttribute('data-direction'))"-->
     </div>
 
     <div class="table-container">
@@ -260,49 +58,38 @@
              th:style="${stat.first} ? 'display: block' : 'display: none'">
 
             <table class="macro-massage-table">
-                <colgroup>
-                    <col style="width: auto;">
-                    <col style="width: 100px;">
-                </colgroup>
                 <thead>
                 <tr>
                     <th>메시지 내용</th>
                     <th style="text-align: right;">관리</th>
                 </tr>
                 </thead>
-                <tbody>
-                <tr th:each="macro : ${entry.value}" class="macro-row" th:attr="data-tab=${stat.index}">
-                    <td class="messageText" th:text="${macro.messageText}">메시지 내용</td>
+                <tbody th:id="'tbody-' + ${entry.key}">
+                <tr th:each="macro : ${entry.value}">
+                    <td class="messageText" th:text="${macro.messageText}"></td>
                     <td style="text-align: right;">
-                        <button class="btn-delete" th:onclick="'deleteMacro(' + ${macro.id} + ')'">삭제</button>
+                        <button type="button" class="btn-delete"
+                                th:data-id="${macro.id}" onclick="deleteMacro(this)">삭제</button>
                     </td>
                 </tr>
                 </tbody>
             </table>
         </div>
-
-        <div th:if="${#maps.isEmpty(macroGroups)}" style="text-align: center; color: #aaa; padding: 40px;">
-            등록된 매크로 메시지 내역이 없습니다.
-        </div>
-        <!-- 페이징 -->
-        <div class="pagination" id="macroPagination"
-             style="display:flex; justify-content:center; margin-top:20px; gap:8px; padding-bottom:15px;"></div>
+        <div class="pagination" id="macroPagination"></div>
     </div>
 
     <div class="modal-overlay" id="addMacroModal">
         <div class="modal-content">
             <h3>새 매크로 등록</h3>
-            <div class="form-group">
+            <div style="margin-top:15px;">
                 <label>전송 방향</label>
                 <select id="newDirection" class="form-control">
                     <option value="STAFF_TO_TABLE">직원 → 테이블</option>
-                    <option value="TABLE_TO_STAFF">테이블 → 직원</option>
                 </select>
             </div>
-            <div class="form-group">
+            <div style="margin-top:15px;">
                 <label>메시지 내용</label>
-                <input type="text" id="newMessageText" class="form-control" placeholder="예: 필요한 것이 있으면 언제든 불러주세요."
-                       autocomplete="off">
+                <input type="text" id="newMessageText" class="form-control" autocomplete="off">
             </div>
             <div class="modal-actions">
                 <button class="btn-cancel" onclick="closeAddModal()">취소</button>
@@ -314,225 +101,111 @@
 
 <th:block layout:fragment="scripts">
     <script>
-        const PAGE_SIZE = 10;
-        const tabPages = {};
-        /* =====================================================
-           현재 선택된 탭의 direction 값 (전역 변수)
-           예: 'STAFF_TO_TABLE', 'TABLE_TO_STAFF'
-           ===================================================== */
         let currentDirection = '';
-        const currentSize = 10; // 한 페이지당 표시할 메시지 수
 
-        /** [핵심] 탭 전환 로직 */
-        function openTab(evt, tabId) {
-            const tabContents = document.getElementsByClassName("tab-content");
-            for (let i = 0; i < tabContents.length; i++) {
-                tabContents[i].style.display = "none";
-            }
-            const tabBtns = document.getElementsByClassName("tab-btn");
-            for (let i = 0; i < tabBtns.length; i++) {
-                tabBtns[i].classList.remove("active");
-            }
-            document.getElementById(tabId).style.display = "block";
-            evt.currentTarget.classList.add("active");
+        function openTab(evt) {
+            const btn = evt.currentTarget;
+            currentDirection = btn.getAttribute('data-dir');
+            const tabId = btn.getAttribute('data-tid');
+
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+            document.getElementById(tabId).style.display = 'block';
+
+            document.getElementById('btnAddMacro').style.display = (currentDirection === 'TABLE_TO_STAFF') ? 'none' : 'block';
+            loadMacroList(currentDirection, 1);
         }
 
-        /* =====================================================
-           페이지 로드 시 첫 번째 탭 자동 선택 및 데이터 로드
-           ===================================================== */
-        document.addEventListener('DOMContentLoaded', () => {
-            const firstBtn = document.querySelector('.tab-btn');
-            if (firstBtn) {
-                currentDirection = firstBtn.getAttribute('data-direction');
-                loadMacroList(currentDirection, 1);
-            }
-        });
+        function loadMacroList(direction, page) {
+            fetch(`/admin/macro/list?direction=${direction}&page=${page}&size=10`)
+                .then(res => res.json())
+                .then(data => {
+                    renderTable(data.dtoList, direction);
+                    renderPagination(data, direction);
+                });
+        }
 
-        /* =====================================================
-           탭 클릭 시 호출
-           - 선택된 탭 버튼 활성화
-           - 해당 direction의 1페이지 데이터 로드
-           ===================================================== */
-        function openTab(evt, direction) {
-            // 모든 탭 버튼 active 제거 후 클릭한 버튼만 활성화
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            evt.currentTarget.classList.add('active');
+        function renderTable(list, direction) {
+            const tbody = document.getElementById('tbody-' + direction);
+            if (!tbody) return;
 
-            // ======= 페이징 렌더링 =======
-            function renderPaging(tabIndex) {
-                const rows = document.querySelectorAll(`.macro-row[data-tab="${tabIndex}"]`);
-                const totalRows = rows.length;
-                const totalPages = Math.ceil(totalRows / PAGE_SIZE);
-                const curPage = tabPages[tabIndex] || 1;
-                currentDirection = direction;
-                loadMacroList(direction, 1); // 탭 변경 시 항상 1페이지부터
-            }
-
-            rows.forEach((row, i) => {
-                const rowPage = Math.floor(i / PAGE_SIZE) + 1;
-                row.style.display = rowPage === curPage ? '' : 'none';
-            });
-
-            /* =====================================================
-               AJAX로 매크로 메시지 목록 조회
-               GET /admin/macro/list?direction=xxx&page=N&size=10
-               성공 시 테이블과 페이징 버튼을 갱신
-               ===================================================== */
-            function loadMacroList(direction, page) {
-                fetch(`/admin/macro/list?direction=${direction}&page=${page}&size=${currentSize}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        renderTable(data.dtoList);          // 테이블 내용 갱신
-                        renderPagination(data, direction);  // 페이징 버튼 갱신
-                    })
-                    .catch(() => {
-                        document.getElementById('macroTableBody').innerHTML =
-                            '<tr><td style="color:#aaa; text-align:center; padding:40px;">데이터를 불러오지 못했습니다.</td></tr>';
-                    });
-            }
-
-            const paginationDiv = document.getElementById(`pagination-${tabIndex}`);
-            if (totalPages <= 1) {
-                paginationDiv.innerHTML = '';
+            if (!list || list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="2" style="text-align:center; padding:40px; color:#aaa;">등록된 메시지가 없습니다.</td></tr>';
                 return;
             }
 
-            let html = `<button class="page-btn" ${curPage === 1 ? 'disabled' : ''}
-                onclick="movePage(${tabIndex}, ${curPage - 1})">‹</button>`;
+            tbody.innerHTML = list.map(item => {
+                // [핵심] 서버 데이터에서 ID 역할을 하는 값을 강제로 찾습니다.
+                // item.id가 없으면 item.mno, 그것도 없으면 item.macroId를 순차적으로 대입
+                const valId = item.id || item.mno || item.macroId || (item.dto && item.dto.id);
 
-            for (let i = 1; i <= totalPages; i++) {
-                html += `<button class="page-btn ${i === curPage ? 'active' : ''}"
-                    onclick="movePage(${tabIndex}, ${i})">${i}</button>`;
-            }
-
-            /* =====================================================
-               조회된 메시지 목록을 tbody에 렌더링
-               list가 비어있으면 안내 메시지 표시
-               ===================================================== */
-            function renderTable(list) {
-                const tbody = document.getElementById('macroTableBody');
-                if (!list || list.length === 0) {
-                    tbody.innerHTML =
-                        '<tr><td style="color:#aaa; text-align:center; padding:40px;">등록된 메시지가 없습니다.</td></tr>';
-                    return;
-                }
-                tbody.innerHTML = list.map(item => `
-            <tr>
-                <td class="messageText">${item.messageText}</td>
+                return `
+            <tr class="macro-row">
+                <td class="messageText">${item.messageText || ''}</td>
+                <td style="text-align: right;">
+                    <button type="button" class="btn-delete"
+                            data-id="${valId}"
+                            onclick="deleteMacro(this)">삭제</button>
+                </td>
             </tr>
-        `).join('');
-            }
+        `;
+            }).join('');
+        }
 
-            html += `<button class="page-btn" ${curPage === totalPages ? 'disabled' : ''}
-                    onclick="movePage(${tabIndex}, ${curPage + 1})">›</button>`;
-
-            /* =====================================================
-               페이징 버튼 렌더링
-               - data.prev: 이전 버튼 표시 여부
-               - data.next: 다음 버튼 표시 여부
-               - data.start ~ data.end: 표시할 페이지 번호 범위
-               - data.page: 현재 페이지 (active 처리)
-               ===================================================== */
-            function renderPagination(data, direction) {
-                const container = document.getElementById('macroPagination');
-                let html = '';
-
-                paginationDiv.innerHTML = html;
-            }
-
-            // 이전 버튼
-            if (data.prev) {
-                html += `<a class="page-btn" onclick="loadMacroList('${direction}', ${data.start - 1})">‹</a>`;
-            }
-
-            // ======== 페이지 이동 ========
-            function movePage(tabIndex, page) {
-                tabPages[tabIndex] = page;
-                renderPaging(tabIndex);
-            }
-
-            // 페이지 번호 버튼
+        function renderPagination(data, direction) {
+            const container = document.getElementById('macroPagination');
+            let html = '';
             for (let i = data.start; i <= data.end; i++) {
-                html += `<a class="page-btn ${data.page === i ? 'active' : ''}"
-                        onclick="loadMacroList('${direction}', ${i})">${i}</a>`;
-            }
-
-            // ======= 초기화 =======
-            window.onload = () => {
-                const tabContents = document.getElementsByClassName("tab-content");
-                for (let i = 0; i < tabContents.length; i++) {
-                    tabPages[i] = 1;
-                    renderPaging(i)
-                }
-            }
-            // 다음 버튼
-            if (data.next) {
-                html += `<a class="page-btn" onclick="loadMacroList('${direction}', ${data.end + 1})">›</a>`;
-            }
-
-
-            // ====== 새 매크로 등록 모달 로직 ======
-            function openAddModal() {
-                document.getElementById('newDirection').value = 'STAFF_TO_TABLE';
-                document.getElementById('newMessageText').value = '';
-                document.getElementById('addMacroModal').style.display = 'flex';
-            }
-
-            function closeAddModal() {
-                document.getElementById('addMacroModal').style.display = 'none';
-            }
-
-            function submitNewMacro() {
-                const direction = document.getElementById('newDirection').value;
-                const messageText = document.getElementById('newMessageText').value.trim();
-
-                if (!messageText) {
-                    alert("메시지 내용을 입력해주세요.");
-                    return;
-                }
-
-                fetch('/admin/macro/api/create', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({direction, messageText})
-                })
-                    .then(res => {
-                        if (!res.ok) throw new Error("등록 실패");
-                        return res.json();
-                    })
-                    .then(data => {
-                        alert("등록되었습니다.");
-                        location.reload(); // 새로고침하여 목록 갱신
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        alert("오류가 발생했습니다.");
-                    });
-            }
-
-            // ====== 삭제 (Soft Delete) 로직 ======
-            function deleteMacro(id) {
-                if (!confirm("정말 이 매크로를 삭제하시겠습니까?")) return;
-
-                fetch(`/admin/macro/api/delete/${id}`, {
-                    method: 'DELETE'
-                })
-                    .then(res => {
-                        if (!res.ok) throw new Error("삭제 실패");
-                        return res.json();
-                    })
-                    .then(data => {
-                        alert("삭제되었습니다.");
-                        location.reload(); // 새로고침하여 목록 갱신
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        alert("오류가 발생했습니다.");
-                    });
-
+                html += `<button class="page-btn ${data.page === i ? 'active' : ''}" onclick="loadMacroList('${direction}', ${i})">${i}</button>`;
             }
             container.innerHTML = html;
         }
+
+        function deleteMacro(btn) {
+            // 1. data-id 값을 가져옴
+            let id = btn.getAttribute('data-id');
+
+            // 2. 검증 (undefined 문자열 방어)
+            if (!id || id === 'undefined' || id === 'null') {
+                alert("데이터 오류: 서버에서 ID를 보내주지 않았거나 필드명이 다릅니다.\nF12 -> Console 탭의 '데이터 원본'을 확인해주세요.");
+                return;
+            }
+
+            if (!confirm("정말 삭제하시겠습니까?")) return;
+
+            fetch(`/admin/macro/api/delete/${id}`, {
+                method: 'DELETE'
+            })
+                .then(res => {
+                    if (res.ok) {
+                        alert("삭제되었습니다.");
+                        location.reload();
+                    } else {
+                        alert("삭제 실패 (코드: " + res.status + ")");
+                    }
+                })
+                .catch(err => console.error("통신 오류:", err));
+        }
+
+        function openAddModal() { document.getElementById('addMacroModal').style.display = 'flex'; }
+        function closeAddModal() { document.getElementById('addMacroModal').style.display = 'none'; }
+        function submitNewMacro() {
+            const direction = document.getElementById('newDirection').value;
+            const messageText = document.getElementById('newMessageText').value.trim();
+            if(!messageText) return alert("내용 입력!");
+            fetch('/admin/macro/api/create', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ direction, messageText })
+            }).then(() => location.reload());
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const firstBtn = document.querySelector('.tab-btn');
+            if (firstBtn) firstBtn.click();
+        });
     </script>
 </th:block>
 </body>

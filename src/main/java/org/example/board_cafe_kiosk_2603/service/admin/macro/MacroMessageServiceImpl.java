@@ -101,6 +101,7 @@ public class MacroMessageServiceImpl implements MacroMessageService {
                 .selectList(direction, pageRequestDTO.getSkip(), pageRequestDTO.getSize())
                 .stream()
                 .map(item -> MacroMessageResponseDTO.builder()
+                        .id(item.getId())
                         .messageText(item.getMessageText())
                         .direction(item.getDirection())
                         .build())
