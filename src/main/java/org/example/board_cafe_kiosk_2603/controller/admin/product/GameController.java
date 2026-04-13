@@ -8,6 +8,7 @@ import org.example.board_cafe_kiosk_2603.service.admin.product.CategoryService;
 import org.example.board_cafe_kiosk_2603.service.admin.product.GameItemService;
 import org.example.board_cafe_kiosk_2603.service.admin.product.GameService;
 import org.example.board_cafe_kiosk_2603.util.FileUploadUtil;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -73,6 +74,7 @@ public class GameController {
     // 이미지 업로드 + 신규 game_item 등록
     /* 게임 및 개별 재고(Item) 등록 처리 */
     @PostMapping("/add")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER')")
     public String register(@ModelAttribute GameRequestDTO gameRequestDTO,
                            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile)
             throws IOException {
@@ -126,6 +128,7 @@ public class GameController {
 
     /* 게임 정보 수정(이미지 교체) 및 재고(game_item) 변경/삭제 처리 */
     @PostMapping("/edit/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER')")
     public String modify(@PathVariable int id,
                          @ModelAttribute GameRequestDTO gameRequestDTO,
                          @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
@@ -198,6 +201,7 @@ public class GameController {
     /* 게임 활성/비활성 상태 토글 (키오스크 노출 여부) */
     // 카테고리 필터 유지하며 리다리렉트
     @PostMapping("/{id}/toggle-active")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER')")
     public String toggleActive(@PathVariable int id,
                                @RequestParam(required = false) Integer categoryId) {
         log.info("--- 게임 활성 상태 토글 (ID: {}) ---", id);

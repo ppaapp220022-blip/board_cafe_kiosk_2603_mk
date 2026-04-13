@@ -191,8 +191,21 @@
 
     <div class="nav-section">
       <div class="nav-label">매출</div>
-      <a th:href="@{/admin/status}" class="nav-item" th:classappend="${activePage == 'salesStats'} ? 'active'">
+
+      <!-- 매출 통계: ADMIN, SUPER 정상 링크 -->
+      <a sec:authorize="hasAnyRole('ADMIN','SUPER')"
+              th:href="@{/admin/status}" class="nav-item" th:classappend="${activePage == 'salesStats'} ? 'active'">
         <span class="nav-icon">📈</span> 매출 통계
+      </a>
+
+      <!-- 매출 통계: STAFF 클릭 시 접근 불가 표시(alter) -->
+      <a sec:authorize="hasRole('STAFF')"
+         href="#"
+         class="nav-item"
+         style="color: #bdc1c6; cursor: not-allowed;"
+         onclick="alert('관리자 권한이 필요한 메뉴입니다.'); return false;">
+        <span class="nav-icon">📈</span> 매출 통계
+        <span style="font-size: 11px; margin-left: auto; background: #f1f3f4; color: #9aa0a6; padding: 2px 6px; border-radius: 4px;">관리자 전용</span>
       </a>
     </div>
 
@@ -208,16 +221,41 @@
       <a th:href="@{/admin/macro}" class="nav-item" th:classappend="${activePage == 'macroMassage'} ? 'active'">
         <span class="nav-icon">💬</span> 매크로 메시지 관리
       </a>
-      <a th:href="@{/admin/policy}" class="nav-item" th:classappend="${activePage == 'packageManagement'} ? 'active'">
+
+      <!-- 요금 정책: ADMIN, SUPER 정상 링크 -->
+      <a sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
+         th:href="@{/admin/policy}" class="nav-item" th:classappend="${activePage == 'packageManagement'} ? 'active'">
         <span class="nav-icon">⚡</span> 요금 정책
+      </a>
+
+      <!-- 요금 정책: STAFF 접근 불가 표시 -->
+      <a sec:authorize="hasRole('STAFF')"
+         href="#" class="nav-item"
+         style="color: #bdc1c6; cursor: not-allowed;"
+         onclick="alert('관리자 권한이 필요한 메뉴입니다.'); return false;">
+        <span class="nav-icon">⚡</span> 요금 정책
+        <span style="font-size: 11px; margin-left: auto; background: #f1f3f4; color: #9aa0a6; padding: 2px 6px; border-radius: 4px;">관리자 전용</span>
       </a>
     </div>
 
     <div class="nav-section">
       <div class="nav-label">계정</div>
-      <a th:href="@{/admin/staff}" class="nav-item" th:classappend="${activePage == 'staffManagement'} ? 'active'">
+
+      <!-- 직원 관리: ADMIN, SUPER 정상 링크 -->
+      <a sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
+         th:href="@{/admin/staff}" class="nav-item" th:classappend="${activePage == 'staffManagement'} ? 'active'">
         <span class="nav-icon">👥</span> 직원 관리
       </a>
+
+      <!-- 직원 관리: STAFF 접근 불가 표시 -->
+      <a sec:authorize="hasRole('STAFF')"
+         href="#" class="nav-item"
+         style="color: #bdc1c6; cursor: not-allowed;"
+         onclick="alert('관리자 권한이 필요한 메뉴입니다.'); return false;">
+        <span class="nav-icon">👥</span> 직원 관리
+        <span style="font-size: 11px; margin-left: auto; background: #f1f3f4; color: #9aa0a6; padding: 2px 6px; border-radius: 4px;">관리자 전용</span>
+      </a>
+
       <a th:href="@{/admin/staff/profile}" class="nav-item" th:classappend="${activePage == 'profileManagement'} ? 'active'">
         <span class="nav-icon">👤</span> 내 정보 관리
       </a>

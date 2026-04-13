@@ -9,6 +9,7 @@ import org.example.board_cafe_kiosk_2603.dto.admin.product.MenuResponseDTO;
 import org.example.board_cafe_kiosk_2603.service.admin.product.CategoryService;
 import org.example.board_cafe_kiosk_2603.service.admin.product.MenuService;
 import org.example.board_cafe_kiosk_2603.util.FileUploadUtil;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -50,27 +51,52 @@ public class MenuController {
         };
 
         // 카테고리 필터링 (hidden 탭이 아닐 경우에만 categoryId 필터 적용)
-        if (categoryId != null && !"hidden".equals(tab)) {
+//        if (categoryId != null && !"hidden".equals(tab)) {
+//            menuList = menuList.stream()
+//                    .filter(m -> m.getCategoryId() == categoryId)
+//                    .toList();
+//            log.info("--- 카테고리 필터 적용 완료 (ID: {}) ---", categoryId);
+//        }
+
+        // 기존: hidden 탭 제외하고 필터 적용
+        // 변경: hidden 탭도 categoryId 필터 적용
+        if (categoryId != null) {
             menuList = menuList.stream()
                     .filter(m -> m.getCategoryId() == categoryId)
                     .toList();
-            log.info("--- 카테고리 필터 적용 완료 (ID: {}) ---", categoryId);
         }
 
         // 탭에 맞는 카테고리 버튼 목록 생성 (숨김 탭은 불필요하므로 null)
-        List<CategoryResponseDTO> categoryList = null;
-        if (!"hidden".equals(tab)) {
+//        List<CategoryResponseDTO> categoryList = null;
+//        if (!"hidden".equals(tab)) {
+//            CategoryType type = switch (tab) {
+//                case "drink" -> CategoryType.DRINK;
+//                case "guest" -> CategoryType.GUEST;
+//                default -> CategoryType.FOOD;
+//            };
+//            categoryList = categoryService.getByType(type);
+//        }
+
+        // 기존: hidden 탭이면 null
+        // 변경: hidden 탭도 전체 카테고리 목록 제공
+        List<CategoryResponseDTO> categoryList;
+        if ("hidden".equals(tab)) {
+            categoryList = categoryService.getAll().stream()
+                    .filter(c -> List.of(CategoryType.FOOD, CategoryType.DRINK, CategoryType.GUEST)
+                            .contains(c.getType()))
+                    .toList();
+        } else {
             CategoryType type = switch (tab) {
                 case "drink" -> CategoryType.DRINK;
                 case "guest" -> CategoryType.GUEST;
-                default -> CategoryType.FOOD;
+                default      -> CategoryType.FOOD;
             };
             categoryList = categoryService.getByType(type);
         }
 
         model.addAttribute("menuList", menuList);
         model.addAttribute("categoryList", categoryList);
-        model.addAttribute("selectedCategoryId", categoryId);   // 뷰에서 활성 버튼 판단에 사용
+        model.addAttribute("selectedCategoryId", categoryId);
         model.addAttribute("activeTab", tab);
         model.addAttribute("activePage", "productReg");
 
@@ -99,6 +125,7 @@ public class MenuController {
 
     /* 메뉴 등록 처리 (이미지 업로드 포함) */
     @PostMapping("/add")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER')")
     public String register(@ModelAttribute MenuRequestDTO menuRequestDTO,
                            @RequestParam(defaultValue = "imageFile", required = false) MultipartFile imageFile,
                            @RequestParam(defaultValue = "food") String tab) throws IOException {
@@ -146,6 +173,7 @@ public class MenuController {
     /* 메뉴 정보 수정 처리 (이미지 교체 로직 포함) */
     // 새 이미지 업로드 시 기존 이미지 교체
     @PostMapping("/edit/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER')")
     public String modify(@PathVariable int id,
                          @ModelAttribute MenuRequestDTO menuRequestDTO,
                          @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
@@ -167,6 +195,7 @@ public class MenuController {
 
     /* 메뉴 숨김 처리 (소프트 삭제) */
     @PostMapping("/{id}/toggle-hide")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER')")
     public String toggleHide(@PathVariable int id,
                              @RequestParam(defaultValue = "food") String tab) {
         log.info("--- 메뉴 숨김(소프트 삭제) 요청 (MenuID: {}, Tab: {}) ---", id, tab);
@@ -178,6 +207,7 @@ public class MenuController {
 
     /* 메뉴 품절 상태 토글 */
     @PostMapping("/{id}/toggle-soldout")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER')")
     public String toggleSoldout(@PathVariable int id,
                                 @RequestParam(defaultValue = "food") String tab) {
         log.info("--- 메뉴 품절 상태 토글 요청 (MenuID: {}, Tab: {}) ---", id, tab);
@@ -189,6 +219,7 @@ public class MenuController {
 
     /* 숨김 메뉴 복원 (소프트 삭제 취소) */
     @PostMapping("/{id}/restore")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER')")
     public String restore(@PathVariable int id) {
         log.info("--- 숨김 메뉴 복원 요청 (MenuID: {}) ---", id);
         menuService.restore(id);

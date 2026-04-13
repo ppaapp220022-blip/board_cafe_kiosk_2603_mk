@@ -81,32 +81,15 @@
             color: #f44336; border-color: #ffccbc; animation: pulse-red 1s infinite;
         }
 
-        /* 새 주문 상태 박스 */
+        /* 주문 상태 박스 */
         .order-status-box {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 12px;
-            border-radius: 16px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            background: #fff8f0;
-            color: #d85a30;
-            border: 1px solid #ffccba;
-            min-height: 40px;
-            max-width: 200px;
+            display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 16px;
+            font-size: 0.9rem; font-weight: 600; background: #fff8f0; color: #d85a30; border: 1px solid #ffccba;
+            min-height: 40px; max-width: 200px;
         }
-
-        .order-status-box.hidden {
-            display: none;
-        }
-
+        .order-status-box.hidden { display: none; }
         .order-status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #d85a30;
-            animation: pulse-order 1.5s infinite;
+            width: 10px; height: 10px; border-radius: 50%; background: #d85a30; animation: pulse-order 1.5s infinite;
         }
 
         @keyframes pulse-order {
@@ -132,147 +115,23 @@
             position: fixed; bottom: 30px; right: 30px; background: #333; color: white;
             padding: 15px 25px; border-radius: 12px; z-index: 2000;
         }
-        /* --- 메뉴 그리드 및 아이템 (추가된 부분) --- */
-        .menu-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 24px;
-            padding-bottom: 20px;
-        }
+        /* 메뉴 그리드 */
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 24px; padding-bottom: 20px; }
         .menu-item {
-            background-color: white;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
-            display: flex;
-            flex-direction: column;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            border: 1px solid #eaeaea;
+            background-color: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+            display: flex; flex-direction: column; transition: transform 0.2s ease, box-shadow 0.2s ease; border: 1px solid #eaeaea;
         }
-        .menu-item:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-        }
-        .menu-item.sold-out {
-            opacity: 0.5;
-            filter: grayscale(100%);
-            pointer-events: none; /* 클릭 방지 */
-        }
-        .menu-img-area {
-            height: 180px;
-            background-color: #f8f9fa;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-        .menu-img-area img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .placeholder-icon {
-            width: 48px;
-            height: 48px;
-            color: #ccc;
-        }
-        .menu-info-area {
-            padding: 16px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .menu-info-left {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        .menu-name {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #333;
-            word-break: keep-all;
-        }
-        .menu-price {
-            font-size: 1.05rem;
-            font-weight: 700;
-            color: #007bff;
-        }
-        .menu-price.free {
-            color: #f44336; /* FREE일 경우 빨간색 강조 */
-        }
-        .menu-info-right .add-direct-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.2s;
-        }
-        .menu-info-right .add-direct-btn:hover {
-            background-color: #0056b3;
-        }
-        .menu-info-right .add-direct-btn:disabled {
-            background-color: #e0e0e0;
-            color: #9e9e9e;
-        }
-
-        /* --- 메뉴 그리드 --- */
-        .menu-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-        }
-        .menu-item {
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .menu-item:not(.sold-out):hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-        }
-        .menu-item.sold-out { opacity: 0.5; }
-        .menu-img-area {
-            width: 100%; aspect-ratio: 4/3;
-            background: #f0f2f5;
-            display: flex; align-items: center; justify-content: center;
-            overflow: hidden;
-        }
+        .menu-item:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08); }
+        .menu-item.sold-out { opacity: 0.5; filter: grayscale(100%); pointer-events: none; }
+        .menu-img-area { height: 180px; background-color: #f8f9fa; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .menu-img-area img { width: 100%; height: 100%; object-fit: cover; }
-        .placeholder-icon { width: 48px; height: 48px; color: #ccc; }
-        .menu-info-area {
-            padding: 16px;
-            display: flex; align-items: center; justify-content: space-between;
-        }
-        .menu-info-left { flex: 1; min-width: 0; }
-        .menu-name {
-            font-size: 1rem; font-weight: 600; color: #333;
-            margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        .menu-price { font-size: 1rem; font-weight: 700; color: #007bff; }
-        .menu-price.free { color: #4caf50; }
-        .menu-info-right { margin-left: 12px; flex-shrink: 0; }
+        .menu-info-area { padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .menu-name { font-size: 1.1rem; font-weight: 700; color: #333; word-break: keep-all; }
+        .menu-price { font-size: 1.05rem; font-weight: 700; color: #007bff; }
         .add-direct-btn {
-            width: 44px; height: 44px; border-radius: 12px;
-            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-            color: white; border: none; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            width: 44px; height: 44px; border-radius: 50%; background-color: #007bff; color: white;
+            border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
-        .add-direct-btn:hover:not(:disabled) {
-            transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(0,123,255,0.4);
-        }
-        .add-direct-btn:disabled { cursor: not-allowed; }
-        .add-direct-btn i { width: 22px; height: 22px; }
     </style>
 </head>
 <body>
@@ -342,7 +201,6 @@
 <script th:inline="javascript">
     lucide.createIcons({attrs: {'stroke-width': 2.5}});
 
-    /* Thymeleaf 인라인 변수 안전하게 가져오기 */
     const SESSION_START_TIME = [[${sessionStartTime}]];
     const DURATION_MINUTES   = [[${durationMinutes}]];
 
@@ -352,6 +210,26 @@
 
     function openServiceModal() { document.getElementById('serviceModal').classList.add('active'); }
     function closeServiceModal() { document.getElementById('serviceModal').classList.remove('active'); }
+
+    /* ================= 스크린세이버 로직 추가 ================= */
+    let idleTimer;
+
+    function resetIdleTimer() {
+        clearTimeout(idleTimer);
+        // 30초 동안 활동이 없으면 screensaver로 이동
+        idleTimer = setTimeout(() => {
+            localStorage.setItem('returnUrl', window.location.pathname);
+            window.location.href = '/kiosk/screensaver';
+        }, 30000);
+    }
+
+    // 활동 감지 이벤트 리스너 등록
+    window.onload = resetIdleTimer;
+    window.onmousemove = resetIdleTimer;
+    window.onclick = resetIdleTimer;
+    window.onkeydown = resetIdleTimer;
+    window.ontouchstart = resetIdleTimer;
+    /* ======================================================= */
 
     function startTimer() {
         const timerText = document.getElementById('timer-text');
@@ -422,11 +300,9 @@
         startOrderStatusWatcher();
     });
 
-    // 주문 상태 감시 함수
     function startOrderStatusWatcher() {
         const statusBox = document.getElementById('order-status-box');
         const statusText = document.getElementById('order-status-text');
-        let lastOrderCount = 0;
 
         function checkOrderStatus() {
             fetch('/kiosk/order/active')
@@ -434,42 +310,23 @@
                 .then(orders => {
                     if (!orders || orders.length === 0) {
                         statusBox.classList.add('hidden');
-                        lastOrderCount = 0;
                         return;
                     }
-
-                    // 완료되지 않은 주문만 필터링
                     const activeOrders = orders.filter(o => o.status !== 'COMPLETED' && o.status !== 'CANCELLED');
-
                     if (activeOrders.length === 0) {
                         statusBox.classList.add('hidden');
-                        lastOrderCount = 0;
                         return;
                     }
-
-                    // 주문 상태 텍스트 업데이트
                     const statusTexts = {
-                        'ORDERED': '주문 완료',
-                        'CONFIRMED': '주문 확인중...',
-                        'COOKING': '조리 중...',
-                        'DELIVERING': '배달 시작',
-                        'COMPLETED': '완료',
-                        'CANCELLED': '취소'
+                        'ORDERED': '주문 완료', 'CONFIRMED': '주문 확인중...', 'COOKING': '조리 중...',
+                        'DELIVERING': '배달 시작', 'COMPLETED': '완료', 'CANCELLED': '취소'
                     };
-
                     const latestOrder = activeOrders[0];
-                    const statusLabel = statusTexts[latestOrder.status] || latestOrder.status;
-                    statusText.textContent = statusLabel;
-
+                    statusText.textContent = statusTexts[latestOrder.status] || latestOrder.status;
                     statusBox.classList.remove('hidden');
-                    lastOrderCount = activeOrders.length;
                 })
-                .catch(err => {
-                    console.error('주문 상태 확인 실패:', err);
-                });
+                .catch(err => console.error('주문 상태 확인 실패:', err));
         }
-
-        // 초기 실행 및 5초마다 체크
         checkOrderStatus();
         setInterval(checkOrderStatus, 5000);
     }

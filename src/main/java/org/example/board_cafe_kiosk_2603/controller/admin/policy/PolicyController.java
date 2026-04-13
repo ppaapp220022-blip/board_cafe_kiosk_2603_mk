@@ -7,6 +7,7 @@ import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageRequestDTO;
 import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageResponseDTO;
 import org.example.board_cafe_kiosk_2603.service.admin.policy.PolicyService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ import java.util.Objects;
 @Controller
 @RequestMapping("/admin/policy")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN','SUPER')")
 public class PolicyController {
 
     private final PolicyService policyService;

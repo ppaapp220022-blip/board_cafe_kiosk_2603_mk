@@ -2,6 +2,7 @@
 <html lang="ko"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layout/admin_layout}">
 
 <head>
@@ -259,7 +260,15 @@
 
     <div class="header-flex">
         <h1 class="page-title">상품 관리 시스템</h1>
-        <a th:href="@{/admin/product/game/add}" class="btn-add-product">+ 새 게임 추가</a>
+        <!-- 새 게임 추가: ADMIN, SUPER 정상 버튼 -->
+        <a sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
+           th:href="@{/admin/product/game/add}" class="btn-add-product">+ 새 게임 추가</a>
+
+        <!-- 새 게임 추가: STAFF 비활성 버튼 -->
+        <a sec:authorize="hasRole('STAFF')"
+           href="#" class="btn-add-product"
+           style="opacity: 0.4; cursor: not-allowed;"
+           onclick="alert('관리자 권한이 필요합니다.'); return false;">+ 새 게임 추가</a>
     </div>
 
     <!-- 상단 탭 네비게이션 -->
@@ -268,7 +277,9 @@
         <a href="/admin/product/menu?tab=food" class="tab-btn">🍔 음식 관리</a>
         <a href="/admin/product/menu?tab=drink" class="tab-btn">☕ 음료 관리</a>
         <a href="/admin/product/menu?tab=guest" class="tab-btn">👥️ 추가인원 관리</a>
-        <a href="/admin/product/menu?tab=hidden" class="tab-btn">👁️ 숨김 목록</a>
+        <a href="/admin/product/menu?tab=hidden" class="tab-btn">👁️ 메뉴 숨김 목록</a>
+        <a href="/admin/product/game?tab=hidden" class="tab-btn"
+           th:classappend="${activeTab == 'hidden'} ? ' active'">🎲 게임 숨김</a>
     </div>
 
     <!--
@@ -347,18 +358,36 @@
                 </td>
                 <td>
                     <div class="action-group">
-                        <a class="btn-table btn-edit"
+
+                        <!-- 수정: ADMIN, SUPER -->
+                        <a sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
+                           class="btn-table btn-edit"
                            th:href="@{/admin/product/game/edit/{id}(id=${game.id})}">📝 수정</a>
 
-                        <form th:action="@{/admin/product/game/{id}/toggle-active(id=${game.id})}"
+                        <!-- 수정: STAFF -->
+                        <a sec:authorize="hasRole('STAFF')"
+                           href="#" class="btn-table btn-edit"
+                           style="opacity: 0.4; cursor: not-allowed;"
+                           onclick="alert('관리자 권한이 필요합니다.'); return false;">📝 수정</a>
+
+                        <!-- 숨기기/표시: ADMIN, SUPER -->
+                        <form sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
+                              th:action="@{/admin/product/game/{id}/toggle-active(id=${game.id})}"
                               method="post" style="display:inline;">
-                            <!-- 카테고리 필터 유지 -->
                             <input type="hidden" name="categoryId" th:value="${selectedCategoryId}">
                             <button type="submit" class="btn-table"
                                     th:classappend="${game.active} ? 'btn-hide' : 'btn-instock'"
                                     th:text="${game.active} ? '👁️ 숨기기' : '✅ 표시'">
                             </button>
                         </form>
+
+                        <!-- 숨기기/표시: STAFF -->
+                        <button sec:authorize="hasRole('STAFF')"
+                                class="btn-table btn-hide"
+                                style="opacity: 0.4; cursor: not-allowed;"
+                                onclick="alert('관리자 권한이 필요합니다.'); return false;"
+                                th:text="${game.active} ? '👁️ 숨기기' : '✅ 표시'">
+                        </button>
                     </div>
                 </td>
             </tr>

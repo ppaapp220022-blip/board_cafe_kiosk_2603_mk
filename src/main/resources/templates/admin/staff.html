@@ -64,15 +64,15 @@
     <div class="tab-container">
         <div class="tab-item" th:classappend="${filter == 'all'} ? 'active'"
              onclick="filterTab('all')">
-            전체 <span class="tab-count" th:text="${countAll}">0</span>
+            전체 <span id="count-all" class="tab-count" th:text="${countAll}">0</span>
         </div>
         <div class="tab-item" th:classappend="${filter == 'active'} ? 'active'"
              onclick="filterTab('active')">
-            활성화 <span class="tab-count" th:text="${countActive}">0</span>
+            활성화 <span id="count-active" class="tab-count" th:text="${countActive}">0</span>
         </div>
         <div class="tab-item" th:classappend="${filter == 'inactive'} ? 'active'"
              onclick="filterTab('inactive')">
-            비활성화 <span class="tab-count" th:text="${countInactive}">0</span>
+            비활성화 <span id="count-inactive" class="tab-count" th:text="${countInactive}">0</span>
         </div>
     </div>
 
@@ -331,7 +331,7 @@
             const rows = Array.from(tableBody.querySelectorAll('tr'));
             rows.sort((a, b) => a.classList.contains('is-disabled') - b.classList.contains('is-disabled'));
             rows.forEach(row => tableBody.appendChild(row));
-            updateCounts();
+            // updateCounts()는 서버에서 이미 정확한 카운트를 내려주므로 호출 불필요
         };
     </script>
 </th:block>

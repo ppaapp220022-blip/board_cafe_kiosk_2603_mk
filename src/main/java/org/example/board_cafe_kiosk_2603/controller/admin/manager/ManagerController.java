@@ -14,6 +14,7 @@ import org.example.board_cafe_kiosk_2603.service.admin.manager.ManagerService;
 import org.example.board_cafe_kiosk_2603.service.admin.sms.MailSenderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,7 @@ import java.util.List;
 @Controller
 @RequestMapping("/admin/staff")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN','SUPER')")
 public class ManagerController {
 
     private final MailSenderService mailSenderService;
