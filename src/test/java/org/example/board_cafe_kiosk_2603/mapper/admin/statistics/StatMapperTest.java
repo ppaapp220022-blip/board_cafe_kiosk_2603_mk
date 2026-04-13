@@ -86,7 +86,7 @@ class StatMapperTest {
 
     @Test
     void findMonthlyTop5ItemsTest() {
-        String yearMonth = "2026-03";
+        String yearMonth = "2026-04";
 
         List<ItemSalesDTO> result = statMapper.findMonthlyTop5Items(yearMonth);
 
@@ -94,13 +94,11 @@ class StatMapperTest {
             ItemSalesDTO current = result.get(i);
             ItemSalesDTO next = result.get(i + 1);
 
-            // 중요: 필드명이 salesQty라면 getSalesQty()를 호출해야 함
             assertThat(current.getSalesQty())
                     .isGreaterThanOrEqualTo(next.getSalesQty());
         }
 
-        // 결과 출력
-        System.out.println("===== 2026년 03월 인기 메뉴 Top 5 =====");
+        log.info("--- {} 인기 메뉴 Top 5 ---", yearMonth);
         result.forEach(item ->
                 System.out.println("메뉴명: " + item.getMenuName() + " | 판매수량: " + item.getSalesQty())
         );
