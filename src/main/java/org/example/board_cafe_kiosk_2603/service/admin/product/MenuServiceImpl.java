@@ -190,5 +190,16 @@ public class MenuServiceImpl implements MenuService {
         return new PageResponseDTO<>(pageRequestDTO, total, list);
     }
 
+    @Override
+    public PageResponseDTO<MenuResponseDTO> getByIsDeletedAndCategoryId(boolean isDeleted, int categoryId, PageRequestDTO pageRequestDTO) {
+        List<MenuResponseDTO> list = menuMapper.findByIsDeletedAndCategoryIdPaged(isDeleted, categoryId, pageRequestDTO);
+        int total = menuMapper.countByIsDeletedAndCategoryId(isDeleted, categoryId);
+        return PageResponseDTO.<MenuResponseDTO>withAll()
+                .pageRequestDTO(pageRequestDTO)
+                .total(total)
+                .dtoList(list)
+                .build();
+    }
+
 
 }

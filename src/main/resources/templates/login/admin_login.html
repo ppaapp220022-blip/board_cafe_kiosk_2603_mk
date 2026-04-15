@@ -118,12 +118,22 @@
 
         /* 에러 메시지 스타일 추가 */
         .error-msg {
-            color: #e74c3c;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            color: #A32D2D;
             font-size: 0.85rem;
-            margin-bottom: 15px;
-            background: #fdf2f2;
-            padding: 10px;
-            border-radius: 8px;
+            margin-bottom: 18px;
+            background: #FCEBEB;
+            border: 0.5px solid #F09595;
+            padding: 12px 14px;
+            border-radius: 10px;
+            text-align: left;
+            animation: slideDown 0.3s ease;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-6px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -135,7 +145,16 @@
     <p class="subtitle">매장 관리 시스템 접속</p>
 
     <div th:if="${param.error}" class="error-msg">
-        아이디 또는 비밀번호가 잘못되었습니다.
+        <svg viewBox="0 0 24 24" width="16" height="16"
+             fill="none" stroke="#A32D2D" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round"
+             style="flex-shrink:0; margin-top:1px;">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span>아이디 혹은 비밀번호가 일치하지 않습니다.</span>
+<!--        아이디 또는 비밀번호가 잘못되었습니다.-->
     </div>
 
     <form th:action="@{/admin/login-process}" method="POST">

@@ -47,64 +47,43 @@ public class MenuController {
 
         // 탭 기준으로 기본 목록 조회
         // (소프트 삭제된 데이터는 hidden 탭에서만 조회)
-        List<MenuResponseDTO> menuList = switch (tab) {
-            case "drink" -> menuService.getByType("DRINK");
-            case "guest" -> menuService.getByType("GUEST");
-            case "hidden" -> menuService.getByIsDeleted(true);
-            default -> menuService.getByType("FOOD");
+        // 1. 서비스의 페이징 메서드 호출로 변경 (PageResponseDTO를 직접 받음)
+        PageResponseDTO<MenuResponseDTO> pageResponse = switch (tab) {
+            case "drink" -> (categoryId != null)
+                    ? menuService.getByTypeAndCategoryId("DRINK", categoryId, pageRequestDTO)
+                    : menuService.getByType("DRINK", pageRequestDTO);
+            case "guest" -> (categoryId != null)
+                    ? menuService.getByTypeAndCategoryId("GUEST", categoryId, pageRequestDTO)
+                    : menuService.getByType("GUEST", pageRequestDTO);
+//            case "hidden" -> menuService.getByIsDeleted(true, pageRequestDTO);
+            case "hidden" -> (categoryId != null)
+                    ? menuService.getByIsDeletedAndCategoryId(true, categoryId, pageRequestDTO)
+                    : menuService.getByIsDeleted(true, pageRequestDTO);
+            default -> (categoryId != null)
+                    ? menuService.getByTypeAndCategoryId("FOOD", categoryId, pageRequestDTO)
+                    : menuService.getByType("FOOD", pageRequestDTO);
         };
 
-        // 카테고리 필터링 (hidden 탭이 아닐 경우에만 categoryId 필터 적용)
-//        if (categoryId != null && !"hidden".equals(tab)) {
-//            menuList = menuList.stream()
-//                    .filter(m -> m.getCategoryId() == categoryId)
-//                    .toList();
-//            log.info("--- 카테고리 필터 적용 완료 (ID: {}) ---", categoryId);
-//        }
-
-        // 기존: hidden 탭 제외하고 필터 적용
-        // 변경: hidden 탭도 categoryId 필터 적용
-        if (categoryId != null) {
-            menuList = menuList.stream()
-                    .filter(m -> m.getCategoryId() == categoryId)
-                    .toList();
-        }
-
-        // 탭에 맞는 카테고리 버튼 목록 생성 (숨김 탭은 불필요하므로 null)
-//        List<CategoryResponseDTO> categoryList = null;
-//        if (!"hidden".equals(tab)) {
-//            CategoryType type = switch (tab) {
-//                case "drink" -> CategoryType.DRINK;
-//                case "guest" -> CategoryType.GUEST;
-//                default -> CategoryType.FOOD;
-//            };
-//            categoryList = categoryService.getByType(type);
-//        }
-
-        // 기존: hidden 탭이면 null
-        // 변경: hidden 탭도 전체 카테고리 목록 제공
+        // 2. 카테고리 목록 로직 (hidden 탭도 카테고리 목록 제공)
         List<CategoryResponseDTO> categoryList;
         if ("hidden".equals(tab)) {
             categoryList = categoryService.getAll().stream()
-                    .filter(c -> List.of(CategoryType.FOOD, CategoryType.DRINK, CategoryType.GUEST)
-                            .contains(c.getType()))
+                    .filter(c -> List.of(CategoryType.FOOD, CategoryType.DRINK, CategoryType.GUEST).contains(c.getType()))
                     .toList();
         } else {
-            CategoryType type = switch (tab) {
-                case "drink" -> CategoryType.DRINK;
-                case "guest" -> CategoryType.GUEST;
-                default -> CategoryType.FOOD;
-            };
+            CategoryType type = CategoryType.valueOf(tab.toUpperCase());
             categoryList = categoryService.getByType(type);
         }
 
-        model.addAttribute("menuList", menuList);
+        model.addAttribute("pageResponse", pageResponse); // HTML 페이징 에러 해결
+        model.addAttribute("menuList", pageResponse.getDtoList()); // 기존 목록 호환
         model.addAttribute("categoryList", categoryList);
         model.addAttribute("selectedCategoryId", categoryId);
         model.addAttribute("activeTab", tab);
         model.addAttribute("activePage", "productReg");
+        model.addAttribute("currentPage", "menu");  // html tab 분기 인식에 사용
 
-        log.info("--- 메뉴 목록 조회 완료 - tab: {}, categoryId: {}, 건수: {}", tab, categoryId, menuList.size());
+        log.info("--- 메뉴 목록 조회 완료 - tab: {}, categoryId: {}, 건수: {}", tab, categoryId, pageResponse.getTotal());
         return "admin/product_menu";
     }
 

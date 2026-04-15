@@ -71,4 +71,13 @@ public interface MenuMapper {
 
     /** 소프트 삭제 여부 기준 메뉴 수 */
     int countByIsDeleted(boolean isDeleted);
+
+    /** 소프트 삭제 여부 + category_id 기준 메뉴 목록 조회 - 페이징 */
+    List<MenuResponseDTO> findByIsDeletedAndCategoryIdPaged(@Param("isDeleted") boolean isDeleted,
+                                                            @Param("categoryId") int categoryId,
+                                                            @Param("pageRequestDTO") PageRequestDTO pageRequestDTO);
+
+    /** 소프트 삭제 여부 + category_id 기준 메뉴 수 */
+    int countByIsDeletedAndCategoryId(@Param("isDeleted") boolean isDeleted,
+                                      @Param("categoryId") int categoryId);
 }

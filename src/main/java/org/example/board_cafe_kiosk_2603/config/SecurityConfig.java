@@ -152,12 +152,12 @@ public class SecurityConfig {
                 .formLogin(config -> {
                     log.info("  [adminChain] formLogin 설정: loginPage=/common/login, processUrl=/admin/login-process");
                     config
-                            .loginPage("/common/login")
+                            .loginPage("/admin/login")
                             .loginProcessingUrl("/admin/login-process")
                             .usernameParameter("username")
                             .passwordParameter("password")
                             .successHandler(managerLoginSuccessHandler)
-                            .failureUrl("/common/login?error")
+                            .failureUrl("/admin/login?error")
 //                            .defaultSuccessUrl("/admin/dashboard", true)
                             .permitAll();
                 })
@@ -177,7 +177,7 @@ public class SecurityConfig {
                             .authenticationEntryPoint((request, response, authException) -> {
                                 log.warn("  [adminChain][AuthEntryPoint] 미인증 접근 감지 → URI: {}, 예외: {}",
                                         request.getRequestURI(), authException.getMessage());
-                                response.sendRedirect("/common/login");
+                                response.sendRedirect("/admin/login");
                             });
                 })
                 // 개발단계, csrf 비활성화
@@ -196,6 +196,8 @@ public class SecurityConfig {
                         .ignoringRequestMatchers("/admin/macro/**")
                         // 요금정책
                         .ignoringRequestMatchers("/admin/policy/**")
+                        // 카테고리
+                        .ignoringRequestMatchers("/admin/category/**")  // ← 추가
                 );
 
         log.info("--- [SecurityConfig] Admin Security Chain 구성 완료 ---");
