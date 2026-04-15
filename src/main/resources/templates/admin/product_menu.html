@@ -21,7 +21,7 @@
 
             .tab-container {
                 display: grid;
-                grid-template-columns: repeat(5, 1fr);
+                grid-template-columns: repeat(4, 1fr);
                 gap: 10px; margin-bottom: 20px;
                 background: #f1f5f9; padding: 5px; border-radius: 12px;
             }
@@ -133,10 +133,26 @@
     <!-- 상단 탭 네비게이션 (5개) -->
     <div class="tab-container">
         <a href="/admin/product/game"            class="tab-btn">🎲 게임 관리</a>
-        <a href="/admin/product/menu?tab=food"   class="tab-btn" th:classappend="${activeTab == 'food'}   ? ' active'">🍔 음식 관리</a>
-        <a href="/admin/product/menu?tab=drink"  class="tab-btn" th:classappend="${activeTab == 'drink'}  ? ' active'">☕ 음료 관리</a>
-        <a href="/admin/product/menu?tab=guest"  class="tab-btn" th:classappend="${activeTab == 'guest'}  ? ' active'">👥 인원 추가</a>
-        <a href="/admin/product/menu?tab=hidden" class="tab-btn" th:classappend="${activeTab == 'hidden'} ? ' active'">👁️ 숨김 목록</a>
+        <!-- 메뉴 탭들: menu 페이지이고 각 tab과 일치할 때 -->
+        <a href="/admin/product/menu?tab=food"  class="tab-btn"
+           th:classappend="${currentPage == 'menu' and activeTab == 'food'}   ? ' active'">🍔 음식 관리</a>
+        <a href="/admin/product/menu?tab=drink" class="tab-btn"
+           th:classappend="${currentPage == 'menu' and activeTab == 'drink'}  ? ' active'">☕ 음료 관리</a>
+        <a href="/admin/product/menu?tab=guest" class="tab-btn"
+           th:classappend="${currentPage == 'menu' and activeTab == 'guest'}  ? ' active'">👥 인원 추가</a>
+
+        <!-- 게임 숨김: game 페이지이고 hidden일 때 -->
+        <a href="/admin/product/game?tab=hidden" class="tab-btn">
+            🎲 게임 숨김 목록</a>
+
+        <!-- 메뉴 숨김: menu 페이지이고 hidden일 때 -->
+        <a href="/admin/product/menu?tab=hidden" class="tab-btn"
+           th:classappend="${currentPage == 'menu' and activeTab == 'hidden'} ? ' active'">👁️ 메뉴 숨김 목록</a>
+
+        <!-- 카테고리 관리: category 페이지일 때 active -->
+        <a href="/admin/category" class="tab-btn"
+           th:classappend="${activePage == 'category'} ? ' active'">🏷️ 카테고리 관리</a>
+
     </div>
 
     <!--
@@ -147,8 +163,8 @@
 
         URL 예시: /admin/product/menu?tab=food&categoryId=2
     -->
-<!--    <div class="category-filter"-->
-<!--         th:if="${activeTab != 'hidden' and categoryList != null and not #lists.isEmpty(categoryList)}">-->
+    <!--    <div class="category-filter"-->
+    <!--         th:if="${activeTab != 'hidden' and categoryList != null and not #lists.isEmpty(categoryList)}">-->
     <!-- hidden 탭도 포함 -->
     <div class="category-filter"
          th:if="${categoryList != null and not #lists.isEmpty(categoryList)}">
@@ -188,11 +204,11 @@
             </tr>
             </thead>
             <tbody id="productList">
-<!--            <tr th:if="${menuList == null or #lists.isEmpty(menuList)}" class="empty-row">-->
+            <!--            <tr th:if="${menuList == null or #lists.isEmpty(menuList)}" class="empty-row">-->
             <tr th:if="${pageResponse.dtoList == null or #lists.isEmpty(pageResponse.dtoList)}" class="empty-row">
                 <td colspan="5">등록된 메뉴가 없습니다.</td>
             </tr>
-<!--            <tr th:each="menu : ${menuList}">-->
+            <!--            <tr th:each="menu : ${menuList}">-->
             <tr th:each="menu : ${pageResponse.dtoList}">
                 <td>
                     <div class="prod-info">
@@ -299,12 +315,12 @@
             </tr>
             </thead>
             <tbody id="productList_hidden">
-<!--            <tr th:if="${menuList == null or #lists.isEmpty(menuList)}" class="empty-row">-->
-<tr th:if="${pageResponse.dtoList == null or #lists.isEmpty(pageResponse.dtoList)}" class="empty-row">
+            <!--            <tr th:if="${menuList == null or #lists.isEmpty(menuList)}" class="empty-row">-->
+            <tr th:if="${pageResponse.dtoList == null or #lists.isEmpty(pageResponse.dtoList)}" class="empty-row">
                 <td colspan="5">숨김 처리된 상품이 없습니다.</td>
             </tr>
-<!--            <tr th:each="menu : ${menuList}">-->
-<tr th:each="menu : ${pageResponse.dtoList}">
+            <!--            <tr th:each="menu : ${menuList}">-->
+            <tr th:each="menu : ${pageResponse.dtoList}">
                 <td>
                     <div class="prod-info">
                         <div class="prod-thumb">🔒</div>

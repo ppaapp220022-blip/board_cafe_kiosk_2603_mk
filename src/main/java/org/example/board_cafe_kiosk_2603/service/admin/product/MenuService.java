@@ -53,4 +53,7 @@ public interface MenuService {
 
     /** 소프트 삭제 여부 기준 메뉴 목록 반환 - 페이징 (숨김 탭용) */
     PageResponseDTO<MenuResponseDTO> getByIsDeleted(boolean isDeleted, PageRequestDTO pageRequestDTO);
+
+    /** 소프트 삭제 여부 + category_id 기준 메뉴 목록 반환 - 페이징 */
+    PageResponseDTO<MenuResponseDTO> getByIsDeletedAndCategoryId(boolean isDeleted, int categoryId, PageRequestDTO pageRequestDTO);
 }

@@ -196,6 +196,8 @@ public class SecurityConfig {
                         .ignoringRequestMatchers("/admin/macro/**")
                         // 요금정책
                         .ignoringRequestMatchers("/admin/policy/**")
+                        // 카테고리
+                        .ignoringRequestMatchers("/admin/category/**")  // ← 추가
                 );
 
         log.info("--- [SecurityConfig] Admin Security Chain 구성 완료 ---");

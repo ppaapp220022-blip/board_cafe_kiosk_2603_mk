@@ -9,106 +9,113 @@ import org.example.board_cafe_kiosk_2603.dto.admin.product.CategoryResponseDTO;
 import org.example.board_cafe_kiosk_2603.mapper.admin.product.CategoryMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
-/**
- * CategoryService 구현체
- * ModelMapper를 사용하여 Domain ↔ DTO 변환 처리
- */
 @Log4j2
 @Service
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryMapper categoryMapper;
-    private final ModelMapper modelMapper;
 
-    /**
-     * 카테고리 전체 목록 조회
-     */
+    /* 카테고리 전체 목록 조회 */
     @Override
     public List<CategoryResponseDTO> getAll() {
-        log.debug("CategoryServiceImpl.getAll() 실행");
-        List<Category> list = categoryMapper.findAll();
-        log.debug("조회된 카테고리 수: {}", list.size());
-        return list.stream()
-                .map(c -> modelMapper.map(c, CategoryResponseDTO.class))
-                .collect(Collectors.toList());
+        List<CategoryResponseDTO> list = categoryMapper.findAll();
+        log.info("--- 카테고리 목록 조회: {} ---", list.size());
+        return list;
     }
 
-    /**
-     * type 기준 카테고리 목록 조회
-     */
+    /* type 기준 카테고리 목록 조회 */
     @Override
     public List<CategoryResponseDTO> getByType(CategoryType type) {
-        log.debug("CategoryServiceImpl.getByType() 실행 - type: {}", type);
-        List<Category> list = categoryMapper.findByType(type);
-        log.debug("조회된 카테고리 수 (type={}): {}", type, list.size());
-        return list.stream()
-                .map(c -> modelMapper.map(c, CategoryResponseDTO.class))
-                .collect(Collectors.toList());
+        List<CategoryResponseDTO> list = categoryMapper.findByType(type);
+        log.info("--- 카테고리 타입 조회 (type={}): {} ---", type, list.size());
+        return list;
     }
 
-    /**
-     * PK로 카테고리 단건 조회
-     */
+    /* PK로 카테고리 단건 조회 */
     @Override
     public CategoryResponseDTO getById(int id) {
-        log.debug("CategoryServiceImpl.getById() 실행 - id: {}", id);
-        Category category = categoryMapper.findById(id)
+        return categoryMapper.findById(id)
                 .orElseThrow(() -> {
-                    log.warn("카테고리 없음 - id: {}", id);
+                    log.warn("카테고리 단건 조회 실패 - id: {}", id);
                     return new NoSuchElementException("카테고리를 찾을 수 없습니다. id=" + id);
                 });
-        return modelMapper.map(category, CategoryResponseDTO.class);
     }
 
-    /**
-     * 카테고리 등록
-     */
+    /* 카테고리 등록 */
     @Override
+    @Transactional
     public void register(CategoryRequestDTO categoryRequestDTO) {
-        log.debug("CategoryServiceImpl.register() 실행 - dto: {}", categoryRequestDTO);
-        Category category = modelMapper.map(categoryRequestDTO, Category.class);
-        int result = categoryMapper.insert(category);
-        log.debug("카테고리 등록 결과 - affected rows: {}, generated id: {}", result, category.getId());
-    }
-
-    /**
-     * 카테고리 수정
-     */
-    @Override
-    public void modify(int id, CategoryRequestDTO categoryRequestDTO) {
-        log.debug("CategoryServiceImpl.modify() 실행 - id: {}, dto: {}", id, categoryRequestDTO);
-        categoryMapper.findById(id)
-                .orElseThrow(() -> {
-                    log.warn("수정 대상 카테고리 없음 - id: {}", id);
-                    return new NoSuchElementException("카테고리를 찾을 수 없습니다. id=" + id);
-                });
         Category category = Category.builder()
-                .id(id)
                 .name(categoryRequestDTO.getName())
                 .type(categoryRequestDTO.getType())
                 .build();
-        int result = categoryMapper.update(category);
-        log.debug("카테고리 수정 결과 - affected rows: {}", result);
+        int result = categoryMapper.insert(category);
+        // useGeneratedKeys=true → insert 후 category.getId()에 PK 자동 주입
+        log.info("[카테고리 등록 완료] name={}, type={}, 생성된 id={}, affected rows={}",
+                categoryRequestDTO.getName(), categoryRequestDTO.getType(), category.getId(), result);
     }
 
-    /**
-     * 카테고리 삭제
-     */
+
+    /* 카테고리 수정 */
     @Override
-    public void remove(int id) {
-        log.debug("CategoryServiceImpl.remove() 실행 - id: {}", id);
+    @Transactional
+    public void modify(int id, CategoryRequestDTO categoryRequestDTO) {
         categoryMapper.findById(id)
                 .orElseThrow(() -> {
-                    log.warn("삭제 대상 카테고리 없음 - id: {}", id);
+                    log.warn("--- 카테고리 수정 실패, id: {} ---", id);
                     return new NoSuchElementException("카테고리를 찾을 수 없습니다. id=" + id);
                 });
+
+        // Mapper 시그니처: update(@Param("id") int id, @Param("dto") CategoryRequestDTO dto)
+        // Category VO가 아닌 id + RequestDTO 를 분리해서 전달
+        int result = categoryMapper.update(id, categoryRequestDTO);
+        log.info("--- 카테고리 수정 완료, id: {}, affected rows: {} ---", id, result);
+    }
+
+    /* 카테고리 삭제 */
+    // remove() 삭제 전 연결 상품 수 검증 추가
+    // 연결된 상품이 1개 이상 존재할 경우 IllegalStateException 발생
+    // Controller에서 이 예외를 잡아 클라이언트에 적절한 응답 반환
+    @Override
+    @Transactional
+    public void remove(int id) {
+        // 삭제 대상 존재 여부 검증
+        CategoryResponseDTO existing = categoryMapper.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("--- 카테고리 삭제 실패 (삭제 대상 없음), id: {} ---", id);
+                    return new NoSuchElementException("카테고리를 찾을 수 없습니다. id=" + id);
+                });
+
+        // 연결 상품 수 확인 → 존재하면 삭제 불가
+        int linkedCount = categoryMapper.countLinkedProducts(id);
+        log.info("--- 카테고리 삭제 검증, (id: {}, name: {}, 연결 상품 수: {}) ---",
+                id, existing.getName(), linkedCount);
+
+        if (linkedCount > 0) {
+            log.warn("--- 카테고리 삭제 거부, (id: {}, name: {}, 연결 상품: {}) ---",
+                    id, existing.getName(), linkedCount);
+            throw new IllegalStateException(
+                    "연결된 상품이 " + linkedCount + "개 있어 삭제할 수 없습니다. (카테고리: " + existing.getName() + ")");
+        }
+
         int result = categoryMapper.delete(id);
-        log.debug("카테고리 삭제 결과 - affected rows: {}", result);
+        log.debug("--- 카테고리 삭제 완료, (id: {}, name: {}, affected rows: {}) ---",
+                id, existing.getName(), result);
+    }
+
+    /* 삭제 가능 여부 확인 */
+    // 연결 상품 수가 0이면 true
+    @Override
+    public boolean canDelete(int id) {
+        int linkedCount = categoryMapper.countLinkedProducts(id);
+        log.info("--- 삭제 가능 여부 (id: {}, 연결 상품 수: {}, canDelete: {}) ---", id, linkedCount, linkedCount == 0);
+        return linkedCount == 0;
     }
 }

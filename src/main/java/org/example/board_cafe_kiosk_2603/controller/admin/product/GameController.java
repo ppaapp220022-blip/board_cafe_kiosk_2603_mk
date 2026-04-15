@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Log4j2
 @Controller
@@ -39,27 +40,48 @@ public class GameController {
     // 카테고리별 필터링 기능 포함
     @GetMapping
     public String getAll(@RequestParam(required = false) Integer categoryId,
+                         @RequestParam(required = false) String tab,
                          PageRequestDTO pageRequestDTO,
                          Model model) {
-        log.info("--- 게임 목록 조회 : (categoryId Filter: {}, page: {}) ---", categoryId, pageRequestDTO.getPage());
+        log.info("--- 게임 목록 조회 : (categoryId: {}, tab: {}, page: {}) ---", categoryId, tab, pageRequestDTO.getPage());
 
         try {
-            // 카테고리 필터 적용: categoryId 있으면 해당 카테고리만, 없으면 전체
-            PageResponseDTO<GameResponseDTO> pageResponse = (categoryId != null)
-                    ? gameService.getByCategoryId(categoryId, pageRequestDTO)
-                    : gameService.getAll(pageRequestDTO);
-
-            // 게임 탭에서 사용할 카테고리 목록 (GAME 타입만)
+            // 카테고리 목록
             List<CategoryResponseDTO> categoryList = categoryService.getByType(CategoryType.GAME);
-
-            model.addAttribute("pageResponse", pageResponse);
             model.addAttribute("categoryList", categoryList);
             model.addAttribute("selectedCategoryId", categoryId);
             model.addAttribute("pageRequestDTO", pageRequestDTO);
             model.addAttribute("activePage", "productReg");
-            model.addAttribute("activeTab", "game");
+            model.addAttribute("currentPage", "game");  // html tab 분기 인식에 사용
 
-            log.info("게임 목록 조회 성공 - 건수: {}, 전체: {}", pageResponse.getDtoList().size(), pageResponse.getTotal());
+            // 숨김 탭
+            if ("hidden".equals(tab)) {
+                model.addAttribute("activeTab", "hidden");
+
+                List<GameResponseDTO> gameList = gameService.getByIsActive(false);
+
+                // 카테고리 필터 적용
+                if (categoryId != null) {
+                    gameList = gameList.stream()
+                            .filter(g -> g.getCategoryId() == categoryId)
+                            .collect(Collectors.toList());
+                }
+
+                model.addAttribute("gameList", gameList);
+                log.info("숨김 게임 목록 조회 성공 - 건수: {}", gameList.size());
+
+                // 일반 탭
+            } else {
+                model.addAttribute("activeTab", "game");
+
+                PageResponseDTO<GameResponseDTO> pageResponse = (categoryId != null)
+                        ? gameService.getByCategoryId(categoryId, pageRequestDTO)
+                        : gameService.getAll(pageRequestDTO);
+
+                model.addAttribute("pageResponse", pageResponse);
+                log.info("게임 목록 조회 성공 - 건수: {}, 전체: {}", pageResponse.getDtoList().size(), pageResponse.getTotal());
+            }
+
         } catch (Exception e) {
             log.error("--- 게임 목록 조회 중 오류 발생: {} ---", e.getMessage());
         }
@@ -186,23 +208,6 @@ public class GameController {
         return "redirect:/admin/product/game";
     }
 
-    // ==========
-    /**
-     * 게임 삭제 처리
-     * POST /admin/product/game/delete/{id}
-     */
-    // 이미지 파일도 함께 삭제
-    /* 게임 데이터 완전 삭제 */
-//    @PostMapping("/delete/{id}")
-//    public String remove(@PathVariable int id) {
-//        log.debug("POST /admin/product/game/delete/{} 요청", id);
-//        fileUploadUtil.delete(gameService.getById(id).getImageUrl());
-//        gameService.remove(id);
-//        log.debug("게임 삭제 완료 - id: {}", id);
-//        return "redirect:/admin/product/game";
-//    }
-    // ==========
-
     /* 게임 활성/비활성 상태 토글 (키오스크 노출 여부) */
     // 카테고리 필터 유지하며 리다리렉트
     @PostMapping("/{id}/toggle-active")
@@ -210,7 +215,15 @@ public class GameController {
     public String toggleActive(@PathVariable int id,
                                @RequestParam(required = false) Integer categoryId) {
         log.info("--- 게임 활성 상태 토글 (ID: {}) ---", id);
+
+        // 토글 전 현재 상태 확인 (토글 후 확인하면 반대로 동작)
+        boolean wasActive = gameService.getById(id).isActive();
         gameService.toggleActive(id);
+
+        // 숨기기(활성 → 비활성): 게임 숨김 탭으로 이동
+        if (wasActive) {
+            return "redirect:/admin/product/game";
+        }
 
         // 필터링 상태 유지를 위해 categoryId와 함께 리다이렉트
         return categoryId != null
