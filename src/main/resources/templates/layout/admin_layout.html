@@ -154,7 +154,7 @@
     <div class="user-avatar">👤</div>
     <div class="user-meta">
       <!-- 이름만 띄울때 -->
-<!--      <span class="user-name" sec:authentication="principal.name">실제 이름</span>-->
+      <!--      <span class="user-name" sec:authentication="principal.name">실제 이름</span>-->
       <!-- 이름 + 아이디 띄울때 -->
       <span class="user-name">
     <span sec:authentication="principal.name">실명</span>
@@ -194,7 +194,7 @@
 
       <!-- 매출 통계: ADMIN, SUPER 정상 링크 -->
       <a sec:authorize="hasAnyRole('ADMIN','SUPER')"
-              th:href="@{/admin/status}" class="nav-item" th:classappend="${activePage == 'salesStats'} ? 'active'">
+         th:href="@{/admin/status}" class="nav-item" th:classappend="${activePage == 'salesStats'} ? 'active'">
         <span class="nav-icon">📈</span> 매출 통계
       </a>
 
@@ -311,6 +311,9 @@
     if (currentPath.includes('/admin/product') && productMenu) {
       productMenu.classList.add('active');
     }
+    if (currentPath.includes('/admin/category') && productMenu) {
+      productMenu.classList.add('active');
+    }
 
     // --- 3. 매크로 메시지 활성화 ---
     if (currentPath.includes('/admin/macro') && macroMenu) {
@@ -334,3 +337,5 @@
 
 </body>
 </html>
+
+아래 자바스크립트 부분에 카테고리 페이지도 활성화 되게 해줘
