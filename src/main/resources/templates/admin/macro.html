@@ -2,6 +2,7 @@
 <html lang="ko"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layout/admin_layout}">
 
 <head>
@@ -37,7 +38,22 @@
 <th:block layout:fragment="content">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
         <h1 class="page-title">💬 매크로 메시지 관리</h1>
-        <button id="btnAddMacro" class="btn-add" onclick="openAddModal()">+ 새 매크로 등록</button>
+
+        <!-- 매크로 등록 버튼: ADMIN, SUPER 가능-->
+        <button id="btnAddMacro" class="btn-add"
+                sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
+                onclick="openAddModal()">
+            + 새 매크로 등록
+        </button>
+
+        <!-- 매크로 등록 버튼: STAFF 불가능 -->
+        <button class="btn-add"
+                sec:authorize="hasRole('STAFF')"
+                style="opacity: 0.4; cursor: not-allowed;"
+                onclick="alert('관리자 권한이 필요합니다.'); return false;">
+            + 새 매크로 등록
+        </button>
+
     </div>
 
     <div class="tabs">
@@ -70,8 +86,22 @@
                 <tr th:each="macro : ${entry.value}">
                     <td class="messageText" th:text="${macro.messageText}"></td>
                     <td style="text-align: right;">
+
+                        <!-- 삭제 버튼: ADMIN, SUPER 가능 -->
                         <button type="button" class="btn-delete"
-                                th:data-id="${macro.id}" onclick="deleteMacro(this)">삭제</button>
+                                sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
+                                th:data-id="${macro.id}" onclick="deleteMacro(this)">
+                            삭제
+                        </button>
+
+                        <!-- 삭제 버튼: STAFF 불가능 -->
+                        <button type="button" class="btn-delete"
+                                sec:authorize="hasRole('STAFF')"
+                                style="opacity: 0.4; cursor: not-allowed;"
+                                onclick="alert('관리자 권한이 필요합니다.'); return false;">
+                            삭제
+                        </button>
+
                     </td>
                 </tr>
                 </tbody>

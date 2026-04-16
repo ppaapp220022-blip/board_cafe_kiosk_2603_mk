@@ -2,6 +2,7 @@ package org.example.board_cafe_kiosk_2603.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.example.board_cafe_kiosk_2603.security.KioskAuthorizationManager;
 import org.example.board_cafe_kiosk_2603.security.KioskUserDetailsService;
 import org.example.board_cafe_kiosk_2603.security.ManagerUserDetailsService;
 import org.example.board_cafe_kiosk_2603.security.handler.ManagerLoginSuccessHandler;
@@ -32,6 +33,7 @@ public class SecurityConfig {
     private final KioskLoginSuccessHandler kioskLoginSuccessHandler;  // 키오스크 로그인 성공 시 처리
     private final ManagerUserDetailsService managerUserDetailsService;  // '관리자' 로그인 로직
     private final ManagerLoginSuccessHandler managerLoginSuccessHandler;  // 관리자 로그인 성공 시 처리
+    private final KioskAuthorizationManager kioskAuthorizationManager;
 
     /* 정적 리소스(CSS, JS, Image, etc) 보안 필터링에서 제외대상 설정 */
     @Bean
