@@ -495,34 +495,10 @@
             let rentalReturnContext = { orderId: null, gameName: '', quantity: 1 };
             let pendingOrdersState = [];
             let latestModalOrderItems = [];
-            let pendingAckOrderIds = new Set();
-
-            try {
-                const raw = sessionStorage.getItem('dashboard_pending_ack_ids');
-                const parsed = raw ? JSON.parse(raw) : [];
-                if (Array.isArray(parsed)) {
-                    pendingAckOrderIds = new Set(parsed.map(v => Number(v)).filter(v => Number.isFinite(v) && v > 0));
-                }
-            } catch (_) {
-                pendingAckOrderIds = new Set();
-            }
 
             function parsePendingOrderId(order) {
                 const id = Number(order?.id ?? order?.orderId ?? 0);
                 return Number.isFinite(id) && id > 0 ? id : 0;
-            }
-
-            function savePendingAckOrderIds() {
-                try {
-                    sessionStorage.setItem('dashboard_pending_ack_ids', JSON.stringify(Array.from(pendingAckOrderIds)));
-                } catch (_) {}
-            }
-
-            function acknowledgePendingOrder(orderId) {
-                const id = Number(orderId || 0);
-                if (id <= 0) return;
-                pendingAckOrderIds.add(id);
-                savePendingAckOrderIds();
             }
 
             function isGameOnlyPendingOrder(order) {
@@ -814,14 +790,7 @@
                 try {
                     const headers = getJsonHeaders();
 
-                    let response = await fetch(`/admin/api/dashboard/orders/${orderId}/status`, {
-                        method: 'PATCH',
-                        headers,
-                        body: JSON.stringify({ status: nextStatus })
-                    });
-                    if (response.ok) return true;
-
-                    response = await fetch(`/admin/orders/${orderId}/status`, {
+                    const response = await fetch(`/admin/api/dashboard/orders/${orderId}/status`, {
                         method: 'PATCH',
                         headers,
                         body: JSON.stringify({ status: nextStatus })
@@ -1661,12 +1630,7 @@
 
             async function fetchPendingOrders() {
                 try {
-                    // 관리자 대시보드에서는 admin 전용 엔드포인트를 우선 사용한다.
-                    // (체인/권한 경로 차이로 /kiosk/order/pending 응답이 불안정한 경우 대비)
-                    let response = await fetch('/admin/api/dashboard/orders/latest');
-                    if (!response.ok) {
-                        response = await fetch('/kiosk/order/pending');
-                    }
+                    const response = await fetch('/admin/api/dashboard/orders/latest');
 
                     if (response.ok) {
                         const data = await response.json();
@@ -1689,11 +1653,7 @@
                 const bulkBtn = document.getElementById('pending-confirm-all-btn');
                 if (!section || !list || !badge) return;
                 pendingOrdersState = Array.isArray(orders) ? orders : [];
-
-                const visibleOrders = pendingOrdersState.filter(order => {
-                    const id = parsePendingOrderId(order);
-                    return id > 0 && !pendingAckOrderIds.has(id);
-                });
+                const visibleOrders = pendingOrdersState.filter(order => parsePendingOrderId(order) > 0);
 
                 if (!visibleOrders || visibleOrders.length === 0) {
                     section.classList.remove('has-orders');
@@ -1721,7 +1681,8 @@
                     const totalAmount = order.totalAmount || order.total_amount || 0;
                     const orderId = parsePendingOrderId(order);
                     const isGameOrder = isGameOnlyPendingOrder(order);
-                    const actionButton = `<button class="btn-pending-confirm" onclick="confirmPendingOrder(${orderId})">주문 확인</button>`;
+                    const actionLabel = isGameOrder ? '일련번호 선택' : '주문 확인';
+                    const actionButton = `<button class="btn-pending-confirm" onclick="confirmPendingOrder(${orderId})">${actionLabel}</button>`;
                     const typeLabel = isGameOrder ? '대여 주문' : '일반 주문';
 
                     return `
@@ -1742,7 +1703,7 @@
             async function confirmAllPendingOrders() {
                 const visible = pendingOrdersState.filter(order => {
                     const id = parsePendingOrderId(order);
-                    return id > 0 && !pendingAckOrderIds.has(id);
+                    return id > 0;
                 });
 
                 if (visible.length === 0) {
@@ -1756,11 +1717,11 @@
 
                 let success = 0;
                 let fail = 0;
+                let gameOrders = 0;
                 for (const order of visible) {
                     const orderId = parsePendingOrderId(order);
                     if (isGameOnlyPendingOrder(order)) {
-                        acknowledgePendingOrder(orderId);
-                        success++;
+                        gameOrders++;
                         continue;
                     }
                     const ok = await updateOrderStatusSilent(orderId, 'CONFIRMED');
@@ -1771,8 +1732,13 @@
                 await fetchPendingOrders();
                 await refreshTableCardOrderBadges();
 
-                if (fail === 0) alert(`신규 주문 ${success}건 확인 완료`);
-                else alert(`완료 ${success}건 / 실패 ${fail}건`);
+                if (gameOrders > 0) {
+                    if (fail === 0) alert(`일반 주문 ${success}건 확인 완료\n게임 주문 ${gameOrders}건은 일련번호 배정 후 확인됩니다.`);
+                    else alert(`일반 주문 완료 ${success}건 / 실패 ${fail}건\n게임 주문 ${gameOrders}건은 일련번호 배정 후 확인됩니다.`);
+                } else {
+                    if (fail === 0) alert(`신규 주문 ${success}건 확인 완료`);
+                    else alert(`완료 ${success}건 / 실패 ${fail}건`);
+                }
             }
 
             async function confirmPendingOrder(orderId) {
@@ -1781,10 +1747,8 @@
 
                 const target = pendingOrdersState.find(o => parsePendingOrderId(o) === id);
                 if (target && isGameOnlyPendingOrder(target)) {
-                    acknowledgePendingOrder(id);
-                    renderPendingOrders(pendingOrdersState);
-                    await refreshTableCardOrderBadges();
-                    alert(`대여 주문 1건을 확인했습니다. (ID: ${id})`);
+                    const tableId = Number(target.tableId || target.table_id || 0);
+                    await openPendingGameOrder(tableId);
                     return;
                 }
 

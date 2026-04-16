@@ -281,4 +281,13 @@ public class CafeTableServiceImpl implements CafeTableService {
         cafeTableMapper.updateTableStatusAndSession(tableId, "OCCUPIED", sessionId);
     }
 
+    // access_token 조회 메서드
+    @Override
+    @Transactional(readOnly = true)
+    public String getTableAccessToken(int tableId) {
+        return cafeTableMapper.selectAccessTokenById(tableId);
+        // selectAccessTokenById는 changeTableStatus()에서 이미 사용 중 → Mapper에 존재함
+    }
+
+
 }

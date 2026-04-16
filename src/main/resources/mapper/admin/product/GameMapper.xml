@@ -5,7 +5,7 @@
 
 <mapper namespace="org.example.board_cafe_kiosk_2603.mapper.admin.product.GameMapper">
 
-    <!-- 게임 상태가 NORMAL, RENTED 만 카운트 -->
+    <!-- 게임 대여 가능 수량(NORMAL)만 카운트 -->
     <sql id="selectGameWithCategory">
         SELECT g.id,
                g.category_id,
@@ -17,7 +17,7 @@
                g.is_active,
                g.image_url,
                MAX(CASE WHEN m.price = 0 AND m.is_deleted = FALSE THEN m.description END) AS description,
-               COUNT(CASE WHEN gi.status IN ('NORMAL', 'RENTED') THEN 1 END) AS game_item_count
+               COUNT(CASE WHEN gi.status = 'NORMAL' THEN 1 END) AS game_item_count
         FROM game g
                  LEFT JOIN category c ON g.category_id = c.id
                  LEFT JOIN menu m ON m.name = g.name

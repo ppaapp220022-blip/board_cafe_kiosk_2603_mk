@@ -522,8 +522,16 @@
     }
 
     // ===== 이용 시간 계산 =====
+    function normalizeEpochMillis(rawValue) {
+        const n = Number(rawValue);
+        if (!n || Number.isNaN(n)) return 0;
+        // 혹시 초 단위 값이 들어오면 ms 단위로 보정
+        if (n > 0 && n < 100000000000) return n * 1000;
+        return n;
+    }
+
     function updateElapsedTime() {
-        const startMs = Number(sessionStartTime);
+        const startMs = normalizeEpochMillis(sessionStartTime);
         if (!startMs || Number.isNaN(startMs)) {
             document.getElementById('elapsed-time').innerText = '0시간 0분';
             return;

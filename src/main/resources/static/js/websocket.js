@@ -290,8 +290,8 @@ async function updateOrderStatusViaApi(orderId, nextStatus) {
         // (대여 주문은 CANCELLED 같은 분기 상태가 있어 next-status 강제 보정과 충돌함)
         const statusToSend = nextStatus;
 
-        // 2) 관리자 대시보드 전용 API로 상태 변경
-        let response = await fetch(`/admin/api/dashboard/orders/${orderId}/status`, {
+        // 관리자 대시보드 전용 API로 상태 변경
+        const response = await fetch(`/admin/api/dashboard/orders/${orderId}/status`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -302,24 +302,6 @@ async function updateOrderStatusViaApi(orderId, nextStatus) {
 
         if (response.ok) {
             console.log('✅ 주문 상태 변경 성공');
-            if (typeof fetchActiveOrders === 'function') await fetchActiveOrders();
-            alert('주문 상태가 변경되었습니다.');
-            return;
-        }
-
-        // 3) 폴백: 기존 API 경로로 한 번 더 시도
-        console.warn('⚠️ 관리자 API 실패, 폴백 시도');
-        response = await fetch(`/admin/orders/${orderId}/status`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({ status: statusToSend })
-        });
-
-        if (response.ok) {
-            console.log('✅ 주문 상태 변경 성공 (폴백)');
             if (typeof fetchActiveOrders === 'function') await fetchActiveOrders();
             alert('주문 상태가 변경되었습니다.');
             return;

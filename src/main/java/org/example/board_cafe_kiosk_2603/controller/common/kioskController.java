@@ -156,6 +156,7 @@ public class kioskController {
         initCart(session);
 
         List<kioskItem> items = gameService.getByIsActive(true).stream()
+                .filter(g -> g.getGameItemCount() > 0)
                 .map(g -> kioskItem.builder()
                         .name(g.getName())
                         .price(0)

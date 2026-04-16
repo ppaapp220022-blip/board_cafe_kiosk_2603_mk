@@ -67,8 +67,6 @@ public class SecurityConfig {
                                     "/kiosk/toss/success",
                                     "/kiosk/toss/fail"
                             ).hasAnyRole("ADMIN", "STAFF", "SUPER", "TABLE")
-                            // 관리자 대시보드의 신규 주문 모니터링용
-                            .requestMatchers("/kiosk/order/pending").hasAnyRole("ADMIN", "STAFF", "SUPER")
                             // 나머지 키오스크 영역 → TABLE 권한 필요
                             .anyRequest().hasRole("TABLE");
                 })
@@ -143,9 +141,7 @@ public class SecurityConfig {
                                     "/login/verifyEmailOtp",
                                     "/login/sendOtp",
                                     "/ws/**",  // WebSocket 엔드포인트
-                                    "/app/**",  // WebSocket /app/** 경로
-                                    "/kiosk/order/**",  // 관리자 대시보드용 신규 주문 조회
-                                    "/admin/orders/**"
+                                    "/app/**"  // WebSocket /app/** 경로
                             ).permitAll()
                             // 관리자 영역 → ADMIN, STAFF, SUPER 권한 필요
                             .requestMatchers("/admin/**").hasAnyRole("ADMIN", "STAFF", "SUPER")
@@ -190,7 +186,6 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf
                         // WebSocket
                         .ignoringRequestMatchers("/ws/**", "/app/**")
-                        .ignoringRequestMatchers("/admin/orders/**")
                         // AJAX 엔드포인트 예외 추가 (fetch()는 CSRF 토큰 미포함)
                         .ignoringRequestMatchers("/login/**")
                         .ignoringRequestMatchers("/forgot-password/**")

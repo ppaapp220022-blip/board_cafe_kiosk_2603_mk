@@ -1,17 +1,25 @@
 package org.example.board_cafe_kiosk_2603.security;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.security.dto.KioskDTO;
+import org.example.board_cafe_kiosk_2603.service.admin.cafeTable.CafeTableService;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
+import org.springframework.stereotype.Component;
 
+import java.util.UUID;
 import java.util.function.Supplier;
 
 @Log4j2
+@Component
+@RequiredArgsConstructor
 public class KioskAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
+
+    private final CafeTableService cafeTableService;
 
     // 변경 적용 전
 //    @Override
@@ -58,8 +66,33 @@ public class KioskAuthorizationManager implements AuthorizationManager<RequestAu
                 log.info("--- [KioskAuthorizationManager] Remember-Me 복구 → 세션 재세팅 | tableNumber: {} ---",
                         kiosk.getUsername());
                 request.getSession().setAttribute("tableNumber", kiosk.getUsername());
-                log.info("--- [KioskAuthorizationManager] 세션 재세팅 완료 | sessionId: {} ---",
-                        request.getSession().getId());
+//                log.info("--- [KioskAuthorizationManager] 세션 재세팅 완료 | sessionId: {} ---",
+//                        request.getSession().getId());
+
+                // ✅ 추가: access_token 갱신
+//                String newToken = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+//                cafeTableService.updateAccessToken(kiosk.getTableId(), newToken);
+//                request.getSession().setAttribute("accessToken", newToken);
+//
+//                log.info("--- [KioskAuthorizationManager] Remember-Me 복구 시 access_token 재발급 완료 ---");
+
+                // ✅ access_token 갱신 조건을 세션이 아닌 DB 값 기준으로 변경
+//                String currentToken = cafeTableService.getTableAccessToken(kiosk.getTableId()); // 추가 필요
+//                if (currentToken == null || currentToken.trim().isEmpty()) {
+//                    String newToken = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+//                    cafeTableService.updateAccessToken(kiosk.getTableId(), newToken);
+//                    request.getSession().setAttribute("accessToken", newToken);
+//                    log.info("--- [KioskAuthorizationManager] access_token 없음 → 재발급 완료 | tableId: {} ---",
+//                            kiosk.getTableId());
+//                }
+                // ✅ access_token이 없으면 → 세션/쿠키 무효화 후 로그인으로 튕김
+                String currentToken = cafeTableService.getTableAccessToken(kiosk.getTableId());
+                if (currentToken == null || currentToken.trim().isEmpty()) {
+                    log.warn("--- [KioskAuthorizationManager] access_token 없음 → 강제 로그아웃 | tableId: {} ---",
+                            kiosk.getTableId());
+                    request.getSession().invalidate();  // 세션 파기
+                    return new AuthorizationDecision(false);  // 접근 거부 → 로그인 페이지로
+                }
             }
         }
 

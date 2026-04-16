@@ -62,12 +62,24 @@ public class Handler403 implements AccessDeniedHandler {
             log.warn("--- [Handler403] Ajax 403 응답 | URI: {} ---", request.getRequestURI());
         } else {
             // 일반 요청 → 리다이렉트
-            String redirectUrl = request.getRequestURI().startsWith("/kiosk")
-                    ? "/kiosk/login"
-                    : "/common/login?error=ACCESS_DENIED";
-            log.warn("--- [Handler403] 일반 요청 리다이렉트 | {} → {} ---",
-                    request.getRequestURI(), redirectUrl);
-            response.sendRedirect(redirectUrl);
+//            String redirectUrl = request.getRequestURI().startsWith("/kiosk")
+//                    ? "/kiosk/login"
+//                    : "/common/login?error=ACCESS_DENIED";
+//            log.warn("--- [Handler403] 일반 요청 리다이렉트 | {} → {} ---",
+//                    request.getRequestURI(), redirectUrl);
+//            response.sendRedirect(redirectUrl);
+            // [+] 일반 요청일 경우 리다이렉트
+            String uri = request.getRequestURI();
+
+            if (uri.startsWith("/kiosk/")) {
+                // 키오스크 관련 경로에서 권한 거부 시
+                response.sendRedirect("/kiosk/login");
+            } else {
+                // 그 외(관리자 페이지 등) 경로에서 권한 거부 시
+                response.sendRedirect("/admin/login");
+            }
+
+            log.warn("— [Handler403] 리다이렉트 수행 | URI: {} —", uri);
         }
     }
 }

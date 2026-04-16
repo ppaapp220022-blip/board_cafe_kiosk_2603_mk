@@ -42,4 +42,7 @@ public interface CafeTableService {
     // 불일치 복구
     void syncTableWithSession(int tableId, Long sessionId);
 
+    // access_token 조회 메서드
+    String getTableAccessToken(int tableId);
+
 }

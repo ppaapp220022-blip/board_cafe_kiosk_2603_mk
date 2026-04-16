@@ -14,6 +14,8 @@ import org.example.board_cafe_kiosk_2603.service.kiosk.cart.CartService;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 
@@ -57,18 +59,7 @@ public class KioskPageService {
     }
 
     public int getSessionDuration(HttpSession session) {
-        Object rawStartTime = session.getAttribute("sessionStartTime");
-        Long startTime = null;
-        if (rawStartTime instanceof Long) {
-            startTime = (Long) rawStartTime;
-        } else if (rawStartTime instanceof Integer) {
-            startTime = ((Integer) rawStartTime).longValue();
-        } else if (rawStartTime instanceof java.time.LocalDateTime) {
-            startTime = ((java.time.LocalDateTime) rawStartTime)
-                    .atZone(java.time.ZoneId.systemDefault())
-                    .toInstant()
-                    .toEpochMilli();
-        }
+        Long startTime = readSessionStartMillis(session.getAttribute("sessionStartTime"));
         if (startTime == null) return 0;
         return (int) ((System.currentTimeMillis() - startTime) / 60000);
     }
@@ -131,29 +122,33 @@ public class KioskPageService {
 
     public void buildCheckoutModel(Model model, int tableNumber, HttpSession session) {
         Integer tableId = (Integer) session.getAttribute("tableId");
+        boolean adminCheckoutMode = Boolean.TRUE.equals(session.getAttribute("adminCheckoutMode"));
         CartDTO cartDTO = cartService.getCart(tableNumber);
-        int sessionDuration = getSessionDuration(session);
         String customerPhone = (String) session.getAttribute("customerPhone");
         int pointBalance = resolvePointBalance(customerPhone);
         int partySize = getPartySize(session);
 
         // DB에서 활성 세션 먼저 조회
         Integer packageId = null;
+        Long sessionStartMillis = null;
         if (tableId != null) {
             CafeTableSession activeSession = tableSessionAdminService.getActiveSession(tableId);
             if (activeSession != null) {
                 packageId = activeSession.getPackageId();
-                long checkInMillis = activeSession.getCheckInTime()
-                        .atZone(java.time.ZoneId.systemDefault())
-                        .toInstant()
-                        .toEpochMilli();
-                model.addAttribute("sessionStartTime", checkInMillis);
-            } else {
-                model.addAttribute("sessionStartTime", session.getAttribute("sessionStartTime"));
+                sessionStartMillis = toEpochMillis(activeSession.getCheckInTime());
             }
-        } else {
-            model.addAttribute("sessionStartTime", session.getAttribute("sessionStartTime"));
         }
+
+        // 활성 세션이 없으면 기존 세션값을 사용하되, 값이 없으면 현재 시각으로 초기화해 과도한 초과시간 표시를 방지한다.
+        if (sessionStartMillis == null && !adminCheckoutMode) {
+            sessionStartMillis = readSessionStartMillis(session.getAttribute("sessionStartTime"));
+        }
+        if (sessionStartMillis == null) {
+            sessionStartMillis = System.currentTimeMillis();
+            session.setAttribute("sessionStartTime", sessionStartMillis);
+        }
+        model.addAttribute("sessionStartTime", sessionStartMillis);
+        int sessionDuration = Math.max(0, (int) ((System.currentTimeMillis() - sessionStartMillis) / 60000));
 
         // 패키지 금액 계산 (packageId가 확정된 후)
         int packageTotal   = 0;
@@ -188,6 +183,31 @@ public class KioskPageService {
 
         log.info("정산 화면 - 테이블: {}, 메뉴: ₩{}, 패키지: {} ₩{}, 합계: ₩{}, 포인트: {}P",
                 tableNumber, cartDTO.getTotalPrice(), packageName, packageTotal, totalPrice, pointBalance);
+    }
+
+    private Long readSessionStartMillis(Object rawStartTime) {
+        if (rawStartTime instanceof Long) {
+            return (Long) rawStartTime;
+        }
+        if (rawStartTime instanceof Integer) {
+            return ((Integer) rawStartTime).longValue();
+        }
+        if (rawStartTime instanceof LocalDateTime) {
+            return toEpochMillis((LocalDateTime) rawStartTime);
+        }
+        if (rawStartTime instanceof String s) {
+            try {
+                return Long.parseLong(s);
+            } catch (NumberFormatException ignored) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    private Long toEpochMillis(LocalDateTime dateTime) {
+        if (dateTime == null) return null;
+        return dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 
     public void buildScreensaverModel(Model model, HttpSession session) {
