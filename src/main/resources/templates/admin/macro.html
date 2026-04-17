@@ -10,26 +10,165 @@
     <th:block layout:fragment="head-extra">
         <style>
             /* 스타일은 기존과 동일하므로 생략하지 않고 유지합니다 */
-            .page-title { font-size: 28px; font-weight: 700; margin-bottom: 24px; }
-            .table-container { background: white; border-radius: 15px; padding: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
-            .macro-massage-table { width: 100%; border-collapse: collapse; }
-            .macro-massage-table th { text-align: left; padding: 15px 20px; border-bottom: 2px solid #f8f9fa; color: #666; font-size: 13px; font-weight: 600; }
-            .macro-massage-table td { padding: 18px 20px; border-bottom: 1px solid #f8f9fa; font-size: 15px; }
-            .macro-massage-table tr:hover { background-color: #f8fbff; }
-            .messageText { font-weight: 600; color: #333; }
-            .tabs { display: flex; gap: 10px; margin-bottom: 30px; background: white; padding: 8px; border-radius: 12px; width: fit-content; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
-            .tab-btn { padding: 10px 25px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; background: transparent; color: #666; transition: 0.2s; }
-            .tab-btn.active { background: #007bff; color: white; }
-            .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 24px; }
-            .page-btn { width: 40px; height: 40px; border-radius: 10px; border: 1px solid #E5E5EA; background: white; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-            .page-btn.active { background: #007bff; color: white; border-color: #007bff; }
-            .btn-add { background: #007bff; color: white; padding: 10px 20px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; }
-            .btn-delete { background: #ff4d4f; color: white; padding: 6px 12px; border-radius: 6px; border: none; font-size: 13px; cursor: pointer; }
-            .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000; justify-content: center; align-items: center; }
-            .modal-content { background: white; padding: 30px; border-radius: 15px; width: 400px; }
-            .form-control { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-            .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
-            .btn-cancel { background: #f1f3f4; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
+            .page-title {
+                font-size: 28px;
+                font-weight: 700;
+                margin-bottom: 24px;
+            }
+
+            .table-container {
+                background: white;
+                border-radius: 15px;
+                padding: 10px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            }
+
+            .macro-massage-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            .macro-massage-table th {
+                text-align: left;
+                padding: 15px 20px;
+                border-bottom: 2px solid #f8f9fa;
+                color: #666;
+                font-size: 13px;
+                font-weight: 600;
+            }
+
+            .macro-massage-table td {
+                padding: 18px 20px;
+                border-bottom: 1px solid #f8f9fa;
+                font-size: 15px;
+            }
+
+            .macro-massage-table tr:hover {
+                background-color: #f8fbff;
+            }
+
+            .messageText {
+                font-weight: 600;
+                color: #333;
+            }
+
+            .tabs {
+                display: flex;
+                gap: 10px;
+                margin-bottom: 30px;
+                background: white;
+                padding: 8px;
+                border-radius: 12px;
+                width: fit-content;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            }
+
+            .tab-btn {
+                padding: 10px 25px;
+                border-radius: 8px;
+                border: none;
+                cursor: pointer;
+                font-weight: 600;
+                background: transparent;
+                color: #666;
+                transition: 0.2s;
+            }
+
+            .tab-btn.active {
+                background: #007bff;
+                color: white;
+            }
+
+            .pagination {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 8px;
+                margin-top: 24px;
+            }
+
+            .page-btn {
+                width: 40px;
+                height: 40px;
+                border-radius: 10px;
+                border: 1px solid #E5E5EA;
+                background: white;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .page-btn.active {
+                background: #007bff;
+                color: white;
+                border-color: #007bff;
+            }
+
+            .btn-add {
+                background: #007bff;
+                color: white;
+                padding: 10px 20px;
+                border-radius: 8px;
+                border: none;
+                font-weight: 600;
+                cursor: pointer;
+            }
+
+            .btn-delete {
+                background: #ff4d4f;
+                color: white;
+                padding: 6px 12px;
+                border-radius: 6px;
+                border: none;
+                font-size: 13px;
+                cursor: pointer;
+            }
+
+            .modal-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 1000;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .modal-content {
+                background: white;
+                padding: 30px;
+                border-radius: 15px;
+                width: 400px;
+            }
+
+            .form-control {
+                width: 100%;
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                box-sizing: border-box;
+            }
+
+            .modal-actions {
+                display: flex;
+                justify-content: flex-end;
+                gap: 10px;
+                margin-top: 25px;
+            }
+
+            .btn-cancel {
+                background: #f1f3f4;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 8px;
+                cursor: pointer;
+            }
         </style>
     </th:block>
 </head>
@@ -47,7 +186,7 @@
         </button>
 
         <!-- 매크로 등록 버튼: STAFF 불가능 -->
-        <button class="btn-add"
+        <button id="btnAddMacroDisabled" class="btn-add"
                 sec:authorize="hasRole('STAFF')"
                 style="opacity: 0.4; cursor: not-allowed;"
                 onclick="alert('관리자 권한이 필요합니다.'); return false;">
@@ -133,6 +272,12 @@
 
 <th:block layout:fragment="scripts">
     <script>
+        /*
+         * [핵심] Thymeleaf가 서버 사이드에서 권한을 평가하여 JS 변수로 주입
+         * renderTable()에서 동적으로 버튼을 생성할 때 이 변수를 참조
+         */
+        const IS_ADMIN_OR_SUPER = /*[[${#authorization.expression('hasAnyRole(''ADMIN'', ''SUPER'')')}]]*/ false;
+
         let currentDirection = 'STAFF_TO_TABLE'; // 기본값을 고정
 
         function openTab(evt) {
@@ -146,8 +291,13 @@
             document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
             document.getElementById(tabId).style.display = 'block';
 
-            // 테이블 -> 직원 로직이 사라졌으므로 등록 버튼은 항상 표시
-            document.getElementById('btnAddMacro').style.display = 'block';
+            /*
+             * [수정] btnAddMacro는 ADMIN/SUPER에게만 렌더링되므로 null 체크 필수
+             * STAFF에게는 btnAddMacroDisabled가 렌더링됨
+             */
+            const addBtn = document.getElementById('btnAddMacro');
+            if (addBtn) addBtn.style.display = 'block';
+
             loadMacroList(currentDirection, 1);
         }
 
@@ -174,16 +324,24 @@
                 // item.id가 없으면 item.mno, 그것도 없으면 item.macroId를 순차적으로 대입
                 const valId = item.id || item.mno || item.macroId || (item.dto && item.dto.id);
 
+                /*
+                 * [핵심 수정] IS_ADMIN_OR_SUPER 변수로 삭제 버튼 분기
+                 * renderTable()이 동적으로 DOM을 덮어써도 권한 체크가 유지됨
+                 */
+                const deleteBtn = IS_ADMIN_OR_SUPER
+                    ? `<button type="button" class="btn-delete"
+                               data-id="${valId}"
+                               onclick="deleteMacro(this)">삭제</button>`
+                    : `<button type="button" class="btn-delete"
+                               style="opacity: 0.4; cursor: not-allowed;"
+                               onclick="alert('관리자 권한이 필요합니다.'); return false;">삭제</button>`;
+
                 return `
-            <tr class="macro-row">
-                <td class="messageText">${item.messageText || ''}</td>
-                <td style="text-align: right;">
-                    <button type="button" class="btn-delete"
-                            data-id="${valId}"
-                            onclick="deleteMacro(this)">삭제</button>
-                </td>
-            </tr>
-        `;
+                    <tr class="macro-row">
+                        <td class="messageText">${item.messageText || ''}</td>
+                        <td style="text-align: right;">${deleteBtn}</td>
+                    </tr>
+                `;
             }).join('');
         }
 
@@ -222,16 +380,22 @@
                 .catch(err => console.error("통신 오류:", err));
         }
 
-        function openAddModal() { document.getElementById('addMacroModal').style.display = 'flex'; }
-        function closeAddModal() { document.getElementById('addMacroModal').style.display = 'none'; }
+        function openAddModal() {
+            document.getElementById('addMacroModal').style.display = 'flex';
+        }
+
+        function closeAddModal() {
+            document.getElementById('addMacroModal').style.display = 'none';
+        }
+
         function submitNewMacro() {
             const direction = document.getElementById('newDirection').value;
             const messageText = document.getElementById('newMessageText').value.trim();
-            if(!messageText) return alert("내용 입력!");
+            if (!messageText) return alert("내용 입력!");
             fetch('/admin/macro/api/create', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ direction, messageText })
+                body: JSON.stringify({direction, messageText})
             }).then(() => location.reload());
         }
 

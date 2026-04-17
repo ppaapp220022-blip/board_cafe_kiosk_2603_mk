@@ -1,519 +1,725 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>비밀번호 찾기</title>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Pretendard', sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      background: #f0f2f5;
-    }
-    .container {
-      background: white;
-      padding: 40px;
-      border-radius: 24px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-      width: 100%;
-      max-width: 440px;
-    }
-    .icon-box {
-      width: 56px; height: 56px;
-      background: #dc3545;
-      border-radius: 14px;
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 18px;
-      color: white;
-    }
-    h2 { text-align: center; font-size: 1.5rem; color: #111; margin-bottom: 6px; }
-    .subtitle { text-align: center; color: #888; font-size: 0.88rem; margin-bottom: 28px; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>비밀번호 찾기</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    /* ── 단계 표시 ── */
-    .steps {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-bottom: 28px;
-    }
-    .step { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-    .step-circle {
-      width: 32px; height: 32px; border-radius: 50%;
-      background: #e0e0e0; color: #999;
-      font-weight: 700; font-size: 14px;
-      display: flex; align-items: center; justify-content: center;
-      transition: all 0.3s;
-    }
-    .step-circle.active { background: #dc3545; color: white; }
-    .step-circle.done   { background: #28a745; color: white; }
-    .step-label { font-size: 11px; color: #999; white-space: nowrap; }
-    .step-label.active { color: #dc3545; font-weight: 600; }
-    .step-label.done   { color: #28a745; }
-    .step-line {
-      width: 48px; height: 2px;
-      background: #e0e0e0;
-      margin-bottom: 18px;
-      transition: background 0.3s;
-    }
-    .step-line.done { background: #28a745; }
+        body {
+            font-family: 'Pretendard', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f0f2f5;
+        }
 
-    /* ── 폼 요소 ── */
-    .form-group { margin-bottom: 18px; text-align: left; }
-    label { display: block; margin-bottom: 6px; color: #555; font-weight: 600; font-size: 0.85rem; }
-    input[type="text"],
-    input[type="email"] {
-      width: 100%; padding: 13px 14px;
-      border: 1px solid #e1e4e8; border-radius: 12px;
-      background: #f8f9fa; font-size: 0.95rem;
-      box-sizing: border-box; outline: none;
-      transition: border-color 0.2s;
-    }
-    input:focus { border-color: #dc3545; background: #fff; }
-    input[readonly] { background: #f0f2f5; color: #888; cursor: not-allowed; }
-    input.input-error { border-color: #dc3545; }
-    .field-error { font-size: 0.78rem; color: #dc3545; margin-top: 5px; display: none; }
-    .field-hint  { font-size: 0.78rem; color: #aaa; margin-top: 5px; }
-    .input-row { display: flex; gap: 8px; }
-    .input-row input { flex: 1; }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 440px;
+        }
 
-    /* ── 타이머 ── */
-    .timer { font-size: 0.82rem; color: #dc3545; font-weight: 700; margin-top: 6px; display: none; }
-    .timer.expiring { animation: blink 0.8s step-start infinite; }
-    @keyframes blink { 50% { opacity: 0.3; } }
+        .icon-box {
+            width: 56px;
+            height: 56px;
+            background: #dc3545;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 18px;
+            color: white;
+        }
 
-    /* ── 버튼 ── */
-    .btn {
-      padding: 12px 16px; border: none; border-radius: 12px;
-      font-size: 0.9rem; font-weight: 600; cursor: pointer;
-      transition: background-color 0.2s; white-space: nowrap;
-    }
-    .btn:disabled { background: #ccc !important; cursor: not-allowed; }
-    .btn-primary   { background: #dc3545; color: white; }
-    .btn-primary:hover:not(:disabled)   { background: #c82333; }
-    .btn-secondary { background: #6c757d; color: white; }
-    .btn-secondary:hover:not(:disabled) { background: #5a6268; }
-    .btn-success   { background: #28a745; color: white; }
-    .btn-success:hover:not(:disabled)   { background: #218838; }
-    .btn-full { width: 100%; padding: 14px; font-size: 1rem; margin-top: 6px; }
+        h2 {
+            text-align: center;
+            font-size: 1.5rem;
+            color: #111;
+            margin-bottom: 6px;
+        }
 
-    /* ── 메시지 ── */
-    #globalMsg {
-      border-radius: 10px; padding: 11px 14px;
-      font-size: 0.85rem; margin-bottom: 16px;
-      display: none; text-align: left;
-    }
-    #globalMsg.error   { background: #fdf2f2; color: #721c24; border: 1px solid #f5c6cb; }
-    #globalMsg.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-    #globalMsg.info    { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .subtitle {
+            text-align: center;
+            color: #888;
+            font-size: 0.88rem;
+            margin-bottom: 28px;
+        }
 
-    /* ── 패널 ── */
-    .panel { display: none; }
-    .panel.active { display: block; }
+        /* 단계 표시 */
+        .steps {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 28px;
+        }
 
-    .back-link {
-      display: block; text-align: center;
-      margin-top: 14px; color: #aaa;
-      font-size: 0.82rem; cursor: pointer;
-      text-decoration: underline;
-    }
-    .back-link:hover { color: #555; }
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
 
-    /* ── 완료 화면 ── */
-    .complete-box {
-      border-radius: 12px; padding: 18px;
-      margin-bottom: 14px; font-size: 0.9rem; line-height: 1.8;
-    }
-    .complete-box.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-    .complete-box.info    { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; font-size: 0.82rem; }
-  </style>
+        .step-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            color: #999;
+            font-weight: 700;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        /* 현재 활성화된 단계는 빨간색 */
+        .step-circle.active {
+            background: #dc3545;
+            color: white;
+        }
+
+        /* 완료된 단계는 빨간색 */
+        .step-circle.done {
+            background: #28a745;
+            color: white;
+        }
+
+        .step-label {
+            font-size: 11px;
+            color: #999;
+            white-space: nowrap;
+        }
+
+        .step-label.active {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .step-label.done {
+            color: #28a745;
+        }
+
+        .step-line {
+            width: 48px;
+            height: 2px;
+            background: #e0e0e0;
+            margin-bottom: 18px;
+            transition: background 0.3s;
+        }
+
+        .step-line.done {
+            background: #28a745;
+        }
+
+        /* 폼 요소 */
+        .form-group {
+            margin-bottom: 18px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #555;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        input[type="text"],
+        input[type="email"] {
+            width: 100%;
+            padding: 13px 14px;
+            border: 1px solid #e1e4e8;
+            border-radius: 12px;
+            background: #f8f9fa;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            border-color: #dc3545;
+            background: #fff;
+        }
+
+        input[readonly] {
+            background: #f0f2f5;
+            color: #888;
+            cursor: not-allowed;
+        }
+
+        input.input-error {
+            border-color: #dc3545;
+        }
+
+        /* 에러 메시지 스타일 */
+        .field-error {
+            font-size: 0.78rem;
+            color: #dc3545;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .field-hint {
+            font-size: 0.78rem;
+            color: #aaa;
+            margin-top: 5px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .input-row input {
+            flex: 1;
+        }
+
+        /* 타이머 */
+        .timer {
+            font-size: 0.82rem;
+            color: #dc3545;
+            font-weight: 700;
+            margin-top: 6px;
+            display: none;
+        }
+
+        /* 타이머 깜빡임 애니메이션: 1분 미만일 때 작용 */
+        .timer.expiring {
+            animation: blink 0.8s step-start infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        /* 버튼 */
+        .btn {
+            padding: 12px 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn:disabled {
+            background: #ccc !important;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #c82333;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: #218838;
+        }
+
+        .btn-full {
+            width: 100%;
+            padding: 14px;
+            font-size: 1rem;
+            margin-top: 6px;
+        }
+
+        /* 메시지 */
+        #globalMsg {
+            border-radius: 10px;
+            padding: 11px 14px;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+            display: none;
+            text-align: left;
+        }
+
+        #globalMsg.error {
+            background: #fdf2f2;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        #globalMsg.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        #globalMsg.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        /* 패널: 기본적으로 숨기고, active가 붙은 것만 보여줌 */
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 14px;
+            color: #aaa;
+            font-size: 0.82rem;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .back-link:hover {
+            color: #555;
+        }
+
+        /* 완료 화면 */
+        .complete-box {
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 14px;
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+
+        .complete-box.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .complete-box.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            font-size: 0.82rem;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
-  <div class="icon-box">
-    <i data-lucide="key-round" style="width:26px;height:26px;"></i>
-  </div>
-  <h2>비밀번호 찾기</h2>
-  <p class="subtitle">아이디와 이메일로 본인을 인증해 주세요</p>
+    <div class="icon-box">
+        <i data-lucide="key-round" style="width:26px;height:26px;"></i>
+    </div>
+    <h2>비밀번호 찾기</h2>
+    <p class="subtitle">아이디와 이메일로 본인을 인증해 주세요</p>
 
-  <!-- 단계 표시 -->
-  <div class="steps">
-    <div class="step">
-      <div class="step-circle active" id="circle1">1</div>
-      <div class="step-label active" id="label1">아이디 입력</div>
-    </div>
-    <div class="step-line" id="line1"></div>
-    <div class="step">
-      <div class="step-circle" id="circle2">2</div>
-      <div class="step-label" id="label2">이메일 인증</div>
-    </div>
-    <div class="step-line" id="line2"></div>
-    <div class="step">
-      <div class="step-circle" id="circle3">3</div>
-      <div class="step-label" id="label3">임시 비밀번호</div>
-    </div>
-  </div>
-
-  <!-- 전역 메시지 -->
-  <div id="globalMsg"></div>
-
-  <!-- STEP 1: 아이디 입력 -->
-  <div class="panel active" id="step1">
-    <div class="form-group">
-      <label for="inputId">아이디</label>
-      <input type="text" id="inputId" placeholder="등록된 아이디를 입력하세요" autofocus>
-      <div class="field-error" id="idError"></div>
-    </div>
-    <button class="btn btn-primary btn-full" id="step1Btn">다음</button>
-    <span class="back-link" id="backToLoginBtn">← 로그인으로 돌아가기</span>
-  </div>
-
-  <!-- STEP 2: 이메일 인증 + OTP -->
-  <div class="panel" id="step2">
-    <div class="form-group">
-      <label>아이디</label>
-      <input type="text" id="confirmedId" readonly>
-    </div>
-    <div class="form-group">
-      <label for="inputEmail">이메일</label>
-      <div class="input-row">
-        <input type="email" id="inputEmail" placeholder="등록된 이메일을 입력하세요">
-        <button class="btn btn-secondary" id="sendOtpBtn">인증 요청</button>
-      </div>
-      <div class="field-hint">데이터베이스에 등록된 이메일과 일치해야 합니다</div>
-      <div class="field-error" id="emailError"></div>
-      <div class="timer" id="authTimer">⏱ 남은 시간: <span id="authTimeLeft">03:00</span></div>
-    </div>
-
-    <div id="otpGroup" style="display:none;">
-      <div class="form-group">
-        <label for="inputOtp">인증번호</label>
-        <div class="input-row">
-          <input type="text" id="inputOtp" maxlength="6"
-                 placeholder="6자리 인증번호" inputmode="numeric" autocomplete="off">
-          <button class="btn btn-primary" id="verifyOtpBtn">확인</button>
+    <!-- 단계 표시 -->
+    <div class="steps">
+        <div class="step">
+            <div class="step-circle active" id="circle1">1</div>
+            <div class="step-label active" id="label1">아이디 입력</div>
         </div>
-        <div class="field-error" id="otpError"></div>
-      </div>
+        <div class="step-line" id="line1"></div>
+        <div class="step">
+            <div class="step-circle" id="circle2">2</div>
+            <div class="step-label" id="label2">이메일 인증</div>
+        </div>
+        <div class="step-line" id="line2"></div>
+        <div class="step">
+            <div class="step-circle" id="circle3">3</div>
+            <div class="step-label" id="label3">임시 비밀번호</div>
+        </div>
     </div>
 
-    <span class="back-link" id="backToStep1Btn">← 아이디 다시 입력</span>
-  </div>
+    <!-- 전역 메시지 -->
+    <div id="globalMsg"></div>
 
-  <!-- STEP 3: 완료 -->
-  <div class="panel" id="step3">
-    <div class="complete-box success">
-      ✅ 인증이 완료되었습니다.<br>
-      등록된 이메일로 <strong>임시 비밀번호</strong>가 발송되었습니다.
+    <!-- STEP 1: 아이디 입력 -->
+    <div class="panel active" id="step1">
+        <div class="form-group">
+            <label for="inputId">아이디</label>
+            <input type="text" id="inputId" placeholder="등록된 아이디를 입력하세요" autofocus>
+            <div class="field-error" id="idError"></div>
+        </div>
+        <button class="btn btn-primary btn-full" id="step1Btn">다음</button>
+        <span class="back-link" id="backToLoginBtn">← 로그인으로 돌아가기</span>
     </div>
-    <div class="complete-box info">
-      🔒 로그인 후 반드시 비밀번호를 변경해 주세요.
+
+    <!-- STEP 2: 이메일 인증 + OTP -->
+    <div class="panel" id="step2">
+        <div class="form-group">
+            <label>아이디</label>
+            <input type="text" id="confirmedId" readonly>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail">이메일</label>
+            <div class="input-row">
+                <input type="email" id="inputEmail" placeholder="등록된 이메일을 입력하세요">
+                <button class="btn btn-secondary" id="sendOtpBtn">인증 요청</button>
+            </div>
+            <div class="field-hint">데이터베이스에 등록된 이메일과 일치해야 합니다</div>
+            <div class="field-error" id="emailError"></div>
+            <div class="timer" id="authTimer">⏱ 남은 시간: <span id="authTimeLeft">03:00</span></div>
+        </div>
+
+        <div id="otpGroup" style="display:none;">
+            <div class="form-group">
+                <label for="inputOtp">인증번호</label>
+                <div class="input-row">
+                    <input type="text" id="inputOtp" maxlength="6"
+                           placeholder="6자리 인증번호" inputmode="numeric" autocomplete="off">
+                    <button class="btn btn-primary" id="verifyOtpBtn">확인</button>
+                </div>
+                <div class="field-error" id="otpError"></div>
+            </div>
+        </div>
+
+        <span class="back-link" id="backToStep1Btn">← 아이디 다시 입력</span>
     </div>
-    <button class="btn btn-success btn-full" id="goLoginBtn">로그인 페이지로 이동</button>
-  </div>
+
+    <!-- STEP 3: 완료 -->
+    <div class="panel" id="step3">
+        <div class="complete-box success">
+            ✅ 인증이 완료되었습니다.<br>
+            등록된 이메일로 <strong>임시 비밀번호</strong>가 발송되었습니다.
+        </div>
+        <div class="complete-box info">
+            🔒 로그인 후 반드시 비밀번호를 변경해 주세요.
+        </div>
+        <button class="btn btn-success btn-full" id="goLoginBtn">로그인 페이지로 이동</button>
+    </div>
 </div>
 
 <script>
-  lucide.createIcons();
+    lucide.createIcons();  // Lucide 아이콘 라이브러리를 실행하여 <i> 태그를 SVG(벡터 그래픽) 아이콘 코드으로 변환
 
-  /* ── 상태 ────────────────────────────────────── */
-  let otpSent           = false;
-  let timerInterval     = null;
+    /* 상태 */
+    let otpSent = false;  // OTP(인증번호)가 발송된 상태인지 체크
+    let timerInterval = null;  // setInterval 함수를 담아두었다가 중단(clear)하기 위한 변수
 
-  /* ── DOM ─────────────────────────────────────── */
-  const inputId       = document.getElementById('inputId');
-  const idError       = document.getElementById('idError');
-  const step1Btn      = document.getElementById('step1Btn');
+    /* DOM */
+    const inputId = document.getElementById('inputId');
+    const idError = document.getElementById('idError');
+    const step1Btn = document.getElementById('step1Btn');
 
-  const confirmedId   = document.getElementById('confirmedId');
-  const inputEmail    = document.getElementById('inputEmail');
-  const emailError    = document.getElementById('emailError');
-  const sendOtpBtn    = document.getElementById('sendOtpBtn');
-  const authTimer     = document.getElementById('authTimer');
-  const authTimeLeft  = document.getElementById('authTimeLeft');
-  const otpGroup      = document.getElementById('otpGroup');
-  const inputOtp      = document.getElementById('inputOtp');
-  const otpError      = document.getElementById('otpError');
-  const verifyOtpBtn  = document.getElementById('verifyOtpBtn');
+    const confirmedId = document.getElementById('confirmedId');
+    const inputEmail = document.getElementById('inputEmail');
+    const emailError = document.getElementById('emailError');
+    const sendOtpBtn = document.getElementById('sendOtpBtn');
+    const authTimer = document.getElementById('authTimer');
+    const authTimeLeft = document.getElementById('authTimeLeft');
+    const otpGroup = document.getElementById('otpGroup');
+    const inputOtp = document.getElementById('inputOtp');
+    const otpError = document.getElementById('otpError');
+    const verifyOtpBtn = document.getElementById('verifyOtpBtn');
 
-  /* ── 단계 이동 ───────────────────────────────── */
-  function goStep(n) {
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('step' + n).classList.add('active');
-    updateStepUI(n);
-    clearMsg();
-  }
-
-  function updateStepUI(current) {
-    for (let i = 1; i <= 3; i++) {
-      const c = document.getElementById('circle' + i);
-      const l = document.getElementById('label'  + i);
-      c.className = 'step-circle' + (i < current ? ' done' : i === current ? ' active' : '');
-      l.className = 'step-label'  + (i < current ? ' done' : i === current ? ' active' : '');
+    /* 단계 이동 */
+    // 특정(n)의 패널만 보여주고 나머지는 숨김
+    function goStep(n) {
+        // 모든 패널에서 'active' 클래스를 제거하여 숨김
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        // 선택한 단계의 패널에 'active' 추가하여 표시
+        document.getElementById('step' + n).classList.add('active');
+        updateStepUI(n);  // 상단 진행 표시줄 (1, 2, 3단계) 업데이트
+        clearMsg();  // 이전 단계에서 떴던 에러 메시지 초기화
     }
-    for (let i = 1; i <= 2; i++) {
-      document.getElementById('line' + i).className =
-              'step-line' + (i < current ? ' done' : '');
+
+    // 상단 스텝 바의 색상을 '진행중/완료/대기' 상태에 맞게 변경
+    function updateStepUI(current) {
+        for (let i = 1; i <= 3; i++) {
+            const c = document.getElementById('circle' + i);
+            const l = document.getElementById('label' + i);
+            // i가 현재 단계보다 작으면 'done'(초록), 현재면 'active'(빨강), 크면 기본
+            c.className = 'step-circle' + (i < current ? ' done' : i === current ? ' active' : '');
+            l.className = 'step-label' + (i < current ? ' done' : i === current ? ' active' : '');
+        }
+        // 단계 사이의 연결 선(Line) 상태 업데이트
+        for (let i = 1; i <= 2; i++) {
+            document.getElementById('line' + i).className =
+                'step-line' + (i < current ? ' done' : '');
+        }
     }
-  }
 
-  /* ── 메시지 ──────────────────────────────────── */
-  function showMsg(text, type) {
-    const el = document.getElementById('globalMsg');
-    el.textContent   = text;
-    el.className     = type;
-    el.style.display = 'block';
-  }
-  function clearMsg() {
-    const el = document.getElementById('globalMsg');
-    el.style.display = 'none';
-    el.textContent   = '';
-  }
-  function showFieldError(el, msg) { el.textContent = msg; el.style.display = 'block'; }
-  function hideFieldError(el)      { el.style.display = 'none'; el.textContent = ''; }
+    /* 메시지 */
+    // 전역 상단 메시지 표시 (성공/실패 알림)
+    function showMsg(text, type) {
+        const el = document.getElementById('globalMsg');
+        el.textContent = text;
+        el.className = type;
+        el.style.display = 'block';
+    }
 
-  /* ── 타이머 (3분 — OtpStore 유효시간과 동기화) ── */
-  function startTimer() {
-    clearInterval(timerInterval);
-    let remaining = 180;
-    authTimer.style.display = 'block';
-    authTimer.classList.remove('expiring');
-    updateTimer(remaining);
+    function clearMsg() {
+        const el = document.getElementById('globalMsg');
+        el.style.display = 'none';
+        el.textContent = '';
+    }
 
-    timerInterval = setInterval(() => {
-      remaining--;
-      updateTimer(remaining);
-      if (remaining <= 60) authTimer.classList.add('expiring');
-      if (remaining <= 0) {
+    // 특정 입력창 하단에 빨간색 에러 문구 표시
+    function showFieldError(el, msg) {
+        el.textContent = msg;
+        el.style.display = 'block';
+    }
+
+    function hideFieldError(el) {
+        el.style.display = 'none';
+        el.textContent = '';
+    }
+
+    /* 타이머 (3분 — OtpStore 유효시간과 동기화) */
+    function startTimer() {
+        clearInterval(timerInterval);  // 기존에 돌고 있던 타이머가 있다면 중단 (중복 방지)
+        let remaining = 180;  // 3분 설정
+        authTimer.style.display = 'block';
+        authTimer.classList.remove('expiring');  // 깜빡임 효과 초기화
+        updateTimer(remaining);
+
+        timerInterval = setInterval(() => {
+            remaining--;
+            updateTimer(remaining);
+            if (remaining <= 60) authTimer.classList.add('expiring');  // 1분 남으면 빨간쌕 깜빡임
+            if (remaining <= 0) {
+                clearInterval(timerInterval);  // 시간 종료 시 정지
+                // 시간 초과 시 입력란 초기화 및 사용자 알림
+                authTimer.style.display = 'none';
+                otpGroup.style.display = 'none';
+                inputOtp.value = '';
+                otpSent = false;
+                inputEmail.readOnly = false;
+                sendOtpBtn.textContent = '인증 요청';
+                sendOtpBtn.disabled = false;
+                showMsg('인증 시간이 만료되었습니다. 다시 인증번호를 요청해 주세요.', 'error');
+            }
+        }, 1000);  // 1초마다 실행
+    }
+
+    function updateTimer(sec) {
+        const m = String(Math.floor(sec / 60)).padStart(2, '0');  // '분' 계산
+        const s = String(sec % 60).padStart(2, '0');  // '초' 계산
+        authTimeLeft.textContent = `${m}:${s}`;
+    }
+
+    function stopTimer() {
         clearInterval(timerInterval);
         authTimer.style.display = 'none';
-        otpGroup.style.display  = 'none';
-        inputOtp.value          = '';
-        otpSent                 = false;
-        inputEmail.readOnly     = false;
-        sendOtpBtn.textContent  = '인증 요청';
-        sendOtpBtn.disabled     = false;
-        showMsg('인증 시간이 만료되었습니다. 다시 인증번호를 요청해 주세요.', 'error');
-      }
-    }, 1000);
-  }
-  function updateTimer(sec) {
-    const m = String(Math.floor(sec / 60)).padStart(2, '0');
-    const s = String(sec % 60).padStart(2, '0');
-    authTimeLeft.textContent = `${m}:${s}`;
-  }
-  function stopTimer() {
-    clearInterval(timerInterval);
-    authTimer.style.display = 'none';
-  }
+    }
 
-  /* ── fetch 헬퍼 ──────────────────────────────── */
-  async function post(url, params) {
-    const res  = await fetch(url, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body:    new URLSearchParams(params)
+    /* AJAX / Fetch */
+    // POST
+    async function post(url, params) {
+        const res = await fetch(url, {
+            method: 'POST',
+            // Spring의 @RequestParam이나 @ModelAttribute로 받기 위해 폼 데이터 형식으로 전송
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: new URLSearchParams(params)
+        });
+        const text = await res.text();  // 서버 응답을 텍스트(String)로 변환
+        return {ok: res.ok, status: res.status, text};
+    }
+
+    /* STEP 1: 아이디 존재 여부 확인 */
+    async function submitStep1() {
+        hideFieldError(idError);  // 기존 에러 문구 숨김
+        clearMsg();  // 전역 메시지 초기화
+
+        const id = inputId.value.trim();
+        if (!id) {
+            showFieldError(idError, '아이디를 입력해 주세요.');
+            return;
+        }
+
+        step1Btn.disabled = true;  // 서버 응답 전까지 버튼 비활성화 (더블 클릭 방지)
+        step1Btn.textContent = '확인 중...';
+
+        try {
+            // POST /forgot-password/verify-id
+            // 서버에 아이디 확인 요청
+            const {ok, status, text} = await post('/forgot-password/verify-id', {loginId: id});
+
+            if (ok) {
+                confirmedId.value = id;  // 다음 단계에서 사용할 수 있게 아이디 복사
+                goStep(2);  // 2단계 이동
+                inputEmail.focus();
+            } else if (status === 403) {
+                // 예외 케이스: 비활성화된 계정일 때
+                showMsg(text, 'error');  // 서버에서 온 "비활성화된 계정입니다" 메시지 출력
+                showFieldError(idError, '이 계정은 현재 사용이 제한되어 있습니다.');
+            } else {
+                // 404: 존재하지 않는 아이디
+                showMsg(text, 'error');
+            }
+        } catch (error) {
+            showMsg('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.', 'error');
+        } finally {
+            step1Btn.disabled = false;
+            step1Btn.textContent = '다음';
+        }
+    }
+
+    /* STEP 2-a: 이메일로 OTP 발송 */
+    async function sendOtp() {
+        hideFieldError(emailError);
+        clearMsg();
+
+        const email = inputEmail.value.trim();
+        if (!email || !/^[A-Za-z0-9+_.-]+@(.+)$/.test(email)) {
+            showFieldError(emailError, '올바른 이메일 형식을 입력해 주세요.');
+            return;
+        }
+
+        sendOtpBtn.disabled = true;
+        sendOtpBtn.textContent = '발송 중...';
+
+        try {
+            // POST /forgot-password/send-otp
+            const {ok, status, text} = await post('/forgot-password/send-otp', {email});
+
+            if (ok) {
+                showMsg(text, 'success');
+                inputEmail.readOnly = true;  // 발송 성공 시 이메일 수정 불가하게 고정
+                otpGroup.style.display = 'block';  // 인증번호 입력창 등장
+                inputOtp.focus();
+                otpSent = true;
+                startTimer();  // 3분 타이머 시작
+                sendOtpBtn.textContent = '재발송';
+                sendOtpBtn.disabled = false;
+            } else {
+                showMsg(text, 'error');
+                sendOtpBtn.textContent = '인증 요청';
+                sendOtpBtn.disabled = false;
+                // 세션 만료(401) → 처음부터
+                if (status === 401) {
+                    setTimeout(() => goStep(1), 1500);
+                }
+            }
+        } catch {
+            showMsg('네트워크 오류가 발생했습니다.', 'error');
+            sendOtpBtn.textContent = '인증 요청';
+            sendOtpBtn.disabled = false;
+        }
+    }
+
+    /* STEP 2-b: OTP 검증 */
+    async function verifyOtp() {
+        hideFieldError(otpError);
+        clearMsg();
+
+        const otp = inputOtp.value.trim();
+        if (!otp || otp.length !== 6) {
+            showFieldError(otpError, '6자리 인증번호를 입력해 주세요.');
+            return;
+        }
+
+        verifyOtpBtn.disabled = true;
+        verifyOtpBtn.textContent = '확인 중...';
+
+        try {
+            // POST /forgot-password/verify-otp
+            const {ok, status, text} = await post('/forgot-password/verify-otp', {
+                email: inputEmail.value.trim(),
+                otp
+            });
+
+            if (ok) {
+                stopTimer();
+                goStep(3);  // 최종 성공 페이지 이동
+            } else {
+                showMsg(text, 'error');
+                verifyOtpBtn.disabled = false;
+                verifyOtpBtn.textContent = '확인';
+                // 세션 만료(401) → 처음부터
+                if (status === 401) {
+                    setTimeout(() => goStep(1), 1500);
+                }
+            }
+        } catch {
+            showMsg('네트워크 오류가 발생했습니다.', 'error');
+            verifyOtpBtn.disabled = false;
+            verifyOtpBtn.textContent = '확인';
+        }
+    }
+
+    /* 이벤트 바인딩 */
+    // click
+    step1Btn.addEventListener('click', submitStep1);
+    sendOtpBtn.addEventListener('click', sendOtp);
+    verifyOtpBtn.addEventListener('click', verifyOtp);
+
+    document.getElementById('backToLoginBtn').addEventListener('click', () => {
+        window.location.href = '/common/login';
     });
-    const text = await res.text();
-    return { ok: res.ok, status: res.status, text };
-  }
-
-  /* ── STEP 1: 아이디 확인 ─────────────────────── */
-  async function submitStep1() {
-    hideFieldError(idError);
-    clearMsg();
-
-    const id = inputId.value.trim();
-    if (!id) { showFieldError(idError, '아이디를 입력해 주세요.'); return; }
-
-    step1Btn.disabled    = true;
-    step1Btn.textContent = '확인 중...';
-
-    try {
-      // POST /forgot-password/verify-id
-      const { ok, status, text } = await post('/forgot-password/verify-id', { loginId: id });
-
-      if (ok) {
-        confirmedId.value = id;
-        goStep(2);
-        inputEmail.focus();
-      } else {
-        // 404: 존재하지 않는 아이디
-        showMsg(text, 'error');
-      }
-    } catch {
-      showMsg('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.', 'error');
-    } finally {
-      step1Btn.disabled    = false;
-      step1Btn.textContent = '다음';
-    }
-  }
-
-  /* ── STEP 2-a: OTP 발송 ──────────────────────── */
-  async function sendOtp() {
-    hideFieldError(emailError);
-    clearMsg();
-
-    const email = inputEmail.value.trim();
-    if (!email || !/^[A-Za-z0-9+_.-]+@(.+)$/.test(email)) {
-      showFieldError(emailError, '올바른 이메일 형식을 입력해 주세요.');
-      return;
-    }
-
-    sendOtpBtn.disabled    = true;
-    sendOtpBtn.textContent = '발송 중...';
-
-    try {
-      // POST /forgot-password/send-otp
-      const { ok, status, text } = await post('/forgot-password/send-otp', { email });
-
-      if (ok) {
-        showMsg(text, 'success');
-        inputEmail.readOnly     = true;
-        otpGroup.style.display  = 'block';
-        inputOtp.focus();
-        otpSent                 = true;
-        startTimer();
-        sendOtpBtn.textContent  = '재발송';
-        sendOtpBtn.disabled     = false;
-      } else {
-        showMsg(text, 'error');
-        sendOtpBtn.textContent = '인증 요청';
-        sendOtpBtn.disabled    = false;
-        // 세션 만료(401) → 처음부터
-        if (status === 401) {
-          setTimeout(() => goStep(1), 1500);
-        }
-      }
-    } catch {
-      showMsg('네트워크 오류가 발생했습니다.', 'error');
-      sendOtpBtn.textContent = '인증 요청';
-      sendOtpBtn.disabled    = false;
-    }
-  }
-
-  /* ── STEP 2-b: OTP 검증 ──────────────────────── */
-  async function verifyOtp() {
-    hideFieldError(otpError);
-    clearMsg();
-
-    const otp = inputOtp.value.trim();
-    if (!otp || otp.length !== 6) {
-      showFieldError(otpError, '6자리 인증번호를 입력해 주세요.');
-      return;
-    }
-
-    verifyOtpBtn.disabled    = true;
-    verifyOtpBtn.textContent = '확인 중...';
-
-    try {
-      // POST /forgot-password/verify-otp
-      const { ok, status, text } = await post('/forgot-password/verify-otp', {
-        email: inputEmail.value.trim(),
-        otp
-      });
-
-      if (ok) {
+    document.getElementById('backToStep1Btn').addEventListener('click', () => {
         stopTimer();
-        goStep(3);
-      } else {
-        showMsg(text, 'error');
-        verifyOtpBtn.disabled    = false;
-        verifyOtpBtn.textContent = '확인';
-        // 세션 만료(401) → 처음부터
-        if (status === 401) {
-          setTimeout(() => goStep(1), 1500);
+        otpSent = false;
+        inputEmail.value = '';
+        inputEmail.readOnly = false;
+        inputOtp.value = '';
+        otpGroup.style.display = 'none';
+        sendOtpBtn.textContent = '인증 요청';
+        sendOtpBtn.disabled = false;
+        goStep(1);
+    });
+    document.getElementById('goLoginBtn').addEventListener('click', () => {
+        window.location.href = '/common/login';
+    });
+
+    // Enter 키를 눌렀을 때도 버튼 클릭과 동일하게 작동하도록 설정
+    inputId.addEventListener('keydown', e => {
+        if (e.key === 'Enter') submitStep1();
+    });
+    inputEmail.addEventListener('keydown', e => {
+        if (e.key === 'Enter') sendOtp();
+    });
+    inputOtp.addEventListener('keydown', e => {
+        if (e.key === 'Enter') verifyOtp();
+    });
+
+    // 인증번호 칸에 OTP 숫자만 입력되도록 실시간 필터링
+    inputOtp.addEventListener('input', function () {
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
+
+    // 사용자가 이메일 수정하면 기존에 보냈던 OTP 상태 초기화
+    inputEmail.addEventListener('input', function () {
+        if (otpSent) {
+            otpSent = false;
+            this.readOnly = false;
+            inputOtp.value = '';
+            otpGroup.style.display = 'none';
+            sendOtpBtn.textContent = '인증 요청';
+            sendOtpBtn.disabled = false;
+            stopTimer();
         }
-      }
-    } catch {
-      showMsg('네트워크 오류가 발생했습니다.', 'error');
-      verifyOtpBtn.disabled    = false;
-      verifyOtpBtn.textContent = '확인';
-    }
-  }
-
-  /* ── 이벤트 바인딩 ───────────────────────────── */
-  step1Btn.addEventListener('click', submitStep1);
-  sendOtpBtn.addEventListener('click', sendOtp);
-  verifyOtpBtn.addEventListener('click', verifyOtp);
-
-  document.getElementById('backToLoginBtn').addEventListener('click', () => {
-    window.location.href = '/common/login';
-  });
-  document.getElementById('backToStep1Btn').addEventListener('click', () => {
-    stopTimer();
-    otpSent = false;
-    inputEmail.value        = '';
-    inputEmail.readOnly     = false;
-    inputOtp.value          = '';
-    otpGroup.style.display  = 'none';
-    sendOtpBtn.textContent  = '인증 요청';
-    sendOtpBtn.disabled     = false;
-    goStep(1);
-  });
-  document.getElementById('goLoginBtn').addEventListener('click', () => {
-    window.location.href = '/common/login';
-  });
-
-  // Enter 키
-  inputId.addEventListener('keydown',    e => { if (e.key === 'Enter') submitStep1(); });
-  inputEmail.addEventListener('keydown', e => { if (e.key === 'Enter') sendOtp(); });
-  inputOtp.addEventListener('keydown',   e => { if (e.key === 'Enter') verifyOtp(); });
-
-  // OTP 숫자만 입력
-  inputOtp.addEventListener('input', function () {
-    this.value = this.value.replace(/[^0-9]/g, '');
-  });
-
-  // 이메일 변경 시 OTP 상태 초기화
-  inputEmail.addEventListener('input', function () {
-    if (otpSent) {
-      otpSent                 = false;
-      this.readOnly           = false;
-      inputOtp.value          = '';
-      otpGroup.style.display  = 'none';
-      sendOtpBtn.textContent  = '인증 요청';
-      sendOtpBtn.disabled     = false;
-      stopTimer();
-    }
-  });
-
-  async function submitStep1() {
-    hideFieldError(idError);
-    clearMsg();
-
-    const id = inputId.value.trim();
-    if (!id) { showFieldError(idError, '아이디를 입력해 주세요.'); return; }
-
-    step1Btn.disabled    = true;
-    step1Btn.textContent = '확인 중...';
-
-    try {
-      const { ok, status, text } = await post('/forgot-password/verify-id', { loginId: id });
-
-      if (ok) {
-        confirmedId.value = id;
-        goStep(2);
-        inputEmail.focus();
-      } else if (status === 403) {
-        // ★ 비활성 계정 분기 ★
-        showMsg(text, 'error');          // "비활성화된 계정입니다. 관리자에게 문의해 주세요."
-        showFieldError(idError, '이 계정은 현재 사용이 제한되어 있습니다.');
-      } else {
-        // 404: 존재하지 않는 아이디 등
-        showMsg(text, 'error');
-      }
-    } catch {
-      showMsg('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.', 'error');
-    } finally {
-      step1Btn.disabled    = false;
-      step1Btn.textContent = '다음';
-    }
-  }
+    });
 </script>
 </body>
 </html>
