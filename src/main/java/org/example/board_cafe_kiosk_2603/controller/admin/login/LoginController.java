@@ -47,9 +47,7 @@ public class LoginController {
     private final ManagerUserDetailsService managerUserDetailsService;  // 완전 로그인 처리에 사용
     private final SuperKeyProperties superKey;  // 포트폴리오용 슈퍼키
 
-    // ──────────────────────────────────────────────
-    // STAFF: 이메일 확인 페이지 GET
-    // ──────────────────────────────────────────────
+    /* STAFF: 이메일 확인 페이지 이동 */
     @GetMapping("/verifyEmail")
     public String verifyEmailPage(HttpSession session, Model model) {
         // PRE_AUTH_USER 없으면 1차 인증 안 한 것 → 로그인 페이지로
@@ -61,9 +59,7 @@ public class LoginController {
         return "login/verify_email";
     }
 
-    // ──────────────────────────────────────────────
-    // STAFF: 이메일 확인 POST (폼 방식)
-    // ──────────────────────────────────────────────
+    /* STAFF: 입력한 이메일과 DB의 이메일 일치 여부 확인 */
     @PostMapping("/verifyEmail")
     public String verifyEmail(@RequestParam("email") String inputEmail,
                               HttpSession session,
@@ -94,9 +90,7 @@ public class LoginController {
         return "redirect:/admin/dashboard";
     }
 
-    // ──────────────────────────────────────────────
-    // ADMIN: OTP 인증 페이지 GET
-    // ──────────────────────────────────────────────
+    /* ADMIN: OTP 인증 페이지 GET */
     @GetMapping("/verifyEmailOtp")
     public String verifyEmailOtpPage(HttpSession session) {
         if (session.getAttribute("PRE_AUTH_USER") == null) {
@@ -111,13 +105,16 @@ public class LoginController {
     // ADMIN: OTP 발송 Ajax (POST)
     //   verify_otp.html '인증 요청' 버튼 → fetch('/login/sendOtp')
     // ──────────────────────────────────────────────
+    // verify_otp.html '인증 요청' 버튼 → fetch('/login/sendOtp')
     @PostMapping("/sendOtp")
-    @ResponseBody
+    @ResponseBody  // AJAX 응답을 위해 데이터만 반환
     public ResponseEntity<String> sendOtp(@RequestParam("email") String inputEmail,
                                           HttpSession session) {
 
+        // 1차 로그인 성공 시 세션에 담아두었던 로그인 아이디를 가져옴
         String loginId = (String) session.getAttribute("PRE_AUTH_USER");
 
+        // 세션이 없을 경우
         if (loginId == null) {
             log.warn("--- [sendOtp] 세션 만료 ---");
             return ResponseEntity.status(401).body("세션이 만료되었습니다. 다시 로그인해 주세요.");
@@ -128,20 +125,24 @@ public class LoginController {
         // DB 이메일 조회 후 일치 여부 확인
         String dbEmail = managerMapper.findEmailByLoginId(loginId).orElse(null);
 
+        // 사용자가 입력한 이메일과 DB의 이메일이 일치하는지 확인 (공백 제거 확인)
         if (dbEmail == null || !dbEmail.equals(inputEmail.trim())) {
             log.warn("--- [sendOtp] 이메일 불일치 | DB: {}, 입력: {} ---", dbEmail, inputEmail);
+            // 400 Bad Request 반환
             return ResponseEntity.status(400).body("등록된 이메일 주소와 일치하지 않습니다.");
         }
 
-        // OTP 생성 → 저장 → 발송
-        String code = mailSenderService.generateVerificationCode();
-        otpStore.save(dbEmail, code);
+        // OTP 생성 → 서버 메모리(optStore)에 임시 저장 → 메 발송
+        String code = mailSenderService.generateVerificationCode();  // 6자리 랜덤 번호 생성
+        otpStore.save(dbEmail, code);  // 인증 번호 검증을 위해 보관
 
         try {
+            // 메일 전송 성공
             mailSenderService.sendMailForAlarm(dbEmail, code);
             log.info("--- [sendOtp] OTP 발송 완료 | 이메일: {} ---", dbEmail);
             return ResponseEntity.ok("OTP가 발송되었습니다.");
         } catch (MessagingException | UnsupportedEncodingException e) {
+            // 메일 서버 오류 발생
             log.error("--- [sendOtp] 메일 발송 실패 | 이메일: {}, 원인: {} ---", dbEmail, e.getMessage());
             return ResponseEntity.status(500).body("메일 발송에 실패했습니다. 잠시 후 다시 시도해 주세요.");
         }
@@ -155,12 +156,14 @@ public class LoginController {
     //   실패 시 4xx + 오류 메시지 텍스트 응답
     //   JS가 응답을 받아 화면 갱신 or window.location.href 처리
 
+    /* 사용자가 인증번호르 입력하고 로그인버튼을 눌렀을 때 실행 */
     @PostMapping("/verifyEmailOtp")
     @ResponseBody  // 폼 방식 → Ajax 방식으로 전환
     public ResponseEntity<String> verifyEmailOtp(@RequestParam("email") String inputEmail,
                                                  @RequestParam("otp") String inputOtp,
                                                  HttpSession session) {
 
+        // 세션에서 인증 대기 중인 유저 아이디 확인
         String loginId = (String) session.getAttribute("PRE_AUTH_USER");
 
         if (loginId == null) {
@@ -171,7 +174,7 @@ public class LoginController {
         log.info("--- [verifyEmailOtp POST] loginId: {}, 입력 이메일: {}, OTP: {} ---",
                 loginId, inputEmail, inputOtp);
 
-        // DB 이메일 검증
+        // DB 이메일 재검증
         String dbEmail = managerMapper.findEmailByLoginId(loginId).orElse(null);
         if (dbEmail == null || !dbEmail.equals(inputEmail.trim())) {
             log.warn("--- [verifyEmailOtp POST] 이메일 불일치 ---");
@@ -193,6 +196,7 @@ public class LoginController {
         log.info("--- [verifyEmailOtp POST] OTP 검증 성공 → ADMIN 완전 로그인 처리 ---");
         completeLogin(loginId, session);
 
+        // AJAX 요청에 대한 응답으로 리다이렉트할 경로를 문자열로 보냄
         // JS가 받아서 window.location.href 로 이동할 리다이렉트 경로 반환
         return ResponseEntity.ok("/admin/dashboard");
     }
@@ -211,6 +215,8 @@ public class LoginController {
      * @param loginId 1차 인증 시 PRE_AUTH_USER로 저장해둔 loginId
      * @param session 현재 HTTP 세션
      */
+    /* 완전 로그인 처리 */
+    // 1차 로그인 성공 시 시큐리티 권한을 바로 주지 않고 비워두었기 때문에, 수동으로 권한 부여
     private void completeLogin(String loginId, HttpSession session) {
         // 1. DB에서 UserDetails 재로드 (ManagerDTO 반환)
         ManagerDTO managerDTO = (ManagerDTO) managerUserDetailsService.loadUserByUsername(loginId);

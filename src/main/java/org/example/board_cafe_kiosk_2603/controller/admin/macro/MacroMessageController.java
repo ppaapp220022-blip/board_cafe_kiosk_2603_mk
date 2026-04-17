@@ -8,6 +8,7 @@ import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageRequestDTO;
 import org.example.board_cafe_kiosk_2603.dto.common.pagenation.PageResponseDTO;
 import org.example.board_cafe_kiosk_2603.service.admin.macro.MacroMessageService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -92,6 +93,7 @@ public class MacroMessageController {
     /** 매크로 등록 API */
     @ResponseBody
     @PostMapping("/api/create")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER')")
     public ResponseEntity<?> createMacro(@RequestBody Map<String, String> data) {
         String direction = data.get("direction");
         String messageText = data.get("messageText");
@@ -107,6 +109,7 @@ public class MacroMessageController {
     /** 매크로 삭제 API (Soft Delete) */
     @ResponseBody
     @DeleteMapping("/api/delete/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER')")
     public ResponseEntity<?> deleteMacro(@PathVariable Integer id) {
         macroMessageService.deleteMacro(id);
         return ResponseEntity.ok(Map.of("message", "삭제 처리되었습니다."));
