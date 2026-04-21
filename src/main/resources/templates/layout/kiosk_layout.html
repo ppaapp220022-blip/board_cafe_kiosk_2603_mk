@@ -424,6 +424,25 @@
     function closeServiceModal() { document.getElementById('serviceModal').classList.remove('active'); }
 
     /* ================= 스크린세이버 로직 추가 ================= */
+    let idleTimer;
+
+    function resetIdleTimer() {
+        clearTimeout(idleTimer);
+        // 30초 동안 활동이 없으면 screensaver로 이동
+        idleTimer = setTimeout(() => {
+            localStorage.setItem('returnUrl', window.location.pathname);
+            window.location.href = '/kiosk/screensaver';
+        }, 30000);
+    }
+
+    // 활동 감지 이벤트 리스너 등록
+    window.onload = resetIdleTimer;
+    window.onmousemove = resetIdleTimer;
+    window.onclick = resetIdleTimer;
+    window.onkeydown = resetIdleTimer;
+    window.ontouchstart = resetIdleTimer;
+    /* ======================================================= */
+
     async function callService(serviceType) {
         try {
             const res = await fetch('/kiosk/service-request', {
@@ -440,7 +459,6 @@
         } catch (e) {
             showToast('요청 실패: ' + e.message);
         }
-        /* ======================================================= */
     }
 
     function startTimer() {

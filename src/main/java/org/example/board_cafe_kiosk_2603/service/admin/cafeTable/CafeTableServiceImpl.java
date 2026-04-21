@@ -4,10 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.domain.admin.table.CafeTable;
 import org.example.board_cafe_kiosk_2603.domain.common.cafeTableSession.CafeTableSession;
+import org.example.board_cafe_kiosk_2603.domain.kiosk.payment.Payment;
 import org.example.board_cafe_kiosk_2603.dto.admin.table.CafeTableDTO;
 import org.example.board_cafe_kiosk_2603.dto.kiosk.order.OrderItemDTO;
 import org.example.board_cafe_kiosk_2603.mapper.admin.product.GameItemMapper;
 import org.example.board_cafe_kiosk_2603.mapper.admin.table.CafeTableMapper;
+import org.example.board_cafe_kiosk_2603.mapper.kiosk.payment.PaymentMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 public class CafeTableServiceImpl implements CafeTableService {
     private final CafeTableMapper cafeTableMapper;
     private final GameItemMapper gameItemMapper;
+    private final PaymentMapper paymentMapper;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -84,6 +87,14 @@ public class CafeTableServiceImpl implements CafeTableService {
             case "CLEANING":
                 /* 주 설명: [퇴실/결제] 현재 이용 중인 세션 마감 및 테이블 포인터 해제 */
                 Long currentSessionId = cafeTableMapper.selectCurrentSessionId(id);
+                if (currentSessionId == null) {
+                    currentSessionId = cafeTableMapper.selectActiveSessionByTableId(id);
+                }
+
+                if (currentSessionId != null) {
+                    ensurePaymentCompletedBeforeCleaning(id, currentSessionId);
+                }
+
                 if (currentSessionId != null) {
                     // 퇴실하는 세션의 모든 메시지 읽음 처리
                     cafeTableMapper.updateMessagesReadStatusBySessionId(currentSessionId);
@@ -119,6 +130,15 @@ public class CafeTableServiceImpl implements CafeTableService {
 
             default:
                 log.warn("알 수 없는 상태값 요청: {}", status);
+        }
+    }
+
+    private void ensurePaymentCompletedBeforeCleaning(Integer tableId, Long sessionId) {
+        Payment payment = paymentMapper.findBySessionId(sessionId);
+        if (payment == null || !"DONE".equals(payment.getStatus())) {
+            log.warn("결제 미완료 상태에서 CLEANING 전환 차단 | tableId: {}, sessionId: {}, paymentStatus: {}",
+                    tableId, sessionId, payment == null ? "NOT_FOUND" : payment.getStatus());
+            throw new IllegalStateException("결제가 완료되지 않아 청소중으로 변경할 수 없습니다.");
         }
     }
 
