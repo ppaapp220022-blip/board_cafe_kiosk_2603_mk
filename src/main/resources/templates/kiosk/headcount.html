@@ -4,103 +4,8 @@
   <meta charset="UTF-8">
   <title>Party Size - Board Game Cafe</title>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    body {
-      margin: 0; padding: 0;
-      font-family: 'Pretendard', sans-serif;
-      background-color: #f0f2f5;
-      display: flex; align-items: center; justify-content: center;
-      height: 100vh; overflow: hidden;
-    }
+  <link rel="stylesheet" th:href="@{/css/kiosk/headcount.css}">
 
-    .container {
-      text-align: center;
-      width: 100%;
-      max-width: 800px;
-    }
-
-    .icon-header {
-      width: 80px; height: 80px;
-      background-color: #007bff;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 20px;
-      color: white;
-    }
-
-    h1 { font-size: 2.5rem; margin: 10px 0; color: #111; }
-    .subtitle { color: #888; margin-bottom: 40px; font-size: 1.1rem; }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 20px;
-      margin-bottom: 40px;
-      padding: 0 20px;
-    }
-
-    .number-card {
-      background: white;
-      border-radius: 20px;
-      padding: 30px 10px;
-      cursor: pointer;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-      transition: all 0.2s ease;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      border: 3px solid transparent;
-    }
-
-    .number-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    }
-
-    .number-card.selected {
-      border-color: #007bff;
-      background-color: #f0f7ff;
-    }
-
-    .number-card i {
-      color: #333;
-      margin-bottom: 15px;
-      width: 32px; height: 32px;
-    }
-
-    .number-card span {
-      font-size: 1.8rem;
-      font-weight: bold;
-      color: #111;
-    }
-
-    .submit-btn {
-      width: calc(100% - 40px);
-      margin: 0 20px;
-      padding: 20px;
-      background-color: #e2e4e7;
-      color: #a0a3a7;
-      border: none;
-      border-radius: 15px;
-      font-size: 1.2rem;
-      font-weight: bold;
-      cursor: not-allowed;
-      transition: all 0.3s ease;
-    }
-
-    .submit-btn.active {
-      background-color: #007bff;
-      color: white;
-      cursor: pointer;
-      box-shadow: 0 10px 20px rgba(0,123,255,0.2);
-    }
-
-    .help-btn {
-      position: fixed; bottom: 20px; right: 20px;
-      background: #333; color: white; width: 40px; height: 40px;
-      border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    }
-  </style>
 </head>
 <body>
 
@@ -155,50 +60,6 @@
 
 <div class="help-btn">?</div>
 
-<script>
-  lucide.createIcons();
-
-  let selectedCount = 0;
-
-  function selectPeople(count, element) {
-    const cards = document.querySelectorAll('.number-card');
-    cards.forEach(card => card.classList.remove('selected'));
-
-    element.classList.add('selected');
-    selectedCount = count;
-
-    const nextBtn = document.getElementById('next-button');
-    nextBtn.classList.add('active');
-    nextBtn.innerText = `${count}명 선택 완료 (다음으로)`;
-    nextBtn.style.cursor = 'pointer';
-  }
-
-  function goToNext() {
-    if (selectedCount > 0) {
-      document.getElementById('partySize-input').value = selectedCount;
-      document.getElementById('headcount-form').submit();
-    }
-  }
-
-  /* ================= 스크린세이버 로직 추가 ================= */
-  let idleTimer;
-
-  function resetIdleTimer() {
-    clearTimeout(idleTimer);
-    // 30초 동안 활동이 없으면 screensaver로 이동
-    idleTimer = setTimeout(() => {
-      localStorage.setItem('returnUrl', window.location.pathname);
-      window.location.href = '/kiosk/screensaver';
-    }, 30000);
-  }
-
-  // 활동 감지 이벤트 리스너 등록
-  window.onload = resetIdleTimer;
-  window.onmousemove = resetIdleTimer;
-  window.onclick = resetIdleTimer;
-  window.onkeydown = resetIdleTimer;
-  window.ontouchstart = resetIdleTimer;
-  /* ======================================================= */
-</script>
+<script th:src="@{/js/kiosk/headcount.js}"></script>
 </body>
 </html>

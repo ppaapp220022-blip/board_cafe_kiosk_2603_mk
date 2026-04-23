@@ -1,0 +1,67 @@
+body {
+    margin: 0; padding: 0;
+    font-family: 'Pretendard', sans-serif;
+    background-color: #f0f2f5;
+    display: flex; align-items: center; justify-content: center;
+    height: 100vh;
+}
+.login-card {
+    background: white;
+    width: 400px;
+    padding: 40px;
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    text-align: center;
+}
+.icon-box {
+    width: 60px; height: 60px;
+    background-color: #eef6ff;
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px;
+    color: #007bff;
+}
+h2 { margin: 0; font-size: 1.8rem; color: #111; }
+.subtitle { color: #888; margin: 10px 0 30px; font-size: 0.95rem; }
+
+.input-group { text-align: left; margin-bottom: 20px; }
+.label { display: block; font-size: 0.85rem; color: #666; margin-bottom: 8px; font-weight: 600; }
+
+.input-wrapper {
+    position: relative;
+    display: flex; align-items: center;
+}
+.input-wrapper i {
+    position: absolute; left: 15px; color: #aaa;
+}
+input {
+    width: 100%;
+    padding: 15px 15px 15px 45px;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    background-color: #f8f9fa;
+    font-size: 1rem;
+    box-sizing: border-box;
+    outline: none;
+    transition: border 0.2s;
+}
+input:focus { border-color: #007bff; background-color: #fff; }
+
+/* 테이블 번호는 아이콘 없으므로 패딩 조정 */
+.no-icon { padding-left: 15px; }
+
+.btn-primary {
+    width: 100%;
+    padding: 16px;
+    background-color: #8dbfff; /* 피그마의 연한 파랑색 반영 */
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.2s;
+}
+.btn-primary:hover { background-color: #007bff; }
+.footer-text { font-size: 0.8rem; color: #aaa; margin-top: 20px; }

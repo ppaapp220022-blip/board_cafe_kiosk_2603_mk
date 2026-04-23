@@ -1,0 +1,242 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+:root {
+    --wood-dark: #3E2723;
+    --wood-warm: #5D4037;
+    --guide-blue: #0288D1;
+    --accent-yellow: #FFD54F;
+    --paper-bg: #FFFDE7;
+    --bg-color: #F5F5F5;
+    --back-btn-bg: #ffffff;
+    --error-red: #E53935;
+}
+
+body {
+    font-family: 'Pretendard', sans-serif;
+    background-color: var(--wood-dark);
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.kiosk-frame {
+    width: 1080px;
+    height: 680px;
+    background: var(--bg-color);
+    display: flex;
+    border: 12px solid #2D1B18;
+    border-radius: 40px;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+    overflow: hidden;
+    position: relative;
+}
+
+/* 🔙 화살표가 포함된 메뉴로 돌아가기 버튼 (디자인 유지) */
+.btn-back-menu {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    z-index: 100;
+    background: var(--back-btn-bg);
+    border: 3px solid var(--wood-dark);
+    border-radius: 50px;
+    padding: 10px 25px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    box-shadow: 0 6px 0 var(--wood-dark);
+    transition: all 0.1s ease;
+}
+
+.btn-back-menu:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 var(--wood-dark);
+}
+
+.btn-back-menu .icon {
+    font-size: 1.8rem;
+}
+
+.btn-back-menu .text {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--wood-dark);
+}
+
+/* 왼쪽: AI 친구 (가이드 모드) */
+.ai-guide-zone {
+    flex: 1.2;
+    background: #E1F5FE;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    border-right: 2px solid #B3E5FC;
+    padding-top: 80px;
+}
+
+.ai-character {
+    width: 150px;
+    height: 150px;
+    background: var(--guide-blue);
+    border-radius: 40% 40% 50% 50%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 5px solid var(--wood-dark);
+    box-shadow: 0 15px 30px rgba(2, 136, 209, 0.3);
+    transition: 0.3s;
+}
+
+.eyes { display: flex; gap: 25px; }
+.eye { width: 12px; height: 12px; background: white; border-radius: 50%; transition: 0.3s; }
+
+/* 경청/분석 애니메이션 */
+.listening .ai-character, .analyzing .ai-character {
+    animation: float 1.5s infinite ease-in-out;
+}
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+.listening .eye { transform: scaleY(0.2); } /* 경청 중 */
+.analyzing .eye { animation: blink 0.3s infinite; } /* 분석 중 */
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+.stt-bubble {
+    margin-top: 30px;
+    background: white;
+    padding: 20px 30px;
+    border-radius: 25px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--wood-dark);
+    text-align: center;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    max-width: 90%;
+    min-height: 1.5em;
+}
+
+/* 오른쪽: 설명 콘텐츠 영역 */
+.content-zone {
+    flex: 1.5;
+    background: white;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.content-header {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--guide-blue);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* 설명 카드 스타일 (기존) */
+.info-card {
+    background: var(--paper-bg);
+    border-left: 8px solid var(--guide-blue);
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    line-height: 1.6;
+    color: #333;
+}
+
+.info-card h3 { margin-top: 0; color: var(--wood-dark); }
+
+/* [추가] 게임을 찾을 수 없을 때의 결과 카드 스타일 */
+.error-card {
+    background: #FFFEB2; /* 약간 더 진한 경고색 */
+    border-left: 8px solid var(--error-red);
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    text-align: center;
+    animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* [핵심] 찾을 수 없는 게임 이미지 (CSS 일러스트) */
+.not-found-image {
+    width: 100%;
+    height: 180px;
+    background: #E0F2F1;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 5rem;
+    position: relative;
+    border: 3px dashed #80CBC4;
+}
+.not-found-image::after {
+    content: '?';
+    position: absolute;
+    color: #80CBC4;
+    font-weight: 900;
+    opacity: 0.7;
+}
+
+.error-title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--wood-dark);
+    margin-bottom: 10px;
+}
+
+.error-msg {
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+/* 환류(피드백) 영역 */
+.feedback-box {
+    margin-top: 30px;
+    padding: 20px;
+    background: #F5F5F5;
+    border-radius: 20px;
+    display: none;
+}
+.feedback-box.active { display: block; animation: slideUp 0.3s; }
+
+@keyframes slideUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+
+textarea {
+    width: 100%; border: 1.5px solid #ddd; border-radius: 12px;
+    padding: 12px; margin-top: 10px; font-family: inherit; font-size: 1rem;
+    box-sizing: border-box;
+}
+
+/* 하단 버튼 */
+.action-btns { display: flex; gap: 15px; margin-top: auto; padding-top: 20px; }
+.btn {
+    flex: 1; padding: 20px; border-radius: 15px; border: none;
+    font-size: 1.1rem; font-weight: 800; cursor: pointer; transition: 0.2s;
+}
+.btn-retry { background: #E0E0E0; color: #666; }
+.btn-confirm { background: var(--guide-blue); color: white; }
+
+.mic-btn {
+    position: absolute; bottom: 30px; left: 30px;
+    width: 80px; height: 80px; border-radius: 50%;
+    background: #FF5252; border: 4px solid var(--wood-dark);
+    font-size: 2rem; color: white; cursor: pointer;
+    box-shadow: 0 8px 0 #C62828; z-index: 10;
+}
+.mic-btn:active { transform: translateY(4px); box-shadow: 0 4px 0 #C62828; }
