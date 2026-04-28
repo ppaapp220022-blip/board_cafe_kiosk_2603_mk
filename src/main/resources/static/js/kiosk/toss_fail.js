@@ -1,7 +1,7 @@
 function retryPayment() {
-    window.location.href = `/kiosk/checkout?tableNumber=${tableNumber}`;
+    window.location.href = retryUrl || `/kiosk/checkout?tableNumber=${tableNumber}`;
 }
 
 function goMenu() {
-    window.location.href = `/kiosk/games?tableNumber=${tableNumber}`;
+    window.location.href = backUrl || `/kiosk/drinks?tableNumber=${tableNumber}`;
 }

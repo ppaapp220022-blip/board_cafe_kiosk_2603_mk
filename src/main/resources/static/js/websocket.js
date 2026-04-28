@@ -301,7 +301,6 @@ async function updateOrderStatusViaApi(orderId, nextStatus) {
         });
 
         if (response.ok) {
-            console.log('✅ 주문 상태 변경 성공');
             if (typeof fetchActiveOrders === 'function') await fetchActiveOrders();
             alert('주문 상태가 변경되었습니다.');
             return;
@@ -317,7 +316,6 @@ async function updateOrderStatusViaApi(orderId, nextStatus) {
             alert('다른 화면에서 먼저 상태가 변경되었습니다. 최신 상태로 갱신했습니다.');
             return;
         }
-
         console.error('❌ 상태 변경 실패:', response.status, errorData);
         alert("❌ " + errorMessage);
     } catch (err) {

@@ -46,6 +46,7 @@ public class PaymentController {
 
         kioskPageService.buildCheckoutModel(model, tableNumber, session);
         model.addAttribute("tableNumber", tableNumber);
+        model.addAttribute("checkoutSource", "kiosk");
 
         return "kiosk/checkout";
     }
@@ -97,9 +98,9 @@ public class PaymentController {
             Model model) {
         try {
             boolean adminCheckoutMode = Boolean.TRUE.equals(session.getAttribute("adminCheckoutMode"));
-            Integer tableNumber = (Integer) session.getAttribute("tableNumber");
+            Integer tableNumber = readSessionTableNumber(session);
             if (tableNumber == null) {
-                model.addAttribute("errorMessage", "세션이 만료되었습니다. 다시 시도해주세요.");
+                addFailNavigationModel(model, session, "세션이 만료되었습니다. 다시 시도해주세요.");
                 return "kiosk/toss_fail";
             }
 
@@ -139,13 +140,13 @@ public class PaymentController {
 
                 return "kiosk/toss_success";
             } else {
-                model.addAttribute("errorMessage", confirmResponse.getMessage());
+                addFailNavigationModel(model, session, confirmResponse.getMessage());
                 log.warn("결제 승인 실패 - {}", confirmResponse.getMessage());
                 return "kiosk/toss_fail";
             }
         } catch (Exception e) {
             log.error("결제 성공 처리 중 오류", e);
-            model.addAttribute("errorMessage", "결제 처리 중 오류가 발생했습니다.");
+            addFailNavigationModel(model, session, "결제 처리 중 오류가 발생했습니다.");
             return "kiosk/toss_fail";
         }
     }
@@ -157,12 +158,41 @@ public class PaymentController {
     public String tossFail(
             @RequestParam(value = "code", required = false) String code,
             @RequestParam(value = "message", required = false) String message,
+            @RequestParam(value = "source", required = false) String source,
+            HttpSession session,
             Model model) {
 
         model.addAttribute("errorCode", code);
-        model.addAttribute("errorMessage", message != null ? message : "결제가 실패했습니다.");
-        log.warn("결제 실패 - code: {}, message: {}", code, message);
+        addFailNavigationModel(model, session, message != null ? message : "결제가 실패했습니다.", source);
+        log.warn("결제 실패 - code: {}, message: {}, source: {}", code, message, source);
         return "kiosk/toss_fail";
+    }
+
+    private void addFailNavigationModel(Model model, HttpSession session, String errorMessage) {
+        addFailNavigationModel(model, session, errorMessage, null);
+    }
+
+    private void addFailNavigationModel(Model model, HttpSession session, String errorMessage, String source) {
+        boolean adminCheckoutMode = source != null
+                ? "admin".equals(source)
+                : Boolean.TRUE.equals(session.getAttribute("adminCheckoutMode"));
+        Integer tableNumber = readSessionTableNumber(session);
+        Integer tableId = readSessionInteger(session, "tableId");
+        String adminRetryUrl = tableId != null
+                ? "/admin/dashboard/" + tableId + "/checkout"
+                : "/admin/dashboard";
+
+        model.addAttribute("errorMessage", errorMessage);
+        model.addAttribute("tableNumber", tableNumber);
+        model.addAttribute("checkoutSource", adminCheckoutMode ? "admin" : "kiosk");
+        model.addAttribute("retryUrl", adminCheckoutMode
+                ? adminRetryUrl
+                : "/kiosk/checkout?tableNumber=" + (tableNumber != null ? tableNumber : ""));
+        model.addAttribute("backUrl", adminCheckoutMode
+                ? "/admin/dashboard"
+                : "/kiosk/drinks?tableNumber=" + (tableNumber != null ? tableNumber : ""));
+        model.addAttribute("retryButtonText", adminCheckoutMode ? "다시 결제 시도" : "다시 시도");
+        model.addAttribute("backButtonText", adminCheckoutMode ? "대시보드로 이동" : "메뉴로 이동");
     }
 
     private Integer resolveTrustedTableNumber(Integer requestTableNumber,
@@ -198,12 +228,16 @@ public class PaymentController {
     }
 
     private Integer readSessionTableNumber(HttpSession session) {
-        Object raw = session.getAttribute("tableNumber");
+        return readSessionInteger(session, "tableNumber");
+    }
+
+    private Integer readSessionInteger(HttpSession session, String attributeName) {
+        Object raw = session.getAttribute(attributeName);
         if (raw == null) return null;
         if (raw instanceof Integer n) return n;
         try {
             int parsed = Integer.parseInt(raw.toString());
-            session.setAttribute("tableNumber", parsed);
+            session.setAttribute(attributeName, parsed);
             return parsed;
         } catch (NumberFormatException e) {
             return null;

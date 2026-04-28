@@ -17,14 +17,17 @@
   </div>
 
   <div class="button-group">
-    <button class="retry-btn" onclick="retryPayment()">다시 시도</button>
-    <button class="back-btn"  onclick="goMenu()">메뉴로 이동</button>
+    <button class="retry-btn" onclick="retryPayment()" th:text="${retryButtonText} ?: '다시 시도'">다시 시도</button>
+    <button class="back-btn"  onclick="goMenu()" th:text="${backButtonText} ?: '메뉴로 이동'">메뉴로 이동</button>
   </div>
 </div>
 
-<script>
+<script th:inline="javascript">
   lucide.createIcons({ attrs: { 'stroke-width': 2.5 } });
   const tableNumber = /*[[${tableNumber}]]*/ '1';
+  const checkoutSource = /*[[${checkoutSource}]]*/ 'kiosk';
+  const retryUrl = /*[[${retryUrl}]]*/ `/kiosk/checkout?tableNumber=${tableNumber}`;
+  const backUrl = /*[[${backUrl}]]*/ `/kiosk/drinks?tableNumber=${tableNumber}`;
 
 </script>
 <script th:src="@{/js/kiosk/toss_fail.js}"></script>

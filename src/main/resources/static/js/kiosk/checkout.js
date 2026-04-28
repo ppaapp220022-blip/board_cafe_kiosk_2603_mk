@@ -282,7 +282,7 @@ async function processPayment() {
             orderId: orderId_toss,
             orderName: orderName,
             successUrl: window.location.origin + `/kiosk/toss/success?pointUsed=${appliedPoint}`,
-            failUrl: window.location.origin + "/kiosk/toss/fail",
+            failUrl: window.location.origin + `/kiosk/toss/fail?source=${encodeURIComponent(checkoutSource || 'kiosk')}`,
         });
     } catch (err) {
         payBtn.disabled = false;

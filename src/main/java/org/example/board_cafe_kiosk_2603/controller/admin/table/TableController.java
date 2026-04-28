@@ -89,6 +89,7 @@ public class TableController {
 
         kioskPageService.buildCheckoutModel(model, tableNumber, session);
         model.addAttribute("tableNumber", tableNumber);
+        model.addAttribute("checkoutSource", "admin");
         return "kiosk/checkout";
     }
 
@@ -200,4 +201,3 @@ public class TableController {
         }
     }
 }
-
