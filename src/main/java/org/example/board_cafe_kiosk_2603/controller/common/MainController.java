@@ -213,4 +213,9 @@ public class MainController {
     public String findPwPage() {
         return "login/find_pw";
     }
+
+    // AI Service
+    @GetMapping("/kiosk/ai")
+    public void aiService() {
+    }
 }

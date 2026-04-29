@@ -3,6 +3,9 @@ plugins {
     id 'org.springframework.boot' version '3.5.11'
     id 'io.spring.dependency-management' version '1.1.7'
 }
+ext {
+    springAiVersion = "1.1.4"
+}
 
 group = 'org.example'
 version = '0.0.1-SNAPSHOT'
@@ -72,6 +75,17 @@ dependencies {
 
     // mail
     implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+    // Open AI
+    implementation 'org.springframework.ai:spring-ai-starter-model-openai'
+
+    // PGVector
+    implementation 'org.springframework.ai:spring-ai-starter-vector-store-pgvector'
+}
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.ai:spring-ai-bom:$springAiVersion"
+    }
 }
 
 tasks.named('test') {

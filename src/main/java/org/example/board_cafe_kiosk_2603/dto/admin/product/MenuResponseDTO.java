@@ -25,6 +25,9 @@ public class MenuResponseDTO {
     /** JOIN으로 가져온 카테고리명 */
     private String categoryName;
 
+    /** 카테고리 타입 (FOOD, DRINK, GAME 등) - 게임 판별 로직에 사용 */
+    private String categoryType;
+
     private String name;
     private int price;
     private String description;
