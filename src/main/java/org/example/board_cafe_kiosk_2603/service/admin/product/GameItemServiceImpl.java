@@ -2,10 +2,12 @@ package org.example.board_cafe_kiosk_2603.service.admin.product;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.example.board_cafe_kiosk_2603.ai.GameEmbeddingService;
 import org.example.board_cafe_kiosk_2603.domain.admin.product.GameItem;
 import org.example.board_cafe_kiosk_2603.domain.admin.product.GameItemStatus;
 import org.example.board_cafe_kiosk_2603.dto.admin.product.GameItemRequestDTO;
 import org.example.board_cafe_kiosk_2603.dto.admin.product.GameItemResponseDTO;
+import org.example.board_cafe_kiosk_2603.mapper.admin.product.MenuMapper;
 import org.example.board_cafe_kiosk_2603.mapper.admin.table.CafeTableMapper;
 import org.example.board_cafe_kiosk_2603.mapper.admin.product.GameItemMapper;
 import org.example.board_cafe_kiosk_2603.service.kiosk.order.OrderService;
@@ -18,23 +20,19 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
-/**
- * GameItemService 구현체
- * ModelMapper를 사용하여 Domain ↔ DTO 변환 처리
- */
 @Log4j2
 @Service
 @RequiredArgsConstructor
-public class GameItemServiceImpl implements GameItemService  {
+public class GameItemServiceImpl implements GameItemService {
 
     private final GameItemMapper gameItemMapper;
     private final CafeTableMapper cafeTableMapper;
     private final ModelMapper modelMapper;
     private final OrderService orderService;
+    private final MenuMapper menuMapper; // menu_id 조회용
+    private final GameEmbeddingService gameEmbeddingService;
 
-    /**
-     * 전체 게임 아이템 목록 조회
-     */
+    /* 전체 게임 아이템 목록 조회 */
     @Override
     public List<GameItemResponseDTO> getAll() {
         log.debug("GameItemServiceImpl.getAll() 실행");
@@ -43,9 +41,7 @@ public class GameItemServiceImpl implements GameItemService  {
         return list;
     }
 
-    /**
-     * game_id 기준 게임 아이템 목록 조회
-     */
+    /* game_id 기준 게임 아이템 목록 조회 */
     @Override
     public List<GameItemResponseDTO> getByGameId(int gameId) {
         log.debug("GameItemServiceImpl.getByGameId() 실행 - gameId: {}", gameId);
@@ -54,9 +50,7 @@ public class GameItemServiceImpl implements GameItemService  {
         return list;
     }
 
-    /**
-     * status 기준 게임 아이템 목록 조회
-     */
+    /* status 기준 게임 아이템 목록 조회 */
     @Override
     public List<GameItemResponseDTO> getByStatus(GameItemStatus gameItemStatus) {
         log.debug("GameItemServiceImpl.getByStatus() 실행 - gameItemStatus: {}", gameItemStatus);
@@ -65,9 +59,7 @@ public class GameItemServiceImpl implements GameItemService  {
         return list;
     }
 
-    /**
-     * PK로 게임 아이템 단건 조회
-     */
+    /* PK로 게임 아이템 단건 조회 */
     @Override
     public GameItemResponseDTO getById(int id) {
         log.debug("GameItemServiceImpl.getById() 실행 - id: {}", id);
@@ -78,44 +70,52 @@ public class GameItemServiceImpl implements GameItemService  {
                 });
     }
 
-    /**
-     * 게임 아이템 등록
-     */
+    /* 게임 아이템 등록 */
+    // 재고가 0이라서 AI 안내에서 제외되었던 게임도, 새 재고가 등록되면 자동으로 AI 지식 베이스(RAG)에 복구됨
     @Override
     public void register(GameItemRequestDTO gameItemRequestDTO) {
         log.debug("GameItemServiceImpl.register() 실행 - gameItemRequestDTO: {}", gameItemRequestDTO);
+
         GameItem gameItem = modelMapper.map(gameItemRequestDTO, GameItem.class);
         int result = gameItemMapper.insert(gameItem);
+
+        // AI 동기화
+        // 새 재고가 들어왔으므로 임베딩 조건(재고 > 0)을 재확인하여 업서트 (game_id → menu_id 경로로 조회 후 upsert)
+        // 이미 임베딩되어 있으면 갱신, 없으면 신규 등록
+        tryUpsertEmbeddingByGameId(gameItemRequestDTO.getGameId());
         log.debug("게임 아이템 등록 결과 - affected rows: {}, generated id: {}", result, gameItem.getId());
     }
 
-    /**
-     * 게임 아이템 수정 (존재 여부 선확인)
-     */
+    /* 게임 아이템 수정 (존재 여부 선확인) */
+    // 시리얼 번호, 상태만 변경하므로 임베딩 내용에 영향 없음 (임베딩 연동 불필요)
     @Override
     public void modify(int id, GameItemRequestDTO gameItemRequestDTO) {
         log.debug("GameItemServiceImpl.modify() 실행 - id: {}, dto: {}", id, gameItemRequestDTO);
+
         gameItemMapper.findById(id)
                 .orElseThrow(() -> {
                     log.warn("수정 대상 게임 아이템 없음 - id: {}", id);
                     return new NoSuchElementException("게임 아이템을 찾을 수 없습니다. id=" + id);
                 });
+
         GameItem gameItem = GameItem.builder()
                 .id(id)
                 .gameId(gameItemRequestDTO.getGameId())
                 .serialNumber(gameItemRequestDTO.getSerialNumber())
                 .status(gameItemRequestDTO.getStatus())
                 .build();
+
         int result = gameItemMapper.update(gameItem);
         log.debug("게임 아이템 수정 결과 - affected rows: {}", result);
     }
 
-    /**
-     * 게임 아이템 삭제 (존재 여부 선확인)
-     */
+    /* 게임 아이템 삭제 (존재 여부 선확인) */
+    // 대여 가능(NORMAL) 혹은 대여 중(RENTED)인 아이템은 삭제할 수 없음
+    // 삭제 후 정상 재고가 0이 되면, AI는 더 이상 해당 게임을 안내하지 않음
     @Override
     public void remove(int id) {
         log.debug("GameItemServiceImpl.remove() 실행 - id: {}", id);
+
         GameItemResponseDTO gameItem = gameItemMapper.findById(id)
                 .orElseThrow(() -> {
                     log.warn("삭제 대상 게임 아이템 없음 - id: {}", id);
@@ -130,23 +130,56 @@ public class GameItemServiceImpl implements GameItemService  {
             throw new IllegalStateException(message);
         }
 
+        // 삭제 전에 gameId 확보
+        int gameId = gameItem.getGameId();
         int result = gameItemMapper.delete(id);
+
+        // AI 동기화: 재고 삭제 후 전체 수량을 체크하여 필요 시 벡터 데이터 자동 제거 (삭제 후 재고 재확인)
+        tryUpsertEmbeddingByGameId(gameId);
         log.debug("게임 아이템 삭제 결과 - affected rows: {}", result);
     }
 
-    /**
-     * 게임 아이템 상태 변경 (존재 여부 선확인)
-     */
+    /* 게임 아이템 상태 변경 (존재 여부 선확인) */
+    // AI 안내 여부에 영향을 주는 '정상 재고 수량'의 변화가 생길 때만 임베딩을 갱신
     @Override
     public void changeStatus(int id, GameItemStatus status) {
         log.debug("GameItemServiceImpl.changeStatus() 실행 - id: {}, status: {}", id, status);
-        gameItemMapper.findById(id)
-                .orElseThrow(() -> {
-                    log.warn("상태 변경 대상 게임 아이템 없음 - id: {}", id);
-                    return new NoSuchElementException("게임 아이템을 찾을 수 없습니다. id=" + id);
-                });
-        int result = gameItemMapper.updateStatus(id, status);
-        log.debug("게임 아이템 상태 변경 결과 - affected rows: {}", result);
+        GameItemResponseDTO gameItem = gameItemMapper.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("게임 아이템을 찾을 수 없습니다. id=" + id));
+
+        gameItemMapper.updateStatus(id, status);
+
+        // 임베딩에 영향을 주는 상태 변화에만 재확인
+        // NORMAL 재고 수가 바뀌는 경우: NORMAL ↔ DAMAGED, NORMAL ↔ LOST
+        // RENTED 상태는 일시적인 대여이므로 지식 베이스에서 삭제하지 않음
+        boolean affectsStock = (status == GameItemStatus.DAMAGED)
+                || (status == GameItemStatus.LOST)
+                || (status == GameItemStatus.NORMAL
+                && (gameItem.getStatus() == GameItemStatus.DAMAGED
+                || gameItem.getStatus() == GameItemStatus.LOST));
+
+        if (affectsStock) {
+            tryUpsertEmbeddingByGameId(gameItem.getGameId());
+        }
+
+        log.debug("게임 아이템 상태 변경 완료 - id: {}, status: {}", id, status);
+    }
+
+    /* 재고 변화를 AI 지식 베이스에 실시간 반영 */
+    // game_id → menu_id → 벡터 저장소 임베딩 upsert/delete
+    private void tryUpsertEmbeddingByGameId(int gameId) {
+        try {
+            // DB 관계망을 통해 연관된 메뉴 ID 확보
+            Integer menuId = menuMapper.findMenuIdByGameId(gameId);
+            if (menuId != null) {
+                // gameEmbeddingService 내부의 쿼리가 재고 0 여부를 판단하여 자동으로 처리함
+                gameEmbeddingService.upsertGameByMenuId(menuId);
+            } else {
+                log.warn("[임베딩] menu_id 없음 - gameId={}", gameId);
+            }
+        } catch (Exception e) {
+            log.error("[임베딩] upsert 실패 - gameId={}, 원인={}", gameId, e.getMessage());
+        }
     }
 
     @Override

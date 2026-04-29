@@ -337,6 +337,43 @@
         }
         .add-direct-btn:disabled { cursor: not-allowed; }
         .add-direct-btn i { width: 22px; height: 22px; }
+        /* --- AI Service 버튼 전용 스타일 --- */
+        .nav-btn.ai-service {
+            /* 미래지향적인 블루/시안 그라데이션 */
+            background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+            color: white;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* AI 버튼만 살짝 더 강조하는 애니메이션 */
+        .nav-btn.ai-service::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(45deg);
+            transition: 0.5s;
+            pointer-events: none;
+        }
+
+        .nav-btn.ai-service:hover::after {
+            left: 120%;
+        }
+
+        .nav-btn.ai-service i {
+            /* 아이콘에 살짝 빛나는 효과 */
+            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+        }
+
+        /* 주황색 버튼(직원호출)과 구분되도록 간격 조정이 필요하다면 */
+        .nav-group .nav-btn.orange {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+        }
     </style>
 </head>
 <body>
@@ -357,6 +394,9 @@
         </button>
     </div>
     <div class="nav-group">
+        <button class="nav-btn ai-service" onclick="location.href='/kiosk/ai'">
+            <i data-lucide="sparkles"></i> <span class="nav-label">AI Service</span>
+        </button>
         <button class="nav-btn orange" onclick="openServiceModal()"><i data-lucide="bell"></i><span class="nav-label">직원호출</span></button>
         <button class="nav-btn red" onclick="navigateCheckout()"><i data-lucide="credit-card"></i><span class="nav-label">정산</span></button>
     </div>
