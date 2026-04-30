@@ -3,7 +3,7 @@ package org.example.board_cafe_kiosk_2603.controller.common;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.example.board_cafe_kiosk_2603.domain.common.kioskItem;
+import org.example.board_cafe_kiosk_2603.domain.kiosk.stock.kioskItem;
 import org.example.board_cafe_kiosk_2603.service.admin.cafeTable.CafeTableService;
 import org.example.board_cafe_kiosk_2603.service.admin.cafeTable.TableSessionAdminService;
 import org.example.board_cafe_kiosk_2603.service.admin.product.GameService;
@@ -15,33 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-/**
- * 키오스크 통합 컨트롤러
- * <p>
- * [로그인]
- * GET  /kiosk/login            → 로그인 페이지        (MainController 담당)
- * POST /kiosk/login-process    → Spring Security 인증  (SecurityConfig 담당)
- * GET  /kiosk/logout           → 로그아웃             (SecurityConfig 담당)
- * <p>
- * [진입 화면]
- * GET  /kiosk/screensaver      → 스크린세이버
- * GET  /kiosk/headcount        → 인원수 선택
- * GET  /kiosk/phone_login      → 전화번호 입력
- * <p>
- * [메뉴 진입]
- * GET  /kiosk/menu             → 메뉴 메인            (MainController 담당)
- * <p>
- * [메뉴 탭]
- * GET  /kiosk/games            → 게임 목록
- * GET  /kiosk/drinks           → 음료 목록
- * GET  /kiosk/food             → 음식 목록
- * GET  /kiosk/members          → 추가인원 목록
- *
- * ★ 역할 분리 원칙
- *   - POST 흐름(headcount, phone_login, package_selection) → MainController
- *   - /kiosk/menu GET + 세션 검증                          → MainController
- *   - 메뉴 탭 GET (DB 조회 + 렌더링)                       → kioskController (이 파일)
- */
 @Log4j2
 @Controller
 @RequestMapping("/kiosk")

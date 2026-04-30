@@ -1,4 +1,4 @@
-package org.example.board_cafe_kiosk_2603.dto.kiosk;
+package org.example.board_cafe_kiosk_2603.dto.kiosk.point;
 
 import lombok.Builder;
 import lombok.Getter;

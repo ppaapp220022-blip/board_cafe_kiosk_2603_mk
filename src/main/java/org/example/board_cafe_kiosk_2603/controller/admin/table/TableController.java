@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpSession;
 import org.example.board_cafe_kiosk_2603.dto.admin.table.CafeTableDTO;
 import org.example.board_cafe_kiosk_2603.dto.kiosk.order.OrderItemDTO;
 import org.example.board_cafe_kiosk_2603.service.admin.cafeTable.CafeTableService;
-import org.example.board_cafe_kiosk_2603.service.kiosk.KioskPageService;
+import org.example.board_cafe_kiosk_2603.service.kiosk.session.KioskPageService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

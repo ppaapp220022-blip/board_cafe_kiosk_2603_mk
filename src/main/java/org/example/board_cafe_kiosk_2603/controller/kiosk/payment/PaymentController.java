@@ -5,7 +5,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.dto.kiosk.payment.PaymentDTO;
-import org.example.board_cafe_kiosk_2603.service.kiosk.KioskPageService;
+import org.example.board_cafe_kiosk_2603.service.kiosk.session.KioskPageService;
 import org.example.board_cafe_kiosk_2603.service.kiosk.payment.PaymentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;

@@ -8,10 +8,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Log4j2
 @Service
@@ -46,7 +43,7 @@ public class GameEmbeddingService {
                 ON m.category_id = c.id
                AND c.type = 'GAME'
             JOIN game g
-                ON g.category_id = c.id
+                ON g.name = m.name
                AND g.is_active = TRUE
             WHERE m.is_available = TRUE
               AND m.is_deleted   = FALSE
@@ -66,22 +63,29 @@ public class GameEmbeddingService {
         log.info("[임베딩] 전체 게임 임베딩 시작");
 
         List<Map<String, Object>> games = mariaJdbcTemplate.queryForList(GAME_QUERY);
-        log.info("[임베딩] 조회된 게임 수: {}", games.size());
+        log.info("[임베딩] 조회된 행 수 (중복 포함): {}", games.size());
 
         if (games.isEmpty()) {
-            log.warn("[임베딩] 임베딩할 게임이 없습니다. MariaDB 데이터를 확인하세요.");
+            log.warn("[임베딩] 임베딩할 게임이 없습니다. (MariaDB 데이터를 확인)");
             return 0;
         }
         // 쿼리 구조상 동일 게임이 여러 번 조회될 수 있으므로 menu_id를 키로 사용하여 1건씩만 필터링함. (중복 제거)
-        Map<String, Map<String, Object>> deduped = new HashMap<>();
+        // ★ 버그 수정: menu_id 기준으로 중복 제거 후 deduped.values()로 Document 생성
+        // 이전 코드에서는 deduped를 만들고도 원본 games로 Document를 만드는 버그가 있었음
+        // game_item이 여러 개면 같은 게임이 여러 행으로 조회되므로 반드시 중복 제거 필요
+        Map<String, Map<String, Object>> deduped = new LinkedHashMap<>();
         for (Map<String, Object> row : games) {
             String menuId = str(row.get("menu_id"));
-            deduped.putIfAbsent(menuId, row);
+            deduped.putIfAbsent(menuId, row);  // 첫 번째 행만 유지
         }
         log.info("[임베딩] 중복 제거 후 게임 수: {}", deduped.size());
 
         // 각 행을 AI 문서(Document) 객체로 변환
-        List<Document> documents = games.stream()
+//        List<Document> documents = games.stream()
+//                .map(this::toDocument)
+//                .toList();
+        // ★ deduped.values() 사용 (버그 수정 핵심)
+        List<Document> documents = deduped.values().stream()
                 .map(this::toDocument)
                 .toList();
 
