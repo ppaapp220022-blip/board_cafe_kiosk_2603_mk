@@ -1,4 +1,4 @@
-package org.example.board_cafe_kiosk_2603.domain.common;
+package org.example.board_cafe_kiosk_2603.domain.kiosk.stock;
 
 import lombok.*;
 

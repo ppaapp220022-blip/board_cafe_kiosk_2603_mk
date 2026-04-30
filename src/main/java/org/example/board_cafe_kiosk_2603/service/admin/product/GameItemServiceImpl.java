@@ -35,9 +35,9 @@ public class GameItemServiceImpl implements GameItemService {
     /* 전체 게임 아이템 목록 조회 */
     @Override
     public List<GameItemResponseDTO> getAll() {
-        log.debug("GameItemServiceImpl.getAll() 실행");
+        log.info("전체 게임 아이템 목록 조회 실행");
         List<GameItemResponseDTO> list = gameItemMapper.findAll();
-        log.debug("조회된 게임 아이템 수: {}", list.size());
+        log.info("조회된 게임 아이템 수: {}", list.size());
         return list;
     }
 
@@ -53,16 +53,16 @@ public class GameItemServiceImpl implements GameItemService {
     /* status 기준 게임 아이템 목록 조회 */
     @Override
     public List<GameItemResponseDTO> getByStatus(GameItemStatus gameItemStatus) {
-        log.debug("GameItemServiceImpl.getByStatus() 실행 - gameItemStatus: {}", gameItemStatus);
+        log.info("상태 기준 게임 아이템 목록 조회 실행: {}", gameItemStatus);
         List<GameItemResponseDTO> list = gameItemMapper.findByStatus(gameItemStatus);
-        log.debug("조회된 게임 아이템 수 (status={}): {}", gameItemStatus, list.size());
+        log.info("조회된 게임 아이템 수 (status={}): {}", gameItemStatus, list.size());
         return list;
     }
 
     /* PK로 게임 아이템 단건 조회 */
     @Override
     public GameItemResponseDTO getById(int id) {
-        log.debug("GameItemServiceImpl.getById() 실행 - id: {}", id);
+        log.info("게임 아이템 단건 조회 실행 - id: {}", id);
         return gameItemMapper.findById(id)
                 .orElseThrow(() -> {
                     log.warn("게임 아이템 없음 - id: {}", id);
@@ -74,7 +74,7 @@ public class GameItemServiceImpl implements GameItemService {
     // 재고가 0이라서 AI 안내에서 제외되었던 게임도, 새 재고가 등록되면 자동으로 AI 지식 베이스(RAG)에 복구됨
     @Override
     public void register(GameItemRequestDTO gameItemRequestDTO) {
-        log.debug("GameItemServiceImpl.register() 실행 - gameItemRequestDTO: {}", gameItemRequestDTO);
+        log.info("게임 아이템 등록 실행 - gameItemRequestDTO: {}", gameItemRequestDTO);
 
         GameItem gameItem = modelMapper.map(gameItemRequestDTO, GameItem.class);
         int result = gameItemMapper.insert(gameItem);
@@ -87,12 +87,18 @@ public class GameItemServiceImpl implements GameItemService {
     }
 
     /* 게임 아이템 수정 (존재 여부 선확인) */
-    // 시리얼 번호, 상태만 변경하므로 임베딩 내용에 영향 없음 (임베딩 연동 불필요)
+    // 시리얼 번호와 상태를 함께 수정하며, 상태 변경이 정상 재고 수량에 영향을 주는 경우 임베딩을 갱신함.
     @Override
     public void modify(int id, GameItemRequestDTO gameItemRequestDTO) {
-        log.debug("GameItemServiceImpl.modify() 실행 - id: {}, dto: {}", id, gameItemRequestDTO);
+        log.info("게임 아이템 수정 실행 - id: {}, dto: {}", id, gameItemRequestDTO);
 
-        gameItemMapper.findById(id)
+//        gameItemMapper.findById(id)
+//                .orElseThrow(() -> {
+//                    log.warn("수정 대상 게임 아이템 없음 - id: {}", id);
+//                    return new NoSuchElementException("게임 아이템을 찾을 수 없습니다. id=" + id);
+//                });
+        // 수정 전 기존 상태를 보존해야 old/new 비교로 임베딩 갱신 여부를 판단할 수 있음
+        GameItemResponseDTO existing = gameItemMapper.findById(id)
                 .orElseThrow(() -> {
                     log.warn("수정 대상 게임 아이템 없음 - id: {}", id);
                     return new NoSuchElementException("게임 아이템을 찾을 수 없습니다. id=" + id);
@@ -107,6 +113,23 @@ public class GameItemServiceImpl implements GameItemService {
 
         int result = gameItemMapper.update(gameItem);
         log.debug("게임 아이템 수정 결과 - affected rows: {}", result);
+
+        // 임베딩에 영향을 주는 상태 변화에만 재확인
+        // changeStatus()와 동일한 기준: NORMAL 재고 수가 바뀌는 경우에만 갱신
+        // RENTED 상태는 일시적인 대여이므로 지식 베이스에서 삭제하지 않음
+        GameItemStatus newStatus = gameItemRequestDTO.getStatus();
+        GameItemStatus oldStatus = existing.getStatus();
+
+        boolean affectsStock = (newStatus == GameItemStatus.DAMAGED)
+                || (newStatus == GameItemStatus.LOST)
+                || (newStatus == GameItemStatus.NORMAL
+                && (oldStatus == GameItemStatus.DAMAGED
+                || oldStatus == GameItemStatus.LOST));
+
+        if (affectsStock) {
+            log.debug("modify() 상태 변경으로 임베딩 갱신 - id: {}, {} → {}", id, oldStatus, newStatus);
+            tryUpsertEmbeddingByGameId(gameItemRequestDTO.getGameId());
+        }
     }
 
     /* 게임 아이템 삭제 (존재 여부 선확인) */

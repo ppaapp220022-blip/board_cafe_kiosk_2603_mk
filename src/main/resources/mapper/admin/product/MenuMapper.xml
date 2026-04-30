@@ -233,13 +233,10 @@
     <select id="findMenuIdByGameId" parameterType="int" resultType="Integer">
         SELECT m.id
         FROM menu m
-                 JOIN category c
-                      ON m.category_id = c.id
-                          AND c.type = 'GAME'
-                 JOIN game g
-                      ON g.category_id = c.id
-                          AND g.id = #{gameId}
-        WHERE m.is_deleted = FALSE
+                 JOIN game g ON g.name = m.name
+                 JOIN category c ON m.category_id = c.id AND c.type = 'GAME'
+        WHERE g.id = #{gameId}
+          AND m.is_deleted = FALSE
         LIMIT 1
     </select>
 
