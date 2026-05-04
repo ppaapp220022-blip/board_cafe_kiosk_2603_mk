@@ -37,6 +37,14 @@
   </div>
 </div>
 
+<script th:inline="javascript">
+  window.gameDetailState = {
+    tableNumber: /*[[${tableNumber}]]*/ 0,
+    orderId: /*[[${orderId}]]*/ 0,
+    order: /*[[${order}]]*/ {},
+    requestedGames: /*[[${requestedGames}]]*/ []
+  };
+</script>
 <script th:src="@{/js/kiosk/game_detail.js}"></script>
 </body>
 </html>

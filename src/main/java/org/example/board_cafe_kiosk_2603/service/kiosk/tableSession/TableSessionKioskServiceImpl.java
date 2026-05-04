@@ -7,7 +7,9 @@ import org.example.board_cafe_kiosk_2603.domain.common.cafeTableSession.CafeTabl
 import org.example.board_cafe_kiosk_2603.dto.admin.point.PointAdminDTO;
 import org.example.board_cafe_kiosk_2603.dto.kiosk.cafePackage.CafePackageDTO;
 import org.example.board_cafe_kiosk_2603.dto.kiosk.cart.CartDTO;
+import org.example.board_cafe_kiosk_2603.domain.kiosk.order.Orders;
 import org.example.board_cafe_kiosk_2603.mapper.common.cafeTableSession.CafeTableSessionMapper;
+import org.example.board_cafe_kiosk_2603.mapper.kiosk.order.OrdersMapper;
 import org.example.board_cafe_kiosk_2603.service.admin.cafeTable.TableSessionAdminService;
 import org.example.board_cafe_kiosk_2603.service.admin.point.PointService;
 import org.example.board_cafe_kiosk_2603.service.kiosk.cafePackage.CafePackageService;
@@ -30,6 +32,7 @@ public class TableSessionKioskServiceImpl implements TableSessionKioskService{
     private final PointService pointService;
     private final CafePackageService cafePackageService;
     private final TableSessionAdminService tableSessionAdminService;
+    private final OrdersMapper ordersMapper;
 
     @Override
     public Long createSession(int tableId, int packageId, int initialGuestCnt) {
@@ -74,7 +77,6 @@ public class TableSessionKioskServiceImpl implements TableSessionKioskService{
         boolean adminCheckoutMode = Boolean.TRUE.equals(session.getAttribute("adminCheckoutMode"));
         CartDTO cartDTO = cartService.getCart(tableNumber);
         String customerPhone = (String) session.getAttribute("customerPhone");
-        int pointBalance = resolvePointBalance(customerPhone);
 
         // DB에서 활성 세션 먼저 조회
         Integer packageId = null;
@@ -87,6 +89,13 @@ public class TableSessionKioskServiceImpl implements TableSessionKioskService{
                 sessionStartMillis = toEpochMillis(activeSession.getCheckInTime());
             }
         }
+
+        String resolvedCustomerPhone = resolveCheckoutCustomerPhone(customerPhone, activeSession);
+        if (resolvedCustomerPhone != null && !resolvedCustomerPhone.isBlank()) {
+            session.setAttribute("customerPhone", resolvedCustomerPhone);
+        }
+        int pointBalance = resolvePointBalance(resolvedCustomerPhone);
+
         int partySize = resolveCheckoutPartySize(activeSession, session);
         session.setAttribute("partySize", partySize);
 
@@ -130,7 +139,7 @@ public class TableSessionKioskServiceImpl implements TableSessionKioskService{
         model.addAttribute("sessionHours",  sessionDuration / 60);
         model.addAttribute("sessionMinutes",sessionDuration % 60);
         model.addAttribute("pointBalance",  pointBalance);
-        model.addAttribute("customerPhone", customerPhone != null ? customerPhone : "");
+        model.addAttribute("customerPhone", resolvedCustomerPhone != null ? resolvedCustomerPhone : "");
 
         log.info("정산 화면 - 테이블: {}, 메뉴: ₩{}, 패키지: {} ₩{}, 합계: ₩{}, 포인트: {}P",
                 tableNumber, cartDTO.getTotalPrice(), packageName, packageTotal, totalPrice, pointBalance);
@@ -176,6 +185,21 @@ public class TableSessionKioskServiceImpl implements TableSessionKioskService{
             return activeSession.getInitialGuestCnt();
         }
         return getPartySize(session);
+    }
+
+    private String resolveCheckoutCustomerPhone(String sessionCustomerPhone, CafeTableSession activeSession) {
+        if (sessionCustomerPhone != null && !sessionCustomerPhone.isBlank()) {
+            return sessionCustomerPhone;
+        }
+        if (activeSession == null) {
+            return "";
+        }
+
+        return ordersMapper.findBySessionId(activeSession.getId()).stream()
+                .map(Orders::getCustomerPhone)
+                .filter(phone -> phone != null && !phone.isBlank())
+                .findFirst()
+                .orElse("");
     }
 
     // 테이블 시작 시간 계산
