@@ -13,6 +13,41 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:11.4
+        env:
+          MARIADB_ROOT_PASSWORD: 7070
+          MARIADB_DATABASE: board_cafe_kiosk_2603
+          MARIADB_USER: boardwave
+          MARIADB_PASSWORD: 0331
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mariadb-admin ping -h 127.0.0.1 -uroot -p7070"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+      pgvector:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_DB: board_cafe_kiosk_2603
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d board_cafe_kiosk_2603"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      MARIADB_URL: jdbc:mariadb://127.0.0.1:3306/board_cafe_kiosk_2603
+      MARIADB_USERNAME: boardwave
+      MARIADB_PASSWORD: 0331
+      PGVECTOR_URL: jdbc:postgresql://127.0.0.1:5432/board_cafe_kiosk_2603
+      PGVECTOR_USERNAME: postgres
+      PGVECTOR_PASSWORD: postgres
 
     steps:
       - name: Checkout
@@ -30,6 +65,17 @@ jobs:
 
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
+
+      - name: Install DB clients
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mariadb-client postgresql-client
+
+      - name: Initialize test databases
+        run: |
+          mysql --protocol=TCP -h 127.0.0.1 -P 3306 -uroot -p7070 < src/main/resources/sql/MariaDB/01_init.sql
+          mysql --protocol=TCP -h 127.0.0.1 -P 3306 -uroot -p7070 board_cafe_kiosk_2603 < src/main/resources/sql/MariaDB/02_dummy.sql
+          psql "postgresql://postgres:postgres@127.0.0.1:5432/board_cafe_kiosk_2603" -c "CREATE EXTENSION IF NOT EXISTS vector;"
 
       - name: Run tests
         run: ./gradlew clean test bootJar
