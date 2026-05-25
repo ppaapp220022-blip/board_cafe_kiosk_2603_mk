@@ -221,6 +221,9 @@ public class PaymentService {
             // 포인트 사용/적립 처리
             int earnedPoints = processPoints(customerPhone, pointUsed, finalAmount, latestOrderId);
 
+            // 결제만 완료되고 처리되지 않은 게임 요청은 더 이상 대기 주문으로 남기지 않는다.
+            cancelPendingGameOrdersOnCheckout(session.getId());
+
             // 결제 완료 시점에 남아있는 게임 대여 이력을 자동 반납 처리한다.
             settleRemainingGameRentalsOnCheckout(session.getId());
 
@@ -555,6 +558,32 @@ public class PaymentService {
         log.debug("결제 완료 후 세션 종료/상태 반영 결과 | " + "tableId: {}, sessionId: {}, " +
                         "msgReadRows: {}, closeRows: {}, statusRows: {}, finalStatus: {}, finalCurrentSessionId: {}",
                 tableId, sessionId, readUpdated, closedRows, statusRows, currentStatus, currentSessionId);
+    }
+
+    private void cancelPendingGameOrdersOnCheckout(Long sessionId) {
+        List<Orders> sessionOrders = ordersMapper.findBySessionId(sessionId);
+
+        for (Orders order : sessionOrders) {
+            if (!OrderStatus.ORDERED.name().equals(order.getStatus())) {
+                continue;
+            }
+
+            List<OrderItem> orderItems = ordersMapper.findItemsByOrderId(order.getId());
+            boolean gameOnlyOrder = orderItems != null
+                    && !orderItems.isEmpty()
+                    && orderItems.stream().allMatch(item -> item.getPrice() == 0);
+
+            if (!gameOnlyOrder) {
+                continue;
+            }
+
+            ordersMapper.updateOrderStatus(Orders.builder()
+                    .id(order.getId())
+                    .status(OrderStatus.CANCELLED.name())
+                    .build());
+            log.debug("결제 완료 시 미처리 게임 요청 자동 취소 | sessionId: {}, orderId: {}",
+                    sessionId, order.getId());
+        }
     }
 
     /**

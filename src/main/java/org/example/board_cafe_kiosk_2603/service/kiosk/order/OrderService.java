@@ -14,6 +14,7 @@ import org.example.board_cafe_kiosk_2603.mapper.admin.product.GameItemMapper;
 import org.example.board_cafe_kiosk_2603.mapper.kiosk.cart.CartItemMapper;
 import org.example.board_cafe_kiosk_2603.mapper.kiosk.cart.CartMapper;
 import org.example.board_cafe_kiosk_2603.mapper.kiosk.order.OrdersMapper;
+import org.example.board_cafe_kiosk_2603.mapper.kiosk.payment.PaymentMapper;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +39,7 @@ public class OrderService {
     private final CartItemMapper cartItemMapper;
     private final CafeTableSessionMapper tableSessionMapper;
     private final GameItemMapper gameItemMapper;
+    private final PaymentMapper paymentMapper;
     private final SimpMessagingTemplate messagingTemplate;
     /**
      * 장바구니 주문 생성합니다.
@@ -215,7 +217,12 @@ public class OrderService {
 
     public List<OrdersDTO> getNewOrders() {
         return ordersMapper.findByStatus(OrderStatus.ORDERED.name()).stream()
-                .map(order -> toDTO(order, fetchItemDTOs(order.getId())))
+                .map(order -> {
+                    List<OrderItemDTO> items = fetchItemDTOs(order.getId());
+                    return new OrdersView(order, items);
+                })
+                .filter(view -> !(isGameOnlyOrderItems(view.items()) && isPaymentDone(view.order().getSessionId())))
+                .map(view -> toDTO(view.order(), view.items()))
                 .collect(Collectors.toList());
     }
 
@@ -451,6 +458,11 @@ public class OrderService {
                 && items.stream().allMatch(item -> item != null && item.getPrice() == 0);
     }
 
+    private boolean isPaymentDone(long sessionId) {
+        var payment = paymentMapper.findBySessionId(sessionId);
+        return payment != null && "DONE".equalsIgnoreCase(payment.getStatus());
+    }
+
     /**
      * validateGameOrderTransition 동작을 수행합니다.
      *
@@ -540,4 +552,6 @@ public class OrderService {
                 order.getId(), tableId, totalAmount, items.size());
         return toDTO(order, fetchItemDTOs(order.getId()));
     }
+
+    private record OrdersView(Orders order, List<OrderItemDTO> items) {}
 }
