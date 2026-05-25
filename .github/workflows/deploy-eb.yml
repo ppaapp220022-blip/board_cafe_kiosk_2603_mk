@@ -98,4 +98,4 @@ jobs:
           application-name: ${{ secrets.EB_APPLICATION_NAME }}
           environment-name: ${{ secrets.EB_ENVIRONMENT_NAME }}
           version-label: github-${{ github.run_number }}-${{ github.sha }}
-          deployment-package: deploy.zip
+          deployment-package-path: deploy.zip
