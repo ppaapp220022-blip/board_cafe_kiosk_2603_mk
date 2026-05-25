@@ -6,17 +6,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.example.board_cafe_kiosk_2603.domain.admin.product.GameItemStatus;
 
-/*
- * 작성자 : 서주연
- * 기능 : 게임 아이템(재고) 등록·수정 요청 시 사용하는 DTO
- * 날짜 : 2026-03-27
- */
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class GameItemRequestDTO {
+    /* 게임 아이템(재고) 등록·수정 요청 시 사용하는 DTO */
+
     /* FK → game.id */
     private int gameId;
 

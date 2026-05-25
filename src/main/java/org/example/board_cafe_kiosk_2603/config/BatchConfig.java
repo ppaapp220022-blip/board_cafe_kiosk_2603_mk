@@ -18,12 +18,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.time.LocalDate;
-/*
- * 작성자 : 강수연
- * 기능 : [Spring Batch 설정] 매출 및 방문자 통계 생성을 위한 배치 설정 클래스
- * 날짜 : 2026-04-01
- */
 
+/**
+ * [Spring Batch 설정] 매출 및 방문자 통계 생성을 위한 배치 설정 클래스
+ */
 
 @Log4j2
 @Configuration
@@ -32,6 +30,11 @@ public class BatchConfig {
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
     private final StatService statService;
+
+    /**
+     * Job - 일일 매출 통계 배치 작업
+     * 1. statStep 단일 단계로 구성 (서비스 내부에서 Delete-Insert를 트랜잭션으로 처리)
+     */
     @Bean
     public Job dailyRevenueJob() {
         log.info("--- Spring Batch dailyRevenueJob ---");
@@ -39,6 +42,11 @@ public class BatchConfig {
                 .start(statStep())
                 .build();
     }
+
+    /**
+     * Step - 통계 생성 단계
+     * Tasklet을 사용하여 단순 Service 호출 로직 실행
+     */
     @Bean
     public Step statStep() {
         log.info("--- Spring Batch statStep ---");
@@ -46,6 +54,11 @@ public class BatchConfig {
                 .tasklet(statTasklet(null), transactionManager)
                 .build();
     }
+
+    /**
+     * Tasklet - 실질적인 데이터 집계 명령을 수행
+     * @Value 를 통해 스케줄러가 넘겨준 'targetDate' 파라미터를 수신
+     */
     @Bean
     @StepScope
     public Tasklet statTasklet(@Value("#{jobParameters['targetDate']}") String targetDateStr) {

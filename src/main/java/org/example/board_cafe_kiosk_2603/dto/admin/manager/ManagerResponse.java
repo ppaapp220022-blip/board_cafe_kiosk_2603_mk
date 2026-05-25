@@ -8,12 +8,6 @@ import org.example.board_cafe_kiosk_2603.domain.admin.manager.RoleType;
 
 import java.time.LocalDateTime;
 
-/*
- * 작성자 : 서주연
- * 기능 : ManagerResponse 클래스
- * 날짜 : 2026-04-01
- */
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

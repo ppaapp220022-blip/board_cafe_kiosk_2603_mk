@@ -8,44 +8,25 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-/*
- * 작성자 : 서주연
- * 기능 : ManagerMapper 테스트
- * 날짜 : 2026-04-01
- */
-
 @Log4j2
 @SpringBootTest
-@Transactional
 class ManagerMapperTest {
 
     @Autowired
     private ManagerMapper managerMapper;
 
-    private String uniqueLoginId(String prefix) {
-        return prefix.substring(0, Math.min(prefix.length(), 4)) + (System.currentTimeMillis() % 100000);
-    }
-
-    /*
-     * 작성자 : 서주연
-     * 기능 : insertTest 메서드
-     * 날짜 : 2026-04-01
-     */
-
     @Test
     void insertTest() {
-        String loginId = uniqueLoginId("test0002");
+        String loginId = "test0002";
         Manager manager = Manager.builder()
                 .loginId(loginId)
                 .password("2222")
                 .name("테스터_02")
-                .email(loginId + "@test.local")
                 .role(RoleType.STAFF)
                 .isActive(true)
                 .createdAt(LocalDateTime.now())
@@ -72,24 +53,9 @@ class ManagerMapperTest {
         Assertions.assertEquals(RoleType.STAFF, saveManager.getRole());
     }
 
-    /*
-     * 작성자 : 서주연
-     * 기능 : findByLoginIdTest 메서드
-     * 날짜 : 2026-04-01
-     */
-
     @Test
     void findByLoginIdTest() {
-        String targetId = uniqueLoginId("find");
-        managerMapper.insert(Manager.builder()
-                .loginId(targetId)
-                .password("2222")
-                .name("조회용매니저")
-                .email(targetId + "@test.local")
-                .role(RoleType.STAFF)
-                .isActive(true)
-                .createdAt(LocalDateTime.now())
-                .build());
+        String targetId = "test0002";
 
         // 1. Optional 자체를 받아옴
         Optional<Manager> foundOptional = managerMapper.findByLoginId(targetId);
@@ -108,27 +74,10 @@ class ManagerMapperTest {
         });
     }
 
-    /*
-     * 작성자 : 서주연
-     * 기능 : updateActiveTest 메서드
-     * 날짜 : 2026-04-01
-     */
-
     @Test
     void updateActiveTest() {
-        String loginId = uniqueLoginId("active");
-        managerMapper.insert(Manager.builder()
-                .loginId(loginId)
-                .password("2222")
-                .name("상태변경용")
-                .email(loginId + "@test.local")
-                .role(RoleType.STAFF)
-                .isActive(true)
-                .createdAt(LocalDateTime.now())
-                .build());
-
         // 1. 기존 데이터 조회 (Optional에서 꺼내기)
-        Manager saved = managerMapper.findByLoginId(loginId)
+        Manager saved = managerMapper.findByLoginId("test0002")
                 .orElseThrow(() -> new RuntimeException("테스트 데이터를 찾을 수 없습니다."));
 
         int targetId = saved.getId();
@@ -139,7 +88,7 @@ class ManagerMapperTest {
         log.info("--- 상태 업데이트(false) 실행 ---");
 
         // 3. 재조회 및 검증
-        Manager updated = managerMapper.findByLoginId(loginId)
+        Manager updated = managerMapper.findByLoginId("test0002")
                 .orElseThrow(() -> new RuntimeException("업데이트 후 데이터를 찾을 수 없습니다."));
 
         log.info("--- 변경 결과 확인 ---");
@@ -147,12 +96,8 @@ class ManagerMapperTest {
 
         Assertions.assertFalse(updated.isActive(), "isActive 상태가 false여야 합니다.");
     }
-    /*
-     * 작성자 : 서민성
-     * 기능 : 관리자 목록 페이징 조회 테스트
-     * 날짜 : 2026-04-09
-     */
-
+    /*====================페이징===================== */
+    /** 전체 목록 페이징 조회 테스트 (filter 없음 = 전체) */
     @Test
     void selectListTest() {
         PageRequestDTO pageRequestDTO = PageRequestDTO.builder()
@@ -168,12 +113,8 @@ class ManagerMapperTest {
 
         Assertions.assertNotNull(result);
     }
-    /*
-     * 작성자 : 서민성
-     * 기능 : 활성화 직원만 조회 테스트
-     * 날짜 : 2026-04-09
-     */
 
+    /** 활성화 직원만 조회 테스트 */
     @Test
     void selectListActiveFilterTest() {
         PageRequestDTO pageRequestDTO = PageRequestDTO.builder()
@@ -190,12 +131,8 @@ class ManagerMapperTest {
         // 모든 결과가 활성화 상태인지 확인
         Assertions.assertTrue(result.stream().allMatch(Manager::isActive));
     }
-    /*
-     * 작성자 : 서민성
-     * 기능 : 전체 개수 조회 테스트
-     * 날짜 : 2026-04-09
-     */
 
+    /** 전체 개수 조회 테스트 */
     @Test
     void selectCountTest() {
         PageRequestDTO pageRequestDTO = PageRequestDTO.builder()

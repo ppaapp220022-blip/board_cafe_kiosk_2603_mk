@@ -15,12 +15,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.UnsupportedEncodingException;
-/*
- * 작성자 : 서주연
- * 기능 : 비밀번호 찾기 컨트롤러
- * 날짜 : 2026-04-08
- */
 
+/**
+ * 비밀번호 찾기 컨트롤러
+ */
 @Log4j2
 @Controller
 @RequestMapping("/forgot-password")
@@ -32,10 +30,14 @@ public class ForgotPasswordController {
     private final MailSenderService mailSenderService;
     private final OtpStore otpStore;
     private final SuperKeyProperties superKey;  // 포트폴리오용 슈퍼키
+
+    // 비밀번호 찾기 첫 페이지 진입 (find_pw.html)
     @GetMapping
     public String findPwPage() {
         return "login/find_pw";
     }
+
+    // STEP 1: 아이디 존재 확인 & 비활성 계정 차단
     @PostMapping("/verify-id")
     @ResponseBody  // AJAX 요청이므로 데이터만 반환
     public ResponseEntity<String> verifyId(@RequestParam("loginId") String loginId,
@@ -63,6 +65,8 @@ public class ForgotPasswordController {
 
         return ResponseEntity.ok("ok");
     }
+
+    // STEP 2-a: 이메일 대조 및 OTP 발송
     @PostMapping("/send-otp")
     @ResponseBody  // AJAX 요청이므로 데이터만 반환
     public ResponseEntity<String> sendOtp(@RequestParam("email") String inputEmail,
@@ -109,6 +113,8 @@ public class ForgotPasswordController {
             return ResponseEntity.status(500).body("메일 발송에 실패했습니다. 잠시 후 다시 시도해 주세요.");
         }
     }
+
+    // STEP 2-b: OTP 검증 및 임시 비밀번호 발급·발송
     @PostMapping("/verify-otp")
     @ResponseBody  // AJAX 요청이므로 데이터만 반환
     public ResponseEntity<String> verifyOtp(@RequestParam("email") String inputEmail,

@@ -18,19 +18,19 @@ import java.io.OutputStream;
 import java.util.Base64;
 import java.util.Map;
 
-/*
- * 작성자 : 서주연
- * 기능 : 음성 인식(STT), 보드게임 지식 검색(RAG), 답변 생성(LLM), 음성 합성(TTS) 통합 관리 컨트롤러
- * 날짜 : 2026-04-29
- */
-
 @Log4j2
 @RestController
 @RequestMapping("/api/ai")
 @RequiredArgsConstructor
 public class AiController {
+    /*
+    음성 인식(STT), 보드게임 지식 검색(RAG), 답변 생성(LLM), 음성 합성(TTS) 통합 관리 컨트롤러
+     */
+
     private final AiService aiService;
     private final GameEmbeddingService gameEmbeddingService;
+
+    /* [RAG 파이프라인]: 음성 입력 -> RAG + LLM -> 스트리밍 음성 출력 */
     @PostMapping(
             value = "/ai_guide",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
@@ -61,6 +61,8 @@ public class AiController {
         // 3. Flux를 이용한 실시간 오디오 출력
         return outputStream -> writeFluxToStream(result.audioFlux(), outputStream);
     }
+
+    /* [텍스트 수정 재질문] STT 오인식 시 사용자가 직접 타이핑 → 음성 출력 */
     @PostMapping(
             value = "/ai_guide_text",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
@@ -83,12 +85,17 @@ public class AiController {
         log.info("[ai_guide_text] question={}, voice={}, speed={}", question, voice, speed);
         return outputStream -> writeFluxToStream(result.audioFlux(), outputStream);
     }
+
+    /* 보드게임 데이터의 벡터 임베딩을 수동으로 갱신 */
+    // 새로운 게임 추가 혹은 설명 수정 시 호출하여 지식 베이스를 동기화 함.
     @PostMapping("/admin/reindex-games")
     public ResponseEntity<String> reindexGames() {
         log.info("[관리자] 전체 게임 재임베딩 요청");
         int count = gameEmbeddingService.embedAllGames();
         return ResponseEntity.ok(count + "개 게임 임베딩 완료");
     }
+
+    // [유틸] 단독 STT 테스트용 (개발/디버깅 용도로 유지)
     @PostMapping(
             value = "/stt",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
@@ -97,6 +104,23 @@ public class AiController {
     public String stt(@RequestParam("speech") MultipartFile speech) throws IOException {
         return aiService.stt(speech.getBytes());
     }
+
+    // 단독 TTS 테스트용 (개발/디버깅 용도)
+//    @PostMapping(
+//            value = "/tts",
+//            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
+//            produces = MediaType.APPLICATION_OCTET_STREAM_VALUE
+//    )
+//    public byte[] tts(
+//            @RequestParam("text") String text,
+//            @RequestParam(defaultValue = "NOVA") String voice,
+//            @RequestParam(defaultValue = "1.0") Double speed
+//    ) {
+//        return aiService.tts(text, voice, speed);
+//    }
+
+    /* Flux 데이터 조각을 응답 스트림에 순차적으로 기록하는 헬퍼 메서드 */
+    // [공통] Flux<byte[]> → OutputStream 쓰기
     private void writeFluxToStream(Flux<byte[]> flux, OutputStream outputStream) throws IOException {
         for (byte[] chunk : flux.toIterable()) {
             outputStream.write(chunk);

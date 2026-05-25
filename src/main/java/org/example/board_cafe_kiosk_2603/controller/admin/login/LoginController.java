@@ -21,17 +21,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.UnsupportedEncodingException;
 
-/*
- * 작성자 : 서주연
- * 기능 : 관리자 - 2차 인증 컨트롤러
- * 날짜 : 2026-04-08
- */
-
 @Log4j2
 @Controller
 @RequestMapping("/login")
 @RequiredArgsConstructor
 public class LoginController {
+    /* 관리자 - 2차 인증 컨트롤러 */
+
     // STAFF -> 타이머 없는 단순 이메일 입력
     // ADMIN -> 타이머 유지, sendOtp (Ajax)
 
@@ -40,6 +36,12 @@ public class LoginController {
     private final OtpStore otpStore;
     private final ManagerUserDetailsService managerUserDetailsService;  // 완전 로그인 처리에 사용
     private final SuperKeyProperties superKey;  // 포트폴리오용 슈퍼키
+
+    // ManagerLoginSuccessHandler -> 1차 인증 후 'PRE_AUTH_USER' 세션 저장
+    // LoginController -> 2차 인증 화면 노출 + 검증 + 완전 로그인 처리
+    // PRE_AUTH_USER: 1차 인증 통과한 loginId -> 2차 인증 완료 시 제거
+
+    /* STAFF: 이메일 확인 페이지 이동 */
     @GetMapping("/verifyEmail")
     public String verifyEmailPage(HttpSession session, Model model) {
         // PRE_AUTH_USER 없으면 1차 인증 안 한 것 → 로그인 페이지로
@@ -50,6 +52,8 @@ public class LoginController {
         log.info("--- [verifyEmail GET] STAFF 이메일 인증 페이지 진입 ---");
         return "login/verify_email";
     }
+
+    /* STAFF: 입력한 이메일과 DB의 이메일 일치 여부 확인 */
     @PostMapping("/verifyEmail")
     public String verifyEmail(@RequestParam("email") String inputEmail,
                               HttpSession session,
@@ -79,6 +83,8 @@ public class LoginController {
 
         return "redirect:/admin/dashboard";
     }
+
+    /* ADMIN: OTP 인증 페이지 GET */
     @GetMapping("/verifyEmailOtp")
     public String verifyEmailOtpPage(HttpSession session) {
         if (session.getAttribute("PRE_AUTH_USER") == null) {
@@ -88,6 +94,12 @@ public class LoginController {
         log.info("--- [verifyEmailOtp GET] ADMIN OTP 인증 페이지 진입 ---");
         return "login/verify_otp";
     }
+
+    // ──────────────────────────────────────────────
+    // ADMIN: OTP 발송 Ajax (POST)
+    //   verify_otp.html '인증 요청' 버튼 → fetch('/login/sendOtp')
+    // ──────────────────────────────────────────────
+    // verify_otp.html '인증 요청' 버튼 → fetch('/login/sendOtp')
     @PostMapping("/sendOtp")
     @ResponseBody  // AJAX 응답을 위해 데이터만 반환
     public ResponseEntity<String> sendOtp(@RequestParam("email") String inputEmail,
@@ -129,6 +141,16 @@ public class LoginController {
             return ResponseEntity.status(500).body("메일 발송에 실패했습니다. 잠시 후 다시 시도해 주세요.");
         }
     }
+
+    // ──────────────────────────────────────────────
+    // ADMIN: OTP 검증 POST
+    // ──────────────────────────────────────────────
+    //   verify_otp.html 로그인 버튼 → fetch('/login/verifyEmailOtp')
+    //   성공 시 { "redirect": "/admin/dashboard" } 응답
+    //   실패 시 4xx + 오류 메시지 텍스트 응답
+    //   JS가 응답을 받아 화면 갱신 or window.location.href 처리
+
+    /* 사용자가 인증번호르 입력하고 로그인버튼을 눌렀을 때 실행 */
     @PostMapping("/verifyEmailOtp")
     @ResponseBody  // 폼 방식 → Ajax 방식으로 전환
     public ResponseEntity<String> verifyEmailOtp(@RequestParam("email") String inputEmail,
@@ -172,6 +194,24 @@ public class LoginController {
         // JS가 받아서 window.location.href 로 이동할 리다이렉트 경로 반환
         return ResponseEntity.ok("/admin/dashboard");
     }
+
+    // ──────────────────────────────────────────────
+    // 공통: 완전 로그인 처리 (SecurityContext 복원)
+    // ──────────────────────────────────────────────
+
+    /**
+     * 2차 인증 통과 후 Spring Security 인증 상태를 완성시킨다.
+     * <p>
+     * ManagerLoginSuccessHandler에서 SecurityContext를 의도적으로 제거했기 때문에
+     * 여기서 UserDetails를 다시 로드하여 Authentication 객체를 세션에 저장해야
+     * 이후 @PreAuthorize, hasRole() 등의 권한 검사가 정상 동작한다.
+     *
+     * @param loginId 1차 인증 시 PRE_AUTH_USER로 저장해둔 loginId
+     * @param session 현재 HTTP 세션
+     */
+    /* 완전 로그인 처리 */
+    /* Spring security Context를 수동으로 복구하여 로그인을 완성함 */
+    // 1차 로그인 성공 시 시큐리티 권한을 바로 주지 않고 비워두었기 때문에, 수동으로 권한 부여
     private void completeLogin(String loginId, HttpSession session) {
         // 1. DB에서 해당 아이디의 상세 정보(UserDetails/ManagerDTO)를 다시 불러옴.
         // 권한(ROLE_ADMIN 등) 정보를 확실히 가져오기 위함.

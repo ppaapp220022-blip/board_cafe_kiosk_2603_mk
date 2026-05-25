@@ -9,23 +9,11 @@ import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/*
- * 작성자 : 서주연
- * 기능 : StatScheduler 테스트
- * 날짜 : 2026-04-09
- */
-
 @Log4j2
 @SpringBootTest
 class StatSchedulerTest {
     @Autowired
     private StatScheduler statScheduler;
-
-    /*
-     * 작성자 : 서주연
-     * 기능 : runManualStatJobTest 메서드
-     * 날짜 : 2026-04-09
-     */
 
     @Test
     void runManualStatJobTest() {

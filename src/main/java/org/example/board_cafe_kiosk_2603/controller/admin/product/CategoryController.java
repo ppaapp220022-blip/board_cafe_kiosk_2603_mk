@@ -15,19 +15,16 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.NoSuchElementException;
 
-/*
- * 작성자 : 서주연
- * 기능 : 카테고리 CRUD 컨트롤러
- * 날짜 : 2026-03-27
- */
-
 @Log4j2
 @Controller
 @RequestMapping("/admin/category")
 @RequiredArgsConstructor
 public class CategoryController {
 
+    /* 카테고리 CRUD 컨트롤러 */
     private final CategoryService categoryService;
+
+    /* 카테고리 전체 목록 조회 → 뷰 반환 */
     @GetMapping
     public String getAll(Model model, PageRequestDTO pageRequestDTO) {
         log.info("--- 카테고리 목록 조회 요청 ---");
@@ -43,6 +40,10 @@ public class CategoryController {
         log.debug("카테고리 목록 조회 완료 - 건수: {}, 전체: {}", pageResponse.getDtoList().size(), pageResponse.getTotal());
         return "admin/category_list";
     }
+
+    /* 카테고리 등록 처리 */
+    // 모달 폼에서 POST 요청 수신
+    // 등록 후 목록으로 redirect
     @PostMapping("/add")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER')")
     public String register(@ModelAttribute CategoryRequestDTO categoryRequestDTO,
@@ -60,6 +61,10 @@ public class CategoryController {
         }
         return "redirect:/admin/category";
     }
+
+    /* 카테고리 수정 처리 */
+    // 수정 모달 폼에서 POST 요청 수신
+    // 수정 후 목록으로 redirect
     @PostMapping("/edit/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER')")
     public String modify(@PathVariable int id,
@@ -83,6 +88,10 @@ public class CategoryController {
         log.debug("--- 카테고리 수정 완료, id: {} ---", id);
         return "redirect:/admin/category";
     }
+
+    /* 카테고리 삭제 처리 */
+    // 연결 상품 존재 시 IllegalStateException → errorMsg로 클라이언트에 전달
+    // 뷰에서 errorMsg를 감지해 삭제 불가 모달 표시
     @PostMapping("/delete/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER')")
     public String remove(@PathVariable int id,

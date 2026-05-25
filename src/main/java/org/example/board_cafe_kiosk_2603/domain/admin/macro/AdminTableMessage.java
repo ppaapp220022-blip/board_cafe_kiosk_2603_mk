@@ -4,12 +4,6 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-/*
- * 작성자 : 강수연
- * 기능 : AdminTableMessage 클래스
- * 날짜 : 2026-04-08
- */
-
 @Getter
 @Builder
 @ToString

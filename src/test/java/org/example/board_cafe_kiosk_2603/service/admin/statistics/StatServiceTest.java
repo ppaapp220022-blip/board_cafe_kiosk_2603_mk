@@ -9,12 +9,6 @@ import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/*
- * 작성자 : 강수연
- * 기능 : StatService 테스트
- * 날짜 : 2026-04-02
- */
-
 @Log4j2
 @SpringBootTest
 class StatServiceTest {

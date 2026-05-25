@@ -15,12 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/*
- * 작성자 : 강수연
- * 기능 : Stat 서비스 인터페이스
- * 날짜 : 2026-04-02
- */
-
 @Log4j2
 @Service
 @RequiredArgsConstructor
@@ -28,6 +22,11 @@ import java.util.stream.Collectors;
 public class StatService {
     private final StatMapper statMapper;
 
+    /**
+     * 단일 날짜 동기화 - 특정 날짜의 모든 통계 데이터를 갱신 (일일 요약 + 상품별 히스토리)
+     * Mapper의 INNER JOIN 로직을 통해 '인원 추가' 수량을 실제 방문자 수에 합산
+     * 상품 히스토리 저장 시 '인원 추가' 매출은 자동으로 제외
+     */
     public void createDailyStatistics(LocalDate targetDate) {
         log.info("--- StatService createDailyStatistics ---");
         log.info("{} 날짜 통계 데이터 재집계", targetDate);
@@ -44,6 +43,11 @@ public class StatService {
 
         log.info("{} 날짜 통계 갱신 완료", targetDate);
     }
+
+    /**
+     * 기간 동기화 특정 기간(예: 최근 한 달)의 통계를 한 번에 초기화할 때 사용
+     * 대규모 데이터 수정이나 로직 변경 후 과거 데이터를 일괄 갱신할 때 유용
+     */
     public void createStatisticsForPeriod(LocalDate startDate, LocalDate endDate) {
         log.info("--- StatService createStatisticsForPeriod ---");
         log.info("{} 부터 {} 까지 기간 통계 생성", startDate, endDate);
@@ -53,18 +57,32 @@ public class StatService {
             current = current.plusDays(1);
         }
     }
+
+    /**
+     * 조회 기준 날짜 포함 최근 7일간의 요약 통계 데이터 조회 (차트 및 요약용)
+     */
     @Transactional(readOnly = true)
     public List<DailySalesDTO> getWeeklyStats(LocalDate endDate) {
         log.info("--- StatService getWeeklyStats ---");
 
         return statMapper.getWeeklyStats(endDate);
     }
+
+    /**
+     * 조회 특정 날짜의 인기 메뉴 TOP N 조회
+     * '인원 추가' 항목이 이미 히스토리 저장 단계에서 배제되었으므로 순수 인기 상품만 반환
+     */
     @Transactional(readOnly = true)
     public List<ItemSalesDTO> getTopSellingMenuByDate(LocalDate targetDate, int limit) {
         log.info("--- StatService getTopSellingMenuByDate ---");
 
         return statMapper.getTopSellingMenuByDate(targetDate, limit);
     }
+
+    /**
+     * 조회 - 특정 날짜의 카테고리별 매출 통계 가공
+     * 프론트엔드 차트 라이브러리(Chart.js 등) 형식에 맞게 라벨과 데이터 값을 분리하여 반환
+     */
     @Transactional(readOnly = true)
     public Map<String, Object> getCategoryStats(LocalDate targetDate) {
         log.info("--- StatService getCategoryStats ---");
@@ -85,6 +103,10 @@ public class StatService {
         result.put("values", values);
         return result;
     }
+
+    /**
+     * 조회 - 기준 날짜가 속한 월의 인기 보드게임 TOP N 조회 (대여 횟수 기준)
+     */
     @Transactional(readOnly = true)
     public List<GameStatsDTO> getTopGamesByMonth(LocalDate targetDate, int limit) {
         log.info("--- StatService getTopGamesByMonth ---");

@@ -11,12 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.List;
 import java.util.Optional;
 
-/*
- * 작성자 : 서주연
- * 기능 : MenuMapper 테스트
- * 날짜 : 2026-03-30
- */
-
 @Log4j2
 @SpringBootTest
 class MenuMapperTest {

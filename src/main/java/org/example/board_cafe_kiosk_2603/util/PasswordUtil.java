@@ -3,16 +3,13 @@ package org.example.board_cafe_kiosk_2603.util;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
-/*
- * 작성자 : 서주연
- * 기능 : BCrypt 해싱 강도 (로그 라운드) : 기본값 = 12
- * 날짜 : 2026-04-08
- */
-
 @Log4j2
 public class PasswordUtil {
 
+    /* BCrypt 해싱 강도 (로그 라운드) : 기본값 = 12 */
     private static final int WORK_FACTOR = 12;
+
+    /* 비밀번호를 BCrypt로 해싱 : 평문 -> BCrypt */
     public static String hashPassword(String plainPassword) {
         if (plainPassword == null || plainPassword.trim().isEmpty()) {
             throw new IllegalArgumentException("비밀번호는 null이거나 빈 문자열일 수 없습니다.");
@@ -32,7 +29,7 @@ public class PasswordUtil {
       예시:
       - checkPassword("admin1234", "$2a$12$R9h/...") → true
       - checkPassword("wrong123", "$2a$12$R9h/...") → false
-      */
+     */
     public static boolean checkPassword(String plainPassword, String hashedPassword) {
         if (plainPassword == null || plainPassword.trim().isEmpty()) {
             log.warn("비밀번호 검증 실패: 입력된 비밀번호가 null 또는 빈 문자열");
@@ -54,6 +51,8 @@ public class PasswordUtil {
             return false;
         }
     }
+
+    /* 해시의 강도(work factor)를 확인 */
     public static int getWorkFactor(String hashedPassword) {
         if (hashedPassword == null || hashedPassword.length() < 7) {
             return -1;
@@ -70,6 +69,8 @@ public class PasswordUtil {
         }
         return -1;
     }
+
+    /* 테스트용 메인 메서드 */
     public static void main(String[] args) {
         // 테스트 1: 비밀번호 해싱
         System.out.println("=== BCrypt 비밀번호 암호화 테스트 ===\n");

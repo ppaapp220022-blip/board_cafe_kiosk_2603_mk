@@ -11,12 +11,6 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/*
- * 작성자 : 강수연
- * 기능 : AdminTableMessageMapper 테스트
- * 날짜 : 2026-04-08
- */
-
 @Log4j2
 @SpringBootTest
 class AdminTableMessageMapperTest {

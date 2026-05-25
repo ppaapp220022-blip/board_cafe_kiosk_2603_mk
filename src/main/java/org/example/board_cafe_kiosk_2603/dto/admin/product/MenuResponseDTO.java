@@ -7,17 +7,17 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-/*
- * 작성자 : 서주연
- * 기능 : 메뉴 조회 응답 시 사용하는 DTO
- * 날짜 : 2026-03-27
- */
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class MenuResponseDTO {
+
+    /*
+     메뉴 조회 응답 시 사용하는 DTO
+     -> categoryName 을 JOIN 하여 함께 반환
+     -> isDeleted 는 관리자 응답에만 포함 (소프트 삭제 상태 확인용)
+     */
 
     private int id;
     private Integer categoryId;

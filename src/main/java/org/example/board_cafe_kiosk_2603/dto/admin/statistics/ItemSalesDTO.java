@@ -5,12 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/*
- * 작성자 : 강수연
- * 기능 : ItemSales 데이터 전달 객체
- * 날짜 : 2026-04-02
- */
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

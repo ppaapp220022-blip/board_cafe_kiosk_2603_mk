@@ -11,12 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
 
-/*
- * 작성자 : 서주연
- * 기능 : MailSender 서비스 인터페이스
- * 날짜 : 2026-04-08
- */
-
 @Log4j2
 @Service
 @RequiredArgsConstructor
@@ -28,10 +22,15 @@ public class MailSenderService {
 
     @Value("${myapp.custom.mail.sender.mailFromName}")
     private String mailFromName;
+
+    // 6자리 난수 생성 메서드 (OTP용)
     public String generateVerificationCode() {
         int code = java.util.concurrent.ThreadLocalRandom.current().nextInt(100000, 1000000);
         return String.valueOf(code);
     }
+
+    /* OTP 인증 메일 발송 */
+    // 사용처: 2차 인증(LoginController), 비밀번호 찾기(ForgotPasswordController)
     public void sendMailForAlarm(String to, String verificationCode)
             throws MessagingException, UnsupportedEncodingException {
 
@@ -56,6 +55,11 @@ public class MailSenderService {
         log.info("수신자: {}, 인증번호: {}", to, verificationCode);
     }
 
+    // ──────────────────────────────────────────────
+    // ✅ [추가] 임시 비밀번호 발송
+    // 사용처: ForgotPasswordController.verifyOtp
+    // ──────────────────────────────────────────────
+
     public void sendTempPassword(String to, String tempPassword)
             throws MessagingException, UnsupportedEncodingException {
 
@@ -78,6 +82,8 @@ public class MailSenderService {
         send(to, subject, body);
         log.info("--- [sendTempPassword] 발송 완료 | To: {} ---", to);
     }
+
+    // 공통 메일 발송 헬퍼
     private void send(String to, String subject, String htmlBody)
             throws MessagingException, UnsupportedEncodingException {
 

@@ -1,12 +1,11 @@
 package org.example.board_cafe_kiosk_2603.domain.admin.product;
 
 import lombok.*;
-/*
- * 작성자 : 서주연
- * 기능 : game 테이블과 1:1 매핑되는 도메인(VO) 클래스
- * 날짜 : 2026-03-27
- */
 
+/**
+ * game 테이블과 1:1 매핑되는 도메인(VO) 클래스
+ * 보드게임 상품 정보를 담으며, category 테이블을 FK로 참조
+ */
 @Getter
 @ToString
 @Builder

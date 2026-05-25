@@ -20,15 +20,11 @@ import reactor.core.publisher.Flux;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/*
- * 작성자 : 서주연
- * 기능 : 음성 인식(STT), 보드게임 지식 검색(RAG), 답변 생성(LLM), 음성 합성(TTS) 통합 관리 서비스
- * 날짜 : 2026-04-29
- */
-
 @Log4j2
 @Service
 public class AiService {
+
+    /* 음성 인식(STT), 보드게임 지식 검색(RAG), 답변 생성(LLM), 음성 합성(TTS) 통합 관리 서비스 */
 
     private final ChatClient chatClient;
     @Autowired
@@ -47,6 +43,8 @@ public class AiService {
     public AiService(ChatClient.Builder chatClientBuilder) {
         this.chatClient = chatClientBuilder.build();
     }
+
+    /* 음성 입력을 받아 최종 AI 응답 객체(AiResult) 생성 */
     public AiResult chatVoiceFlux(byte[] audioQuestion, String voice, Double speed) {
         // 1. STT : 사용자의 목소리를 텍스트로 반환
         String textQuestion = stt(audioQuestion);
@@ -62,6 +60,9 @@ public class AiService {
         // 결과 종합 (질문 텍스트, 답변 텍스트, 오디오 스트림)
         return new AiResult(textQuestion, textAnswer, audioFlux);
     }
+
+    /* STT 과정에서 '음성 인식 오류'를 보정하기 위한 경로 */
+    // 사용자가 직접 입력하거나 수정된 텍스트를 바탕으로 RAG 단계로 진입
     public AiResult chatVoiceFluxFromText(String textQuestion, String voice, Double speed) {
         log.info("[텍스트 직접 입력] {}", textQuestion);
 
@@ -75,6 +76,11 @@ public class AiService {
         // 3. 결과 반환: 입력 텍스트(질문), 생성 텍스트(답변), 오디오 스트림을 묶어서 반환
         return new AiResult(textQuestion, textAnswer, audioFlux);
     }
+
+    /* [RAG] 질문과 관련된 지식을 VectorStore에서 찾아 LLM에게 전달 */
+    // - PGVector 유사도 검색 → DB에 있는 게임만 컨텍스트 사용
+    // - 검색 결과 없음 → "등록된 게임 없음" 프롬프트
+    // - 검색 결과 있음 → 해당 게임 정보를 LLM 프롬프트에 주입
     private String generateAnswer(String textQuestion) {
 
         // 1. 유사도 검색: VectorDB에서 질문과 가장 유사한 게임 정보를 조회
@@ -102,6 +108,8 @@ public class AiService {
                 .call()
                 .content();
     }
+
+    /* RAG 검색 결과에 따른 결과 처리 */
     private String buildSystemPrompt(String context) {
         if (context == null || context.isBlank()) {
             // 1. 검색 결과가 없는 경우
@@ -127,6 +135,8 @@ public class AiService {
                 %s
                 """.formatted(context);
     }
+
+    /* STT: 음성(byte[])을 텍스트로 추출 */
     public String stt(byte[] bytes) {
         Resource audioResource = new ByteArrayResource(bytes) {
             @Override
@@ -142,11 +152,22 @@ public class AiService {
         AudioTranscriptionResponse response = openAiAudioTranscriptionModel.call(prompt);
         return response.getResult().getOutput();
     }
+
+    // TTS 동기: 텍스트 → byte[] (테스트용)
+//    public byte[] tts(String text, String voice, Double speed) {
+//        TextToSpeechPrompt prompt = new TextToSpeechPrompt(text, buildSpeechOptions(voice, speed));
+//        TextToSpeechResponse response = openAiAudioSpeechModel.call(prompt);
+//        return response.getResult().getOutput();
+//    }
+
+    /* TTS 스트리밍: 답변을 실시간 오디오 조각(Flux)으로 변환 (텍스트 → Flux<byte[]>) */
     private Flux<byte[]> ttsFlux(String text, String voice, Double speed) {
         TextToSpeechPrompt prompt = new TextToSpeechPrompt(text, buildSpeechOptions(voice, speed));
         Flux<TextToSpeechResponse> responseFlux = openAiAudioSpeechModel.stream(prompt);
         return responseFlux.map(r -> r.getResult().getOutput());
     }
+
+    /* TTS option: 목소리 종류와 재생 속도를 동적으로 설정 */
     private OpenAiAudioSpeechOptions buildSpeechOptions(String voice, Double speed) {
         OpenAiAudioApi.SpeechRequest.Voice selectedVoice;
         try {

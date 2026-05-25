@@ -5,17 +5,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/*
- * 작성자 : 서주연
- * 기능 : 메뉴 등록·수정 요청 시 사용하는 DTO
- * 날짜 : 2026-03-27
- */
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class MenuRequestDTO {
+
+    /*
+     메뉴 등록·수정 요청 시 사용하는 DTO
+     -> imageUrl 은 파일 업로드 후 저장된 경로를 문자열로 전달
+     */
 
     /* FK → category.id */
     private Integer categoryId;

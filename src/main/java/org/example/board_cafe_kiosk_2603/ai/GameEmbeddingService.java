@@ -10,19 +10,16 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-/*
- * 작성자 : 서주연
- * 기능 : 지식 베이스 임베딩 서비스
- * 날짜 : 2026-04-29
- */
-
 @Log4j2
 @Service
 public class GameEmbeddingService {
+    /* 지식 베이스 임베딩 서비스 */
     // MariaDB(정형 데이터)를 읽어 VectorStore로 변환/저장하는 역할
 
     private final JdbcTemplate mariaJdbcTemplate;  // 소스 데이터 (MariaDB)
     private final VectorStore vectorStore;  // 목적지 (PGVector)
+
+    // 멀티 DB 환경에서 생성자 주입으로 명시적으로 처리
     public GameEmbeddingService(
             @Qualifier("mariaJdbcTemplate") JdbcTemplate mariaJdbcTemplate,
             VectorStore vectorStore) {
@@ -98,6 +95,9 @@ public class GameEmbeddingService {
         log.info("[임베딩] {}개 게임 PGVector 저장 완료", documents.size());
         return documents.size();
     }
+
+    /* 단일 동기화 */
+    // 특정 게임의 정보가 바뀌었을 때 실시간으로 AI 지식을 업데이트함
     public void upsertGameByMenuId(Integer menuId) {
         String singleQuery = GAME_QUERY + " AND m.id = ?";
         List<Map<String, Object>> result = mariaJdbcTemplate.queryForList(singleQuery, menuId);
@@ -115,12 +115,18 @@ public class GameEmbeddingService {
 
         log.info("[임베딩] menuId={} 임베딩 완료", menuId);
     }
+
+    /* 단일 데이터 삭제 */
+    // 특정 게임을 AI 지식 베이스에서 제거
     public void deleteByMenuId(Integer menuId) {
         // menu_id 기반의 고정 UUID를 생성하여 정확한 문서를 타겟팅해 삭제
         String documentId = menuIdToUuid(menuId);
         vectorStore.delete(List.of(documentId));
         log.info("[임베딩] menuId={} 벡터 삭제 (uuid={})", menuId, documentId);
     }
+
+    /* 변환 로직 */
+    // DB 행 데이터를 AI가 읽을 수 있는 자연어 문장으로 변환합니다.
     private Document toDocument(Map<String, Object> row) {
         String name = str(row.get("name"));
         String description = str(row.get("description"));
@@ -153,12 +159,19 @@ public class GameEmbeddingService {
 
         return new Document(documentId, content, metadata);
     }
+
+    /* UUID 생성 */
+    // 동일한 menu_id에 대해 항상 같은 UUID를 생성하여 벡터 저장소 내에서 데이터가 중복되지 않고 덮어쓰기 되도록 함.
     private String menuIdToUuid(Integer menuId) {
         return UUID.nameUUIDFromBytes(("game-menu-" + menuId).getBytes()).toString();
     }
+
+    // 안전한 문자열 변환
     private String str(Object o) {
         return o != null ? o.toString() : null;
     }
+
+    // 안전한 숫자 변환
     private Integer toInt(Object o) {
         if (o == null) return null;  // 데이터가 없으면 null 변환
         if (o instanceof Integer i) return i;  // 이미 숫자형이면 그대로 반환

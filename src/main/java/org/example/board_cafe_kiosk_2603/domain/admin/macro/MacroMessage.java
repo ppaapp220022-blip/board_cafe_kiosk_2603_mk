@@ -5,12 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-/*
- * 작성자 : 강수연
- * 기능 : MacroMessage 클래스
- * 날짜 : 2026-03-25
- */
-
 @Getter
 @ToString
 @NoArgsConstructor

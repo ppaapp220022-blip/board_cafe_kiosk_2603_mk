@@ -16,6 +16,11 @@ import java.io.IOException;
 @Log4j2
 @Component  //SecurityConfig에서 생성자 주입을 받기 위해 빈 등록
 public class ManagerLoginSuccessHandler implements AuthenticationSuccessHandler {
+    // instanceof 분기가 생기는 순간 단일 책임 원칙(SRP) 위반되므로,
+    // Kiosk, Admin - LoginSuccessHandler 2EA의 파일로 관리
+
+    // 목적 - ROLE 기반 2차 인증 분기
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,

@@ -7,12 +7,6 @@ import org.springframework.security.core.userdetails.User;
 
 import java.util.Collection;
 
-/*
- * 작성자 : 서주연
- * 기능 : Kiosk 데이터 전달 객체
- * 날짜 : 2026-04-06
- */
-
 @Getter
 @Log4j2
 public class KioskDTO extends User {

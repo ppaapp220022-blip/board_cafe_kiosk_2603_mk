@@ -7,18 +7,13 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-/*
- * 작성자 : 서주연
- * 기능 : GameController에서 '게임 등록(register)' 후 생성된 PK 수신용
- * 날짜 : 2026-03-27
- */
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class GameRequestDTO {
 
+    // GameController에서 '게임 등록(register)' 후 생성된 PK 수신용
     private Integer id;
 
     /* FK → category.id */

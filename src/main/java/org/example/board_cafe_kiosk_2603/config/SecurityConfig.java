@@ -23,12 +23,6 @@ import org.springframework.security.web.authentication.rememberme.PersistentToke
 import javax.sql.DataSource;
 import java.nio.file.Path;
 
-/*
- * 작성자 : 서주연
- * 기능 : Security 설정
- * 날짜 : 2026-04-01
- */
-
 @Log4j2
 @Configuration
 @RequiredArgsConstructor
@@ -40,12 +34,8 @@ public class SecurityConfig {
     private final ManagerUserDetailsService managerUserDetailsService;  // '관리자' 로그인 로직
     private final ManagerLoginSuccessHandler managerLoginSuccessHandler;  // 관리자 로그인 성공 시 처리
     private final KioskAuthorizationManager kioskAuthorizationManager;
-    /*
-     * 작성자 : 서주연
-     * 기능 : 정적 리소스(CSS, JS, Image, etc) 보안 필터링에서 제외대상 설정
-     * 날짜 : 2026-04-01
-     */
 
+    /* 정적 리소스(CSS, JS, Image, etc) 보안 필터링에서 제외대상 설정 */
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         log.info("--- [SecurityConfig] webSecurityCustomizer: 정적 리소스 보안 제외 설정 ---");
@@ -54,12 +44,8 @@ public class SecurityConfig {
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/fonts/**", "/webjars/**");
 
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : ── Chain 1: 키오스크 (/kiosk/**) ──────────────────────────
-     * 날짜 : 2026-04-01
-     */
 
+    // ── Chain 1: 키오스크 (/kiosk/**) ──────────────────────────
     @Bean
     @Order(1)
     public SecurityFilterChain kioskChain(HttpSecurity http) throws Exception {
@@ -126,12 +112,8 @@ public class SecurityConfig {
         log.info("--- [SecurityConfig] Kiosk Security Chain 구성 완료 ---");
         return http.build();
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : ── Chain 2: 관리자 ──────────────────────────
-     * 날짜 : 2026-04-01
-     */
 
+    // ── Chain 2: 관리자 ──────────────────────────
     @Bean
     @Order(2)
     public SecurityFilterChain adminChain(HttpSecurity http) throws Exception {
@@ -224,12 +206,9 @@ public class SecurityConfig {
         log.info("--- [SecurityConfig] Admin Security Chain 구성 완료 ---");
         return http.build();
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : 자동 로그인 정보를 DB에 보관하는 저장소 설정
-     * 날짜 : 2026-04-01
-     */
 
+    /* 자동 로그인 정보를 DB에 보관하는 저장소 설정 */
+    // Remember-me DB 저장소
     @Bean
     public PersistentTokenRepository persistentTokenRepository() {
         log.info("--- [SecurityConfig] PersistentTokenRepository(Remember-Me DB 저장소) 초기화 ---");
@@ -238,12 +217,8 @@ public class SecurityConfig {
         repo.setCreateTableOnStartup(false);  // 테이블명 커스텀 설정 비활
         return repo;
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : 권한 거부(403 Forbidden) 시 발생할 이벤트 핸들러
-     * 날짜 : 2026-04-01
-     */
 
+    /* 권한 거부(403 Forbidden) 시 발생할 이벤트 핸들러 */
     @Bean
     public AccessDeniedHandler accessDeniedHandler() {
         log.info("--- [SecurityConfig] AccessDeniedHandler(Handler403) 등록 ---");

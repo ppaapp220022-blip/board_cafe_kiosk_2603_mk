@@ -11,66 +11,59 @@ import org.example.board_cafe_kiosk_2603.dto.common.pagination.PageRequestDTO;
 import java.util.List;
 import java.util.Optional;
 
-@Mapper
-
-/*
- * 작성자 : 서주연
- * 기능 : 카테고리 데이터 접근 인터페이스
- * 날짜 : 2026-03-27
+/**
+ * category 테이블 CRUD MyBatis Mapper 인터페이스
  */
+@Mapper
 public interface CategoryMapper {
-    /*
-     * 작성자 : 서주연
-     * 기능 : 전체 목록 조회
-     * 날짜 : 2026-03-27
-     */
+
+    /* SELECT → ResponseDTO 직접 매핑 (JOIN 집계 포함) */
+    // ──────────────────────────────────────────────
+    // SELECT
+    // ──────────────────────────────────────────────
+
+    /* 카테고리 전체 목록 조회 (연결 상품 수 포함) */
     List<CategoryResponseDTO> findAll();
-    /*
-     * 작성자 : 서주연
-     * 기능 : ID로 단건 조회
-     * 날짜 : 2026-03-27
-     */
-    Optional<CategoryResponseDTO> findById(int id);
-    /*
-     * 작성자 : 서주연
-     * 기능 : 타입별 목록 조회
-     * 날짜 : 2026-03-27
-     */
+
+    /* type 기준 카테고리 목록 조회 (연결 상품 수 포함) */
+    // DRINK / FOOD / GAME / GUEST
     List<CategoryResponseDTO> findByType(CategoryType type);
-    /*
-     * 작성자 : 서주연
-     * 기능 : 데이터 등록
-     * 날짜 : 2026-03-27
-     */
+
+    /* PK로 카테고리 단건 조회 (연결 상품 수 포함) */
+    Optional<CategoryResponseDTO> findById(int id);
+
+    /* INSERT/UPDATE/DELETE → Category VO 파라미터 유지 */
+    // ──────────────────────────────────────────────
+    // INSERT  — VO 파라미터 유지 (generated key → VO.id 역주입)
+    // Service 에서 RequestDTO → VO 변환 후 호출
+    // ──────────────────────────────────────────────
+
+    /* 카테고리 등록 */
+    // insert 후 generated PK → category.id 반영
     int insert(Category category);
-    /*
-     * 작성자 : 서주연
-     * 기능 : 데이터 수정
-     * 날짜 : 2026-03-27
+
+    // ──────────────────────────────────────────────
+    // UPDATE  — RequestDTO + id 분리 파라미터
+    // ──────────────────────────────────────────────
+
+    /**
+     * 카테고리 수정
+     * @param id  수정 대상 PK
+     * @param dto name / type 변경 값
      */
     int update(@Param("id") int id, @Param("dto") CategoryRequestDTO dto);
-    /*
-     * 작성자 : 서주연
-     * 기능 : 데이터 삭제
-     * 날짜 : 2026-03-27
-     */
+
+    /* 카테고리 삭제 */
     int delete(int id);
-    /*
-     * 작성자 : 서주연
-     * 기능 : 연결된 상품 건수 조회
-     * 날짜 : 2026-03-27
-     */
+
+    /* 해당 카테고리에 연결된 상품(product) 수 조회 */
+     // 삭제 가능 여부 검증에 활용
+     // category_id FK 기준 COUNT 쿼리
     int countLinkedProducts(int id);
-    /*
-     * 작성자 : 서주연
-     * 기능 : 전체 목록 페이징 조회
-     * 날짜 : 2026-03-27
-     */
+
+    /** 전체 카테고리 목록 조회 - 페이징 */
     List<CategoryResponseDTO> findAllPaged(PageRequestDTO pageRequestDTO);
-    /*
-     * 작성자 : 서주연
-     * 기능 : 전체 건수 조회
-     * 날짜 : 2026-03-27
-     */
+
+    /** 전체 카테고리 수 */
     int countAll();
 }

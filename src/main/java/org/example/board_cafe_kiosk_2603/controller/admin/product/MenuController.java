@@ -20,17 +20,12 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
-/*
- * 작성자 : 서주연
- * 기능 : 메뉴 CRUD 컨트롤러
- * 날짜 : 2026-03-27
- */
-
 @Log4j2
 @Controller
 @RequestMapping("/admin/product/menu")
 @RequiredArgsConstructor
 public class MenuController {
+    /* 메뉴 CRUD 컨트롤러 */
     // 탭별 목록 조회
     // 메뉴 등록/수정
     // 소프트 삭제(숨김) 및 복원
@@ -39,12 +34,10 @@ public class MenuController {
     private final MenuService menuService;
     private final CategoryService categoryService;
     private final FileUploadUtil fileUploadUtil;
-    /*
-     * 작성자 : 서주연
-     * 기능 : 메뉴 목록 조회
-     * 날짜 : 2026-03-27
-     */
 
+    /* 메뉴 목록 조회 */
+    // tab 파라미터(food, drink, guest, hidden)에 따라 데이터 분기 처리
+    // 페이징 포함
     @GetMapping
     public String getList(@RequestParam(defaultValue = "food") String tab,
                           @RequestParam(required = false) Integer categoryId,
@@ -93,12 +86,8 @@ public class MenuController {
         log.info("--- 메뉴 목록 조회 완료 - tab: {}, categoryId: {}, 건수: {}", tab, categoryId, pageResponse.getTotal());
         return "admin/product_menu";
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : 메뉴 등록 페이지 이동
-     * 날짜 : 2026-03-27
-     */
 
+    /* 메뉴 등록 페이지 이동 */
     @GetMapping("/add")
     public String addForm(@RequestParam(defaultValue = "food") String tab, Model model) {
         log.info("--- 메뉴 등록 폼 요청 (Tab: {}) ---", tab);
@@ -116,12 +105,8 @@ public class MenuController {
 
         return "admin/product_menu_form";
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : 메뉴 등록 처리 (이미지 업로드 포함)
-     * 날짜 : 2026-03-27
-     */
 
+    /* 메뉴 등록 처리 (이미지 업로드 포함) */
     @PostMapping("/add")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER')")
     public String register(@ModelAttribute MenuRequestDTO menuRequestDTO,
@@ -140,12 +125,10 @@ public class MenuController {
         log.info("--- 메뉴 등록 완료 ---");
         return "redirect:/admin/product/menu?tab=" + tab;
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : 기존 이미지 표시
-     * 날짜 : 2026-03-27
-     */
 
+    // 기존 이미지 표시
+    /* 메뉴 수정 페이지 이동 */
+    // 기존 이미지가 있는 경우, 이미지를 수정하지 않았을 때 기존 이미지 보존
     @GetMapping("/edit/{id}")
     public String editForm(@PathVariable int id,
                            @RequestParam(defaultValue = "food") String tab, Model model) {
@@ -169,12 +152,9 @@ public class MenuController {
         log.info("--- 수정 폼 데이터 로드 완료 (메뉴명: {}) ---", menu.getName());
         return "admin/product_menu_form";
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : 메뉴 정보 수정 처리 (이미지 교체 로직 포함)
-     * 날짜 : 2026-03-27
-     */
 
+    /* 메뉴 정보 수정 처리 (이미지 교체 로직 포함) */
+    // 새 이미지 업로드 시 기존 이미지 교체
     @PostMapping("/edit/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER')")
     public String modify(@PathVariable int id,
@@ -195,12 +175,8 @@ public class MenuController {
         log.info("--- 메뉴 수정 완료 (id: {}) ---", id);
         return "redirect:/admin/product/menu?tab=" + tab;
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : 메뉴 숨김 처리 (소프트 삭제)
-     * 날짜 : 2026-03-27
-     */
 
+    /* 메뉴 숨김 처리 (소프트 삭제) */
     @PostMapping("/{id}/toggle-hide")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER')")
     public String toggleHide(@PathVariable int id,
@@ -211,12 +187,8 @@ public class MenuController {
         log.info("--- 메뉴 숨김 완료 (id: {}) ---", id);
         return "redirect:/admin/product/menu?tab=" + tab;
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : 메뉴 품절 상태 토글
-     * 날짜 : 2026-03-27
-     */
 
+    /* 메뉴 품절 상태 토글 */
     @PostMapping("/{id}/toggle-soldout")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER')")
     public String toggleSoldout(@PathVariable int id,
@@ -227,12 +199,8 @@ public class MenuController {
         log.info("--- 판매 상태 변경 완료 (id: {}) ---", id);
         return "redirect:/admin/product/menu?tab=" + tab;
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : 숨김 메뉴 복원 (소프트 삭제 취소)
-     * 날짜 : 2026-03-27
-     */
 
+    /* 숨김 메뉴 복원 (소프트 삭제 취소) */
     @PostMapping("/{id}/restore")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER')")
     public String restore(@PathVariable int id) {

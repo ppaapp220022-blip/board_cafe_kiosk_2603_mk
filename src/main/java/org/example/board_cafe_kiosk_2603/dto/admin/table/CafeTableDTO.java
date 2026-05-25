@@ -4,18 +4,16 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-/*
- * 작성자 : 강수연
- * 기능 : 테이블 현황 응답 및 수정용 DTO
- * 날짜 : 2026-03-26
- */
-
 @Getter
 @Builder
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class CafeTableDTO {
+    /**
+     * 테이블 현황 응답 및 수정용 DTO
+     * 추가된 내용: 입실 시간 포맷팅 및 토큰 정보 포함
+     */
     private Integer id;
     private Integer tableNumber;
     private String status;      // EMPTY, OCCUPIED, CLEANING

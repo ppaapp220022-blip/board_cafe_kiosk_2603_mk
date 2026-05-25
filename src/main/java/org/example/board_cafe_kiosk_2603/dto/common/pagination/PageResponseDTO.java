@@ -6,16 +6,11 @@ import lombok.ToString;
 
 import java.util.List;
 
-/*
- * 작성자 : 서민성
- * 기능 : 현재 페이지 번호
- * 날짜 : 2026-04-09
- */
-
 @Getter
 @ToString
 public class PageResponseDTO<E> {
 
+    // 현재 페이지 번호
     private int page;
 
     // 한 페이지당 데이터 개수
@@ -38,12 +33,6 @@ public class PageResponseDTO<E> {
 
     // 화면에 표시할 데이터 목록
     private List<E> dtoList;
-
-    /*
-     * 작성자 : 서민성
-     * 기능 : PageResponseDTO 메서드
-     * 날짜 : 2026-04-09
-     */
 
     @Builder(builderMethodName = "withAll")
     public PageResponseDTO(PageRequestDTO pageRequestDTO, int total, List<E> dtoList) {

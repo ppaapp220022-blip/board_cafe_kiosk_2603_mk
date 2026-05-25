@@ -12,12 +12,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 
-/*
- * 작성자 : 강수연
- * 기능 : StatScheduler 클래스
- * 날짜 : 2026-04-02
- */
-
 @Log4j2
 @Component
 @EnableScheduling
@@ -25,12 +19,10 @@ import java.time.LocalDate;
 public class StatScheduler {
     private final JobLauncher jobLauncher;
     private final Job dailyRevenueJob; // BatchConfig의 @Bean 메서드 명과 동일해야 함
-    /*
-     * 작성자 : 강수연
-     * 기능 : 매일 새벽 03:00:00에 Spring Batch Job 실행
-     * 날짜 : 2026-04-02
-     */
 
+    /**
+     * 매일 새벽 03:00:00에 Spring Batch Job 실행
+     */
     @Scheduled(cron = "0 0 3 * * *")
     public void runDailyStatJob() {
         try {
@@ -56,12 +48,10 @@ public class StatScheduler {
             e.printStackTrace();
         }
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : 수동 실행을 위한 메서드 - 테스트 코드에서 호출
-     * 날짜 : 2026-04-09
-     */
 
+    /**
+     * 수동 실행을 위한 메서드 - 테스트 코드에서 호출
+     */
     public void runManualStatJob(LocalDate targetDate) {
         log.info("[Batch Scheduler] 수동 통계 배치 작업 요청 확인 (대상일자: {})", targetDate);
 

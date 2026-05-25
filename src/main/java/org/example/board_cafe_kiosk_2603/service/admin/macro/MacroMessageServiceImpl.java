@@ -17,12 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/*
- * 작성자 : 강수연
- * 기능 : MacroMessage 관련 비즈니스 로직을 처리하는 서비스 구현체
- * 날짜 : 2026-03-25
- */
-
 @Log4j2
 @Service
 @Transactional(readOnly = true)
@@ -31,12 +25,6 @@ public class MacroMessageServiceImpl implements MacroMessageService {
     private final MacroMessageMapper macroMessageMapper;
     private final AdminTableMessageMapper adminTableMessageMapper;
     private final CafeTableMapper cafeTableMapper;
-
-    /*
-     * 작성자 : 강수연
-     * 기능 : getAllActiveMessages 메서드
-     * 날짜 : 2026-03-25
-     */
 
     @Override
     public List<MacroMessageResponseDTO> getAllActiveMessages() {
@@ -53,12 +41,6 @@ public class MacroMessageServiceImpl implements MacroMessageService {
         });
         return activeMessages;
     }
-
-    /*
-     * 작성자 : 강수연
-     * 기능 : sendMessage 메서드
-     * 날짜 : 2026-04-08
-     */
 
     @Override
     @Transactional
@@ -85,12 +67,6 @@ public class MacroMessageServiceImpl implements MacroMessageService {
         log.info("테이블 {}번으로 메세지 로그 저장 성공!", tableId);
     }
 
-    /*
-     * 작성자 : 강수연
-     * 기능 : sendToAllActiveTables 메서드
-     * 날짜 : 2026-04-08
-     */
-
     @Override
     @Transactional
     public void sendToAllActiveTables(Integer macroId) {
@@ -102,12 +78,6 @@ public class MacroMessageServiceImpl implements MacroMessageService {
         log.info("📢 총 {}개 테이블에 전체 메시지 전송 완료!", tableIds.size());
     }
 
-    /*
-     * 작성자 : 강수연
-     * 기능 : createMacro 메서드
-     * 날짜 : 2026-04-08
-     */
-
     @Override
     @Transactional
     public void createMacro(String direction, String messageText) {
@@ -116,24 +86,14 @@ public class MacroMessageServiceImpl implements MacroMessageService {
         log.info("새 매크로 등록 완료: [{}] {}", direction, messageText);
     }
 
-    /*
-     * 작성자 : 강수연
-     * 기능 : deleteMacro 메서드
-     * 날짜 : 2026-04-08
-     */
-
     @Override
     @Transactional
     public void deleteMacro(Integer id) {
         macroMessageMapper.deactivateMacro(id);
         log.info("매크로 삭제(비활성화) 완료: ID {}", id);
     }
-    /*
-     * 작성자 : 서민성
-     * 기능 : direction별 페이징 조회
-     * 날짜 : 2026-04-09
-     */
 
+    // direction별 페이징 조회
     @Override
     public PageResponseDTO<MacroMessageResponseDTO> getPagedMessage(String direction, PageRequestDTO pageRequestDTO) {
         List<MacroMessageResponseDTO> dtoList = macroMessageMapper

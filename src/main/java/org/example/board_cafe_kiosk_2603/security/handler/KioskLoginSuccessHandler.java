@@ -18,28 +18,21 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.UUID;
 
-/*
- * 작성자 : 서주연
- * 기능 : instanceof 분기가 생기는 순간 단일 책임 원칙(SRP) 위반되므로,
- * 날짜 : 2026-04-06
- */
-
 @Log4j2
 @Component
 @RequiredArgsConstructor
 public class KioskLoginSuccessHandler implements AuthenticationSuccessHandler {
+    // instanceof 분기가 생기는 순간 단일 책임 원칙(SRP) 위반되므로,
+    // Kiosk, Admin - LoginSuccessHandler 2EA의 파일로 관리
+
+    // 목적 - 테이블 세션 관리, access_token 갱신, DB 동기화
+
     private final CafeTableService cafeTableService;
 
     // ★ 추가: 재로그인 시 활성 세션 상세 정보(CafeTableSession 객체)를
     //         HTTP 세션에 복구하기 위해 주입
     private final TableSessionAdminService tableSessionAdminService;
     private final CafePackageService cafePackageService;
-
-    /*
-     * 작성자 : 서주연
-     * 기능 : onAuthenticationSuccess 메서드
-     * 날짜 : 2026-04-06
-     */
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
@@ -160,12 +153,6 @@ public class KioskLoginSuccessHandler implements AuthenticationSuccessHandler {
             response.sendRedirect("/kiosk/session/start");
         }
     }
-
-    /*
-     * 작성자 : 서주연
-     * 기능 : init 메서드
-     * 날짜 : 2026-04-06
-     */
 
     @PostConstruct
     public void init() {

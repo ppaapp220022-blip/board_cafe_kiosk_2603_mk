@@ -4,18 +4,13 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-/*
- * 작성자 : 강수연
- * 기능 : 테이블 고유 ID (PK)
- * 날짜 : 2026-03-26
- */
-
 @Getter
 @Builder
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class CafeTable {
+    /* 테이블 고유 ID (PK) */
     private Integer id;
 
     /* 테이블 번호 (1번, 2번 등) */

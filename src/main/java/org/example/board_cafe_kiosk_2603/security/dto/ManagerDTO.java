@@ -7,15 +7,10 @@ import org.springframework.security.core.userdetails.User;
 
 import java.util.Collection;
 
-/*
- * 작성자 : 서주연
- * 기능 : 시큐리티 전용 DTO
- * 날짜 : 2026-04-01
- */
-
 @Getter
 @Log4j2
 public class ManagerDTO extends User {
+    /* 시큐리티 전용 DTO */
     // admin_layout에 현재 로그인되어있는 이름을 출력하기 위함
 
     private final String name;  // 실명 추가

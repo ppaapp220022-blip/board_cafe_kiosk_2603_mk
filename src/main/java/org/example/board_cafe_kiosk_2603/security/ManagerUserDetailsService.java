@@ -14,12 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/*
- * 작성자 : 서주연
- * 기능 : ManagerUserDetails 서비스 인터페이스
- * 날짜 : 2026-04-01
- */
-
 @Log4j2
 @Service
 @RequiredArgsConstructor

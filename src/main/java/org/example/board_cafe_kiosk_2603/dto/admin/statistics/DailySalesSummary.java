@@ -7,12 +7,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
-/*
- * 작성자 : 강수연
- * 기능 : DailySalesSummary 클래스
- * 날짜 : 2026-04-01
- */
-
 @Data
 @Builder
 @NoArgsConstructor

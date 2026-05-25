@@ -4,12 +4,6 @@ import lombok.*;
 
 import java.sql.Timestamp;
 
-/*
- * 작성자 : 서민성
- * 기능 : Customer 클래스
- * 날짜 : 2026-03-27
- */
-
 @Getter
 @ToString
 @Builder

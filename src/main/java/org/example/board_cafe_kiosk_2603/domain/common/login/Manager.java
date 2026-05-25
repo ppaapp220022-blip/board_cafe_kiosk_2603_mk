@@ -3,12 +3,10 @@ package org.example.board_cafe_kiosk_2603.domain.common.login;
 import lombok.*;
 
 import java.time.LocalDateTime;
-/*
- * 작성자 : 서주연
- * 기능 : manager — 관리자·직원 계정.
- * 날짜 : 2026-03-30
- */
 
+/**
+ * manager — 관리자·직원 계정.
+ */
 @Getter
 @ToString
 @Builder

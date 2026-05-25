@@ -11,12 +11,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/*
- * 작성자 : 서주연
- * 기능 : MenuServiceImpl 테스트
- * 날짜 : 2026-03-30
- */
-
 @Log4j2
 @SpringBootTest
 class MenuServiceImplTest {

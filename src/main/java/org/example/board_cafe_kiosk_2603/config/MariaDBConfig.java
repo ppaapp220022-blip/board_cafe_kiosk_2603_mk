@@ -10,30 +10,25 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
-/*
- * 작성자 : 서주연
- * 기능 : MariaDB 설정
- * 날짜 : 2026-04-29
- */
-
-
 
 @Configuration
 public class MariaDBConfig {
+    /* 마리아 디비 연결 설정 */
+
     @Primary
     @Bean
     @ConfigurationProperties("spring.datasource.mariadb")
-    public DataSourceProperties mariaDataSourceProperties() {
+    public DataSourceProperties getDataSourceProperties() {
         /* 데이터 소스 프로퍼티 빈 생성
            URL, 계정, 비밀번호 등을 저장 */
         return new DataSourceProperties();
     }
 
     @Primary
-    @Bean(name = {"dataSource", "primaryDataSource"})
+    @Bean(name = "primaryDataSource")
     public DataSource primaryDataSource() {
         /* 데이터베이스 연결 객체 생성 */
-        return mariaDataSourceProperties()
+        return getDataSourceProperties()
                 .initializeDataSourceBuilder()
                 .build();
     }
@@ -46,7 +41,7 @@ public class MariaDBConfig {
     }
 
     @Primary
-    @Bean(name = {"transactionManager", "mariaTxManager"})
+    @Bean(name = "mariaTxManager")
     public PlatformTransactionManager mariaTxManager(DataSource mariaDataSource) {
         /* 트랜잭션 관리자 생성 */
         return new DataSourceTransactionManager(mariaDataSource);

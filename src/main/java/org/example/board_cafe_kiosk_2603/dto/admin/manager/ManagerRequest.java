@@ -6,12 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.example.board_cafe_kiosk_2603.domain.admin.manager.RoleType;
 
-/*
- * 작성자 : 서주연
- * 기능 : ManagerRequest 클래스
- * 날짜 : 2026-04-01
- */
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

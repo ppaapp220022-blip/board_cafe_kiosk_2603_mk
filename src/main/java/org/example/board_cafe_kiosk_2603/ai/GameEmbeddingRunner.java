@@ -7,18 +7,16 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-/*
- * 작성자 : 서주연
- * 기능 : 애플리케이션이 구동되는 시점에 자동으로 실행되어 RAG용 벡터 데이터를 최신화함
- * 날짜 : 2026-04-29
- */
-
 @Log4j2
 @Component
 public class GameEmbeddingRunner implements ApplicationRunner {
 
+    /* 애플리케이션이 구동되는 시점에 자동으로 실행되어 RAG용 벡터 데이터를 최신화함 */
+
     private final GameEmbeddingService gameEmbeddingService;
     private final JdbcTemplate pgVectorJdbcTemplate;
+
+    // 멀티 DB 환경에서 의존성 주입
     public GameEmbeddingRunner(
             GameEmbeddingService gameEmbeddingService,
             @Qualifier("pgVectorJdbcTemplate") JdbcTemplate pgVectorJdbcTemplate) {
@@ -51,6 +49,9 @@ public class GameEmbeddingRunner implements ApplicationRunner {
 //            log.error("[초기화] 수동 재실행: POST /api/ai/admin/reindex-games");
         }
     }
+
+    /* PostgresSQL 벡터 확장 기능 활성화 */
+    // SQL 문법이 MariaDB와 다르므로 반드시 pgVectorJdbcTemplate을 통해 실행
     private void ensureVectorExtension() {
         try {
             pgVectorJdbcTemplate.execute("CREATE EXTENSION IF NOT EXISTS vector");

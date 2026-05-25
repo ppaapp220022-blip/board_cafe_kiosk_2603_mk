@@ -5,12 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/*
- * 작성자 : 서주연
- * 기능 : GameResponse 데이터 전달 객체
- * 날짜 : 2026-03-27
- */
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

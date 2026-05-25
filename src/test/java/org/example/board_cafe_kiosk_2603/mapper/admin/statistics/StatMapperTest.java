@@ -14,12 +14,6 @@ import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-/*
- * 작성자 : 강수연
- * 기능 : StatMapper 테스트
- * 날짜 : 2026-04-02
- */
-
 @Log4j2
 @SpringBootTest
 @Transactional // 테스트 후 데이터를 롤백하여 DB 청결 유지
@@ -29,12 +23,6 @@ class StatMapperTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate; // DB에 직접 쿼리해서 데이터 확인용
-
-    /*
-     * 작성자 : 강수연
-     * 기능 : dailySummaryTest 메서드
-     * 날짜 : 2026-04-02
-     */
 
     @Rollback(false)
     @Test
@@ -72,12 +60,6 @@ class StatMapperTest {
         }
 
     }
-
-    /*
-     * 작성자 : 강수연
-     * 기능 : itemSalesHistoryTest 메서드
-     * 날짜 : 2026-04-02
-     */
 
     @Test
     void itemSalesHistoryTest() {

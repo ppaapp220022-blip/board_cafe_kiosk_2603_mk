@@ -6,17 +6,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.example.board_cafe_kiosk_2603.domain.admin.product.GameItemStatus;
 
-/*
- * 작성자 : 서주연
- * 기능 : 게임 아이템(재고) 조회 응답 시 사용하는 DTO
- * 날짜 : 2026-03-27
- */
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class GameItemResponseDTO {
+    /*
+    게임 아이템(재고) 조회 응답 시 사용하는 DTO
+    -> gameName 을 JOIN 하여 함께 반환
+     */
+
     private int id;
 
     /* FK → game.id */

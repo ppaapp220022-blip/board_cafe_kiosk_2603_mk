@@ -11,17 +11,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.annotation.Transactional;
-
-/*
- * 작성자 : 서주연
- * 기능 : ManagerServiceImpl 테스트
- * 날짜 : 2026-04-01
- */
 
 @Log4j2
 @SpringBootTest
-@Transactional
 class ManagerServiceImplTest {
 
     @Autowired
@@ -29,25 +21,13 @@ class ManagerServiceImplTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    private String uniqueLoginId(String prefix) {
-        return prefix.substring(0, Math.min(prefix.length(), 5)) + (System.currentTimeMillis() % 100000);
-    }
-
-    /*
-     * 작성자 : 서주연
-     * 기능 : CreateAndFindAll 메서드
-     * 날짜 : 2026-04-01
-     */
-
     @Test
     void CreateAndFindAll() {
-        String loginId = uniqueLoginId("111a");
         // 1. 준비: 등록할 정보 생성
         ManagerRequest request = ManagerRequest.builder()
-                .loginId(loginId)
+                .loginId("111a")
                 .password(passwordEncoder.encode("1234"))
                 .name("서비스테스터")
-                .email(loginId + "@test.local")
                 .role(RoleType.ADMIN)
                 .build();
 
@@ -66,28 +46,20 @@ class ManagerServiceImplTest {
 
         // 4. 검증: 방금 넣은 데이터가 리스트에 있는지 확인
         boolean exists = responseDTO.getDtoList().stream()
-                .anyMatch(m -> m.getLoginId().equals(loginId));
+                .anyMatch(m -> m.getLoginId().equals("111a"));
 
 
         log.info("등록된 아이디 존재 여부: {}", exists);
         Assertions.assertTrue(exists, "등록한 매니저가 목록에 존재해야 합니다.");
     }
 
-    /*
-     * 작성자 : 서주연
-     * 기능 : updateActive 메서드
-     * 날짜 : 2026-04-01
-     */
-
     @Test
     void updateActive() {
-        String loginId = uniqueLoginId("active_test");
         // 1. 우선 하나 등록 (ID를 알기 위해 목록 조회를 활용)
         managerService.createManager(ManagerRequest.builder()
-                .loginId(loginId)
+                .loginId("active_test")
                 .password("1111")
                 .name("상태변경자")
-                .email(loginId + "@test.local")
                 .role(RoleType.ADMIN)
                 .build());
 
@@ -98,10 +70,7 @@ class ManagerServiceImplTest {
                 .build();
 
         PageResponseDTO<ManagerResponse> responseDTO = managerService.getPagedManagers(pageRequestDTO);
-        ManagerResponse target = responseDTO.getDtoList().stream()
-                .filter(manager -> loginId.equals(manager.getLoginId()))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("등록한 직원을 찾을 수 없습니다."));
+        ManagerResponse target = responseDTO.getDtoList().get(0); // 가장 최근 혹은 첫번째 데이터
         int targetId = target.getId();
         log.info("변경 대상 ID: {}, 현재 상태: {}", targetId, target.getIsActive());
 

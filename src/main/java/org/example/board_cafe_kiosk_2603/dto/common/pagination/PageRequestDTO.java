@@ -11,18 +11,13 @@ import lombok.NoArgsConstructor;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
-/*
- * 작성자 : 서민성
- * 기능 : 현재 페이지 번호 (기본값: 1, 최솟값: 1)
- * 날짜 : 2026-04-09
- */
-
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class PageRequestDTO {
 
+    // 현재 페이지 번호 (기본값: 1, 최솟값: 1)
     @Builder.Default
     @Min(value = 1)
     @Positive
@@ -40,21 +35,20 @@ public class PageRequestDTO {
 
     // 필터 (예: "all", "active", "inactive")
     private String filter;
-    /*
-     * 작성자 : 서민성
-     * 기능 : MyBatis LIMIT 절에 사용할 시작 위치 계산
-     * 날짜 : 2026-04-09
-     */
 
+    /**
+     * MyBatis LIMIT 절에 사용할 시작 위치 계산
+     * 예) page=3, size=10 → skip=20
+     */
     public int getSkip() {
         return (Math.max(1, page) - 1) * size;
     }
-    /*
-     * 작성자 : 서민성
-     * 기능 : 페이징 링크에 붙을 쿼리 파라미터 문자열 생성
-     * 날짜 : 2026-04-09
-     */
 
+    /**
+     * 페이징 링크에 붙을 쿼리 파라미터 문자열 생성
+     * 예) size=10&keyword=010
+     * page는 HTML에서 직접 붙이므로 여기서는 제외
+     */
     public String getLink() {
         StringBuilder builder = new StringBuilder();
         builder.append("size=").append(this.size);

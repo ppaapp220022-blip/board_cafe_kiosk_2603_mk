@@ -13,19 +13,19 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 
 import java.io.IOException;
 
-/*
- * 작성자 : 서주연
- * 기능 : 키오스크 계정이 관리자 페이지에 접속하려 할때 발생하는 403 Forbidden(권한 거부) 상황 처리하는 커스텀 핸들러
- * 날짜 : 2026-04-01
- */
-
 @Log4j2
 public class Handler403 implements AccessDeniedHandler {
-    /*
-     * 기능 : 키오스크 계정이 관리자 페이지에 접속하려 할때 발생하는 403 Forbidden(권한 거부) 상황 처리하는 커스텀 핸들러
-     * 날짜 : 2026-04-01
-     */
 
+    /* 키오스크 계정이 관리자 페이지에 접속하려 할때 발생하는 403 Forbidden(권한 거부) 상황 처리하는 커스텀 핸들러 */
+    /*
+     * 403 Forbidden 커스텀 핸들러
+     *
+     * Ajax 요청 → 403 상태코드 + JSON 응답
+     *             (fetch()가 리다이렉트를 따라가지 않으므로 JSON으로 처리)
+     * 일반 요청 → 리다이렉트
+     *             키오스크: /kiosk/login
+     *             관리자  : /common/login?error=ACCESS_DENIED
+     */
 
     @Override
     public void handle(HttpServletRequest request,

@@ -5,22 +5,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-/*
- * 작성자 : 서주연
- * 기능 : 업로드 파일을 정적 리소스로 서빙하기 위한 WebMvc 설정
- * 날짜 : 2026-03-30
- */
-
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
+    // 업로드 파일을 정적 리소스로 서빙하기 위한 WebMvc 설정
+    //   /upload/** 요청 → my.upload.path 디렉토리의 실제 파일로 매핑
+
+    // 파일 삭제를 위해서 추가
     @Value("${my.upload.path}")
     private String uploadPath;  // 파일의 저장 경로
-
-    /*
-     * 작성자 : 서주연
-     * 기능 : addResourceHandlers 메서드
-     * 날짜 : 2026-03-30
-     */
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {

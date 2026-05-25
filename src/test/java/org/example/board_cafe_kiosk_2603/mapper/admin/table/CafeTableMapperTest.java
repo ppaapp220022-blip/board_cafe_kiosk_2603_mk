@@ -9,12 +9,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
-/*
- * 작성자 : 강수연
- * 기능 : CafeTableMapper 테스트
- * 날짜 : 2026-04-08
- */
-
 @Log4j2
 @SpringBootTest
 class CafeTableMapperTest {

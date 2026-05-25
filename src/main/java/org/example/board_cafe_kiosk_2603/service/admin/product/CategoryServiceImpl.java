@@ -15,30 +15,30 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-/*
- * 작성자 : 서주연
- * 기능 : Category 관련 비즈니스 로직을 처리하는 서비스 구현체
- * 날짜 : 2026-03-27
- */
-
 @Log4j2
 @Service
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryMapper categoryMapper;
+
+    /* 카테고리 전체 목록 조회 */
     @Override
     public List<CategoryResponseDTO> getAll() {
         List<CategoryResponseDTO> list = categoryMapper.findAll();
         log.info("--- 카테고리 목록 조회: {} ---", list.size());
         return list;
     }
+
+    /* type 기준 카테고리 목록 조회 */
     @Override
     public List<CategoryResponseDTO> getByType(CategoryType type) {
         List<CategoryResponseDTO> list = categoryMapper.findByType(type);
         log.info("--- 카테고리 타입 조회 (type={}): {} ---", type, list.size());
         return list;
     }
+
+    /* PK로 카테고리 단건 조회 */
     @Override
     public CategoryResponseDTO getById(int id) {
         return categoryMapper.findById(id)
@@ -47,6 +47,8 @@ public class CategoryServiceImpl implements CategoryService {
                     return new NoSuchElementException("카테고리를 찾을 수 없습니다. id=" + id);
                 });
     }
+
+    /* 카테고리 등록 */
     @Override
     @Transactional
     public void register(CategoryRequestDTO categoryRequestDTO) {
@@ -59,6 +61,9 @@ public class CategoryServiceImpl implements CategoryService {
         log.info("[카테고리 등록 완료] name={}, type={}, 생성된 id={}, affected rows={}",
                 categoryRequestDTO.getName(), categoryRequestDTO.getType(), category.getId(), result);
     }
+
+
+    /* 카테고리 수정 */
     @Override
     @Transactional
     public void modify(int id, CategoryRequestDTO categoryRequestDTO) {
@@ -73,6 +78,11 @@ public class CategoryServiceImpl implements CategoryService {
         int result = categoryMapper.update(id, categoryRequestDTO);
         log.info("--- 카테고리 수정 완료, id: {}, affected rows: {} ---", id, result);
     }
+
+    /* 카테고리 삭제 */
+    // remove() 삭제 전 연결 상품 수 검증 추가
+    // 연결된 상품이 1개 이상 존재할 경우 IllegalStateException 발생
+    // Controller에서 이 예외를 잡아 클라이언트에 적절한 응답 반환
     @Override
     @Transactional
     public void remove(int id) {
@@ -99,12 +109,17 @@ public class CategoryServiceImpl implements CategoryService {
         log.debug("--- 카테고리 삭제 완료, (id: {}, name: {}, affected rows: {}) ---",
                 id, existing.getName(), result);
     }
+
+    /* 삭제 가능 여부 확인 */
+    // 연결 상품 수가 0이면 true
     @Override
     public boolean canDelete(int id) {
         int linkedCount = categoryMapper.countLinkedProducts(id);
         log.info("--- 삭제 가능 여부 (id: {}, 연결 상품 수: {}, canDelete: {}) ---", id, linkedCount, linkedCount == 0);
         return linkedCount == 0;
     }
+
+    /* 전체 카테고리 목록 - 페이징 */
     @Override
     public PageResponseDTO<CategoryResponseDTO> getAll(PageRequestDTO pageRequestDTO) {
         log.info("--- 카테고리 페이징 실행 ---");

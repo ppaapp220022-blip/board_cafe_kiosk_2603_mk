@@ -14,12 +14,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 
-/*
- * 작성자 : 서주연
- * 기능 : PgVector 설정
- * 날짜 : 2026-04-29
- */
-
 @Configuration
 public class PgVectorConfig {
     @Bean

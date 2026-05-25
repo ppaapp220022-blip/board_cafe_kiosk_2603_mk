@@ -14,24 +14,22 @@ import org.springframework.stereotype.Component;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-/*
- * 작성자 : 서주연
- * 기능 : KioskAuthorizationManager 클래스
- * 날짜 : 2026-04-01
- */
-
 @Log4j2
 @Component
 @RequiredArgsConstructor
 public class KioskAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
 
     private final CafeTableService cafeTableService;
-    /*
-     * 작성자 : 서주연
-     * 기능 : 변경 적용 전
-     * 날짜 : 2026-04-01
-     */
 
+    // 변경 적용 전
+//    @Override
+//    public AuthorizationDecision check(Supplier<Authentication> authentication,
+//                                       RequestAuthorizationContext context) {
+//        HttpServletRequest request = context.getRequest();
+//        Object tableId = request.getSession().getAttribute("tableId");
+//        Object tableNumber = request.getSession().getAttribute("tableNumber");
+//        return new AuthorizationDecision(tableId != null || tableNumber != null);
+//    }
 
     @Override
     public AuthorizationDecision check(Supplier<Authentication> authentication,

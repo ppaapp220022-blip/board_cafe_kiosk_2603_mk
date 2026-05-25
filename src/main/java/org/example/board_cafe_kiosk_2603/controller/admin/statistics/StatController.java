@@ -19,12 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/*
- * 작성자 : 강수연
- * 기능 : Stat 관련 요청을 처리하는 컨트롤러
- * 날짜 : 2026-04-02
- */
-
 @Log4j2
 @Controller
 @RequestMapping("/admin")
@@ -33,12 +27,9 @@ import java.util.Map;
 public class StatController {
     private final StatService statService;
 
-    /*
-     * 작성자 : 강수연
-     * 기능 : adminStatusPage 메서드
-     * 날짜 : 2026-04-02
+    /**
+     관리자 통계 페이지 이동
      */
-
     @GetMapping("/status")
     public String adminStatusPage(Model model) {
         log.info("--- StatController adminStatusPage ---");
@@ -48,12 +39,9 @@ public class StatController {
         return "admin/status";
     }
 
-    /*
-     * 작성자 : 강수연
-     * 기능 : getStatData 메서드
-     * 날짜 : 2026-04-02
+    /**
+     통계 데이터 API (차트 및 요약 정보)
      */
-
     @GetMapping("/api/statistics")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> getStatData(

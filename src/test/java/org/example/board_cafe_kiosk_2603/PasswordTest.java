@@ -6,12 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-/*
- * 작성자 : 서주연
- * 기능 : Password 테스트
- * 날짜 : 2026-04-06
- */
-
 @SpringBootTest
 @Log4j2
 public class PasswordTest {

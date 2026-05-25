@@ -10,12 +10,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/*
- * 작성자 : 강수연
- * 기능 : MacroMessageServiceImpl 테스트
- * 날짜 : 2026-03-25
- */
-
 @Log4j2
 @SpringBootTest
 class MacroMessageServiceImplTest {

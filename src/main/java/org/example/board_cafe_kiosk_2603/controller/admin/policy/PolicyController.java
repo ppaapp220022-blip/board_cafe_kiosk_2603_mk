@@ -14,12 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-/*
- * 작성자 : 서민성
- * 기능 : Policy 관련 요청을 처리하는 컨트롤러
- * 날짜 : 2026-04-03
- */
-
 @Log4j2
 @Controller
 @RequestMapping("/admin/policy")
@@ -28,12 +22,10 @@ import java.util.Map;
 public class PolicyController {
 
     private final PolicyService policyService;
-    /*
-     * 작성자 : 서민성
-     * 기능 : 요금 정책 페이지 조회
-     * 날짜 : 2026-04-03
-     */
 
+    // ===========================================================
+    // 페이지
+    // ===========================================================
     @GetMapping
     public String policyPage(PageRequestDTO pageRequestDTO, Model model) {
         PageResponseDTO<PolicyDTO> responseDTO = policyService.selectPagedPolicies(pageRequestDTO);
@@ -54,12 +46,8 @@ public class PolicyController {
 
         return "admin/package";
     }
-    /*
-     * 작성자 : 서민성
-     * 기능 : 패키지 등록
-     * 날짜 : 2026-04-03
-     */
 
+    // 패키지 등록
     @PostMapping("/insert")
     @ResponseBody
     public ResponseEntity<PolicyDTO> insert(@RequestBody PolicyDTO dto) {
@@ -72,12 +60,8 @@ public class PolicyController {
             return ResponseEntity.badRequest().body(PolicyDTO.fail("패키지 등록에 실패했습니다."));
         }
     }
-    /*
-     * 작성자 : 서민성
-     * 기능 : 활성/비활성 토글
-     * 날짜 : 2026-04-03
-     */
 
+    // 활성/비활성 토글
     @PostMapping("/status")
     @ResponseBody
     public ResponseEntity<PolicyDTO> updateStatus(@RequestBody Map<String, Object> req) {

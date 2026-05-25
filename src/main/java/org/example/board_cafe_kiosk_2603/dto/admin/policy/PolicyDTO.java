@@ -4,18 +4,13 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-/*
- * 작성자 : 서민성
- * 기능 : 도메인 VO 필드 정의
- * 날짜 : 2026-04-03
- */
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class PolicyDTO {
 
+    // === 도메인 VO 필드 ===
     private int           id;
     private String        name;
     private String        type;
@@ -28,12 +23,8 @@ public class PolicyDTO {
     // === 응답(Response)용 필드 ===
     private boolean success;
     private String  message;
-    /*
-     * 작성자 : 서민성
-     * 기능 : 정적 팩토리 메서드
-     * 날짜 : 2026-04-03
-     */
 
+    // === 정적 팩토리 ===
     public static PolicyDTO fail(String message) {
         return PolicyDTO.builder()
                 .success(false)
@@ -41,24 +32,14 @@ public class PolicyDTO {
                 .build();
     }
 
-    /*
-     * 작성자 : 서민성
-     * 기능 : success 메서드
-     * 날짜 : 2026-04-03
-     */
-
     public static PolicyDTO success(String message) {
         return PolicyDTO.builder()
                 .success(true)
                 .message(message)
                 .build();
     }
-    /*
-     * 작성자 : 서민성
-     * 기능 : 표시용 헬퍼 메서드
-     * 날짜 : 2026-04-03
-     */
 
+    // === 표시용 헬퍼 ===
     public String getDisplayTime() {
         if (durationMinutes == null) return "Free";
         if (durationMinutes < 60) return durationMinutes + "분";

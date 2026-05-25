@@ -18,12 +18,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 
-/*
- * 작성자 : 서주연
- * 기능 : Main 관련 요청을 처리하는 컨트롤러
- * 날짜 : 2026-03-23
- */
-
 @Log4j2
 @Controller
 @RequiredArgsConstructor
@@ -32,56 +26,50 @@ public class MainController {
     private final TableSessionAdminService tableSessionAdminService;
     private final TableSessionKioskService tableSessionKioskService;
     private final CafeTableService cafeTableService;
-    /*
-     * 작성자 : 서주연
-     * 기능 : 루트 경로 리다이렉트
-     * 날짜 : 2026-03-23
-     */
 
+    // ===========================================================
+    // 공통 로그인 페이지 라우팅
+    // ===========================================================
 
     @GetMapping("/")
     public String root() {
         return "redirect:/common/login";
     }
 
-    /*
-     * 작성자 : 서주연
-     * 기능 : loginPage 메서드
-     * 날짜 : 2026-03-23
-     */
-
     @GetMapping("/common/login")
     public String loginPage() {
         return "common/login";
     }
-
-    /*
-     * 작성자 : 서주연
-     * 기능 : adminLoginPage 메서드
-     * 날짜 : 2026-03-23
-     */
 
     @GetMapping("/admin/login")
     public String adminLoginPage() {
         return "login/admin_login";
     }
 
-    /*
-     * 작성자 : 서주연
-     * 기능 : kioskLoginPage 메서드
-     * 날짜 : 2026-03-23
-     */
-
     @GetMapping("/kiosk/login")
     public String kioskLoginPage(HttpServletRequest request, RedirectAttributes redirectAttributes) {
         return "login/kiosk_login";
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : 키오스크 강제 로그아웃 처리
-     * 날짜 : 2026-04-01
-     */
 
+    // ===========================================================
+    // ★ 수정: @PostMapping("/kiosk/login") 제거
+    //
+    //    기존 문제:
+    //      - @PostMapping("/kiosk/login")이 Spring Security 인증을 우회하여
+    //        KioskLoginSuccessHandler를 경유하지 않음
+    //      - partySize/packageId 세션 복구 로직이 실행되지 않았음
+    //
+    //    해결:
+    //      - 로그인 POST 처리는 SecurityConfig의
+    //        .loginProcessingUrl("/kiosk/login-process")에 전적으로 위임
+    //      - 인증 성공 후 KioskLoginSuccessHandler가 세션 복구 및 리다이렉트 담당
+    //
+    //    뷰(kiosk_login.html) 수정 필요:
+    //      form action="/kiosk/login"  → form action="/kiosk/login-process"
+    // ===========================================================
+
+    // ===========================================================
+    // ===== ⛔️ 디버깅용 (운영 시 제거) ⛔️ =====
     @GetMapping("/kiosk/force-logout")
     public String kioskForceLogout(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
@@ -91,24 +79,22 @@ public class MainController {
         }
         return "redirect:/kiosk/login";
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : 키오스크 인원수 저장 처리
-     * 날짜 : 2026-03-23
-     */
+    // ===== //⛔️ 디버깅용 ⛔️ =====
 
+    // ===========================================================
+    // 키오스크 POST 흐름
+    // screensaver → headcount → phone_login → package_selection → menu
+    // ===========================================================
+
+    /* [1단계] 인원수 선택 처리 - partySize 세션 저장 */
     @PostMapping("/kiosk/headcount")
     public String headcountProcess(@RequestParam int partySize,
                                    HttpSession session) {
         session.setAttribute("partySize", partySize);
         return "redirect:/kiosk/phone_login";
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : [2단계] 전화번호 처리 - customerPhone 세션 저장
-     * 날짜 : 2026-03-23
-     */
 
+    /* [2단계] 전화번호 처리 - customerPhone 세션 저장 */
     @PostMapping("/kiosk/phone_login")
     public String phoneLoginProcess(@RequestParam(required = false) String phone,
                                     HttpSession session) {
@@ -119,12 +105,8 @@ public class MainController {
         }
         return "redirect:/kiosk/package_selection";
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : [3단계] 패키지 선택 처리 - table_session DB 저장
-     * 날짜 : 2026-03-23
-     */
 
+    /* [3단계] 패키지 선택 처리 - table_session DB 저장 */
     @PostMapping("/kiosk/package_selection")
     public String packageSelectionProcess(@RequestParam int packageId,
                                           HttpSession session) {
@@ -154,12 +136,12 @@ public class MainController {
 
         return "redirect:/kiosk/drinks";
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : [4단계] 메인 메뉴 페이지
-     * 날짜 : 2026-03-23
-     */
 
+    /* [4단계] 메인 메뉴 페이지
+     * ★ 수정: partySize 세션 유효성 검사 추가
+     *         세션에 partySize 없으면 /kiosk/session/start 로 리다이렉트
+     *         (기존: 검증 없이 그냥 화면 진입 → 비정상 렌더링)
+     */
     @GetMapping("/kiosk/menu")
     public String mainMenuPage(HttpSession session,
                                HttpServletResponse response) throws IOException {
@@ -222,23 +204,17 @@ public class MainController {
 
         return "redirect:/kiosk/drinks";
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : 비밀번호 찾기 페이지 조회
-     * 날짜 : 2026-04-08
-     */
 
+    // ===========================================================
+    // 관리자
+    // ===========================================================
 
     @GetMapping("/admin/find_pw")
     public String findPwPage() {
         return "login/find_pw";
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : AI Service
-     * 날짜 : 2026-04-29
-     */
 
+    // AI Service
     @GetMapping("/kiosk/ai")
     public void aiService() {
     }

@@ -6,56 +6,25 @@ import org.example.board_cafe_kiosk_2603.domain.admin.macro.MacroMessage;
 
 import java.util.List;
 
-
 @Mapper
-
-/*
- * 작성자 : 강수연
- * 기능 : 매크로 메시지 데이터 접근 인터페이스
- * 날짜 : 2026-04-08
- */
 public interface MacroMessageMapper {
-    /*
-     * 작성자 : 서민성
-     * 기능 : 활성 데이터 목록 조회
-     * 날짜 : 2026-04-09
-     */
+    // 사용 중(is_active = true)인 매크로만 조회
     List<MacroMessage> findAllActive();
 
-    /*
-     * 작성자 : 서민성
-     * 기능 : ID로 단건 조회
-     * 날짜 : 2026-04-09
-     */
+    // 상세 조회를 위해 추가
     MacroMessage findById(Integer id);
 
-    /*
-     * 작성자 : 강수연
-     * 기능 : 데이터 등록
-     * 날짜 : 2026-04-08
-     */
+    // 메세지 등록
     void insertMacro(MacroMessage macroMessage);
 
-    /*
-     * 작성자 : 강수연
-     * 기능 : 매크로 비활성화
-     * 날짜 : 2026-04-08
-     */
+    // Soft Delete 용도
     void deactivateMacro(Integer id);
 
-    /*
-     * 작성자 : 서민성
-     * 기능 : 조건별 목록 조회
-     * 날짜 : 2026-04-09
-     */
+    // direction별 페이징 목록 조회 <페이징>
     List<MacroMessage> selectList(@Param("direction") String direction,
                                   @Param("skip") int skip,
                                   @Param("size") int size);
 
-    /*
-     * 작성자 : 서민성
-     * 기능 : 조건별 건수 조회
-     * 날짜 : 2026-04-09
-     */
+    // direction별 전체 개수 조회 <페이징>
     int selectCount(@Param("direction") String direction);
 }
