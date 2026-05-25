@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320">
+  <rect width="320" height="320" rx="32" fill="#eef4ff"/>
+  <circle cx="130" cy="126" r="28" fill="#7aa2ff"/>
+  <circle cx="192" cy="140" r="24" fill="#aac2ff"/>
+  <path d="M92 214c8-30 30-46 58-46s50 16 58 46" fill="#7aa2ff"/>
+  <path d="M168 220c6-22 22-34 44-34s38 12 44 34" fill="#aac2ff"/>
+  <text x="160" y="276" text-anchor="middle" font-size="24" font-family="Arial, sans-serif" fill="#4864a6">Extra Guest</text>
+</svg>
