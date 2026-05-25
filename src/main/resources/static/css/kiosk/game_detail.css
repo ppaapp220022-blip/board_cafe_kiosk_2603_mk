@@ -79,7 +79,30 @@ body { margin: 0; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 
 .game-qty { font-size: 13px; color: #64748b; }
 
 .detail-body { padding: 16px; }
-.game-image { width: 100%; max-height: 300px; object-fit: cover; border-radius: 12px; background: #f1f5f9; margin-bottom: 14px; }
+.game-image-frame {
+    width: 100%;
+    min-height: 300px;
+    max-height: 300px;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    background:
+            radial-gradient(circle at top left, rgba(255,255,255,0.72), rgba(255,255,255,0) 36%),
+            linear-gradient(135deg, #eef4ff 0%, #f6f9ff 45%, #eef4ff 100%);
+    border: 1px solid #e3ebfb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.game-image {
+    width: 100%;
+    height: 100%;
+    max-height: 260px;
+    object-fit: contain;
+    border-radius: 10px;
+    display: block;
+}
 .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
 .meta { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px; }
 .meta .k { font-size: 12px; color: #64748b; margin-bottom: 4px; }
@@ -88,4 +111,12 @@ body { margin: 0; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 
 
 @media (max-width: 900px) {
     .layout { grid-template-columns: 1fr; }
+    .game-image-frame {
+        min-height: 240px;
+        max-height: 240px;
+        padding: 16px;
+    }
+    .game-image {
+        max-height: 208px;
+    }
 }
