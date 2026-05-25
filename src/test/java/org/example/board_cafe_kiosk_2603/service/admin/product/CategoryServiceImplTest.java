@@ -7,6 +7,7 @@ import org.example.board_cafe_kiosk_2603.dto.admin.product.CategoryResponseDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Log4j2
 @SpringBootTest
+@Transactional
 class CategoryServiceImplTest {
 
     @Autowired
@@ -40,7 +42,7 @@ class CategoryServiceImplTest {
     @Test
     void registerTest() {
         CategoryRequestDTO categoryRequestDTO = CategoryRequestDTO.builder()
-                .name("테스트카테고리")
+                .name("테스트카테고리_" + System.currentTimeMillis())
                 .type(CategoryType.GAME)
                 .build();
         categoryService.register(categoryRequestDTO);
@@ -59,7 +61,16 @@ class CategoryServiceImplTest {
 
     @Test
     void removeTest() {
-        categoryService.remove(1);
+        CategoryRequestDTO categoryRequestDTO = CategoryRequestDTO.builder()
+                .name("삭제카테고리_" + System.currentTimeMillis())
+                .type(CategoryType.GAME)
+                .build();
+        categoryService.register(categoryRequestDTO);
+        CategoryResponseDTO created = categoryService.getAll().stream()
+                .filter(category -> category.getName().equals(categoryRequestDTO.getName()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("생성한 카테고리를 찾지 못했습니다."));
+        categoryService.remove(created.getId());
         log.info("remove 완료");
     }
 }

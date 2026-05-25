@@ -49,7 +49,6 @@ public class MenuServiceImpl implements MenuService {
         return list;
     }
 
-
     /* 소프트 삭제 여부 기준 메뉴 목록 조회 (숨김 탭용) */
     @Override
     public List<MenuResponseDTO> getByIsDeleted(boolean isDeleted) {

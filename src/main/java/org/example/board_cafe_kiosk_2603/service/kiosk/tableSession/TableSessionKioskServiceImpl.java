@@ -59,20 +59,22 @@ public class TableSessionKioskServiceImpl implements TableSessionKioskService{
                 tableId, packageId, initialGuestCnt);
         return tableSession.getId();  // Long 반환
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 인원수 체크
-     * 날짜 : 2026-04-30
+    /**
+     * 인원수 체크 작업을 수행합니다.
+     *
+     * @param session 전달받은 session 값
+     * @return 처리 결과
      */
 
     private int getPartySize(HttpSession session) {
         Integer partySize = (Integer) session.getAttribute("partySize");
         return partySize != null ? partySize : 2;
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 포인트 조회
-     * 날짜 : 2026-04-30
+    /**
+     * 포인트 조회합니다.
+     *
+     * @param customerPhone 전달받은 customerPhone 값
+     * @return 처리 결과
      */
 
     private int resolvePointBalance(String customerPhone) {
@@ -81,13 +83,16 @@ public class TableSessionKioskServiceImpl implements TableSessionKioskService{
         return point != null ? point.getBalance() : 0;
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : buildCartModel 메서드
-     * 날짜 : 2026-04-30
+    /**
+     * buildCartModel 동작을 수행합니다.
+     *
+     * @param model 전달받은 model 값
+     * @param tableNumber 전달받은 tableNumber 값
+     * @param session 전달받은 session 값
      */
 
     @Override
+
     public void buildCartModel(Model model, int tableNumber, HttpSession session) {
         CartDTO cartDTO = cartService.getCart(tableNumber);
         model.addAttribute("tableNumber", tableNumber);
@@ -97,13 +102,16 @@ public class TableSessionKioskServiceImpl implements TableSessionKioskService{
         model.addAttribute("cartCount", cartDTO.getCartCount());
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : buildCheckoutModel 메서드
-     * 날짜 : 2026-04-30
+    /**
+     * buildCheckoutModel 동작을 수행합니다.
+     *
+     * @param model 전달받은 model 값
+     * @param tableNumber 전달받은 tableNumber 값
+     * @param session 전달받은 session 값
      */
 
     @Override
+
     public void buildCheckoutModel(Model model, int tableNumber, HttpSession session) {
         Integer tableId = (Integer) session.getAttribute("tableId");
         boolean adminCheckoutMode = Boolean.TRUE.equals(session.getAttribute("adminCheckoutMode"));
@@ -177,13 +185,15 @@ public class TableSessionKioskServiceImpl implements TableSessionKioskService{
                 tableNumber, cartDTO.getTotalPrice(), packageName, packageTotal, totalPrice, pointBalance);
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : buildCheckoutMeta 메서드
-     * 날짜 : 2026-04-30
+    /**
+     * buildCheckoutMeta 동작을 수행합니다.
+     *
+     * @param tableId 전달받은 tableId 값
+     * @return 처리 결과
      */
 
     @Override
+
     public Map<String, Object> buildCheckoutMeta(Integer tableId) {
         Map<String, Object> meta = new LinkedHashMap<>();
         meta.put("packageTotal", 0);
@@ -216,10 +226,12 @@ public class TableSessionKioskServiceImpl implements TableSessionKioskService{
 
         return meta;
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 세션 활성화시 인원수 체크
-     * 날짜 : 2026-04-30
+    /**
+     * 세션 활성화시 인원수 체크 작업을 수행합니다.
+     *
+     * @param activeSession 전달받은 activeSession 값
+     * @param session 전달받은 session 값
+     * @return 처리 결과
      */
 
     private int resolveCheckoutPartySize(CafeTableSession activeSession, HttpSession session) {
@@ -229,10 +241,12 @@ public class TableSessionKioskServiceImpl implements TableSessionKioskService{
         return getPartySize(session);
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : 세션 또는 주문 정보 기준으로 정산용 고객 전화번호 조회
-     * 날짜 : 2026-05-25
+    /**
+     * 세션 또는 주문 정보 기준으로 정산용 고객 전화번호 조회합니다.
+     *
+     * @param sessionCustomerPhone 전달받은 sessionCustomerPhone 값
+     * @param activeSession 전달받은 activeSession 값
+     * @return 처리 결과
      */
     private String resolveCheckoutCustomerPhone(String sessionCustomerPhone, CafeTableSession activeSession) {
         if (sessionCustomerPhone != null && !sessionCustomerPhone.isBlank()) {
@@ -249,10 +263,11 @@ public class TableSessionKioskServiceImpl implements TableSessionKioskService{
                 .orElse("");
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : 테이블 시작 시간 계산
-     * 날짜 : 2026-04-30
+    /**
+     * 테이블 시작 시간 계산합니다.
+     *
+     * @param rawStartTime 전달받은 rawStartTime 값
+     * @return 처리 결과
      */
     private Long readSessionStartMillis(Object rawStartTime) {
         if (rawStartTime instanceof Long) {
@@ -273,10 +288,11 @@ public class TableSessionKioskServiceImpl implements TableSessionKioskService{
         }
         return null;
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 테이블 종료 시간 계산
-     * 날짜 : 2026-04-30
+    /**
+     * 테이블 종료 시간 계산합니다.
+     *
+     * @param dateTime 전달받은 dateTime 값
+     * @return 처리 결과
      */
 
     private Long toEpochMillis(LocalDateTime dateTime) {

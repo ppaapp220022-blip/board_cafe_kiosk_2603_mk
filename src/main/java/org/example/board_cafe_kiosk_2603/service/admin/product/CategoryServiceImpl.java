@@ -62,7 +62,6 @@ public class CategoryServiceImpl implements CategoryService {
                 categoryRequestDTO.getName(), categoryRequestDTO.getType(), category.getId(), result);
     }
 
-
     /* 카테고리 수정 */
     @Override
     @Transactional

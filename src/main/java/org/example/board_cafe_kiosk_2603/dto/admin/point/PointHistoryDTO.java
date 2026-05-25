@@ -23,12 +23,13 @@ public class PointHistoryDTO {
     private int amount;
     private int balanceAfter;
     private LocalDateTime createdAt;
-    /*
-     * 작성자 : 김민기
-     * 기능 : 정적 팩토리 메서드
-     * 날짜 : 2026-03-27
-     */
 
+    /**
+     * from 결과를 생성해 반환합니다.
+     *
+     * @param history 전달받은 history 값
+     * @return 처리 결과
+     */
     public static PointHistoryDTO from(PointHistory history) {
         return PointHistoryDTO.builder()
                 .id(history.getId())

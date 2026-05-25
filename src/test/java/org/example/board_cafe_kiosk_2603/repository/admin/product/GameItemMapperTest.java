@@ -8,6 +8,7 @@ import org.example.board_cafe_kiosk_2603.mapper.admin.product.GameItemMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Log4j2
 @SpringBootTest
+@Transactional
 class GameItemMapperTest {
 
     @Autowired
@@ -51,9 +53,10 @@ class GameItemMapperTest {
 
     @Test
     void insertTest() {
+        String serial = "SN-TEST-" + System.currentTimeMillis();
         GameItem gameItem = GameItem.builder()
                 .gameId(1)
-                .serialNumber("SN-TEST-001")
+                .serialNumber(serial)
                 .status(GameItemStatus.NORMAL)
                 .build();
         int result = gameItemMapper.insert(gameItem);
@@ -74,7 +77,13 @@ class GameItemMapperTest {
 
     @Test
     void deleteTest() {
-        int result = gameItemMapper.delete(1);
+        GameItem gameItem = GameItem.builder()
+                .gameId(1)
+                .serialNumber("SN-DEL-" + System.currentTimeMillis())
+                .status(GameItemStatus.DAMAGED)
+                .build();
+        gameItemMapper.insert(gameItem);
+        int result = gameItemMapper.delete(gameItem.getId());
         log.info("delete 결과: " + result);
     }
 

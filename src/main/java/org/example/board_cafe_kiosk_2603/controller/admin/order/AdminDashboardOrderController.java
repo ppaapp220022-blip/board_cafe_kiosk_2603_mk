@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 /*
  * 작성자 : 김민기
- * 기능 : 관리자 대시보드 REST API
+ * 기능 : 관리자 대시보드 주문 REST API
  * 날짜 : 2026-04-06
  */
 

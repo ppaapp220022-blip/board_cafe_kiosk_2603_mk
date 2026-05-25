@@ -39,14 +39,17 @@ public class OrderService {
     private final CafeTableSessionMapper tableSessionMapper;
     private final GameItemMapper gameItemMapper;
     private final SimpMessagingTemplate messagingTemplate;
-    /*
-     * 작성자 : 김민기
-     * 기능 : 장바구니 주문 생성
-     * 날짜 : 2026-03-27
+    /**
+     * 장바구니 주문 생성합니다.
+     *
+     * @param tableNumber 전달받은 tableNumber 값
+     * @param customerPhone 전달받은 customerPhone 값
+     * @param requestedTotalAmount 전달받은 requestedTotalAmount 값
+     * @return 처리 결과
      */
 
-
     @Transactional
+
     public OrdersDTO createOrderFromCart(int tableNumber, String customerPhone, Integer requestedTotalAmount) {
         // tableNumber → tableId 변환
         Integer tableId = cartMapper.findCafeTableIdByTableNumber(tableNumber);
@@ -156,10 +159,12 @@ public class OrderService {
         return response;
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : isOrderOwnedByTableNumber 메서드
-     * 날짜 : 2026-04-12
+    /**
+     * isOrderOwnedByTableNumber 동작을 수행합니다.
+     *
+     * @param orderId 전달받은 orderId 값
+     * @param tableNumber 전달받은 tableNumber 값
+     * @return 처리 결과 여부
      */
 
     public boolean isOrderOwnedByTableNumber(int orderId, int tableNumber) {
@@ -171,10 +176,12 @@ public class OrderService {
         return tableId != null && Objects.equals(order.getTableId(), tableId);
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : isSessionOwnedByTableNumber 메서드
-     * 날짜 : 2026-04-12
+    /**
+     * isSessionOwnedByTableNumber 동작을 수행합니다.
+     *
+     * @param sessionId 전달받은 sessionId 값
+     * @param tableNumber 전달받은 tableNumber 값
+     * @return 처리 결과 여부
      */
 
     public boolean isSessionOwnedByTableNumber(long sessionId, int tableNumber) {
@@ -185,12 +192,12 @@ public class OrderService {
         Integer tableId = cartMapper.findCafeTableIdByTableNumber(tableNumber);
         return tableId != null && Objects.equals(session.getTableId(), tableId);
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 주문 단건 조회
-     * 날짜 : 2026-03-27
+    /**
+     * 주문 단건 조회합니다.
+     *
+     * @param orderId 전달받은 orderId 값
+     * @return 처리 결과
      */
-
 
     public OrdersDTO getOrder(int orderId) {
         Orders order = ordersMapper.findByOrderId(orderId);
@@ -200,10 +207,10 @@ public class OrderService {
         return toDTO(order, fetchItemDTOs(orderId));
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : getNewOrders 메서드
-     * 날짜 : 2026-03-27
+    /**
+     * getNewOrders 동작을 수행합니다.
+     *
+     * @return 처리 결과
      */
 
     public List<OrdersDTO> getNewOrders() {
@@ -212,10 +219,11 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : getOrdersByTableId 메서드
-     * 날짜 : 2026-03-27
+    /**
+     * getOrdersByTableId 동작을 수행합니다.
+     *
+     * @param tableId 전달받은 tableId 값
+     * @return 처리 결과
      */
 
     public List<OrdersDTO> getOrdersByTableId(int tableId) {
@@ -226,10 +234,11 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : getLatestOrderByTableNumber 메서드
-     * 날짜 : 2026-03-27
+    /**
+     * getLatestOrderByTableNumber 동작을 수행합니다.
+     *
+     * @param tableNumber 전달받은 tableNumber 값
+     * @return 처리 결과
      */
 
     public OrdersDTO getLatestOrderByTableNumber(int tableNumber) {
@@ -244,10 +253,11 @@ public class OrderService {
         return toDTO(order, fetchItemDTOs(order.getId()));
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : getOrdersBySessionId 메서드
-     * 날짜 : 2026-03-27
+    /**
+     * getOrdersBySessionId 동작을 수행합니다.
+     *
+     * @param sessionId 전달받은 sessionId 값
+     * @return 처리 결과
      */
 
     public List<OrdersDTO> getOrdersBySessionId(long sessionId) {
@@ -256,10 +266,11 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : getActiveSessionOrders 메서드
-     * 날짜 : 2026-04-09
+    /**
+     * getActiveSessionOrders 동작을 수행합니다.
+     *
+     * @param tableNumber 전달받은 tableNumber 값
+     * @return 처리 결과
      */
 
     public List<OrdersDTO> getActiveSessionOrders(int tableNumber) {
@@ -267,14 +278,16 @@ public class OrderService {
         if (tableId == null) return List.of();
         return getOrdersByTableId(tableId);
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 주문 상태 변경 처리
-     * 날짜 : 2026-03-27
+    /**
+     * 주문 상태 변경 처리합니다.
+     *
+     * @param orderId 전달받은 orderId 값
+     * @param newStatus 전달받은 newStatus 값
+     * @return 처리 결과
      */
 
-
     @Transactional
+
     public OrdersDTO updateStatus(int orderId, String newStatus) {
         Orders order = ordersMapper.findByOrderId(orderId);
         if (order == null) {
@@ -321,20 +334,23 @@ public class OrderService {
         return result;
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : cancelOrder 메서드
-     * 날짜 : 2026-03-27
+    /**
+     * cancelOrder 동작을 수행합니다.
+     *
+     * @param orderId 전달받은 orderId 값
+     * @return 처리 결과
      */
 
     @Transactional
+
     public OrdersDTO cancelOrder(int orderId) {
         return updateStatus(orderId, OrderStatus.CANCELLED.name());
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 신규 주문 웹소켓 브로드캐스트
-     * 날짜 : 2026-03-27
+    /**
+     * 신규 주문 웹소켓 브로드캐스트 작업을 수행합니다.
+     *
+     * @param order 전달받은 order 값
+     * @param tableId 전달받은 tableId 값
      */
 
     private void broadcastNewOrder(OrdersDTO order, int tableId) {
@@ -350,10 +366,11 @@ public class OrderService {
             log.warn("웹소켓 전송 실패: {}", e.getMessage());
         }
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 주문 상태 변경 알림
-     * 날짜 : 2026-03-27
+    /**
+     * 주문 상태 변경 알림 작업을 수행합니다.
+     *
+     * @param order 전달받은 order 값
+     * @param tableId 전달받은 tableId 값
      */
 
     private void broadcastOrderUpdate(OrdersDTO order, int tableId) {
@@ -365,12 +382,12 @@ public class OrderService {
             log.warn("웹소켓 전송 실패: {}", e.getMessage());
         }
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 주문 상품 DTO 목록 변환
-     * 날짜 : 2026-03-27
+    /**
+     * 주문 상품 DTO 목록 변환합니다.
+     *
+     * @param orderId 전달받은 orderId 값
+     * @return 처리 결과
      */
-
 
     private List<OrderItemDTO> fetchItemDTOs(int orderId) {
         return ordersMapper.findItemsByOrderId(orderId).stream()
@@ -385,10 +402,12 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : toDTO 메서드
-     * 날짜 : 2026-04-01
+    /**
+     * toDTO 동작을 수행합니다.
+     *
+     * @param order 전달받은 order 값
+     * @param items 전달받은 items 값
+     * @return 처리 결과
      */
 
     private OrdersDTO toDTO(Orders order, List<OrderItemDTO> items) {
@@ -404,10 +423,11 @@ public class OrderService {
                 .build();
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : isGameOnlyOrder 메서드
-     * 날짜 : 2026-04-14
+    /**
+     * isGameOnlyOrder 동작을 수행합니다.
+     *
+     * @param order 전달받은 order 값
+     * @return 처리 결과 여부
      */
 
     private boolean isGameOnlyOrder(OrdersDTO order) {
@@ -418,10 +438,11 @@ public class OrderService {
                 .allMatch(item -> item != null && item.getPrice() == 0);
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : isGameOnlyOrderItems 메서드
-     * 날짜 : 2026-04-14
+    /**
+     * isGameOnlyOrderItems 동작을 수행합니다.
+     *
+     * @param items 전달받은 items 값
+     * @return 처리 결과 여부
      */
 
     private boolean isGameOnlyOrderItems(List<OrderItemDTO> items) {
@@ -430,10 +451,11 @@ public class OrderService {
                 && items.stream().allMatch(item -> item != null && item.getPrice() == 0);
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : validateGameOrderTransition 메서드
-     * 날짜 : 2026-04-14
+    /**
+     * validateGameOrderTransition 동작을 수행합니다.
+     *
+     * @param current 전달받은 current 값
+     * @param next 전달받은 next 값
      */
 
     private void validateGameOrderTransition(OrderStatus current, OrderStatus next) {
@@ -450,10 +472,11 @@ public class OrderService {
         }
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : validateGameSerialMatched 메서드
-     * 날짜 : 2026-04-14
+    /**
+     * validateGameSerialMatched 동작을 수행합니다.
+     *
+     * @param order 전달받은 order 값
+     * @param items 전달받은 items 값
      */
 
     private void validateGameSerialMatched(Orders order, List<OrderItemDTO> items) {
@@ -476,10 +499,14 @@ public class OrderService {
         }
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : createSeparatedOrder 메서드
-     * 날짜 : 2026-04-14
+    /**
+     * createSeparatedOrder 동작을 수행합니다.
+     *
+     * @param sessionId 전달받은 sessionId 값
+     * @param tableId 전달받은 tableId 값
+     * @param customerPhone 전달받은 customerPhone 값
+     * @param items 전달받은 items 값
+     * @return 처리 결과
      */
 
     private OrdersDTO createSeparatedOrder(long sessionId,

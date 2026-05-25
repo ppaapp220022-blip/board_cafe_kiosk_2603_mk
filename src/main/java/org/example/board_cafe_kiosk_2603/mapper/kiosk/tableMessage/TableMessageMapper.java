@@ -6,7 +6,6 @@ import org.example.board_cafe_kiosk_2603.domain.kiosk.tableMessage.TableMessage;
 
 import java.util.List;
 
-
 @Mapper
 
 /*
@@ -16,46 +15,45 @@ import java.util.List;
  */
 public interface TableMessageMapper {
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : 데이터 등록
-     * 날짜 : 2026-04-12
+    /**
+     * 데이터 등록합니다.
+     *
+     * @param message 전달받은 message 값
      */
     void insert(TableMessage message);
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : findUnread 처리
-     * 날짜 : 2026-03-30
+    /**
+     * findUnread 처리합니다.
+     *
+     * @return 처리 결과
      */
     List<TableMessage> findUnread();
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : 테이블 ID 기준 조회
-     * 날짜 : 2026-03-30
+    /**
+     * 테이블 ID 기준 조회합니다.
+     *
+     * @param tableId 전달받은 tableId 값
+     * @return 처리 결과
      */
     List<TableMessage> findByTableId(@Param("tableId") int tableId);
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : 테이블의 미읽음 관리자 메시지 조회
-     * 날짜 : 2026-04-12
+    /**
+     * 테이블의 미읽음 관리자 메시지 조회합니다.
+     *
+     * @param tableId 전달받은 tableId 값
+     * @return 처리 결과
      */
     List<TableMessage> findUnreadStaffByTableId(@Param("tableId") int tableId);
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : 메시지 읽음 처리
-     * 날짜 : 2026-03-30
+    /**
+     * 메시지 읽음 처리합니다.
+     *
+     * @param id 전달받은 id 값
      */
     void markAsRead(@Param("id") long id);
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : 전체 메시지 읽음 처리
-     * 날짜 : 2026-03-30
+    /**
+     * 전체 메시지 읽음 처리합니다.
      */
     void markAllAsRead();
 }
-

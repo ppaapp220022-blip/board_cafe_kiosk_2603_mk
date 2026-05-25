@@ -75,10 +75,12 @@ public class PaymentService {
     private String confirmUrl;
 
     private static final double EARN_RATE = 0.05;
-    /*
-     * 작성자 : 김민기
-     * 기능 : 결제 준비 처리
-     * 날짜 : 2026-03-27
+    /**
+     * 결제 준비 처리합니다.
+     *
+     * @param tableNumber 전달받은 tableNumber 값
+     * @param request 전달받은 request 값
+     * @return 처리 결과
      */
 
     public PaymentDTO preparePayment(int tableNumber, PaymentDTO request) {
@@ -148,13 +150,20 @@ public class PaymentService {
             return errorResponse("결제 준비 중 오류가 발생했습니다.");
         }
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 결제 승인 처리
-     * 날짜 : 2026-03-27
+    /**
+     * 결제 승인 처리합니다.
+     *
+     * @param paymentKey 전달받은 paymentKey 값
+     * @param orderIdToss 전달받은 orderIdToss 값
+     * @param amount 전달받은 amount 값
+     * @param tableNumber 전달받은 tableNumber 값
+     * @param pointUsed 전달받은 pointUsed 값
+     * @param customerPhone 전달받은 customerPhone 값
+     * @return 처리 결과
      */
 
     @Transactional
+
     public PaymentDTO confirmPayment(String paymentKey, String orderIdToss,
                                      int amount, int tableNumber,
                                      int pointUsed, String customerPhone) {
@@ -241,12 +250,14 @@ public class PaymentService {
             return errorResponse("결제 승인 중 오류가 발생했습니다.");
         }
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 토스 결제 승인 API 호출
-     * 날짜 : 2026-03-27
+    /**
+     * 토스 결제 승인 API 호출 작업을 수행합니다.
+     *
+     * @param paymentKey 전달받은 paymentKey 값
+     * @param orderId 전달받은 orderId 값
+     * @param amount 전달받은 amount 값
+     * @return 처리 결과
      */
-
 
     private TossConfirmResponse callTossConfirmApi(String paymentKey, String orderId, int amount) {
         try {
@@ -285,10 +296,11 @@ public class PaymentService {
         }
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : parseTossError 메서드
-     * 날짜 : 2026-03-27
+    /**
+     * parseTossError 동작을 수행합니다.
+     *
+     * @param body 전달받은 body 값
+     * @return 처리 결과
      */
 
     private String parseTossError(String body) {
@@ -300,10 +312,11 @@ public class PaymentService {
             return "결제 승인에 실패했습니다.";
         }
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 활성 주문 목록 조회
-     * 날짜 : 2026-03-27
+    /**
+     * 활성 주문 목록 조회합니다.
+     *
+     * @param sessionId 전달받은 sessionId 값
+     * @return 처리 결과
      */
 
     private List<Orders> getActiveOrders(long sessionId) {
@@ -312,10 +325,11 @@ public class PaymentService {
                 .filter(o -> !OrderStatus.CANCELLED.name().equals(o.getStatus()))
                 .collect(Collectors.toList());
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 패키지 금액 계산 (인원수 곱하기)
-     * 날짜 : 2026-03-27
+    /**
+     * 패키지 금액 계산 (인원수 곱하기) 작업을 수행합니다.
+     *
+     * @param session 전달받은 session 값
+     * @return 처리 결과
      */
 
     private int calculatePackagePrice(CafeTableSession session) {
@@ -330,10 +344,11 @@ public class PaymentService {
         return pkg.getBasePrice() * guestCount;
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : calculateOverCharge 메서드
-     * 날짜 : 2026-04-27
+    /**
+     * calculateOverCharge 동작을 수행합니다.
+     *
+     * @param session 전달받은 session 값
+     * @return 처리 결과
      */
 
     private int calculateOverCharge(CafeTableSession session) {
@@ -362,10 +377,11 @@ public class PaymentService {
         int guestCount = session.getInitialGuestCnt() != null ? session.getInitialGuestCnt() : 1;
         return (int) Math.ceil(overUnits * extraPricePerMin * guestCount);
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : CafePackage → CafePackageDTO 변환
-     * 날짜 : 2026-03-27
+    /**
+     * CafePackage → CafePackageDTO 변환합니다.
+     *
+     * @param pkg 전달받은 pkg 값
+     * @return 처리 결과
      */
 
     private CafePackageDTO buildCafePackageDTO(CafePackage pkg) {
@@ -381,30 +397,34 @@ public class PaymentService {
                 .build();
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : generateOrderId 메서드
-     * 날짜 : 2026-03-27
+    /**
+     * generateOrderId 동작을 수행합니다.
+     *
+     * @param tableNumber 전달받은 tableNumber 값
+     * @return 처리 결과
      */
 
     private String generateOrderId(int tableNumber) {
         return "KIOSK-T" + tableNumber + "-" + System.currentTimeMillis();
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : generateCustomerKey 메서드
-     * 날짜 : 2026-03-27
+    /**
+     * generateCustomerKey 동작을 수행합니다.
+     *
+     * @param tableNumber 전달받은 tableNumber 값
+     * @param sessionId 전달받은 sessionId 값
+     * @return 처리 결과
      */
 
     private String generateCustomerKey(int tableNumber, long sessionId) {
         return "GUEST-T" + tableNumber + "-S" + sessionId;
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : buildOrderNameFromOrders 메서드
-     * 날짜 : 2026-04-09
+    /**
+     * buildOrderNameFromOrders 동작을 수행합니다.
+     *
+     * @param orders 전달받은 orders 값
+     * @return 처리 결과
      */
 
     private String buildOrderNameFromOrders(List<Orders> orders) {
@@ -414,10 +434,15 @@ public class PaymentService {
         int extra = orders.size() - 1;
         return items.get(0).getMenuName() + (extra > 0 ? " 외 " + extra + "건" : "");
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 결제 정보 DB 저장
-     * 날짜 : 2026-04-01
+    /**
+     * 결제 정보 DB 저장 작업을 수행합니다.
+     *
+     * @param session 전달받은 session 값
+     * @param finalAmount 전달받은 finalAmount 값
+     * @param paymentKey 전달받은 paymentKey 값
+     * @param orderIdToss 전달받은 orderIdToss 값
+     * @param tossResponse 전달받은 tossResponse 값
+     * @param tableNumber 전달받은 tableNumber 값
      */
 
     private void createPayment(CafeTableSession session, int finalAmount,
@@ -441,10 +466,11 @@ public class PaymentService {
         paymentMapper.insert(payment);
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : parseApprovedAt 메서드
-     * 날짜 : 2026-03-27
+    /**
+     * parseApprovedAt 동작을 수행합니다.
+     *
+     * @param approvedAt 전달받은 approvedAt 값
+     * @return 처리 결과
      */
 
     private LocalDateTime parseApprovedAt(String approvedAt) {
@@ -458,10 +484,14 @@ public class PaymentService {
             return LocalDateTime.now();
         }
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 포인트 사용 + 적립 처리
-     * 날짜 : 2026-04-01
+    /**
+     * 포인트 사용 + 적립 처리합니다.
+     *
+     * @param customerPhone 전달받은 customerPhone 값
+     * @param pointUsed 전달받은 pointUsed 값
+     * @param finalAmount 전달받은 finalAmount 값
+     * @param orderId 전달받은 orderId 값
+     * @return 처리 결과
      */
 
     private int processPoints(String customerPhone, int pointUsed, int finalAmount, Long orderId) {
@@ -486,20 +516,22 @@ public class PaymentService {
         return earnedPoints;
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : isValidPhone 메서드
-     * 날짜 : 2026-04-06
+    /**
+     * isValidPhone 동작을 수행합니다.
+     *
+     * @param customerPhone 전달받은 customerPhone 값
+     * @return 처리 결과 여부
      */
 
     private boolean isValidPhone(String customerPhone) {
         return customerPhone != null && !customerPhone.isBlank();
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : closeTableSessionAndSetCleaning 메서드
-     * 날짜 : 2026-04-10
+    /**
+     * closeTableSessionAndSetCleaning 동작을 수행합니다.
+     *
+     * @param tableId 전달받은 tableId 값
+     * @param sessionId 전달받은 sessionId 값
      */
 
     private void closeTableSessionAndSetCleaning(Integer tableId, Long sessionId) {
@@ -525,10 +557,10 @@ public class PaymentService {
                 tableId, sessionId, readUpdated, closedRows, statusRows, currentStatus, currentSessionId);
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : settleRemainingGameRentalsOnCheckout 메서드
-     * 날짜 : 2026-04-14
+    /**
+     * settleRemainingGameRentalsOnCheckout 동작을 수행합니다.
+     *
+     * @param sessionId 전달받은 sessionId 값
      */
 
     private void settleRemainingGameRentalsOnCheckout(Long sessionId) {
@@ -538,10 +570,11 @@ public class PaymentService {
                 sessionId, historyUpdated, itemUpdated);
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : errorResponse 메서드
-     * 날짜 : 2026-04-06
+    /**
+     * errorResponse 동작을 수행합니다.
+     *
+     * @param message 전달받은 message 값
+     * @return 처리 결과
      */
 
     private PaymentDTO errorResponse(String message) {

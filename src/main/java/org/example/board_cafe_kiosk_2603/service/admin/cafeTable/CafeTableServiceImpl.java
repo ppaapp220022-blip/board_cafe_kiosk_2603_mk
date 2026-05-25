@@ -36,12 +36,6 @@ public class CafeTableServiceImpl implements CafeTableService {
     private final PaymentMapper paymentMapper;
     private final PasswordEncoder passwordEncoder;
 
-    /*
-     * 작성자 : 강수연
-     * 기능 : getAllTableStatus 메서드
-     * 날짜 : 2026-03-27
-     */
-
     @Override
     @Transactional(readOnly = true) // 상세 설명: 단순 조회 메서드이므로 성능 최적화를 위해 readOnly 적용
     public List<CafeTableDTO> getAllTableStatus() {
@@ -60,12 +54,6 @@ public class CafeTableServiceImpl implements CafeTableService {
                 .build()
         ).collect(Collectors.toList());
     }
-
-    /*
-     * 작성자 : 강수연
-     * 기능 : changeTableStatus 메서드
-     * 날짜 : 2026-03-26
-     */
 
     @Override
     public void changeTableStatus(Integer id, String status) {
@@ -151,10 +139,11 @@ public class CafeTableServiceImpl implements CafeTableService {
         }
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : ensurePaymentCompletedBeforeCleaning 메서드
-     * 날짜 : 2026-04-18
+    /**
+     * ensurePaymentCompletedBeforeCleaning 동작을 수행합니다.
+     *
+     * @param tableId 전달받은 tableId 값
+     * @param sessionId 전달받은 sessionId 값
      */
 
     private void ensurePaymentCompletedBeforeCleaning(Integer tableId, Long sessionId) {
@@ -165,12 +154,6 @@ public class CafeTableServiceImpl implements CafeTableService {
             throw new IllegalStateException("결제가 완료되지 않아 청소중으로 변경할 수 없습니다.");
         }
     }
-
-    /*
-     * 작성자 : 강수연
-     * 기능 : generateNewToken 메서드
-     * 날짜 : 2026-03-26
-     */
 
     @Override
     public String generateNewToken(Integer id) {
@@ -186,12 +169,6 @@ public class CafeTableServiceImpl implements CafeTableService {
 
         return newToken;
     }
-
-    /*
-     * 작성자 : 강수연
-     * 기능 : resetAllTablesForNewDay 메서드
-     * 날짜 : 2026-03-26
-     */
 
     @Override
     public void resetAllTablesForNewDay() {
@@ -216,11 +193,6 @@ public class CafeTableServiceImpl implements CafeTableService {
 
         log.info("--- 자정 데이터 리셋 프로세스 종료 ---");
     }
-    /*
-     * 작성자 : 강수연
-     * 기능 : [실시간 주문 상세 내역 조회]
-     * 날짜 : 2026-03-30
-     */
 
     @Override
     @Transactional(readOnly = true) // 데이터 정합성을 유지하면서도 성능 최적화를 위해 읽기 전용 트랜잭션 적용
@@ -257,22 +229,12 @@ public class CafeTableServiceImpl implements CafeTableService {
 
         return activeItems;
     }
-    /*
-     * 작성자 : 강수연
-     * 기능 : 읽지 않은 메시지 내용들만 추출
-     * 날짜 : 2026-03-30
-     */
 
     @Override
     public List<String> getUnreadMessages(Integer tableId) {
         log.info("손님 요청 메시지 조회 - 테이블 ID: {}", tableId);
         return cafeTableMapper.selectUnreadMessageContents(tableId);
     }
-    /*
-     * 작성자 : 강수연
-     * 기능 : 알림 상태 업데이트 (is_read = true)
-     * 날짜 : 2026-03-30
-     */
 
     @Override
     @Transactional
@@ -280,11 +242,6 @@ public class CafeTableServiceImpl implements CafeTableService {
         log.info("손님 요청 읽음 처리 - 테이블 ID: {}", tableId);
         cafeTableMapper.updateMessagesReadStatus(tableId);
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : 키오스크 로그인: 테이블 번호 + 비밀번호 검증 후 테이블 반환
-     * 날짜 : 2026-04-01
-     */
 
     @Override
     public Optional<CafeTable> login(int tableNumber, String password) {
@@ -309,22 +266,17 @@ public class CafeTableServiceImpl implements CafeTableService {
         return Optional.of(cafeTable);
     }
 
-    /*
-     * 작성자 : 서주연
-     * 기능 : updateAccessToken 메서드
-     * 날짜 : 2026-04-06
-     */
-
     @Override
     public void updateAccessToken(int tableId, String accessToken) {
         log.info("--- [CafeTableService] access_token 업데이트 | tableId: {} ---", tableId);
         cafeTableMapper.updateAccessToken(tableId, accessToken);
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : getTableStatus 메서드
-     * 날짜 : 2026-04-12
+    /**
+     * getTableStatus 동작을 수행합니다.
+     *
+     * @param tableId 전달받은 tableId 값
+     * @return 처리 결과
      */
 
     @Override
@@ -332,12 +284,6 @@ public class CafeTableServiceImpl implements CafeTableService {
     public String getTableStatus(int tableId) {
         return cafeTableMapper.selectStatusById(tableId);
     }
-
-    /*
-     * 작성자 : 서주연
-     * 기능 : findCurrentSessionId 메서드
-     * 날짜 : 2026-04-06
-     */
 
     @Override
     public Long findCurrentSessionId(int tableId) {
@@ -347,24 +293,12 @@ public class CafeTableServiceImpl implements CafeTableService {
         return sessionId;
     }
 
-    /*
-     * 작성자 : 서주연
-     * 기능 : findActiveSessionByTableId 메서드
-     * 날짜 : 2026-04-06
-     */
-
     @Override
     @Transactional(readOnly = true)
     public Long findActiveSessionByTableId(int tableId) {
         log.info("--- [CafeTableService] table_session 활성 세션 조회 | tableId: {} ---", tableId);
         return cafeTableMapper.selectActiveSessionByTableId(tableId);
     }
-
-    /*
-     * 작성자 : 서주연
-     * 기능 : syncTableWithSession 메서드
-     * 날짜 : 2026-04-06
-     */
 
     @Override
     public void syncTableWithSession(int tableId, Long sessionId) {
@@ -373,10 +307,11 @@ public class CafeTableServiceImpl implements CafeTableService {
         // tableId를 그냥 넘기면 됨 - Mapper @Param("id")가 받음.
         cafeTableMapper.updateTableStatusAndSession(tableId, "OCCUPIED", sessionId);
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : access_token 조회 메서드
-     * 날짜 : 2026-04-16
+    /**
+     * access_token 조회합니다.
+     *
+     * @param tableId 전달받은 tableId 값
+     * @return 처리 결과
      */
 
     @Override
@@ -385,6 +320,5 @@ public class CafeTableServiceImpl implements CafeTableService {
         return cafeTableMapper.selectAccessTokenById(tableId);
         // selectAccessTokenById는 changeTableStatus()에서 이미 사용 중 → Mapper에 존재함
     }
-
 
 }

@@ -16,12 +16,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 
-/*
- * 작성자 : 서민성
- * 기능 : PointMapper 테스트
- * 날짜 : 2026-03-27
- */
-
 @Log4j2
 @SpringBootTest
 @Transactional
@@ -33,12 +27,6 @@ class PointMapperTest {
     private String uniquePhone(String suffix) {
         return "010" + String.format("%08d", (System.currentTimeMillis() % 100_000_000)) + suffix;
     }
-
-    /*
-     * 작성자 : 김민기
-     * 기능 : insert_and_findByPhone 메서드
-     * 날짜 : 2026-03-27
-     */
 
     @Test
     @DisplayName("포인트 계좌 생성 후 전화번호로 조회 성공")
@@ -54,24 +42,12 @@ class PointMapperTest {
         assertThat(found.getBalance()).isEqualTo(0);
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : findByPhone_notFound 메서드
-     * 날짜 : 2026-03-27
-     */
-
     @Test
     @DisplayName("존재하지 않는 전화번호 조회 시 null 반환")
     void findByPhone_notFound() {
         Point found = pointMapper.findByPhone("000-0000-0000");
         assertThat(found).isNull();
     }
-
-    /*
-     * 작성자 : 김민기
-     * 기능 : updateBalance 메서드
-     * 날짜 : 2026-03-27
-     */
 
     @Test
     @DisplayName("잔액 업데이트 성공")
@@ -93,12 +69,6 @@ class PointMapperTest {
         assertThat(found.getBalance()).isEqualTo(5000);
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : countAll_and_sumTotalBalance 메서드
-     * 날짜 : 2026-03-27
-     */
-
     @Test
     @DisplayName("전체 고객 수 및 총 잔액 집계 성공")
     void countAll_and_sumTotalBalance() {
@@ -109,11 +79,6 @@ class PointMapperTest {
         assertThat(pointMapper.sumTotalBalance()).isGreaterThanOrEqualTo(3000);
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : insertHistory_and_findHistory 메서드
-     * 날짜 : 2026-03-27
-     */
 
     @Test
     @Disabled("현재 point_history 스키마가 주문 이력과 강하게 결합되어 있어 독립 실행 테스트가 불안정합니다.")
@@ -137,11 +102,6 @@ class PointMapperTest {
         assertThat(list.get(0).getAmount()).isEqualTo(1000);
         assertThat(list.get(0).getBalanceAfter()).isEqualTo(1000);
     }
-    /*
-     * 작성자 : 서민성
-     * 기능 : 포인트 목록 페이징 조회 테스트
-     * 날짜 : 2026-04-09
-     */
 
     @Test
     @DisplayName("페이징 포인트 목록 조회 성공")
@@ -157,12 +117,6 @@ class PointMapperTest {
         List<Point> list = pointMapper.selectList(pageRequestDTO);
         assertThat(list).hasSizeGreaterThanOrEqualTo(2);
     }
-
-    /*
-     * 작성자 : 서민성
-     * 기능 : selectList_withKeyword 메서드
-     * 날짜 : 2026-04-09
-     */
 
     @Test
     @DisplayName("keyword로 전화번호 검색 조회 성공")
@@ -180,12 +134,6 @@ class PointMapperTest {
         assertThat(list).hasSizeGreaterThanOrEqualTo(1);
         assertThat(list.stream().anyMatch(point -> phone.equals(point.getPhone()))).isTrue();
     }
-
-    /*
-     * 작성자 : 서민성
-     * 기능 : selectCount 메서드
-     * 날짜 : 2026-04-09
-     */
 
     @Test
     @DisplayName("전체 개수 조회 성공")

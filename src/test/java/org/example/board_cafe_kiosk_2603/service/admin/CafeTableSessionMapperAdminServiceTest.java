@@ -28,5 +28,4 @@ class CafeTableSessionMapperAdminServiceTest {
         log.info("정산 금액 업데이트... sessionId: {}, totalAmount: 25000", tableSession.getId());
     }
 
-
 }

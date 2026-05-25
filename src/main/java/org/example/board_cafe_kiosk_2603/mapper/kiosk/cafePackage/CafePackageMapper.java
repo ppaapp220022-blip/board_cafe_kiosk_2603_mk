@@ -5,7 +5,6 @@ import org.example.board_cafe_kiosk_2603.domain.kiosk.cafePackage.CafePackage;
 
 import java.util.List;
 
-
 @Mapper
 
 /*
@@ -15,17 +14,18 @@ import java.util.List;
  */
 public interface CafePackageMapper {
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : 활성 데이터 목록 조회
-     * 날짜 : 2026-03-27
+    /**
+     * 활성 데이터 목록 조회합니다.
+     *
+     * @return 처리 결과
      */
     List<CafePackage> findAllActive();
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : ID로 단건 조회
-     * 날짜 : 2026-03-27
+    /**
+     * ID로 단건 조회합니다.
+     *
+     * @param id 전달받은 id 값
+     * @return 처리 결과
      */
     CafePackage findById(int id);
 }

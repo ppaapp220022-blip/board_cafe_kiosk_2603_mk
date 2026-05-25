@@ -2,6 +2,7 @@ package org.example.board_cafe_kiosk_2603.ai;
 
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 @Log4j2
 @Component
+@ConditionalOnProperty(name = "app.ai.enabled", havingValue = "true", matchIfMissing = true)
 public class GameEmbeddingRunner implements ApplicationRunner {
 
     /* 애플리케이션이 구동되는 시점에 자동으로 실행되어 RAG용 벡터 데이터를 최신화함 */

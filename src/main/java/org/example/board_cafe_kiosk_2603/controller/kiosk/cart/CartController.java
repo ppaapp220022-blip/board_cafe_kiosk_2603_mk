@@ -27,13 +27,14 @@ public class CartController {
 
     private final CartService     cartService;
     private final TableSessionKioskService tableSessionKioskService;
-    /*
-     * 작성자 : 김민기
-     * 기능 : 장바구니 페이지 조회
-     * 날짜 : 2026-03-27
+
+    /**
+     * 장바구니 페이지 조회합니다.
+     *
+     * @param session 전달받은 session 값
+     * @param model 전달받은 model 값
+     * @return 처리 결과
      */
-
-
     @GetMapping
     public String cartPage(HttpSession session, Model model) {
         Integer tableNumber = tableNumber(session);
@@ -41,13 +42,13 @@ public class CartController {
         tableSessionKioskService.buildCartModel(model, tableNumber, session);
         return "kiosk/cart";
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 장바구니 조회
-     * 날짜 : 2026-03-27
+
+    /**
+     * 장바구니 조회합니다.
+     *
+     * @param session 전달받은 session 값
+     * @return 처리 결과
      */
-
-
     @GetMapping("/items")
     @ResponseBody
     public ResponseEntity<CartDTO> getCart(HttpSession session) {
@@ -56,12 +57,13 @@ public class CartController {
         return ResponseEntity.ok(cartService.getCart(tableNumber));
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : addToCart 메서드
-     * 날짜 : 2026-03-27
+    /**
+     * addToCart 동작을 수행합니다.
+     *
+     * @param item 전달받은 item 값
+     * @param session 전달받은 session 값
+     * @return 처리 결과
      */
-
     @PostMapping(value = "/add")
     @ResponseBody
     public ResponseEntity<?> addToCart(@RequestBody CartItemDTO item,
@@ -84,12 +86,13 @@ public class CartController {
         }
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : updateCart 메서드
-     * 날짜 : 2026-03-27
+    /**
+     * updateCart 동작을 수행합니다.
+     *
+     * @param item 전달받은 item 값
+     * @param session 전달받은 session 값
+     * @return 처리 결과
      */
-
     @PutMapping("/update")
     @ResponseBody
     public ResponseEntity<CartDTO> updateCart(@RequestBody CartItemDTO item,
@@ -99,12 +102,12 @@ public class CartController {
         return ResponseEntity.ok(cartService.updateItem(tableNumber, item));
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : clearCart 메서드
-     * 날짜 : 2026-03-27
+    /**
+     * clearCart 동작을 수행합니다.
+     *
+     * @param session 전달받은 session 값
+     * @return 처리 결과
      */
-
     @DeleteMapping("/clear")
     @ResponseBody
     public ResponseEntity<CartDTO> clearCart(HttpSession session) {
@@ -112,12 +115,13 @@ public class CartController {
         if (tableNumber == null) return ResponseEntity.badRequest().build();
         return ResponseEntity.ok(cartService.clearCart(tableNumber));
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 세션에서 테이블 번호 조회
-     * 날짜 : 2026-03-27
-     */
 
+    /**
+     * 세션에서 테이블 번호 조회합니다.
+     *
+     * @param session 전달받은 session 값
+     * @return 처리 결과
+     */
     private Integer tableNumber(HttpSession session) {
         Object raw = session.getAttribute("tableNumber");
         if (raw == null) {
@@ -139,5 +143,4 @@ public class CartController {
             return null;
         }
     }
-
 }

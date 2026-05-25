@@ -79,7 +79,6 @@ public class StatController {
         log.info("topMenus : {}", statService.getTopSellingMenuByDate(targetDate, 5));
         response.put("topMenus", statService.getTopSellingMenuByDate(targetDate, 5));
 
-
         // 4. 카테고리 통계
         log.info("categoryStats : {}", statService.getCategoryStats(targetDate));
         response.put("categoryStats", statService.getCategoryStats(targetDate));

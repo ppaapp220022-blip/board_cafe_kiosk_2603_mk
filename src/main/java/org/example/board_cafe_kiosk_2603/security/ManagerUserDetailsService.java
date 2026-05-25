@@ -41,7 +41,6 @@ public class ManagerUserDetailsService implements UserDetailsService {
             // 별도 예외를 던지지 않아도 자동 차단됨
         }
 
-
 //        // 2. 시큐리티 전용 User 객체 생성 (권한은 일단 ROLE_ADMIN으로 부여)
 //        return new User(
 //                manager.getLoginId(),

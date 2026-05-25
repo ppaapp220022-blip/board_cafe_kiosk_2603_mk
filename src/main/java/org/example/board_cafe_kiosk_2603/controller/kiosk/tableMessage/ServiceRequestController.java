@@ -23,13 +23,14 @@ public class ServiceRequestController {
 
     private final TableMessageMapper tableMessageMapper;
     private final CartMapper cartMapper;
-    /*
-     * 작성자 : 김민기
-     * 기능 : 서비스 요청 메시지 등록
-     * 날짜 : 2026-03-30
+
+    /**
+     * 서비스 요청 메시지 등록합니다.
+     *
+     * @param req 전달받은 req 값
+     * @param session 전달받은 session 값
+     * @return 처리 결과
      */
-
-
     @PostMapping("/kiosk/service-request")
     public ResponseEntity<Map<String, Object>> serviceRequest(
             @RequestBody Map<String, Object> req,
@@ -79,13 +80,12 @@ public class ServiceRequestController {
         res.put("message", serviceType + " 요청이 전송되었습니다.");
         return ResponseEntity.ok(res);
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 미읽음 메시지 조회
-     * 날짜 : 2026-03-30
+
+    /**
+     * 미읽음 메시지 조회합니다.
+     *
+     * @return 처리 결과
      */
-
-
     @GetMapping("/admin/messages/unread")
     public Map<String, Object> getUnreadMessages() {
         var messages = tableMessageMapper.findUnread();
@@ -96,12 +96,12 @@ public class ServiceRequestController {
         return res;
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : getMessagesByTable 메서드
-     * 날짜 : 2026-03-30
+    /**
+     * getMessagesByTable 동작을 수행합니다.
+     *
+     * @param tableNumber 전달받은 tableNumber 값
+     * @return 처리 결과
      */
-
     @GetMapping("/admin/messages/table/{tableNumber}")
     public Map<String, Object> getMessagesByTable(
             @PathVariable int tableNumber) {
@@ -119,13 +119,12 @@ public class ServiceRequestController {
         res.put("messages", messages);
         return res;
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 메시지 읽음 처리
-     * 날짜 : 2026-03-30
+    /**
+     * 메시지 읽음 처리합니다.
+     *
+     * @param id 전달받은 id 값
+     * @return 처리 결과
      */
-
-
     @PutMapping("/admin/messages/{id}/read")
     public Map<String, Object> markAsRead(@PathVariable long id) {
         tableMessageMapper.markAsRead(id);
@@ -135,12 +134,11 @@ public class ServiceRequestController {
         return res;
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : markAllAsRead 메서드
-     * 날짜 : 2026-03-30
+    /**
+     * markAllAsRead 동작을 수행합니다.
+     *
+     * @return 처리 결과
      */
-
     @PutMapping("/admin/messages/read-all")
     public Map<String, Object> markAllAsRead() {
         tableMessageMapper.markAllAsRead();
@@ -149,13 +147,13 @@ public class ServiceRequestController {
         res.put("success", true);
         return res;
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 직원용 미읽음 메시지 조회
-     * 날짜 : 2026-04-12
+
+    /**
+     * 직원용 미읽음 메시지 조회합니다.
+     *
+     * @param session 전달받은 session 값
+     * @return 처리 결과
      */
-
-
     @GetMapping("/kiosk/messages/staff/unread")
     public Map<String, Object> getUnreadStaffMessages(HttpSession session) {
         Map<String, Object> res = new LinkedHashMap<>();
@@ -205,12 +203,12 @@ public class ServiceRequestController {
         return res;
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : markMessageAsReadForKiosk 메서드
-     * 날짜 : 2026-04-12
+    /**
+     * markMessageAsReadForKiosk 동작을 수행합니다.
+     *
+     * @param id 전달받은 id 값
+     * @return 처리 결과
      */
-
     @PatchMapping("/kiosk/messages/{id}/read")
     public Map<String, Object> markMessageAsReadForKiosk(@PathVariable long id) {
         tableMessageMapper.markAsRead(id);
@@ -218,13 +216,13 @@ public class ServiceRequestController {
         res.put("success", true);
         return res;
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 정수 변환 처리
-     * 날짜 : 2026-03-30
+
+    /**
+     * 정수 변환 처리합니다.
+     *
+     * @param val 전달받은 val 값
+     * @return 처리 결과
      */
-
-
     private int toInt(Object val) {
         if (val == null) return 0;
         if (val instanceof Number number) {

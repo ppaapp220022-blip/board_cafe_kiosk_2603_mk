@@ -5,6 +5,7 @@ import org.example.board_cafe_kiosk_2603.domain.admin.macro.MacroMessage;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -12,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Log4j2
 @SpringBootTest
+@Transactional
 class MacroMessageMapperTest {
     @Autowired
     private MacroMessageMapper macroMessageMapper;
@@ -78,8 +80,7 @@ class MacroMessageMapperTest {
         macroMessageMapper.deactivateMacro(targetId);
 
         MacroMessage updatedMsg = macroMessageMapper.findById(targetId);
-
-        log.info("비활성화 후 상태: {}", updatedMsg.isActive());
+        log.info("비활성화 후 조회 결과: {}", updatedMsg);
 
         // findAllActive 목록에 포함되지 않아야 함
         List<MacroMessage> activeList = macroMessageMapper.findAllActive();

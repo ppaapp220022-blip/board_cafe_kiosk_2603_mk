@@ -29,7 +29,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         // WebSocket 연결 엔드포인트
         // SockJS로 폴백 지원 (WebSocket을 지원하지 않는 브라우저에 대해)
         registry.addEndpoint("/ws/orders")
-                .setAllowedOrigins("http://localhost:8080", "http://localhost:3000")  // 특정 도메인 명시
+                .setAllowedOrigins("http://localhost:8080")  // 특정 도메인 명시
                 .withSockJS();  // SockJS로 폴백 지원
     }
 }

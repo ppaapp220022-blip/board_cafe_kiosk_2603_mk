@@ -15,11 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-/*
- * 작성자 : 강수연
- * 기능 : Table 관련 요청을 처리하는 컨트롤러
- * 날짜 : 2026-03-26
- */
+/* 대시보드 컨트롤러 */
 
 @Log4j2
 @Controller
@@ -29,12 +25,7 @@ public class TableController {
     private final CafeTableService cafeTableService;
     private final TableSessionKioskService tableSessionKioskService;
 
-    /*
-     * 작성자 : 강수연
-     * 기능 : dashboard 메서드
-     * 날짜 : 2026-03-26
-     */
-
+    /* dashboard getMapping */
     @GetMapping
     public String dashboard(Model model) {
         log.info("--- TableController dashboard ---");
@@ -45,23 +36,16 @@ public class TableController {
         return "admin/dashboard";
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : getTablesSnapshot 메서드
-     * 날짜 : 2026-04-12
+    /**
+     * getTablesSnapshot 동작을 수행합니다.
+     *
+     * @return 처리 결과
      */
-
     @ResponseBody
     @GetMapping("/tables")
     public ResponseEntity<List<CafeTableDTO>> getTablesSnapshot() {
         return ResponseEntity.ok(cafeTableService.getAllTableStatus());
     }
-
-    /*
-     * 작성자 : 강수연
-     * 기능 : getTableOrders 메서드
-     * 날짜 : 2026-03-30
-     */
 
     @ResponseBody
     @GetMapping("/{id}/orders")
@@ -79,12 +63,14 @@ public class TableController {
         return ResponseEntity.ok(activeOrders);
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : moveToCheckout 메서드
-     * 날짜 : 2026-04-14
+    /**
+     * moveToCheckout 동작을 수행합니다.
+     *
+     * @param id 전달받은 id 값
+     * @param session 전달받은 session 값
+     * @param model 전달받은 model 값
+     * @return 처리 결과
      */
-
     @GetMapping("/{id}/checkout")
     public String moveToCheckout(@PathVariable("id") Integer id, HttpSession session, Model model) {
         List<CafeTableDTO> tables = cafeTableService.getAllTableStatus();
@@ -108,23 +94,17 @@ public class TableController {
         return "kiosk/checkout";
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : getCheckoutMeta 메서드
-     * 날짜 : 2026-04-27
+    /**
+     * getCheckoutMeta 동작을 수행합니다.
+     *
+     * @param id 전달받은 id 값
+     * @return 처리 결과
      */
-
     @ResponseBody
     @GetMapping("/{id}/checkout-meta")
     public ResponseEntity<Map<String, Object>> getCheckoutMeta(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(tableSessionKioskService.buildCheckoutMeta(id));
     }
-
-    /*
-     * 작성자 : 강수연
-     * 기능 : updateStatus 메서드
-     * 날짜 : 2026-03-26
-     */
 
     @ResponseBody
     @PatchMapping("/{id}/status")
@@ -153,12 +133,6 @@ public class TableController {
         }
     }
 
-    /*
-     * 작성자 : 강수연
-     * 기능 : refreshToken 메서드
-     * 날짜 : 2026-03-26
-     */
-
     @ResponseBody
     @PostMapping("/{id}/token")
     public ResponseEntity<Map<String, String>> refreshToken(@PathVariable("id") Integer id) {
@@ -176,12 +150,6 @@ public class TableController {
         }
     }
 
-    /*
-     * 작성자 : 강수연
-     * 기능 : forceReset 메서드
-     * 날짜 : 2026-03-26
-     */
-
     @ResponseBody
     @DeleteMapping("/reset")
     public ResponseEntity<Map<String, String>> forceReset() {
@@ -196,12 +164,6 @@ public class TableController {
         }
     }
 
-    /*
-     * 작성자 : 강수연
-     * 기능 : getUnreadMessages 메서드
-     * 날짜 : 2026-03-30
-     */
-
     @GetMapping("/messages/{tableId}")
     @ResponseBody
     public ResponseEntity<List<String>> getUnreadMessages(@PathVariable("tableId") Integer tableId) {
@@ -210,12 +172,6 @@ public class TableController {
         List<String> messages = cafeTableService.getUnreadMessages(tableId);
         return ResponseEntity.ok(messages);
     }
-
-    /*
-     * 작성자 : 강수연
-     * 기능 : markAsRead 메서드
-     * 날짜 : 2026-03-30
-     */
 
     @PatchMapping("/messages/{tableId}/read")
     @ResponseBody

@@ -36,7 +36,6 @@ public class ManagerServiceImpl implements ManagerService {
                 .collect(Collectors.toList());
     }
 
-
     // 직원 등록 - Request → VO 변환 후 insert
     @Override
     public void createManager(ManagerRequest request) {

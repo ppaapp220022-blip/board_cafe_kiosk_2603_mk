@@ -27,13 +27,16 @@ public class PaymentController {
 
     private final TableSessionKioskService tableSessionKioskService;
     private final PaymentService paymentService;
-    /*
-     * 작성자 : 김민기
-     * 기능 : 결제 페이지 조회
-     * 날짜 : 2026-03-27
+
+    /**
+     * 결제 페이지 조회합니다.
+     *
+     * @param "tableNumber" 전달받은 "tableNumber" 값
+     * @param requestTableNumber 전달받은 requestTableNumber 값
+     * @param session 전달받은 session 값
+     * @param model 전달받은 model 값
+     * @return 처리 결과
      */
-
-
     @GetMapping("/checkout")
     public String checkoutPage(@RequestParam(value = "tableNumber", required = false) Integer requestTableNumber,
                                HttpSession session,
@@ -50,12 +53,15 @@ public class PaymentController {
 
         return "kiosk/checkout";
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 토스 결제 준비 처리
-     * 날짜 : 2026-03-27
-     */
 
+    /**
+     * 토스 결제 준비 처리합니다.
+     *
+     * @param requestTableNumber 전달받은 requestTableNumber 값
+     * @param request 전달받은 request 값
+     * @param session 전달받은 session 값
+     * @return 처리 결과
+     */
     @PostMapping("/payment/prepare")
     @ResponseBody
     public ResponseEntity<PaymentDTO> tossPrepare(
@@ -78,12 +84,19 @@ public class PaymentController {
         PaymentDTO response = paymentService.preparePayment(tableNumber, request);
         return ResponseEntity.ok(response);
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 2단계: 결제 성공 콜백
-     * 날짜 : 2026-03-27
-     */
 
+    /**
+     * 2단계: 결제 성공 콜백 작업을 수행합니다.
+     *
+     * @param paymentKey 전달받은 paymentKey 값
+     * @param orderIdToss 전달받은 orderIdToss 값
+     * @param amount 전달받은 amount 값
+     * @param "pointUsed" 전달받은 "pointUsed" 값
+     * @param pointUsedParam 전달받은 pointUsedParam 값
+     * @param session 전달받은 session 값
+     * @param model 전달받은 model 값
+     * @return 처리 결과
+     */
     @GetMapping("/toss/success")
     public String tossSuccess(
             @RequestParam("paymentKey") String paymentKey,
@@ -146,12 +159,20 @@ public class PaymentController {
             return "kiosk/toss_fail";
         }
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 결제 실패/취소 콜백
-     * 날짜 : 2026-03-27
-     */
 
+    /**
+     * 결제 실패/취소 콜백 작업을 수행합니다.
+     *
+     * @param "code" 전달받은 "code" 값
+     * @param code 전달받은 code 값
+     * @param "message" 전달받은 "message" 값
+     * @param message 전달받은 message 값
+     * @param "source" 전달받은 "source" 값
+     * @param source 전달받은 source 값
+     * @param session 전달받은 session 값
+     * @param model 전달받은 model 값
+     * @return 처리 결과
+     */
     @GetMapping("/toss/fail")
     public String tossFail(
             @RequestParam(value = "code", required = false) String code,
@@ -166,22 +187,25 @@ public class PaymentController {
         return "kiosk/toss_fail";
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : addFailNavigationModel 메서드
-     * 날짜 : 2026-04-28
+    /**
+     * addFailNavigationModel 동작을 수행합니다.
+     *
+     * @param model 전달받은 model 값
+     * @param session 전달받은 session 값
+     * @param errorMessage 전달받은 errorMessage 값
      */
-
     private void addFailNavigationModel(Model model, HttpSession session, String errorMessage) {
         addFailNavigationModel(model, session, errorMessage, null);
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : addFailNavigationModel 메서드
-     * 날짜 : 2026-04-28
+    /**
+     * addFailNavigationModel 동작을 수행합니다.
+     *
+     * @param model 전달받은 model 값
+     * @param session 전달받은 session 값
+     * @param errorMessage 전달받은 errorMessage 값
+     * @param source 전달받은 source 값
      */
-
     private void addFailNavigationModel(Model model, HttpSession session, String errorMessage, String source) {
         boolean adminCheckoutMode = source != null
                 ? "admin".equals(source)
@@ -205,12 +229,14 @@ public class PaymentController {
         model.addAttribute("backButtonText", adminCheckoutMode ? "대시보드로 이동" : "메뉴로 이동");
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : resolveTrustedTableNumber 메서드
-     * 날짜 : 2026-04-14
+    /**
+     * resolveTrustedTableNumber 동작을 수행합니다.
+     *
+     * @param requestTableNumber 전달받은 requestTableNumber 값
+     * @param sessionTableNumber 전달받은 sessionTableNumber 값
+     * @param session 전달받은 session 값
+     * @return 처리 결과
      */
-
     private Integer resolveTrustedTableNumber(Integer requestTableNumber,
                                               Integer sessionTableNumber,
                                               HttpSession session) {
@@ -243,22 +269,23 @@ public class PaymentController {
         return sessionTableNumber;
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : readSessionTableNumber 메서드
-     * 날짜 : 2026-04-14
+    /**
+     * readSessionTableNumber 동작을 수행합니다.
+     *
+     * @param session 전달받은 session 값
+     * @return 처리 결과
      */
-
     private Integer readSessionTableNumber(HttpSession session) {
         return readSessionInteger(session, "tableNumber");
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : readSessionInteger 메서드
-     * 날짜 : 2026-04-14
+    /**
+     * readSessionInteger 동작을 수행합니다.
+     *
+     * @param session 전달받은 session 값
+     * @param attributeName 전달받은 attributeName 값
+     * @return 처리 결과
      */
-
     private Integer readSessionInteger(HttpSession session, String attributeName) {
         Object raw = session.getAttribute(attributeName);
         if (raw == null) return null;
@@ -272,12 +299,11 @@ public class PaymentController {
         }
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : isAdminOrStaff 메서드
-     * 날짜 : 2026-04-14
+    /**
+     * isAdminOrStaff 동작을 수행합니다.
+     *
+     * @return 처리 결과 여부
      */
-
     private boolean isAdminOrStaff() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || authentication.getAuthorities() == null) {

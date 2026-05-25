@@ -7,12 +7,14 @@ import org.example.board_cafe_kiosk_2603.mapper.admin.product.GameMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Log4j2
 @SpringBootTest
+@Transactional
 class GameMapperTest {
 
     @Autowired
@@ -44,9 +46,10 @@ class GameMapperTest {
 
     @Test
     void insertTest() {
+        String gameName = "테스트게임_" + System.currentTimeMillis();
         Game game = Game.builder()
                 .categoryId(1)
-                .name("테스트게임")
+                .name(gameName)
                 .minPlayers(2)
                 .maxPlayers(4)
                 .playTime(30)
@@ -73,7 +76,16 @@ class GameMapperTest {
 
     @Test
     void deleteTest() {
-        int result = gameMapper.delete(1);
+        Game game = Game.builder()
+                .categoryId(1)
+                .name("삭제테스트게임_" + System.currentTimeMillis())
+                .minPlayers(2)
+                .maxPlayers(4)
+                .playTime(30)
+                .isActive(true)
+                .build();
+        gameMapper.insert(game);
+        int result = gameMapper.delete(game.getId());
         log.info("delete 결과: " + result);
     }
 

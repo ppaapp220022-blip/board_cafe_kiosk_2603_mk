@@ -10,11 +10,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Log4j2
+@Transactional
 class ManagerEncodingTest {
 
     @Autowired
@@ -30,12 +32,14 @@ class ManagerEncodingTest {
         // 1. 준비
         String rawPassword = "12345";
         String encodedPassword = passwordEncoder.encode(rawPassword);
+        String loginId = "encoding_" + System.currentTimeMillis();
 
         // VO 생성 (생성자 또는 빌더 사용)
         Manager newManager = Manager.builder()
-                .loginId("qwer")
+                .loginId(loginId)
                 .password(encodedPassword)
                 .name("테스트")
+                .email(loginId + "@test.com")
                 .role(RoleType.ADMIN)
                 .isActive(true)
                 .build();
@@ -45,7 +49,7 @@ class ManagerEncodingTest {
 
         // 3. 검증 (Optional 처리 중요!)
         // .orElseThrow()를 사용하면 Optional 안의 Manager를 바로 꺼낼 수 있습니다.
-        Manager savedManager = managerMapper.findByLoginId("qwer")
+        Manager savedManager = managerMapper.findByLoginId(loginId)
                 .orElseThrow(() -> new RuntimeException("관리자를 찾을 수 없습니다."));
 
         log.info("입력 평문: {}", rawPassword);

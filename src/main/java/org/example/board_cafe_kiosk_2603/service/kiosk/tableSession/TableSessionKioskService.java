@@ -11,31 +11,39 @@ import java.util.Map;
  * 날짜 : 2026-03-27
  */
 public interface TableSessionKioskService {
-    /*
-     * 작성자 : 김민기
-     * 기능 : 테이블 세션 생성
-     * 날짜 : 2026-04-30
+    /**
+     * 테이블 세션 생성합니다.
+     *
+     * @param tableId 전달받은 tableId 값
+     * @param packageId 전달받은 packageId 값
+     * @param initialGuestCnt 전달받은 initialGuestCnt 값
+     * @return 처리 결과
      */
     Long createSession(int tableId, int packageId, int initialGuestCnt);
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : 장바구니 화면 모델 구성
-     * 날짜 : 2026-04-30
+    /**
+     * 장바구니 화면 모델 구성합니다.
+     *
+     * @param model 전달받은 model 값
+     * @param tableNumber 전달받은 tableNumber 값
+     * @param session 전달받은 session 값
      */
     void buildCartModel(Model model, int tableNumber, HttpSession session);
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : 결제 화면 모델 구성
-     * 날짜 : 2026-04-30
+    /**
+     * 결제 화면 모델 구성합니다.
+     *
+     * @param model 전달받은 model 값
+     * @param tableNumber 전달받은 tableNumber 값
+     * @param session 전달받은 session 값
      */
     void buildCheckoutModel(Model model, int tableNumber, HttpSession session);
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : 결제 메타 정보 구성
-     * 날짜 : 2026-04-30
+    /**
+     * 결제 메타 정보 구성합니다.
+     *
+     * @param tableId 전달받은 tableId 값
+     * @return 처리 결과
      */
     Map<String, Object> buildCheckoutMeta(Integer tableId);
 }

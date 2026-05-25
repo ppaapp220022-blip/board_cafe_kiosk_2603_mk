@@ -25,4 +25,3 @@ public class CartDTO {
     private int               totalPrice;
     private int               cartCount;
 }
-

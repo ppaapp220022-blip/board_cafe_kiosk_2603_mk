@@ -25,34 +25,28 @@ import java.util.List;
 public class PointController {
 
     private final PointService pointService;
-    /*
-     * 작성자 : 서민성
-     * 기능 : 포인트 관리 페이지
-     * 날짜 : 2026-04-09
-     */
 
+    /* 포인트 관리 페이지 */
 
     @GetMapping
     public String pointManagement() {
         return "redirect:/admin/points/list";
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 포인트 이력 조회 (AJAX)
-     * 날짜 : 2026-03-27
+    /**
+     * 포인트 이력 조회 (AJAX) 작업을 수행합니다.
+     *
+     * @param pointId 전달받은 pointId 값
+     * @return 처리 결과
      */
 
     @GetMapping("/{pointId}/history")
     @ResponseBody
+
     public List<PointHistoryDTO> pointHistory(@PathVariable int pointId) {
         return pointService.getHistoryByPointId(pointId);
     }
-    /*
-     * 작성자 : 서민성
-     * 기능 : 페이징 처리된 포인트 목록 페이지
-     * 날짜 : 2026-04-09
-     */
 
+    /*  페이징 처리된 포인트 목록 페이지 */
     @GetMapping("/list")
     public String list(PageRequestDTO pageRequestDTO, Model model) {
         log.info("포인트 페이징 목록 요청: " + pageRequestDTO);

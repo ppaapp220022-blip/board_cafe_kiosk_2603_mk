@@ -12,46 +12,49 @@ import org.example.board_cafe_kiosk_2603.domain.kiosk.payment.Payment;
  */
 public interface PaymentMapper {
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : 데이터 등록
-     * 날짜 : 2026-04-06
+    /**
+     * 데이터 등록합니다.
+     *
+     * @param payment 전달받은 payment 값
      */
     void insert(Payment payment);
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : 결제 키로 결제 조회
-     * 날짜 : 2026-04-06
+    /**
+     * 결제 키로 결제 조회합니다.
+     *
+     * @param paymentKey 전달받은 paymentKey 값
+     * @return 처리 결과
      */
     Payment findByPaymentKey(String paymentKey);
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : 주문 ID로 결제 조회
-     * 날짜 : 2026-04-06
+    /**
+     * 주문 ID로 결제 조회합니다.
+     *
+     * @param orderIdToss 전달받은 orderIdToss 값
+     * @return 처리 결과
      */
     Payment findByOrderIdToss(String orderIdToss);
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : 세션 ID 기준 조회
-     * 날짜 : 2026-04-06
+    /**
+     * 세션 ID 기준 조회합니다.
+     *
+     * @param sessionId 전달받은 sessionId 값
+     * @return 처리 결과
      */
     Payment findBySessionId(long sessionId);
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : 상태 변경
-     * 날짜 : 2026-04-06
+    /**
+     * 상태 변경합니다.
+     *
+     * @param payment 전달받은 payment 값
      */
     void updateStatus(Payment payment);
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : ID로 단건 조회
-     * 날짜 : 2026-04-06
+    /**
+     * ID로 단건 조회합니다.
+     *
+     * @param id 전달받은 id 값
+     * @return 처리 결과
      */
     Payment findById(int id);
 }
-

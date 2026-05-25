@@ -6,6 +6,7 @@ import org.example.board_cafe_kiosk_2603.dto.admin.product.GameResponseDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Log4j2
 @SpringBootTest
+@Transactional
 class GameServiceImplTest {
 
     @Autowired
@@ -44,9 +46,10 @@ class GameServiceImplTest {
 
     @Test
     void registerTest() {
+        String gameName = "테스트게임_" + System.currentTimeMillis();
         GameRequestDTO gameRequestDTO = GameRequestDTO.builder()
                 .categoryId(1)
-                .name("테스트게임")
+                .name(gameName)
                 .minPlayers(2)
                 .maxPlayers(4)
                 .playTime(30)
@@ -72,7 +75,17 @@ class GameServiceImplTest {
 
     @Test
     void removeTest() {
-        gameService.remove(1);
+        String gameName = "삭제게임_" + System.currentTimeMillis();
+        GameRequestDTO gameRequestDTO = GameRequestDTO.builder()
+                .categoryId(1)
+                .name(gameName)
+                .minPlayers(2)
+                .maxPlayers(4)
+                .playTime(30)
+                .isActive(true)
+                .build();
+        int gameId = gameService.register(gameRequestDTO);
+        gameService.remove(gameId);
         log.info("remove 완료");
     }
 

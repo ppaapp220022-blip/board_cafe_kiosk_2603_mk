@@ -3,6 +3,7 @@ package org.example.board_cafe_kiosk_2603.ai;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +23,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/ai")
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "app.ai.enabled", havingValue = "true", matchIfMissing = true)
 public class AiController {
     /*
     음성 인식(STT), 보드게임 지식 검색(RAG), 답변 생성(LLM), 음성 합성(TTS) 통합 관리 컨트롤러

@@ -8,7 +8,6 @@ import lombok.Getter;
  * 기능 : PointKiosk 데이터 전달 객체
  * 날짜 : 2026-03-27
  */
-
 @Getter
 @Builder
 public class PointKioskDTO {
@@ -16,12 +15,13 @@ public class PointKioskDTO {
     private final boolean exists;
     private final int     balance;
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : of 메서드
-     * 날짜 : 2026-03-27
+    /**
+     * of 동작을 수행합니다.
+     *
+     * @param exists 전달받은 exists 값
+     * @param balance 전달받은 balance 값
+     * @return 처리 결과
      */
-
     public static PointKioskDTO of(boolean exists, int balance) {
         return PointKioskDTO.builder()
                 .exists(exists)
@@ -29,12 +29,12 @@ public class PointKioskDTO {
                 .build();
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : found 메서드
-     * 날짜 : 2026-03-27
+    /**
+     * found 동작을 수행합니다.
+     *
+     * @param balance 전달받은 balance 값
+     * @return 처리 결과
      */
-
     public static PointKioskDTO found(int balance) {
         return PointKioskDTO.builder()
                 .exists(true)
@@ -42,12 +42,11 @@ public class PointKioskDTO {
                 .build();
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : notFound 메서드
-     * 날짜 : 2026-03-27
+    /**
+     * notFound 동작을 수행합니다.
+     *
+     * @return 처리 결과
      */
-
     public static PointKioskDTO notFound() {
         return PointKioskDTO.builder()
                 .exists(false)

@@ -7,6 +7,7 @@ import org.example.board_cafe_kiosk_2603.dto.admin.product.GameItemResponseDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -15,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Log4j2
 @SpringBootTest
+@Transactional
 class GameItemServiceImplTest {
 
     @Autowired
@@ -46,9 +48,10 @@ class GameItemServiceImplTest {
 
     @Test
     void registerTest() {
+        String serial = "SN-TEST-" + System.currentTimeMillis();
         GameItemRequestDTO gameItemRequestDTO = GameItemRequestDTO.builder()
                 .gameId(1)
-                .serialNumber("SN-TEST-001")
+                .serialNumber(serial)
                 .status(GameItemStatus.NORMAL)
                 .build();
         gameItemService.register(gameItemRequestDTO);

@@ -10,12 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.*;
 
-/*
- * 작성자 : 김민기
- * 기능 : CartMapper 테스트
- * 날짜 : 2026-03-27
- */
-
 @Log4j2
 @SpringBootTest
 @Transactional
@@ -30,35 +24,17 @@ class CartMapperTest {
         return tableId;
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : findCafeTableIdByTableNumber_success 메서드
-     * 날짜 : 2026-03-27
-     */
-
     @Test
     void findCafeTableIdByTableNumber_success() {
         Integer tableId = cartMapper.findCafeTableIdByTableNumber(1);
         assertThat(tableId).isNotNull().isPositive();
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : findCafeTableIdByTableNumber_notFound 메서드
-     * 날짜 : 2026-03-27
-     */
-
     @Test
     void findCafeTableIdByTableNumber_notFound() {
         Integer tableId = cartMapper.findCafeTableIdByTableNumber(999);
         assertThat(tableId).isNull();
     }
-
-    /*
-     * 작성자 : 김민기
-     * 기능 : insert_and_findByTableId 메서드
-     * 날짜 : 2026-03-27
-     */
 
     @Test
     void insert_and_findByTableId() {
@@ -74,23 +50,11 @@ class CartMapperTest {
         assertThat(found.getTableId()).isEqualTo(tableId);
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : findByTableId_notFound 메서드
-     * 날짜 : 2026-03-27
-     */
-
     @Test
     void findByTableId_notFound() {
         Cart found = cartMapper.findByTableId(99999);
         assertThat(found).isNull();
     }
-
-    /*
-     * 작성자 : 김민기
-     * 기능 : updateTimestamp 메서드
-     * 날짜 : 2026-03-27
-     */
 
     @Test
     void updateTimestamp() {
@@ -102,11 +66,6 @@ class CartMapperTest {
                 .doesNotThrowAnyException();
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : deleteByTableId 메서드
-     * 날짜 : 2026-03-27
-     */
 
     @Test
     void deleteByTableId() {

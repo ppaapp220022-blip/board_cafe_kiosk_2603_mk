@@ -15,11 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/*
- * 작성자 : 서주연
- * 기능 : 게임 아이템(재고) CRUD 컨트롤러
- * 날짜 : 2026-03-27
- */
+/* 게임 아이템(재고) CRUD 컨트롤러 */
 
 @Log4j2
 @Controller
@@ -31,12 +27,8 @@ public class GameItemController {
     // 아이템 상태(대여가능/수리중 등) 관리
 
     private final GameItemService gameItemService;
-    /*
-     * 작성자 : 서주연
-     * 기능 : 게임 아이템 전체 목록 조회 → 뷰 반환
-     * 날짜 : 2026-03-27
-     */
 
+    /* 게임 아이템 전체 목록 조회 → 뷰 반환 */
     @GetMapping
     public String getAll(Model model) {
         log.info("--- 게임 아이템 전체 목록 조회 요청 ---");
@@ -50,12 +42,8 @@ public class GameItemController {
         }
         return "admin/product_game";
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : 게임 아이템 수정 처리
-     * 날짜 : 2026-03-27
-     */
 
+    /* 게임 아이템 수정 처리 */
     @PostMapping("/edit/{id}")
     public String modify(@PathVariable int id, @ModelAttribute GameItemRequestDTO gameItemRequestDTO) {
         log.info("--- 게임 아이템 수정 시작 (ItemID: {}) ---", id);
@@ -66,12 +54,8 @@ public class GameItemController {
         log.info("게임 아이템 수정 성공 - id: {}", id);
         return "redirect:/admin/product/game";
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : 게임 아이템 삭제 처리
-     * 날짜 : 2026-03-27
-     */
 
+    /* 게임 아이템 삭제 처리 */
     @PostMapping("/delete/{id}")
     public String remove(@PathVariable int id,
                          RedirectAttributes redirectAttributes) {
@@ -91,12 +75,8 @@ public class GameItemController {
         log.debug("게임 아이템 삭제 완료 - id: {}", id);
         return "redirect:/admin/product/game";
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : 게임 아이템 상태 변경 (단독 변경)
-     * 날짜 : 2026-03-27
-     */
 
+    /* 게임 아이템 상태 변경 (단독 변경) */
     @PostMapping("/{id}/status")
     public String changeStatus(@PathVariable int id,
                                @RequestParam GameItemStatus status) {
@@ -107,12 +87,14 @@ public class GameItemController {
         log.info("--- 상태 변경 완료 (id: {}, status: {}) ---", id, status);
         return "redirect:/admin/product/game";
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 대시보드/관리자용: 게임명 기준 대여 가능한 시리얼 조회
-     * 날짜 : 2026-04-14
-     */
 
+    /**
+     * 대시보드/관리자용: 게임명 기준 대여 가능한 시리얼 조회합니다.
+     *
+     * @param tableId 전달받은 tableId 값
+     * @param gameName 전달받은 gameName 값
+     * @return 처리 결과
+     */
     @GetMapping("/available")
     @ResponseBody
     public List<GameItemResponseDTO> getAvailableGameItems(
@@ -121,12 +103,13 @@ public class GameItemController {
         log.info("대여 가능 시리얼 조회 - tableId: {}, gameName: {}", tableId, gameName);
         return gameItemService.getAvailableByGameName(gameName);
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 대시보드/관리자용: 주문에 시리얼 할당 후 RENTED 전환 + game_history 생성
-     * 날짜 : 2026-04-14
-     */
 
+    /**
+     * 대시보드/관리자용: 주문에 시리얼 할당 후 RENTED 전환 + game_history 생성합니다.
+     *
+     * @param body 전달받은 body 값
+     * @return 처리 결과
+     */
     @PostMapping("/assign")
     @ResponseBody
     public Map<String, Object> assignGameItems(@RequestBody Map<String, Object> body) {
@@ -139,34 +122,37 @@ public class GameItemController {
         gameItemService.assignGameItemsToOrder(tableId, orderId, gameName, gameItemIds);
         return Map.of("success", true, "message", "일련번호가 대여 처리되었습니다.");
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 현재 테이블의 활성 대여 목록 조회 (RENTED)
-     * 날짜 : 2026-04-14
-     */
 
+    /**
+     * 현재 테이블의 활성 대여 목록 조회 (RENTED) 작업을 수행합니다.
+     *
+     * @param tableId 전달받은 tableId 값
+     * @return 처리 결과
+     */
     @GetMapping("/rentals/active")
     @ResponseBody
     public List<Map<String, Object>> getActiveRentals(@RequestParam int tableId) {
         return gameItemService.getActiveGameRentalsByTable(tableId);
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 현재 테이블의 전체 대여 이력 조회
-     * 날짜 : 2026-04-14
-     */
 
+    /**
+     * 현재 테이블의 전체 대여 이력 조회합니다.
+     *
+     * @param tableId 전달받은 tableId 값
+     * @return 처리 결과
+     */
     @GetMapping("/rentals/history")
     @ResponseBody
     public List<Map<String, Object>> getRentalHistory(@RequestParam int tableId) {
         return gameItemService.getGameRentalHistoryByTable(tableId);
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 결제 전/후 반납 상태 처리 (NORMAL/DAMAGED/LOST) + game_history 업데이트
-     * 날짜 : 2026-04-14
-     */
 
+    /**
+     * 결제 전/후 반납 상태 처리 (NORMAL/DAMAGED/LOST) + game_history 업데이트 작업을 수행합니다.
+     *
+     * @param body 전달받은 body 값
+     * @return 처리 결과
+     */
     @PatchMapping("/rentals/settle")
     @ResponseBody
     public Map<String, Object> settleRentals(@RequestBody Map<String, Object> body) {

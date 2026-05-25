@@ -37,11 +37,8 @@ public class GameItemServiceImpl implements GameItemService {
     private final OrderService orderService;
     private final MenuMapper menuMapper; // menu_id 조회용
     private final GameEmbeddingService gameEmbeddingService;
-    /*
-     * 작성자 : 서주연
-     * 기능 : 전체 게임 아이템 목록 조회
-     * 날짜 : 2026-03-27
-     */
+
+    /* 전체 게임 아이템 목록 조회 */
 
     @Override
     public List<GameItemResponseDTO> getAll() {
@@ -50,12 +47,8 @@ public class GameItemServiceImpl implements GameItemService {
         log.info("조회된 게임 아이템 수: {}", list.size());
         return list;
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : game_id 기준 게임 아이템 목록 조회
-     * 날짜 : 2026-03-27
-     */
 
+    /* 기능 : game_id 기준 게임 아이템 목록 조회 */
     @Override
     public List<GameItemResponseDTO> getByGameId(int gameId) {
         log.debug("GameItemServiceImpl.getByGameId() 실행 - gameId: {}", gameId);
@@ -63,12 +56,8 @@ public class GameItemServiceImpl implements GameItemService {
         log.debug("조회된 게임 아이템 수 (gameId={}): {}", gameId, list.size());
         return list;
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : status 기준 게임 아이템 목록 조회
-     * 날짜 : 2026-03-27
-     */
 
+    /* status 기준 게임 아이템 목록 조회 */
     @Override
     public List<GameItemResponseDTO> getByStatus(GameItemStatus gameItemStatus) {
         log.info("상태 기준 게임 아이템 목록 조회 실행: {}", gameItemStatus);
@@ -76,11 +65,7 @@ public class GameItemServiceImpl implements GameItemService {
         log.info("조회된 게임 아이템 수 (status={}): {}", gameItemStatus, list.size());
         return list;
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : PK로 게임 아이템 단건 조회
-     * 날짜 : 2026-03-27
-     */
+    /* 게임 아이템 단건 조회 */
 
     @Override
     public GameItemResponseDTO getById(int id) {
@@ -91,12 +76,8 @@ public class GameItemServiceImpl implements GameItemService {
                     return new NoSuchElementException("게임 아이템을 찾을 수 없습니다. id=" + id);
                 });
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : 게임 아이템 등록
-     * 날짜 : 2026-03-27
-     */
 
+    /* 게임 아이템 등록 */
     @Override
     public void register(GameItemRequestDTO gameItemRequestDTO) {
         log.info("게임 아이템 등록 실행 - gameItemRequestDTO: {}", gameItemRequestDTO);
@@ -110,12 +91,8 @@ public class GameItemServiceImpl implements GameItemService {
         tryUpsertEmbeddingByGameId(gameItemRequestDTO.getGameId());
         log.debug("게임 아이템 등록 결과 - affected rows: {}, generated id: {}", result, gameItem.getId());
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : 게임 아이템 수정 (존재 여부 선확인)
-     * 날짜 : 2026-03-27
-     */
 
+    /* 게임 아이템 수정 (존재 여부 선확인) */
     @Override
     public void modify(int id, GameItemRequestDTO gameItemRequestDTO) {
         log.info("게임 아이템 수정 실행 - id: {}, dto: {}", id, gameItemRequestDTO);
@@ -159,12 +136,8 @@ public class GameItemServiceImpl implements GameItemService {
             tryUpsertEmbeddingByGameId(gameItemRequestDTO.getGameId());
         }
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : 게임 아이템 삭제 (존재 여부 선확인)
-     * 날짜 : 2026-03-27
-     */
 
+    /* 게임 아이템 삭제 (존재 여부 선확인) */
     @Override
     public void remove(int id) {
         log.debug("GameItemServiceImpl.remove() 실행 - id: {}", id);
@@ -191,12 +164,8 @@ public class GameItemServiceImpl implements GameItemService {
         tryUpsertEmbeddingByGameId(gameId);
         log.debug("게임 아이템 삭제 결과 - affected rows: {}", result);
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : 게임 아이템 상태 변경 (존재 여부 선확인)
-     * 날짜 : 2026-03-27
-     */
 
+    /* 게임 아이템 상태 변경 (존재 여부 선확인) */
     @Override
     public void changeStatus(int id, GameItemStatus status) {
         log.debug("GameItemServiceImpl.changeStatus() 실행 - id: {}, status: {}", id, status);
@@ -220,12 +189,8 @@ public class GameItemServiceImpl implements GameItemService {
 
         log.debug("게임 아이템 상태 변경 완료 - id: {}, status: {}", id, status);
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : 재고 변화를 AI 지식 베이스에 실시간 반영
-     * 날짜 : 2026-03-27
-     */
 
+    /* 재고 변화를 AI 지식 베이스에 실시간 반영 */
     private void tryUpsertEmbeddingByGameId(int gameId) {
         try {
             // DB 관계망을 통해 연관된 메뉴 ID 확보
@@ -241,10 +206,11 @@ public class GameItemServiceImpl implements GameItemService {
         }
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : getAvailableByGameName 메서드
-     * 날짜 : 2026-04-14
+    /**
+     * getAvailableByGameName 동작을 수행합니다.
+     *
+     * @param gameName 전달받은 gameName 값
+     * @return 처리 결과
      */
 
     @Override
@@ -260,12 +226,14 @@ public class GameItemServiceImpl implements GameItemService {
                 .collect(Collectors.toList());
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : assignGameItemsToOrder 메서드
-     * 날짜 : 2026-04-14
+    /**
+     * assignGameItemsToOrder 동작을 수행합니다.
+     *
+     * @param tableId 전달받은 tableId 값
+     * @param orderId 전달받은 orderId 값
+     * @param gameName 전달받은 gameName 값
+     * @param gameItemIds 전달받은 gameItemIds 값
      */
-
     @Override
     @Transactional
     public void assignGameItemsToOrder(int tableId, int orderId, String gameName, List<Integer> gameItemIds) {
@@ -304,10 +272,11 @@ public class GameItemServiceImpl implements GameItemService {
         }
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : getActiveGameRentalsByTable 메서드
-     * 날짜 : 2026-04-14
+    /**
+     * getActiveGameRentalsByTable 동작을 수행합니다.
+     *
+     * @param tableId 전달받은 tableId 값
+     * @return 처리 결과
      */
 
     @Override
@@ -316,10 +285,11 @@ public class GameItemServiceImpl implements GameItemService {
         return gameItemMapper.findActiveGameRentalsBySessionId(sessionId);
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : getGameRentalHistoryByTable 메서드
-     * 날짜 : 2026-04-14
+    /**
+     * getGameRentalHistoryByTable 동작을 수행합니다.
+     *
+     * @param tableId 전달받은 tableId 값
+     * @return 처리 결과
      */
 
     @Override
@@ -328,12 +298,12 @@ public class GameItemServiceImpl implements GameItemService {
         return gameItemMapper.findGameRentalHistoryBySessionId(sessionId);
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : settleGameRentals 메서드
-     * 날짜 : 2026-04-14
+    /**
+     * settleGameRentals 동작을 수행합니다.
+     *
+     * @param tableId 전달받은 tableId 값
+     * @param updates 전달받은 updates 값
      */
-
     @Override
     @Transactional
     public void settleGameRentals(int tableId, List<Map<String, Object>> updates) {
@@ -380,12 +350,12 @@ public class GameItemServiceImpl implements GameItemService {
         }
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : resolveSessionId 메서드
-     * 날짜 : 2026-04-14
+    /**
+     * resolveSessionId 동작을 수행합니다.
+     *
+     * @param tableId 전달받은 tableId 값
+     * @return 처리 결과
      */
-
     private Long resolveSessionId(int tableId) {
         Long sessionId = cafeTableMapper.selectCurrentSessionId(tableId);
         if (sessionId == null) {

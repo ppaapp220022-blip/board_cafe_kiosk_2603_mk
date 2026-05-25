@@ -1,6 +1,5 @@
 package org.example.board_cafe_kiosk_2603.service.admin.product;
 
-
 import org.example.board_cafe_kiosk_2603.dto.admin.product.GameRequestDTO;
 import org.example.board_cafe_kiosk_2603.dto.admin.product.GameResponseDTO;
 import org.example.board_cafe_kiosk_2603.dto.common.pagination.PageRequestDTO;

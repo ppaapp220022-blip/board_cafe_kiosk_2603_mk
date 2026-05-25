@@ -33,12 +33,15 @@ import java.util.stream.Collectors;
 public class OrderController {
     private final OrderService orderService;
     private final GameService gameService;
-    /*
-     * 작성자 : 김민기
-     * 기능 : 주문 상세 페이지 조회
-     * 날짜 : 2026-03-27
-     */
 
+    /**
+     * 주문 상세 페이지 조회합니다.
+     *
+     * @param orderId 전달받은 orderId 값
+     * @param model 전달받은 model 값
+     * @param session 전달받은 session 값
+     * @return 처리 결과
+     */
     @GetMapping("/{orderId}")
     public String orderDetailPage(@PathVariable int orderId, Model model, HttpSession session) {
         Integer tableNumber = sessionTableNumber(session);
@@ -66,12 +69,15 @@ public class OrderController {
 
         return "kiosk/order_detail";
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 게임 주문 상세 페이지
-     * 날짜 : 2026-04-14
-     */
 
+    /**
+     * 게임 주문 상세 페이지 작업을 수행합니다.
+     *
+     * @param orderId 전달받은 orderId 값
+     * @param model 전달받은 model 값
+     * @param session 전달받은 session 값
+     * @return 처리 결과
+     */
     @GetMapping("/game/{orderId}")
     public String gameDetailPage(@PathVariable int orderId, Model model, HttpSession session) {
         Integer tableNumber = sessionTableNumber(session);
@@ -126,12 +132,14 @@ public class OrderController {
         model.addAttribute("requestedGames", requestedGames);
         return "kiosk/game_detail";
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 주문 생성 처리
-     * 날짜 : 2026-03-27
-     */
 
+    /**
+     * 주문 생성 처리합니다.
+     *
+     * @param request 전달받은 request 값
+     * @param session 전달받은 session 값
+     * @return 처리 결과
+     */
     @PostMapping("/create")
     @ResponseBody
     public ResponseEntity<OrdersDTO> createOrder(
@@ -170,12 +178,12 @@ public class OrderController {
                             .build());
         }
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 대기 주문 목록 조회
-     * 날짜 : 2026-04-09
-     */
 
+    /**
+     * 대기 주문 목록 조회합니다.
+     *
+     * @return 처리 결과
+     */
     @GetMapping("/pending")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> getPendingOrders() {
@@ -196,12 +204,14 @@ public class OrderController {
                     ));
         }
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 주문 단건 조회 (JSON)
-     * 날짜 : 2026-03-27
-     */
 
+    /**
+     * 주문 단건 조회 (JSON) 작업을 수행합니다.
+     *
+     * @param orderId 전달받은 orderId 값
+     * @param session 전달받은 session 값
+     * @return 처리 결과
+     */
     @GetMapping("/api/{orderId}")
     @ResponseBody
     public ResponseEntity<OrdersDTO> getOrderApi(@PathVariable int orderId, HttpSession session) {
@@ -214,12 +224,13 @@ public class OrderController {
         OrdersDTO result = orderService.getOrder(orderId);
         return result.isSuccess() ? ResponseEntity.ok(result) : ResponseEntity.notFound().build();
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 테이블 최근 주문 조회 (JSON)
-     * 날짜 : 2026-03-27
-     */
 
+    /**
+     * 테이블 최근 주문 조회 (JSON) 작업을 수행합니다.
+     *
+     * @param session 전달받은 session 값
+     * @return 처리 결과
+     */
     @GetMapping("/latest")
     @ResponseBody
     public ResponseEntity<OrdersDTO> getLatestOrder(HttpSession session) {
@@ -228,12 +239,14 @@ public class OrderController {
         OrdersDTO result = orderService.getLatestOrderByTableNumber(tableNumber);
         return result.isSuccess() ? ResponseEntity.ok(result) : ResponseEntity.notFound().build();
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 세션 주문 목록 조회 (JSON)
-     * 날짜 : 2026-03-27
-     */
 
+    /**
+     * 세션 주문 목록 조회 (JSON) 작업을 수행합니다.
+     *
+     * @param sessionId 전달받은 sessionId 값
+     * @param session 전달받은 session 값
+     * @return 처리 결과
+     */
     @GetMapping("/session/{sessionId}")
     @ResponseBody
     public ResponseEntity<List<OrdersDTO>> getOrdersBySession(@PathVariable long sessionId, HttpSession session) {
@@ -245,12 +258,13 @@ public class OrderController {
         }
         return ResponseEntity.ok(orderService.getOrdersBySessionId(sessionId));
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 현재 활성 세션의 주문 목록 조회 (장바구니 진입 버튼용)
-     * 날짜 : 2026-03-27
-     */
 
+    /**
+     * 현재 활성 세션의 주문 목록 조회 (장바구니 진입 버튼용) 작업을 수행합니다.
+     *
+     * @param session 전달받은 session 값
+     * @return 처리 결과
+     */
     @GetMapping("/active")
     @ResponseBody
     public ResponseEntity<List<OrdersDTO>> getActiveOrders(HttpSession session) {
@@ -258,12 +272,15 @@ public class OrderController {
         if (tableNumber == null) return ResponseEntity.ok(List.of());
         return ResponseEntity.ok(orderService.getActiveSessionOrders(tableNumber));
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 주문 상태 변경 처리
-     * 날짜 : 2026-04-01
-     */
 
+    /**
+     * 주문 상태 변경 처리합니다.
+     *
+     * @param orderId 전달받은 orderId 값
+     * @param body 전달받은 body 값
+     * @param session 전달받은 session 값
+     * @return 처리 결과
+     */
     @PatchMapping("/{orderId}/status")
     @ResponseBody
     public ResponseEntity<OrdersDTO> updateStatus(@PathVariable int orderId,
@@ -280,12 +297,14 @@ public class OrderController {
         OrdersDTO result = orderService.updateStatus(orderId, status);
         return result.isSuccess() ? ResponseEntity.ok(result) : ResponseEntity.badRequest().body(result);
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 주문 취소
-     * 날짜 : 2026-04-01
-     */
 
+    /**
+     * 주문 취소 작업을 수행합니다.
+     *
+     * @param orderId 전달받은 orderId 값
+     * @param session 전달받은 session 값
+     * @return 처리 결과
+     */
     @DeleteMapping("/{orderId}")
     @ResponseBody
     public ResponseEntity<OrdersDTO> cancelOrder(@PathVariable int orderId, HttpSession session) {
@@ -298,12 +317,14 @@ public class OrderController {
         OrdersDTO result = orderService.cancelOrder(orderId);
         return result.isSuccess() ? ResponseEntity.ok(result) : ResponseEntity.badRequest().body(result);
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 주문 상태 표시명 반환
-     * 날짜 : 2026-04-01
-     */
 
+    /**
+     * 주문 상태 표시명 반환 작업을 수행합니다.
+     *
+     * @param status 전달받은 status 값
+     * @param isGameOnlyOrder 전달받은 isGameOnlyOrder 값
+     * @return 처리 결과
+     */
     private String getStatusDisplay(String status, boolean isGameOnlyOrder) {
         if (isGameOnlyOrder) {
             return switch (status) {
@@ -326,12 +347,12 @@ public class OrderController {
         };
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : isGameOnlyOrder 메서드
-     * 날짜 : 2026-04-14
+    /**
+     * isGameOnlyOrder 동작을 수행합니다.
+     *
+     * @param order 전달받은 order 값
+     * @return 처리 결과 여부
      */
-
     private boolean isGameOnlyOrder(OrdersDTO order) {
         if (order == null || order.getItems() == null || order.getItems().isEmpty()) {
             return false;
@@ -340,12 +361,12 @@ public class OrderController {
                 .allMatch(item -> item != null && item.getPrice() == 0);
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : sessionTableNumber 메서드
-     * 날짜 : 2026-03-27
+    /**
+     * sessionTableNumber 동작을 수행합니다.
+     *
+     * @param session 전달받은 session 값
+     * @return 처리 결과
      */
-
     private Integer sessionTableNumber(HttpSession session) {
         Object raw = session.getAttribute("tableNumber");
         if (raw == null) return null;
@@ -358,5 +379,4 @@ public class OrderController {
             return null;
         }
     }
-
 }

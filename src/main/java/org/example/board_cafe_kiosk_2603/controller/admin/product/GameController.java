@@ -20,11 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
-/*
- * 작성자 : 서주연
- * 기능 : 게임 CRUD 컨트롤러
- * 날짜 : 2026-03-27
- */
+/* 게임 CRUD 컨트롤러 */
 
 @Log4j2
 @Controller
@@ -40,12 +36,8 @@ public class GameController {
     private final GameService gameService;
     private final GameItemService gameItemService;
     private final FileUploadUtil fileUploadUtil;
-    /*
-     * 작성자 : 서주연
-     * 기능 : 게임 전체 목록 조회
-     * 날짜 : 2026-03-27
-     */
 
+    /* 게임 전체 목록 조회 */
     @GetMapping
     public String getAll(@RequestParam(required = false) Integer categoryId,
                          @RequestParam(required = false) String tab,
@@ -106,12 +98,8 @@ public class GameController {
         }
         return "admin/product_game";
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : 게임 등록 페이지
-     * 날짜 : 2026-03-27
-     */
 
+    /* 게임 등록 페이지  */
     @GetMapping("/add")
     public String addForm(Model model) {
         log.info("--- 게임 등록 폼 요청 ---");
@@ -120,12 +108,8 @@ public class GameController {
         model.addAttribute("activePage", "productReg");
         return "admin/product_game_form";
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : 이미지 업로드 + 신규 game_item 등록
-     * 날짜 : 2026-03-27
-     */
 
+    /* 이미지 업로드 + 신규 game_item 등록 */
     @PostMapping("/add")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER')")
     @Transactional(rollbackFor = Exception.class)
@@ -160,12 +144,8 @@ public class GameController {
         log.info("--- 전체 게임 등록 프로세스 완료 ---");
         return "redirect:/admin/product/game";
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : 게임 수정 페이지 이동
-     * 날짜 : 2026-03-27
-     */
 
+    /* 게임 수정 페이지 이동  */
     @GetMapping("/edit/{id}")
     public String editForm(@PathVariable int id, Model model) {
         log.info("--- 게임 수정 폼 요청 (ID: {}) ---", id);
@@ -182,12 +162,8 @@ public class GameController {
         log.info("게임 수정 폼 로드 완료 - gameId: {}, 재고수: {}", id, gameItemList.size());
         return "admin/product_game_form";
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : 게임 정보 수정(이미지 교체) 및 재고(game_item) 변경/삭제 처리
-     * 날짜 : 2026-03-27
-     */
 
+    /* 게임 정보 수정(이미지 교체) 및 재고(game_item) 변경/삭제 처리 */
     @PostMapping("/edit/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER')")
     @Transactional(rollbackFor = Exception.class)
@@ -250,10 +226,11 @@ public class GameController {
         return "redirect:/admin/product/game";
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : validateItemOwnership 메서드
-     * 날짜 : 2026-04-14
+    /**
+     * validateItemOwnership 동작을 수행합니다.
+     *
+     * @param gameId 전달받은 gameId 값
+     * @param itemId 전달받은 itemId 값
      */
 
     private void validateItemOwnership(int gameId, int itemId) {
@@ -263,12 +240,8 @@ public class GameController {
                     "현재 게임(id=" + gameId + ")에 속하지 않은 재고(itemId=" + itemId + ")는 수정/삭제할 수 없습니다.");
         }
     }
-    /*
-     * 작성자 : 서주연
-     * 기능 : 게임 활성/비활성 상태 토글 (키오스크 노출 여부)
-     * 날짜 : 2026-03-27
-     */
 
+    /* 게임 활성/비활성 상태 토글 (키오스크 노출 여부) */
     @PostMapping("/{id}/toggle-active")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER')")
     public String toggleActive(@PathVariable int id,

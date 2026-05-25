@@ -6,6 +6,7 @@ import org.springframework.web.client.RestTemplate;
 
 /*
  * 작성자 : 김민기
+ * 기능 : restTemplate 설정 추가
  * 날짜 : 2026-03-27
  */
 

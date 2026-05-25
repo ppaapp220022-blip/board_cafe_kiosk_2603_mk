@@ -12,6 +12,7 @@ import org.springframework.ai.openai.api.OpenAiAudioApi;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 
 @Log4j2
 @Service
+@ConditionalOnProperty(name = "app.ai.enabled", havingValue = "true", matchIfMissing = true)
 public class AiService {
 
     /* 음성 인식(STT), 보드게임 지식 검색(RAG), 답변 생성(LLM), 음성 합성(TTS) 통합 관리 서비스 */

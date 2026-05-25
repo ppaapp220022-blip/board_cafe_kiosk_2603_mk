@@ -34,12 +34,13 @@ public class CafePackageDTO {
     private boolean success;
     private String  message;
     private Integer tableNumber;
-    /*
-     * 작성자 : 김민기
-     * 기능 : 정적 팩토리 메서드
-     * 날짜 : 2026-03-27
-     */
 
+    /**
+     * fail 결과를 생성해 반환합니다.
+     *
+     * @param message 전달받은 message 값
+     * @return 처리 결과
+     */
     public static CafePackageDTO fail(String message) {
         return CafePackageDTO.builder()
                 .success(false)
@@ -47,12 +48,13 @@ public class CafePackageDTO {
                 .build();
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : selected 메서드
-     * 날짜 : 2026-03-27
+    /**
+     * selected 동작을 수행합니다.
+     *
+     * @param pkg 전달받은 pkg 값
+     * @param tableNumber 전달받은 tableNumber 값
+     * @return 처리 결과
      */
-
     public static CafePackageDTO selected(CafePackageDTO pkg, Integer tableNumber) {
         return CafePackageDTO.builder()
                 .success(true)
@@ -61,12 +63,6 @@ public class CafePackageDTO {
                 .tableNumber(tableNumber)
                 .build();
     }
-
-    /*
-     * 작성자 : 서민성
-     * 기능 : getDisplayTime 메서드
-     * 날짜 : 2026-03-31
-     */
 
     public String getDisplayTime() { // package_selection.html에서 pkg.displayTime을 사용하고 있어서 추가함
         if (durationMinutes == null) return "Free";

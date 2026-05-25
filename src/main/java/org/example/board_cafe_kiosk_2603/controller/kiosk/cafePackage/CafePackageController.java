@@ -30,13 +30,14 @@ public class CafePackageController {
     private final CafeTableService cafeTableService;
     private final TableSessionKioskService tableSessionKioskService;
     private final TableSessionAdminService tableSessionAdminService;
-    /*
-     * 작성자 : 김민기
-     * 기능 : 패키지 선택 페이지 조회
-     * 날짜 : 2026-03-27
+
+    /**
+     * 패키지 선택 페이지 조회합니다.
+     *
+     * @param session 전달받은 session 값
+     * @param model 전달받은 model 값
+     * @return 처리 결과
      */
-
-
     @GetMapping("/package_selection")
     public String packageSelectionPage(HttpSession session, Model model) {
         Integer tableNumber = (Integer) session.getAttribute("tableNumber");
@@ -49,13 +50,13 @@ public class CafePackageController {
         log.info("패키지 선택 화면 - 테이블: {}, 인원: {}", tableNumber, partySize);
         return "kiosk/package_selection";
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 패키지 선택 처리
-     * 날짜 : 2026-03-27
+    /**
+     * 패키지 선택 처리합니다.
+     *
+     * @param req 전달받은 req 값
+     * @param session 전달받은 session 값
+     * @return 처리 결과
      */
-
-
     @PostMapping("/package/select")
     @ResponseBody
     public Map<String, Object> selectPackage(

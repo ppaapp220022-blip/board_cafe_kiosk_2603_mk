@@ -30,4 +30,3 @@ public class OrdersDTO {
     private LocalDateTime      orderedAt;
     private List<OrderItemDTO> items;
 }
-

@@ -23,10 +23,10 @@ public class Orders {
     private String        status;          // DB의 ENUM 값을 String으로 매핑
     private int           totalAmount;
     private LocalDateTime orderedAt;
-    /*
-     * 작성자 : 김민기
-     * 기능 : status 문자열을 OrderStatus enum으로 변환
-     * 날짜 : 2026-04-01
+    /**
+     * status 문자열을 OrderStatus enum으로 변환합니다.
+     *
+     * @return 처리 결과
      */
 
     public OrderStatus getStatusEnum() {

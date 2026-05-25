@@ -18,12 +18,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 
-/*
- * 작성자 : 김민기
- * 기능 : OrdersMapper 테스트
- * 날짜 : 2026-03-27
- */
-
 @Log4j2
 @SpringBootTest
 @Transactional
@@ -35,12 +29,6 @@ class OrdersMapperTest {
 
     private int  tableId;
     private long sessionId;
-
-    /*
-     * 작성자 : 김민기
-     * 기능 : setUp 메서드
-     * 날짜 : 2026-03-27
-     */
 
     @BeforeEach
     void setUp() {
@@ -54,12 +42,6 @@ class OrdersMapperTest {
         sessionId = session.getId();
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : buildOrder 메서드
-     * 날짜 : 2026-03-27
-     */
-
     private Orders buildOrder() {
         return Orders.builder()
                 .sessionId(sessionId)
@@ -70,14 +52,7 @@ class OrdersMapperTest {
                 .build();
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : insertOrder_and_findLatest 메서드
-     * 날짜 : 2026-03-27
-     */
-
     @Test
-    @Disabled("테이블 단위 최신 주문 조회는 로컬 누적 주문 데이터의 영향이 커서 반복 실행 시 결과가 흔들립니다.")
     void insertOrder_and_findLatest() {
         Orders order = buildOrder();
         ordersMapper.insertOrder(order);
@@ -91,12 +66,6 @@ class OrdersMapperTest {
         assertThat(found.getCustomerPhone()).isEqualTo("010-1234-5678");
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : insertOrder_and_findByOrderId 메서드
-     * 날짜 : 2026-03-27
-     */
-
     @Test
     void insertOrder_and_findByOrderId() {
         Orders order = buildOrder();
@@ -108,23 +77,11 @@ class OrdersMapperTest {
         assertThat(found.getSessionId()).isEqualTo(sessionId);
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : findByOrderId_notFound 메서드
-     * 날짜 : 2026-03-27
-     */
-
     @Test
     void findByOrderId_notFound() {
         Orders found = ordersMapper.findByOrderId(99999);
         assertThat(found).isNull();
     }
-
-    /*
-     * 작성자 : 김민기
-     * 기능 : findLatestByTableId_notFound 메서드
-     * 날짜 : 2026-03-27
-     */
 
     @Test
     void findLatestByTableId_notFound() {
@@ -132,14 +89,7 @@ class OrdersMapperTest {
         assertThat(found).isNull();
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : insertOrderItem_and_findItems 메서드
-     * 날짜 : 2026-03-27
-     */
-
     @Test
-    @Disabled("주문 상태 허용값과 실제 로컬 더미 메뉴 구성이 자주 바뀌어 주문 아이템 시나리오가 불안정합니다.")
     void insertOrderItem_and_findItems() {
         Orders order = buildOrder();
         ordersMapper.insertOrder(order);
@@ -161,14 +111,7 @@ class OrdersMapperTest {
         assertThat(items.get(0).getQuantity()).isEqualTo(2);
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : findItemsByOrderId_empty 메서드
-     * 날짜 : 2026-03-27
-     */
-
     @Test
-    @Disabled("주문 상태 허용값과 실제 로컬 더미 메뉴 구성이 자주 바뀌어 빈 주문 아이템 시나리오를 보류합니다.")
     void findItemsByOrderId_empty() {
         Orders order = buildOrder();
         ordersMapper.insertOrder(order);
@@ -176,12 +119,6 @@ class OrdersMapperTest {
         List<OrderItem> items = ordersMapper.findItemsByOrderId(order.getId());
         assertThat(items).isEmpty();
     }
-
-    /*
-     * 작성자 : 김민기
-     * 기능 : findBySessionId 메서드
-     * 날짜 : 2026-03-27
-     */
 
     @Test
     void findBySessionId() {
@@ -192,12 +129,6 @@ class OrdersMapperTest {
         assertThat(orders).isNotEmpty();
         assertThat(orders.stream().anyMatch(o -> o.getId() == order.getId())).isTrue();
     }
-
-    /*
-     * 작성자 : 김민기
-     * 기능 : updateOrderStatus 메서드
-     * 날짜 : 2026-03-27
-     */
 
     @Test
     void updateOrderStatus() {

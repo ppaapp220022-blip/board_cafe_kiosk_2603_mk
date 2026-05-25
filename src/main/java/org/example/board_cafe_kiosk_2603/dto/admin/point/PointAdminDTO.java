@@ -20,12 +20,13 @@ public class PointAdminDTO {
     private String phone;
     private int balance;
     private LocalDateTime updatedAt;
-    /*
-     * 작성자 : 김민기
-     * 기능 : 정적 팩토리 메서드
-     * 날짜 : 2026-03-27
-     */
 
+    /**
+     * from 결과를 생성해 반환합니다.
+     *
+     * @param point 전달받은 point 값
+     * @return 처리 결과
+     */
     public static PointAdminDTO from(Point point) {
         return PointAdminDTO.builder()
                 .id(point.getId())

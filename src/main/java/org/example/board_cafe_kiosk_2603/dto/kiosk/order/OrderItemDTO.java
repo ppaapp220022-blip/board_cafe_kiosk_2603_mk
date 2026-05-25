@@ -25,4 +25,3 @@ public class OrderItemDTO {
     private int     quantity;
     private String  status;
 }
-

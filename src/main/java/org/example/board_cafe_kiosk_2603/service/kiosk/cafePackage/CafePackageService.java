@@ -24,10 +24,10 @@ public class CafePackageService {
 
     private final CafePackageMapper cafePackageMapper;
     private final ModelMapper       modelMapper;
-    /*
-     * 작성자 : 김민기
-     * 기능 : 활성화된 패키지 목록 조회
-     * 날짜 : 2026-03-27
+    /**
+     * 활성화된 패키지 목록 조회합니다.
+     *
+     * @return 처리 결과
      */
 
     public List<CafePackageDTO> getActivePackages() {
@@ -36,10 +36,11 @@ public class CafePackageService {
                 .map(p -> modelMapper.map(p, CafePackageDTO.class))
                 .collect(Collectors.toList());
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : ID로 단건 조회
-     * 날짜 : 2026-03-27
+    /**
+     * ID로 단건 조회합니다.
+     *
+     * @param id 전달받은 id 값
+     * @return 처리 결과
      */
 
     public CafePackageDTO getById(int id) {

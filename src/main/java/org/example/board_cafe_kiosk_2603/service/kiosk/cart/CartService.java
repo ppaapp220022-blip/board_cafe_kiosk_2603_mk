@@ -66,14 +66,16 @@ public class CartService {
                     .build();
         }
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 장바구니 항목 추가
-     * 날짜 : 2026-03-27
+    /**
+     * 장바구니 항목 추가 작업을 수행합니다.
+     *
+     * @param tableNumber 전달받은 tableNumber 값
+     * @param request 전달받은 request 값
+     * @return 처리 결과
      */
 
-
     @Transactional
+
     public CartDTO addItem(int tableNumber, CartItemDTO request) {
         Integer menuId = cartItemMapper.findMenuIdByNameAndPrice(request.getMenuName(), request.getMenuPrice());
         if (menuId == null) {
@@ -122,14 +124,16 @@ public class CartService {
                 .cartCount(cartCount)
                 .build();
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 장바구니 항목 수량 변경
-     * 날짜 : 2026-03-27
+    /**
+     * 장바구니 항목 수량 변경합니다.
+     *
+     * @param tableNumber 전달받은 tableNumber 값
+     * @param request 전달받은 request 값
+     * @return 처리 결과
      */
 
-
     @Transactional
+
     public CartDTO updateItem(int tableNumber, CartItemDTO request) {
         Integer menuId = cartItemMapper.findMenuIdByNameAndPrice(request.getMenuName(), request.getMenuPrice());
         if (menuId == null) {
@@ -178,14 +182,15 @@ public class CartService {
                 .totalPrice(total)
                 .build();
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 장바구니 비우기
-     * 날짜 : 2026-03-27
+    /**
+     * 장바구니 비우기 작업을 수행합니다.
+     *
+     * @param tableNumber 전달받은 tableNumber 값
+     * @return 처리 결과
      */
 
-
     @Transactional
+
     public CartDTO clearCart(int tableNumber) {
         try {
             int tableId = resolveTableId(tableNumber);
@@ -209,12 +214,12 @@ public class CartService {
                     .build();
         }
     }
-    /*
-     * 작성자 : 김민기
-     * 기능 : 테이블 번호로 테이블 ID 조회
-     * 날짜 : 2026-04-01
+    /**
+     * 테이블 번호로 테이블 ID 조회합니다.
+     *
+     * @param tableNumber 전달받은 tableNumber 값
+     * @return 처리 결과
      */
-
 
     private int resolveTableId(int tableNumber) {
         Integer tableId = cartMapper.findCafeTableIdByTableNumber(tableNumber);
@@ -224,10 +229,11 @@ public class CartService {
         return tableId;
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : getOrCreateCart 메서드
-     * 날짜 : 2026-03-27
+    /**
+     * getOrCreateCart 동작을 수행합니다.
+     *
+     * @param tableId 전달받은 tableId 값
+     * @return 처리 결과
      */
 
     private Cart getOrCreateCart(int tableId) {
@@ -241,30 +247,34 @@ public class CartService {
         return cart;
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : isGameMenu 메서드
-     * 날짜 : 2026-04-14
+    /**
+     * isGameMenu 동작을 수행합니다.
+     *
+     * @param menuId 전달받은 menuId 값
+     * @return 처리 결과 여부
      */
 
     private boolean isGameMenu(int menuId) {
         return cartItemMapper.countGameMenuByMenuId(menuId) > 0;
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : availableGameStock 메서드
-     * 날짜 : 2026-04-14
+    /**
+     * availableGameStock 동작을 수행합니다.
+     *
+     * @param menuId 전달받은 menuId 값
+     * @return 처리 결과
      */
 
     private int availableGameStock(int menuId) {
         return cartItemMapper.countAvailableGameStockByMenuId(menuId);
     }
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : hasEnoughGameStock 메서드
-     * 날짜 : 2026-04-14
+    /**
+     * hasEnoughGameStock 동작을 수행합니다.
+     *
+     * @param menuId 전달받은 menuId 값
+     * @param requiredQty 전달받은 requiredQty 값
+     * @return 처리 결과 여부
      */
 
     private boolean hasEnoughGameStock(int menuId, int requiredQty) {

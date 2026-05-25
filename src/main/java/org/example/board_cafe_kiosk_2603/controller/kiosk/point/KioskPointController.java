@@ -21,12 +21,13 @@ public class KioskPointController {
 
     private final PointService pointService;
 
-    /*
-     * 작성자 : 김민기
-     * 기능 : lookupPoint 메서드
-     * 날짜 : 2026-03-27
+    /**
+     * lookupPoint 동작을 수행합니다.
+     *
+     * @param phone 전달받은 phone 값
+     * @param session 전달받은 session 값
+     * @return 처리 결과
      */
-
     @GetMapping("/lookup")
     public PointKioskDTO lookupPoint(
             @RequestParam String phone,

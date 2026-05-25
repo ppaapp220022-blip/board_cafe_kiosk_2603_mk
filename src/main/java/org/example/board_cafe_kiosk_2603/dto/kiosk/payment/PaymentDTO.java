@@ -8,12 +8,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+
 /*
  * 작성자 : 김민기
  * 기능 : 결제 REST API 요청/응답 DTO
  * 날짜 : 2026-03-27
  */
-
 @Data
 @Builder
 @NoArgsConstructor
@@ -45,5 +45,3 @@ public class PaymentDTO {
     private boolean success;             // 성공 여부
     private String message;              // 오류 메시지
 }
-
-

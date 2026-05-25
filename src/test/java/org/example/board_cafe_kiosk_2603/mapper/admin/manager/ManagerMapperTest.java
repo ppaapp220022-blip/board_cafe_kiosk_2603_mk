@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.Optional;
 
 @Log4j2
 @SpringBootTest
+@Transactional
 class ManagerMapperTest {
 
     @Autowired
@@ -22,11 +24,12 @@ class ManagerMapperTest {
 
     @Test
     void insertTest() {
-        String loginId = "test0002";
+        String loginId = "test_" + System.currentTimeMillis();
         Manager manager = Manager.builder()
                 .loginId(loginId)
                 .password("2222")
                 .name("테스터_02")
+                .email(loginId + "@test.com")
                 .role(RoleType.STAFF)
                 .isActive(true)
                 .createdAt(LocalDateTime.now())
@@ -55,7 +58,16 @@ class ManagerMapperTest {
 
     @Test
     void findByLoginIdTest() {
-        String targetId = "test0002";
+        String targetId = "find_" + System.currentTimeMillis();
+        managerMapper.insert(Manager.builder()
+                .loginId(targetId)
+                .password("2222")
+                .name("단건조회자")
+                .email(targetId + "@test.com")
+                .role(RoleType.STAFF)
+                .isActive(true)
+                .createdAt(LocalDateTime.now())
+                .build());
 
         // 1. Optional 자체를 받아옴
         Optional<Manager> foundOptional = managerMapper.findByLoginId(targetId);
@@ -76,8 +88,19 @@ class ManagerMapperTest {
 
     @Test
     void updateActiveTest() {
+        String loginId = "active_" + System.currentTimeMillis();
+        managerMapper.insert(Manager.builder()
+                .loginId(loginId)
+                .password("2222")
+                .name("활성변경자")
+                .email(loginId + "@test.com")
+                .role(RoleType.STAFF)
+                .isActive(true)
+                .createdAt(LocalDateTime.now())
+                .build());
+
         // 1. 기존 데이터 조회 (Optional에서 꺼내기)
-        Manager saved = managerMapper.findByLoginId("test0002")
+        Manager saved = managerMapper.findByLoginId(loginId)
                 .orElseThrow(() -> new RuntimeException("테스트 데이터를 찾을 수 없습니다."));
 
         int targetId = saved.getId();
@@ -88,7 +111,7 @@ class ManagerMapperTest {
         log.info("--- 상태 업데이트(false) 실행 ---");
 
         // 3. 재조회 및 검증
-        Manager updated = managerMapper.findByLoginId("test0002")
+        Manager updated = managerMapper.findByLoginId(loginId)
                 .orElseThrow(() -> new RuntimeException("업데이트 후 데이터를 찾을 수 없습니다."));
 
         log.info("--- 변경 결과 확인 ---");
