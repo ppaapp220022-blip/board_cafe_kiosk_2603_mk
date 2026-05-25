@@ -48,10 +48,10 @@ public class BatchConfig {
      * Tasklet을 사용하여 단순 Service 호출 로직 실행
      */
     @Bean
-    public Step statStep() {
+    public Step statStep(Tasklet statTasklet) {
         log.info("--- Spring Batch statStep ---");
         return new StepBuilder("statStep", jobRepository)
-                .tasklet(statTasklet(null), transactionManager)
+                .tasklet(statTasklet, transactionManager)
                 .build();
     }
 
