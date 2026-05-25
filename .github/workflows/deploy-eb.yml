@@ -43,8 +43,8 @@ jobs:
           --health-retries=10
     env:
       MARIADB_URL: jdbc:mariadb://127.0.0.1:3306/board_cafe_kiosk_2603
-      MARIADB_USERNAME: boardwave
-      MARIADB_PASSWORD: 0331
+      MARIADB_USERNAME: root
+      MARIADB_PASSWORD: 7070
       PGVECTOR_URL: jdbc:postgresql://127.0.0.1:5432/board_cafe_kiosk_2603
       PGVECTOR_USERNAME: postgres
       PGVECTOR_PASSWORD: postgres
