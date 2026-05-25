@@ -36,10 +36,10 @@ public class BatchConfig {
      * 1. statStep 단일 단계로 구성 (서비스 내부에서 Delete-Insert를 트랜잭션으로 처리)
      */
     @Bean
-    public Job dailyRevenueJob() {
+    public Job dailyRevenueJob(Step statStep) {
         log.info("--- Spring Batch dailyRevenueJob ---");
         return new JobBuilder("dailyRevenueJob", jobRepository)
-                .start(statStep())
+                .start(statStep)
                 .build();
     }
 
