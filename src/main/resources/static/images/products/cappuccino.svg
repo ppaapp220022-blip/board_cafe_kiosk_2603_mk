@@ -1,7 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320">
   <rect width="320" height="320" rx="32" fill="#f5ece5"/>
+  <g transform="translate(32 24) scale(0.8)">
   <rect x="96" y="98" width="108" height="122" rx="18" fill="#9a6b43"/>
   <path d="M110 110c8-20 34-24 50-12 12-16 38-16 50 0 18-8 38 4 42 24z" fill="#fff8f1"/>
   <path d="M204 128h18c18 0 32 12 32 28s-14 28-32 28h-18" fill="none" stroke="#9a6b43" stroke-width="14" stroke-linecap="round"/>
+  </g>
   <text x="160" y="276" text-anchor="middle" font-size="24" font-family="Arial, sans-serif" fill="#69462a">Cappuccino</text>
 </svg>

@@ -16,7 +16,7 @@
 
         <div class="menu-img-area">
           <img th:if="${item.imageUrl != null and item.imageUrl != ''}"
-               th:src="${item.imageUrl}" alt="상품 이미지">
+               th:src="${item.imageUrl}" alt="상품 이미지" class="menu-thumbnail">
           <div th:unless="${item.imageUrl != null and item.imageUrl != ''}">
             <i data-lucide="image" class="placeholder-icon"></i>
           </div>

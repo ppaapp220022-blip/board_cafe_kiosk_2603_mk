@@ -1,6 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320">
   <rect width="320" height="320" rx="32" fill="#f0f4ff"/>
+  <g transform="translate(32 24) scale(0.8)">
   <path d="M88 98h144a16 16 0 0 1 16 16v70a16 16 0 0 1-16 16h-50l-28 28-4-28H88a16 16 0 0 1-16-16v-70a16 16 0 0 1 16-16z" fill="#ffffff" stroke="#83a7ff" stroke-width="8"/>
   <text x="160" y="162" text-anchor="middle" font-size="64" font-family="Arial, sans-serif" font-weight="700" fill="#5d7cd4">?</text>
+  </g>
   <text x="160" y="276" text-anchor="middle" font-size="24" font-family="Arial, sans-serif" fill="#51659b">Quiz Game</text>
 </svg>

@@ -1,7 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320">
   <rect width="320" height="320" rx="32" fill="#fffadf"/>
+  <g transform="translate(32 24) scale(0.8)">
   <rect x="106" y="84" width="88" height="140" rx="20" fill="#f8d549"/>
   <circle cx="160" cy="154" r="28" fill="#fff2a7" stroke="#efc100" stroke-width="8"/>
   <path d="M194 122h16c18 0 30 12 30 28s-12 28-30 28h-16" fill="none" stroke="#e7bf00" stroke-width="14" stroke-linecap="round"/>
+  </g>
   <text x="160" y="276" text-anchor="middle" font-size="24" font-family="Arial, sans-serif" fill="#9d8500">Lemon Ade</text>
 </svg>
