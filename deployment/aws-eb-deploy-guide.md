@@ -34,6 +34,7 @@ mkdir -p ~/boardwave-db/mariadb-init
 
 Copy these files from the repository:
 
+- `src/main/resources/sql/MariaDB/00_batch_schema.sql`
 - `deployment/docker-db/docker-compose.yml`
 - `deployment/docker-db/.env.example` -> rename to `.env`
 - `src/main/resources/sql/MariaDB/01_init.sql`
@@ -42,6 +43,7 @@ Copy these files from the repository:
 Place the SQL files in:
 
 ```text
+~/boardwave-db/mariadb-init/00_batch_schema.sql
 ~/boardwave-db/mariadb-init/01_init.sql
 ~/boardwave-db/mariadb-init/02_dummy.sql
 ```
@@ -114,6 +116,23 @@ SPRING_BATCH_JDBC_INITIALIZE_SCHEMA=never
 SPRING_SERVLET_MULTIPART_LOCATION=/var/app/current/upload
 MY_UPLOAD_PATH=/var/app/current/upload
 ```
+
+## 4-1. 운영 DB 점검/적용 순서
+
+배치 메타테이블과 더미 데이터는 필요 시 수동으로 확인하거나 적용합니다.
+
+```bash
+mysql -h <DB_HOST> -P 3306 -u <USER> -p board_cafe_kiosk_2603 < src/main/resources/sql/MariaDB/00_batch_schema.sql
+mysql -h <DB_HOST> -P 3306 -u <USER> -p board_cafe_kiosk_2603 < src/main/resources/sql/MariaDB/02_dummy.sql
+mysql -h <DB_HOST> -P 3306 -u <USER> -p board_cafe_kiosk_2603 < src/main/resources/sql/MariaDB/04_ops_check.sql
+```
+
+주의:
+
+- `00_batch_schema.sql` 은 Spring Batch 메타테이블이 없을 때만 1회 실행합니다.
+- Amazon Linux + MariaDB 운영 환경에서는 대소문자 이슈를 피하기 위해 소문자 `batch_*` 테이블명 기준으로 유지합니다.
+- `02_dummy.sql` 은 더미 환경에서만 실행합니다. 운영 데이터가 있는 DB에는 그대로 실행하지 마세요.
+- `04_ops_check.sql` 은 점검 전용입니다.
 
 ## 5. GitHub repository secrets
 

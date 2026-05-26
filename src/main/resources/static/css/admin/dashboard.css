@@ -296,3 +296,196 @@
     border-bottom: 1px dashed #dbeafe;
 }
 .rented-game-row:last-child { border-bottom: none; }
+
+@media (max-width: 1200px) {
+    .table-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .header-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .header-container > div:last-child {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-title {
+        font-size: 18px;
+    }
+
+    .status-legend {
+        flex-wrap: wrap;
+        gap: 8px;
+        font-size: 10px;
+    }
+
+    .table-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .table-card {
+        min-height: 132px;
+        padding: 12px;
+    }
+
+    .header-container {
+        margin-bottom: 16px;
+        gap: 10px;
+    }
+
+    .header-container > div:last-child {
+        gap: 8px !important;
+    }
+
+    .header-container .btn-msg,
+    .btn-reset {
+        padding: 8px 10px !important;
+        font-size: 11px !important;
+        gap: 6px !important;
+        border-radius: 8px !important;
+    }
+
+    .dot {
+        width: 9px;
+        height: 9px;
+    }
+
+    .table-number {
+        font-size: 16px;
+    }
+
+    .status-text {
+        font-size: 11px;
+        gap: 4px;
+    }
+
+    .order-mini-badge {
+        font-size: 9px;
+        padding: 2px 6px;
+    }
+
+    .live-amount-box {
+        margin-top: 8px;
+        padding: 6px 8px;
+        border-radius: 8px;
+    }
+
+    .live-amount-label {
+        font-size: 10px;
+    }
+
+    .live-amount-value {
+        font-size: 11px;
+    }
+
+    .modal-content {
+        width: calc(100vw - 32px);
+        padding: 22px 18px;
+    }
+
+    .pending-order-card,
+    .order-item-header,
+    .order-item-actions,
+    .live-amount-row {
+        flex-wrap: wrap;
+    }
+
+    .action-group .btn {
+        flex: 1 1 100%;
+        font-size: 12px;
+        padding: 12px;
+    }
+
+    .time-info {
+        font-size: 10px !important;
+        margin-top: 10px !important;
+        padding-top: 8px !important;
+        gap: 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .table-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .table-number {
+        font-size: 14px;
+    }
+
+    .page-title {
+        font-size: 15px;
+    }
+
+    .header-container {
+        gap: 8px;
+    }
+
+    .header-container .btn-msg,
+    .btn-reset {
+        padding: 6px 8px !important;
+        font-size: 10px !important;
+    }
+
+    .status-legend {
+        gap: 6px;
+        font-size: 9px;
+    }
+
+    .table-card {
+        min-height: 116px;
+        padding: 10px;
+        border-left-width: 5px;
+    }
+
+    .status-text {
+        font-size: 10px;
+    }
+
+    .pending-section-header {
+        flex-wrap: wrap;
+        font-size: 13px;
+    }
+
+    .pending-actions,
+    .pending-order-actions {
+        width: 100%;
+    }
+
+    .btn-pending-confirm,
+    .btn-pending-bulk {
+        width: 100%;
+        font-size: 11px;
+        padding: 8px 10px;
+    }
+
+    .modal-content {
+        width: calc(100vw - 20px);
+        padding: 16px 12px;
+        border-radius: 14px;
+    }
+
+    .modal-header {
+        margin-bottom: 14px;
+        font-size: 16px;
+    }
+
+    .order-list {
+        max-height: 240px;
+        padding: 8px;
+    }
+
+    .action-group .btn {
+        font-size: 11px;
+        padding: 10px;
+    }
+}

@@ -72,6 +72,7 @@ public class StatScheduler {
         } catch (Exception e) {
             log.error("[Batch Scheduler] 수동 통계 배치 작업 중 오류 발생: {}", e.getMessage());
             e.printStackTrace();
+            throw new RuntimeException("수동 통계 배치 작업 실행에 실패했습니다.", e);
         }
     }
 }

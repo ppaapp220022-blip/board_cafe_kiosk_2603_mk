@@ -1,4 +1,6 @@
 let dailySalesChart, categorySalesChart;
+const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
 
 document.addEventListener('DOMContentLoaded', function() {
     // 오늘 날짜 구하기 및 max 설정
@@ -181,4 +183,41 @@ function initCharts() {
             }
         }
     });
+}
+
+async function runStatBatch(date) {
+    const targetDate = date || document.getElementById('targetDate')?.value;
+
+    if (!targetDate) {
+        alert('기준 날짜를 먼저 선택해 주세요.');
+        return;
+    }
+
+    const confirmed = window.confirm(`${targetDate} 기준으로 수동 통계 배치를 실행할까요?`);
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+        const headers = {};
+        if (csrfToken && csrfHeader) {
+            headers[csrfHeader] = csrfToken;
+        }
+
+        const response = await fetch(`/admin/api/statistics/run-batch?targetDate=${encodeURIComponent(targetDate)}`, {
+            method: 'POST',
+            headers
+        });
+
+        if (!response.ok) {
+            throw new Error('수동 배치 실행 요청에 실패했습니다.');
+        }
+
+        const data = await response.json();
+        alert(data.message || '수동 통계 배치 실행을 완료했습니다.');
+        await loadStatData(targetDate);
+    } catch (error) {
+        console.error('수동 배치 실행 오류:', error);
+        alert('수동 통계 배치 실행 중 오류가 발생했습니다.');
+    }
 }

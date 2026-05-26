@@ -4,12 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.example.board_cafe_kiosk_2603.dto.admin.statistics.DailySalesDTO;
 import org.example.board_cafe_kiosk_2603.dto.admin.statistics.GameStatsDTO;
+import org.example.board_cafe_kiosk_2603.scheduler.StatScheduler;
 import org.example.board_cafe_kiosk_2603.service.admin.statistics.StatService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -26,6 +28,7 @@ import java.util.Map;
 @PreAuthorize("hasAnyRole('ADMIN','SUPER')")
 public class StatController {
     private final StatService statService;
+    private final StatScheduler statScheduler;
 
     /**
      관리자 통계 페이지 이동
@@ -96,6 +99,25 @@ public class StatController {
         log.info("topGames : {}", topGames);
         response.put("topGames", topGames);
 
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/api/statistics/run-batch")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> runBatchNow(
+            @RequestParam(value = "targetDate", required = false) String targetDateStr) {
+        LocalDate targetDate = (targetDateStr == null || targetDateStr.isEmpty())
+                ? LocalDate.now().minusDays(1)
+                : LocalDate.parse(targetDateStr);
+
+        log.info("--- StatController runBatchNow --- targetDate: {}", targetDate);
+
+        statScheduler.runManualStatJob(targetDate);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("targetDate", targetDate.toString());
+        response.put("message", targetDate + " 기준 수동 통계 배치 실행을 요청했습니다.");
         return ResponseEntity.ok(response);
     }
 }

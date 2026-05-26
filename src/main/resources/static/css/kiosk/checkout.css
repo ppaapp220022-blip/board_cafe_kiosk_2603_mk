@@ -9,9 +9,10 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100vh;
-    overflow: hidden;
+    min-height: 100vh;
+    overflow-y: auto;
     background-color: #f4f6f8;
+    padding: 28px 20px 40px;
 }
 
 .container {
@@ -367,5 +368,43 @@ body {
     to {
         transform: translateY(0);
         opacity: 1;
+    }
+}
+
+@media (max-width: 1024px) {
+    .container {
+        max-width: 860px;
+    }
+
+    .point-input-row,
+    .button-group {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        align-items: flex-start;
+        padding: 20px 16px 32px;
+    }
+
+    .container {
+        max-width: 640px;
+        padding: 16px 0;
+    }
+
+    .card,
+    .point-card {
+        padding: 20px;
+    }
+
+    .final-box {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .final-box-amount {
+        font-size: 2.2rem;
     }
 }

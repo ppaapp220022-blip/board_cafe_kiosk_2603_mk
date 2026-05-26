@@ -120,3 +120,13 @@ body { margin: 0; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 
         max-height: 208px;
     }
 }
+
+@media (max-width: 1024px) {
+    .wrap {
+        max-width: 960px;
+    }
+
+    .layout {
+        grid-template-columns: 280px 1fr;
+    }
+}

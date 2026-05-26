@@ -6,9 +6,10 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100vh;
+    min-height: 100vh;
     text-align: center;
     padding: 20px;
+    overflow-y: auto;
 }
 
 .container {
@@ -77,3 +78,9 @@ h1 { font-size: 2rem; font-weight: 800; color: #333; }
 }
 
 .back-btn:hover { background: #e0e2e7; }
+
+@media (max-width: 768px) {
+    .button-group {
+        flex-direction: column;
+    }
+}

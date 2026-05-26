@@ -18,13 +18,14 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    overflow: hidden;
+    min-height: 100vh;
+    overflow-y: auto;
+    padding: 24px 20px;
 }
 
 .kiosk-frame {
-    width: 1080px;
-    height: 680px;
+    width: min(100%, 1080px);
+    min-height: 680px;
     background: var(--bg-color);
     display: flex;
     border: 5px solid #FFFFFF;
@@ -514,4 +515,43 @@ body {
 
 audio {
     display: none;
+}
+
+@media (max-width: 1024px) {
+    .kiosk-frame {
+        min-height: 0;
+        height: auto;
+        flex-direction: column;
+    }
+
+    .ai-guide-zone {
+        border-right: none;
+        border-bottom: 2px solid #B3E5FC;
+        padding: 28px 24px;
+    }
+
+    .content-zone {
+        padding: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        align-items: flex-start;
+        padding: 16px;
+    }
+
+    .ai-character {
+        width: 180px;
+        height: 180px;
+    }
+
+    .eyes {
+        gap: 28px;
+    }
+
+    .mic-btn {
+        width: 64px;
+        height: 64px;
+    }
 }

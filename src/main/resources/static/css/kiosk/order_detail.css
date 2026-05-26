@@ -9,8 +9,8 @@ body {
     background-color: #f4f6f8;
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    overflow: hidden;
+    min-height: 100vh;
+    overflow-y: auto;
     color: #333;
 }
 
@@ -553,5 +553,14 @@ body {
 
     .status-control-buttons {
         justify-content: flex-start;
+    }
+}
+
+@media (max-width: 1024px) {
+    .header,
+    .content,
+    .footer {
+        padding-left: 24px;
+        padding-right: 24px;
     }
 }

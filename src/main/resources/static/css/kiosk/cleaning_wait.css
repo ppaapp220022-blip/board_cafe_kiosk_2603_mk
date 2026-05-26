@@ -3,12 +3,13 @@ body {
     margin: 0;
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background: linear-gradient(135deg, #fff8e1 0%, #ffe0b2 100%);
-    height: 100vh;
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #4e342e;
-    overflow: hidden;
+    overflow-y: auto;
+    padding: 24px 16px;
 }
 .container {
     width: min(92vw, 760px);

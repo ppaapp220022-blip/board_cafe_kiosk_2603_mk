@@ -7,6 +7,8 @@
 <head>
   <title>Sales Statistics</title>
   <th:block layout:fragment="head-extra">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" th:href="@{/css/admin/status.css}">
   </th:block>
@@ -17,6 +19,9 @@
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
     <h1 class="page-title" style="margin-bottom: 0;">매출 통계</h1>
     <div style="display: flex; align-items: center; gap: 15px;">
+      <button type="button" onclick="runStatBatch(document.getElementById('targetDate').value)" class="batch-run-btn">
+        ▶ 배치 수동 실행
+      </button>
       <button onclick="loadStatData(document.getElementById('targetDate').value)" class="sync-btn">
         🔄 실시간 동기화
       </button>

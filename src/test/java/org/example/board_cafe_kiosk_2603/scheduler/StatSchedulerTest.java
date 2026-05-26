@@ -1,31 +1,43 @@
-//package org.example.board_cafe_kiosk_2603.scheduler;
-//
-//import lombok.extern.log4j.Log4j2;
-//import org.junit.jupiter.api.Test;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.test.context.SpringBootTest;
-//
-//import java.time.LocalDate;
-//
-//import static org.junit.jupiter.api.Assertions.*;
-//
-//@Log4j2
-//@SpringBootTest
-//class StatSchedulerTest {
-//    @Autowired
-//    private StatScheduler statScheduler;
-//
-//    @Test
-//    void runManualStatJobTest() {
-//        // 1. 테스트하고 싶은 날짜 설정 (예: 3일 전)
-//        LocalDate targetDate = LocalDate.now();
-//
-//        log.info(">>>>>> 통합 테스트 시작: 대상 날짜 = {}", targetDate);
-//
-//        // 2. 실제 메서드 호출
-//        // 이 메서드 안에서 jobLauncher.run()이 실제로 돌아갑니다.
-//        statScheduler.runManualStatJob(targetDate);
-//
-//        log.info(">>>>>> 통합 테스트 종료. DB의 BATCH_JOB_EXECUTION 테이블을 확인하세요.");
-//    }
-//}
+package org.example.board_cafe_kiosk_2603.scheduler;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.launch.JobLauncher;
+
+import java.time.LocalDate;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+
+@ExtendWith(MockitoExtension.class)
+class StatSchedulerTest {
+
+    @Mock
+    private JobLauncher jobLauncher;
+
+    @Mock
+    private Job dailyRevenueJob;
+
+    @InjectMocks
+    private StatScheduler statScheduler;
+
+    @Test
+    void runManualStatJob_usesTargetDateAndUniqueTime() throws Exception {
+        LocalDate targetDate = LocalDate.of(2026, 5, 1);
+
+        statScheduler.runManualStatJob(targetDate);
+
+        ArgumentCaptor<JobParameters> jobParametersCaptor = ArgumentCaptor.forClass(JobParameters.class);
+        verify(jobLauncher).run(org.mockito.Mockito.eq(dailyRevenueJob), jobParametersCaptor.capture());
+
+        JobParameters captured = jobParametersCaptor.getValue();
+        assertThat(captured.getString("targetDate")).isEqualTo("2026-05-01");
+        assertThat(captured.getLong("time")).isNotNull();
+    }
+}

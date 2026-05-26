@@ -21,6 +21,9 @@ updateClock();
 // [상품 메뉴 활성화 보정]
 document.addEventListener("DOMContentLoaded", function() {
     const currentPath = window.location.pathname;
+    const sidebar = document.getElementById('adminSidebar');
+    const sidebarToggle = document.querySelector('.sidebar-toggle');
+    const sidebarBackdrop = document.querySelector('.sidebar-backdrop');
 
     // 모든 메뉴 링크를 가져옵니다.
     const productMenu = document.querySelector('a[href*="/admin/product"]');
@@ -57,5 +60,39 @@ document.addEventListener("DOMContentLoaded", function() {
             // '직원 관리' 본체인 경우
             if (staffMenu) staffMenu.classList.add('active');
         }
+    }
+
+    function setSidebarOpen(isOpen) {
+        if (!sidebar || !sidebarToggle || !sidebarBackdrop) return;
+
+        sidebar.classList.toggle('open', isOpen);
+        document.body.classList.toggle('sidebar-open', isOpen);
+        sidebarBackdrop.hidden = !isOpen;
+        sidebarToggle.setAttribute('aria-expanded', String(isOpen));
+    }
+
+    if (sidebar && sidebarToggle && sidebarBackdrop) {
+        sidebarToggle.addEventListener('click', function () {
+            const shouldOpen = !sidebar.classList.contains('open');
+            setSidebarOpen(shouldOpen);
+        });
+
+        sidebarBackdrop.addEventListener('click', function () {
+            setSidebarOpen(false);
+        });
+
+        sidebar.querySelectorAll('a').forEach(function (link) {
+            link.addEventListener('click', function () {
+                if (window.innerWidth <= 768) {
+                    setSidebarOpen(false);
+                }
+            });
+        });
+
+        window.addEventListener('resize', function () {
+            if (window.innerWidth > 768) {
+                setSidebarOpen(false);
+            }
+        });
     }
 });
