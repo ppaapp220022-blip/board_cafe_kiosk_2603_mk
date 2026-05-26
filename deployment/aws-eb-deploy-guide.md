@@ -130,7 +130,7 @@ mysql -h <DB_HOST> -P 3306 -u <USER> -p board_cafe_kiosk_2603 < src/main/resourc
 주의:
 
 - `00_batch_schema.sql` 은 Spring Batch 메타테이블이 없을 때만 1회 실행합니다.
-- Amazon Linux + MariaDB 운영 환경에서는 대소문자 이슈를 피하기 위해 소문자 `batch_*` 테이블명 기준으로 유지합니다.
+- 이 프로젝트의 운영 Spring Batch는 대문자 `BATCH_*` 테이블/시퀀스 이름을 찾으므로, DB 오브젝트 이름도 동일하게 맞춰야 합니다.
 - `02_dummy.sql` 은 더미 환경에서만 실행합니다. 운영 데이터가 있는 DB에는 그대로 실행하지 마세요.
 - `04_ops_check.sql` 은 점검 전용입니다.
 

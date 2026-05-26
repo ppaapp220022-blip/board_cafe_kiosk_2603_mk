@@ -6,6 +6,7 @@ import org.example.board_cafe_kiosk_2603.dto.admin.statistics.DailySalesDTO;
 import org.example.board_cafe_kiosk_2603.dto.admin.statistics.GameStatsDTO;
 import org.example.board_cafe_kiosk_2603.scheduler.StatScheduler;
 import org.example.board_cafe_kiosk_2603.service.admin.statistics.StatService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -111,13 +112,36 @@ public class StatController {
                 : LocalDate.parse(targetDateStr);
 
         log.info("--- StatController runBatchNow --- targetDate: {}", targetDate);
-
-        statScheduler.runManualStatJob(targetDate);
-
         Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("targetDate", targetDate.toString());
-        response.put("message", targetDate + " 기준 수동 통계 배치 실행을 요청했습니다.");
-        return ResponseEntity.ok(response);
+
+        try {
+            statScheduler.runManualStatJob(targetDate);
+
+            response.put("success", true);
+            response.put("targetDate", targetDate.toString());
+            response.put("message", targetDate + " 기준 수동 통계 배치 실행을 요청했습니다.");
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Throwable rootCause = getRootCause(e);
+            String errorMessage = rootCause.getMessage() != null ? rootCause.getMessage() : e.getMessage();
+
+            log.error("--- StatController runBatchNow failed --- targetDate: {}, error: {}", targetDate, errorMessage, e);
+
+            response.put("success", false);
+            response.put("targetDate", targetDate.toString());
+            response.put("message", "수동 통계 배치 실행 중 오류가 발생했습니다.");
+            response.put("error", errorMessage);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    private Throwable getRootCause(Throwable throwable) {
+        Throwable current = throwable;
+
+        while (current.getCause() != null && current.getCause() != current) {
+            current = current.getCause();
+        }
+
+        return current;
     }
 }

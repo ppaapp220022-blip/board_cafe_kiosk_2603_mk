@@ -3,7 +3,7 @@
 -- 1) Spring Batch 메타테이블 존재 여부
 -- 2) 포인트 더미/실데이터 적재 여부
 -- 3) 최근 배치 실행 이력
--- Note: Linux MariaDB 환경에서는 batch_* 소문자 이름 기준으로 확인합니다.
+-- Note: 운영 환경의 Spring Batch는 대문자 BATCH_* 이름 기준으로 확인합니다.
 -- ============================================================
 
 -- 1. Spring Batch 메타테이블 존재 여부
@@ -11,12 +11,12 @@ SELECT table_name
 FROM information_schema.tables
 WHERE table_schema = DATABASE()
   AND table_name IN (
-    'batch_job_instance',
-    'batch_job_execution',
-    'batch_job_execution_params',
-    'batch_step_execution',
-    'batch_step_execution_context',
-    'batch_job_execution_context'
+    'BATCH_JOB_INSTANCE',
+    'BATCH_JOB_EXECUTION',
+    'BATCH_JOB_EXECUTION_PARAMS',
+    'BATCH_STEP_EXECUTION',
+    'BATCH_STEP_EXECUTION_CONTEXT',
+    'BATCH_JOB_EXECUTION_CONTEXT'
   )
 ORDER BY table_name;
 
@@ -25,9 +25,9 @@ SELECT sequence_name
 FROM information_schema.sequences
 WHERE sequence_schema = DATABASE()
   AND sequence_name IN (
-    'batch_step_execution_seq',
-    'batch_job_execution_seq',
-    'batch_job_seq'
+    'BATCH_STEP_EXECUTION_SEQ',
+    'BATCH_JOB_EXECUTION_SEQ',
+    'BATCH_JOB_SEQ'
   )
 ORDER BY sequence_name;
 
@@ -40,10 +40,10 @@ SELECT
     je.start_time,
     je.end_time,
     je.exit_code
-FROM batch_job_execution je
-JOIN batch_job_instance ji
-  ON je.job_instance_id = ji.job_instance_id
-ORDER BY je.job_execution_id DESC
+FROM BATCH_JOB_EXECUTION je
+JOIN BATCH_JOB_INSTANCE ji
+  ON je.JOB_INSTANCE_ID = ji.JOB_INSTANCE_ID
+ORDER BY je.JOB_EXECUTION_ID DESC
 LIMIT 20;
 
 -- 4. 최근 Step 실행 이력
@@ -55,8 +55,8 @@ SELECT
     commit_count,
     start_time,
     end_time
-FROM batch_step_execution
-ORDER BY step_execution_id DESC
+FROM BATCH_STEP_EXECUTION
+ORDER BY STEP_EXECUTION_ID DESC
 LIMIT 20;
 
 -- 5. 포인트 계정 현황

@@ -74,19 +74,3 @@
     background: white; color: #007bff; cursor: pointer; font-weight: 600; font-size: 13px;
 }
 .sync-btn:hover { background: #f0f7ff; }
-
-.batch-run-btn {
-    padding: 8px 15px;
-    border-radius: 8px;
-    border: 1px solid #28a745;
-    background: #28a745;
-    color: white;
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 13px;
-}
-
-.batch-run-btn:hover {
-    background: #218838;
-    border-color: #218838;
-}
