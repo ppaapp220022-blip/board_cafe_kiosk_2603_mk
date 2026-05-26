@@ -60,11 +60,13 @@
     background: white;
     border-radius: 15px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 
 .cat-table {
     width: 100%;
+    min-width: 720px;
     border-collapse: collapse;
 }
 
@@ -410,4 +412,124 @@
     background: var(--primary-blue);
     border-color: var(--primary-blue);
     color: white;
+}
+
+@media (max-width: 1200px) {
+    .tab-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .page-title {
+        font-size: 18px;
+    }
+
+    .header-flex {
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .btn-add-product {
+        width: 100%;
+        text-align: center;
+        font-size: 12px;
+        padding: 10px 12px;
+    }
+
+    .tab-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+        margin-bottom: 14px;
+    }
+
+    .tab-btn {
+        padding: 10px 8px;
+        font-size: 12px;
+    }
+
+    .cat-table th,
+    .cat-table td {
+        padding: 12px 10px;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .count-badge,
+    .status-badge,
+    .btn-table {
+        font-size: 11px;
+    }
+
+    .btn-table {
+        min-width: 66px;
+        padding: 6px 8px;
+    }
+
+    .action-group {
+        gap: 6px;
+    }
+
+    .modal-box {
+        width: calc(100vw - 32px);
+        padding: 18px 14px;
+        border-radius: 16px;
+    }
+
+    .modal-title {
+        font-size: 15px;
+        margin-bottom: 16px;
+    }
+
+    .input-field,
+    .btn-submit,
+    .btn-cancel,
+    .btn-alert-ok {
+        font-size: 12px;
+    }
+
+    .modal-footer {
+        flex-wrap: wrap;
+    }
+
+    .modal-footer button {
+        width: 100%;
+    }
+
+    .page-link {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-title {
+        font-size: 16px;
+    }
+
+    .tab-container {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .cat-table th,
+    .cat-table td {
+        padding: 10px 8px;
+        font-size: 11px;
+    }
+
+    .cat-table {
+        min-width: 640px;
+    }
+
+    .btn-table,
+    .status-badge,
+    .count-badge {
+        font-size: 10px;
+    }
+
+    .modal-box {
+        width: calc(100vw - 20px);
+        padding: 14px 10px;
+    }
 }

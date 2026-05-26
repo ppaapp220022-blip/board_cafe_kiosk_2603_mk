@@ -95,3 +95,101 @@ tr.is-disabled { background-color: #F9F9F9; opacity: 0.6; }
 .page-btn:hover { background: #f1f3f4; }
 .page-btn.active { background: var(--primary-blue); color: white; border-color: var(--primary-blue); }
 .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+@media (max-width: 768px) {
+    .page-title {
+        font-size: 18px;
+        margin-bottom: 16px;
+    }
+
+    .header-container {
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    .tab-container {
+        width: 100%;
+        gap: 6px;
+        padding: 6px;
+        margin-bottom: 16px;
+    }
+
+    .tab-button {
+        flex: 1;
+        padding: 9px 10px;
+        font-size: 12px;
+    }
+
+    .table-container {
+        padding: 8px;
+    }
+
+    .macro-massage-table th,
+    .macro-massage-table td {
+        padding: 12px 10px;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .modal-content {
+        width: calc(100vw - 32px);
+        padding: 18px 14px;
+        border-radius: 16px;
+    }
+
+    .form-row {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .form-group input[type="text"],
+    .stepper-control,
+    .toggle-group {
+        height: 42px;
+    }
+
+    .btn-primary,
+    .btn-text,
+    .btn-cancel {
+        font-size: 12px;
+    }
+
+    .pagination {
+        gap: 6px;
+        margin-top: 16px;
+    }
+
+    .page-btn {
+        width: 34px;
+        height: 34px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-title {
+        font-size: 16px;
+    }
+
+    .tab-container {
+        flex-wrap: wrap;
+    }
+
+    .tab-button {
+        width: calc(50% - 3px);
+        flex: none;
+        text-align: center;
+    }
+
+    .macro-massage-table th,
+    .macro-massage-table td {
+        padding: 10px 8px;
+        font-size: 11px;
+    }
+
+    .modal-content {
+        width: calc(100vw - 20px);
+        padding: 14px 10px;
+    }
+}

@@ -92,6 +92,12 @@ body {
 .time-display { display: flex; align-items: center; gap: 10px; }
 #current-time { font-size: 18px; font-weight: 700; color: var(--text-dark); }
 .clock-icon { font-size: 16px; }
+.time-display svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2;
+    flex-shrink: 0;
+}
 
 /* ===== [3. 네비게이션 메뉴] ===== */
 .nav-menu { flex-grow: 1; }
@@ -260,7 +266,8 @@ body.sidebar-open {
     }
 
     .clock-icon,
-    .time-display i {
+    .time-display i,
+    .time-display svg {
         font-size: 11px;
         width: 12px;
         height: 12px;
@@ -342,6 +349,11 @@ body.sidebar-open {
     .nav-icon {
         width: 14px;
         font-size: 12px;
+    }
+
+    .time-display svg {
+        width: 10px;
+        height: 10px;
     }
 
     .logout-btn {

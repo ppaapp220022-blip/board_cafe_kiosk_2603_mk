@@ -40,3 +40,88 @@ tr.is-disabled { background-color: #F9F9F9; opacity: 0.6; }
 
 /* 실시간 메시지 스타일 */
 .status-msg { font-size: 12px; margin-top: 6px; min-height: 18px; font-weight: 500; }
+
+@media (max-width: 768px) {
+    .page-title {
+        font-size: 18px;
+    }
+
+    .header-container {
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .tab-container {
+        width: 100%;
+        gap: 6px;
+        padding: 6px;
+        margin-bottom: 16px;
+    }
+
+    .tab-item {
+        flex: 1;
+        padding: 9px 10px;
+        font-size: 12px;
+        text-align: center;
+    }
+
+    .table-container {
+        padding: 8px;
+    }
+
+    .macro-massage-table th,
+    .macro-massage-table td {
+        padding: 12px 10px;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .btn-primary,
+    .btn-text {
+        font-size: 12px;
+    }
+
+    .modal-content {
+        width: calc(100vw - 32px);
+        padding: 18px 14px;
+        border-radius: 16px;
+    }
+
+    .form-row {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .form-group input,
+    .form-group select {
+        height: 42px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-title {
+        font-size: 16px;
+    }
+
+    .tab-container {
+        flex-wrap: wrap;
+    }
+
+    .tab-item {
+        width: calc(50% - 3px);
+        flex: none;
+    }
+
+    .macro-massage-table th,
+    .macro-massage-table td {
+        padding: 10px 8px;
+        font-size: 11px;
+    }
+
+    .modal-content {
+        width: calc(100vw - 20px);
+        padding: 14px 10px;
+    }
+}

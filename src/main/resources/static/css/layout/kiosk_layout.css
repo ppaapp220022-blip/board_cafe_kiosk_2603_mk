@@ -65,12 +65,42 @@ body {
 }
 .header-left { display: flex; align-items: center; gap: 15px; min-width: 0; flex-wrap: wrap; }
 .table-info { font-size: 1.5rem; font-weight: 700; color: #333; letter-spacing: -0.5px; }
+.header-right { display: flex; gap: 15px; flex-wrap: wrap; justify-content: flex-end; }
+.party-badge,
+.timer-badge,
+.order-status-box,
+.game-status-box,
+.icon-btn.cart {
+    min-height: 44px;
+    border-radius: 12px;
+    padding: 0 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.party-badge span,
+.timer-badge span,
+.order-status-box span,
+.game-status-box span,
+.icon-btn.cart .btn-label {
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: 1;
+}
+
 .party-badge {
     background: linear-gradient(135deg, #eef6ff 0%, #e3f2fd 100%);
-    color: #007bff; padding: 8px 16px; border-radius: 20px;
-    font-size: 1rem; font-weight: 500; display: flex; align-items: center; gap: 8px; border: 1px solid #bbdefb;
+    color: #007bff;
+    border: 1px solid #bbdefb;
 }
-.header-right { display: flex; gap: 15px; flex-wrap: wrap; justify-content: flex-end; }
+
 .icon-btn {
     width: 56px; height: 56px; border-radius: 50%; display: flex;
     align-items: center; justify-content: center; border: none; cursor: pointer;
@@ -78,62 +108,40 @@ body {
 }
 .icon-btn.cart {
     width: auto;
-    height: 44px;
-    border-radius: 12px;
-    padding: 0 14px;
-    gap: 6px;
+    height: auto;
     background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
 }
-.icon-btn .btn-label {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: #fff;
-    line-height: 1;
-}
+.icon-btn .btn-label { color: #fff; }
 .cart-badge {
     position: absolute; top: -5px; right: -5px; background-color: #ff5252;
     color: white; font-size: 0.75rem; font-weight: 700; width: 24px; height: 24px;
     border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white;
 }
 .timer-badge {
-    display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 20px;
-    font-size: 1rem; font-weight: 700; background: linear-gradient(135deg, #eef6ff 0%, #e3f2fd 100%);
-    color: #007bff; border: 1px solid #bbdefb; min-width: 100px; justify-content: center;
+    background: linear-gradient(135deg, #eef6ff 0%, #e3f2fd 100%);
+    color: #007bff;
+    border: 1px solid #bbdefb;
 }
 .timer-badge.overtime {
     background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
-    color: #f44336; border-color: #ffccbc; animation: pulse-red 1s infinite;
+    color: #f44336;
+    border-color: #ffccbc;
+    animation: pulse-red 1s infinite;
 }
 
 /* 새 주문 상태 박스 */
 .order-status-box {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 12px;
-    border-radius: 16px;
-    font-size: 0.9rem;
-    font-weight: 600;
     background: #fff8f0;
     color: #d85a30;
     border: 1px solid #ffccba;
-    min-height: 40px;
     max-width: 200px;
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .game-status-box {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 12px;
-    border-radius: 16px;
-    font-size: 0.9rem;
-    font-weight: 600;
     background: #eff7ee;
     color: #2d7d32;
     border: 1px solid #b9dfbc;
-    min-height: 40px;
     max-width: 240px;
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -415,14 +423,100 @@ body {
         align-items: center;
     }
 
+    .party-badge,
+    .timer-badge,
+    .order-status-box,
+    .game-status-box,
+    .icon-btn.cart {
+        min-height: 40px;
+        padding: 0 12px;
+        font-size: 0.82rem;
+    }
+
     .menu-grid {
         grid-template-columns: repeat(2, minmax(260px, 1fr));
     }
 }
 
+@media (max-width: 1024px) and (min-width: 641px) {
+    .sidebar-left {
+        height: 100dvh;
+        max-height: 100dvh;
+        overflow-y: auto;
+        overflow-x: hidden;
+        position: sticky;
+        top: 0;
+        align-self: flex-start;
+    }
+
+    .sidebar-left > .nav-group:last-of-type {
+        margin-top: auto;
+    }
+
+    .header {
+        flex-wrap: nowrap;
+        align-items: center;
+        padding: 14px 18px;
+        gap: 10px;
+    }
+
+    .header-left,
+    .header-right {
+        width: auto;
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .header-left {
+        flex: 1 1 auto;
+    }
+
+    .header-right {
+        flex: 0 1 auto;
+        justify-content: flex-end;
+    }
+
+    .table-info {
+        font-size: 1.2rem;
+    }
+
+    .party-badge,
+    .timer-badge,
+    .order-status-box,
+    .game-status-box {
+        min-height: 36px;
+        padding: 0 10px;
+        font-size: 0.74rem;
+        gap: 4px;
+        border-radius: 11px;
+    }
+
+    .icon-btn.cart {
+        min-height: 36px;
+        padding: 0 10px;
+        gap: 4px;
+        border-radius: 11px;
+    }
+
+    .timer-badge i,
+    .party-badge i,
+    .icon-btn.cart i {
+        width: 15px;
+        height: 15px;
+    }
+
+    .order-status-dot,
+    .game-status-dot {
+        width: 8px;
+        height: 8px;
+    }
+}
+
 @media (max-width: 640px) {
     .sidebar-left {
-        width: 88px;
+        width: 108px;
         padding: 12px 8px;
         gap: 10px;
         border-right: 1px solid #eaeaea;
@@ -435,18 +529,14 @@ body {
         gap: 8px;
     }
 
-    .sidebar-left > .nav-group:last-of-type {
-        margin-top: auto;
-    }
-
     .nav-btn {
         width: 100%;
         min-width: 0;
         height: 42px;
         padding: 0 8px;
-        gap: 6px;
+        gap: 5px;
         border-radius: 10px;
-        font-size: 0.74rem;
+        font-size: 0.68rem;
     }
 
     .nav-btn i {
@@ -455,7 +545,12 @@ body {
     }
 
     .nav-label {
-        font-size: 0.72rem;
+        font-size: 0.66rem;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+        line-height: 1.05;
+        word-break: keep-all;
     }
 
     .table-info {
@@ -464,51 +559,50 @@ body {
     }
 
     .main-area {
-        max-width: calc(100vw - 88px);
+        max-width: calc(100vw - 108px);
     }
 
     .header {
         padding: 12px 14px;
         gap: 8px;
+        flex-wrap: wrap;
+        align-items: flex-start;
     }
 
     .header-left,
     .header-right {
-        gap: 8px;
-        flex-wrap: nowrap;
+        gap: 6px;
+        flex-wrap: wrap;
         min-width: 0;
+        width: 100%;
+        align-items: flex-start;
     }
 
-    .party-badge {
-        padding: 6px 10px;
-        font-size: 0.8rem;
-        gap: 4px;
+    .header-right {
+        justify-content: flex-start;
     }
 
+    .party-badge,
     .timer-badge,
     .order-status-box,
     .game-status-box {
-        min-width: 0;
-        max-width: 120px;
-        padding: 6px 8px;
-        font-size: 0.72rem;
-        gap: 4px;
+        min-height: 32px;
+        padding: 0 6px;
+        font-size: 0.62rem;
+        gap: 3px;
     }
 
     .icon-btn.cart {
-        height: 36px;
-        padding: 0 10px;
-        gap: 4px;
-        border-radius: 10px;
+        min-height: 32px;
+        padding: 0 6px;
+        gap: 3px;
+        border-radius: 8px;
+        min-width: 0;
     }
 
     .icon-btn.cart i {
-        width: 16px;
-        height: 16px;
-    }
-
-    .icon-btn .btn-label {
-        font-size: 0.74rem;
+        width: 14px;
+        height: 14px;
     }
 
     .content {
@@ -563,19 +657,19 @@ body {
 
 @media (max-width: 480px) {
     .sidebar-left {
-        width: 76px;
+        width: 96px;
         padding: 10px 6px;
     }
 
     .main-area {
-        max-width: calc(100vw - 76px);
+        max-width: calc(100vw - 96px);
     }
 
     .nav-btn {
         height: 38px;
         padding: 0 6px;
         gap: 4px;
-        font-size: 0.68rem;
+        font-size: 0.62rem;
     }
 
     .nav-btn i {
@@ -584,38 +678,67 @@ body {
     }
 
     .nav-label {
-        font-size: 0.66rem;
+        font-size: 0.58rem;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+        line-height: 1.05;
+        word-break: keep-all;
     }
 
     .header {
         padding: 10px;
         gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .header-left,
+    .header-right {
+        width: 100%;
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+
+    .header-right {
+        justify-content: flex-start;
     }
 
     .table-info {
         font-size: 0.9rem;
     }
 
-    .party-badge {
-        padding: 4px 8px;
-        font-size: 0.72rem;
-    }
-
+    .party-badge,
     .timer-badge,
     .order-status-box,
     .game-status-box {
-        max-width: 92px;
-        padding: 5px 6px;
-        font-size: 0.64rem;
+        min-height: 28px;
+        padding: 0 5px;
+        font-size: 0.52rem;
+    }
+
+    .timer-badge i {
+        width: 10px;
+        height: 10px;
     }
 
     .icon-btn.cart {
-        height: 34px;
-        padding: 0 8px;
+        min-height: 28px;
+        padding: 0 4px;
+        gap: 2px;
+        border-radius: 7px;
     }
 
-    .icon-btn .btn-label {
-        font-size: 0.68rem;
+    .icon-btn.cart i {
+        width: 10px;
+        height: 10px;
+    }
+
+    .cart-badge {
+        width: 16px;
+        height: 16px;
+        font-size: 0.5rem;
+        top: -3px;
+        right: -3px;
     }
 
     .menu-grid {

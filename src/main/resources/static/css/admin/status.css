@@ -74,3 +74,115 @@
     background: white; color: #007bff; cursor: pointer; font-weight: 600; font-size: 13px;
 }
 .sync-btn:hover { background: #f0f7ff; }
+
+@media (max-width: 1200px) {
+    .summary-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .chart-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-title {
+        font-size: 18px;
+        margin-bottom: 16px;
+    }
+
+    .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .summary-card,
+    .chart-card,
+    .best-seller-card {
+        padding: 14px;
+        border-radius: 12px;
+    }
+
+    .summary-label {
+        font-size: 10px;
+    }
+
+    .summary-value {
+        font-size: 16px;
+    }
+
+    .chart-row {
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .chart-title {
+        font-size: 13px;
+        margin-bottom: 14px;
+    }
+
+    .seller-item {
+        padding: 10px 0;
+        gap: 8px;
+    }
+
+    .rank-badge {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+        margin-right: 8px;
+    }
+
+    .item-name,
+    .item-price {
+        font-size: 12px;
+    }
+
+    .item-count {
+        font-size: 11px;
+        margin-right: 8px;
+    }
+
+    .sync-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .summary-card,
+    .chart-card,
+    .best-seller-card {
+        padding: 12px;
+    }
+
+    .page-title {
+        font-size: 16px;
+    }
+
+    .summary-label {
+        font-size: 9px;
+    }
+
+    .summary-value {
+        font-size: 14px;
+    }
+
+    .chart-title,
+    .item-name,
+    .item-price,
+    .item-count {
+        font-size: 11px;
+    }
+
+    .sync-btn {
+        padding: 7px 10px;
+        font-size: 11px;
+    }
+}

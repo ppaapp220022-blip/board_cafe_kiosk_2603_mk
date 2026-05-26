@@ -158,3 +158,88 @@
     border-radius: 8px;
     cursor: pointer;
 }
+
+@media (max-width: 768px) {
+    .page-title {
+        font-size: 18px;
+        margin-bottom: 16px;
+    }
+
+    .tabs {
+        width: 100%;
+        gap: 6px;
+        padding: 6px;
+        margin-bottom: 16px;
+    }
+
+    .tab-btn {
+        flex: 1;
+        padding: 9px 10px;
+        font-size: 12px;
+    }
+
+    .btn-add {
+        width: 100%;
+        padding: 10px 12px;
+        font-size: 12px;
+    }
+
+    .table-container {
+        padding: 8px;
+        overflow-x: auto;
+    }
+
+    .macro-massage-table th,
+    .macro-massage-table td {
+        padding: 12px 10px;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .btn-delete {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+
+    .modal-content {
+        width: calc(100vw - 32px);
+        padding: 18px 14px;
+        border-radius: 16px;
+    }
+
+    .modal-actions {
+        flex-wrap: wrap;
+    }
+
+    .modal-actions button,
+    .modal-actions .btn-cancel {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-title {
+        font-size: 16px;
+    }
+
+    .tabs {
+        flex-wrap: wrap;
+    }
+
+    .tab-btn {
+        width: calc(50% - 3px);
+        flex: none;
+        text-align: center;
+    }
+
+    .macro-massage-table th,
+    .macro-massage-table td {
+        padding: 10px 8px;
+        font-size: 11px;
+    }
+
+    .modal-content {
+        width: calc(100vw - 20px);
+        padding: 14px 10px;
+    }
+}

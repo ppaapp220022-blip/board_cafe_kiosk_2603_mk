@@ -151,3 +151,72 @@ textarea.form-control {
 .btn-cancel:hover {
     background: #f8fafc;
 }
+
+@media (max-width: 768px) {
+    .header-flex {
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .page-title {
+        font-size: 18px;
+    }
+
+    .form-card {
+        padding: 18px 14px;
+        border-radius: 12px;
+        max-width: 100%;
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .form-label,
+    .form-check-group label,
+    .image-placeholder {
+        font-size: 12px;
+    }
+
+    .form-control {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+
+    textarea.form-control {
+        min-height: 84px;
+    }
+
+    .image-preview-box {
+        height: 120px;
+    }
+
+    .btn-group {
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 18px;
+    }
+
+    .btn-submit,
+    .btn-cancel {
+        width: 100%;
+        justify-content: center;
+        padding: 11px 14px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-title {
+        font-size: 16px;
+    }
+
+    .form-card {
+        padding: 14px 10px;
+    }
+
+    .form-control {
+        font-size: 12px;
+    }
+}
