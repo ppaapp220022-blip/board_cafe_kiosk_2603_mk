@@ -8,6 +8,56 @@ const requestedGames = Array.isArray(gameDetailState.requestedGames)
     ? gameDetailState.requestedGames
     : [];
 
+function applyResponsiveLayout() {
+    const layout = document.querySelector('.layout');
+    const listCard = document.querySelector('.list-card');
+    const detailCard = document.querySelector('.detail-card');
+    const listEl = document.getElementById('game-list');
+    const imageFrame = document.querySelector('.game-image-frame');
+    const metaGrid = document.querySelector('.meta-grid');
+
+    if (!layout || !listCard || !detailCard || !listEl || !imageFrame || !metaGrid) {
+        return;
+    }
+
+    const width = window.innerWidth || document.documentElement.clientWidth || 1024;
+
+    listEl.style.maxHeight = 'none';
+    listEl.style.overflow = 'visible';
+    listCard.style.height = 'fit-content';
+    detailCard.style.height = 'fit-content';
+    listCard.style.minWidth = '0';
+    detailCard.style.minWidth = '0';
+    imageFrame.style.maxWidth = '100%';
+
+    if (width <= 640) {
+        layout.style.display = 'flex';
+        layout.style.flexDirection = 'column';
+        layout.style.gridTemplateColumns = 'none';
+        listCard.style.width = '100%';
+        detailCard.style.width = '100%';
+        imageFrame.style.width = '100%';
+        imageFrame.style.aspectRatio = width <= 480 ? '1 / 1' : '4 / 3';
+        metaGrid.style.gridTemplateColumns = '1fr';
+    } else if (width <= 1024) {
+        layout.style.display = 'grid';
+        layout.style.flexDirection = '';
+        layout.style.gridTemplateColumns = 'minmax(170px, 0.58fr) minmax(0, 1.42fr)';
+        listCard.style.width = '100%';
+        detailCard.style.width = '100%';
+        imageFrame.style.width = 'min(100%, 260px)';
+        imageFrame.style.aspectRatio = '4 / 3';
+        metaGrid.style.gridTemplateColumns = '1fr';
+    } else {
+        layout.style.display = 'grid';
+        layout.style.flexDirection = '';
+        layout.style.gridTemplateColumns = 'minmax(240px, 0.72fr) minmax(0, 1.28fr)';
+        imageFrame.style.width = '100%';
+        imageFrame.style.aspectRatio = '16 / 9';
+        metaGrid.style.gridTemplateColumns = 'repeat(2, minmax(0, 1fr))';
+    }
+}
+
 function startTableStatusWatcher() {
     async function checkTableStatus() {
         try {
@@ -57,6 +107,7 @@ function renderList() {
     const listEl = document.getElementById('game-list');
     if (!Array.isArray(requestedGames) || requestedGames.length === 0) {
         listEl.innerHTML = '<div style="padding:10px; color:#64748b;">요청된 게임이 없습니다.</div>';
+        applyResponsiveLayout();
         return;
     }
 
@@ -77,6 +128,7 @@ function renderList() {
     });
 
     renderDetail(requestedGames[0]);
+    applyResponsiveLayout();
 }
 
 function goToMenu() {
@@ -85,3 +137,4 @@ function goToMenu() {
 
 startTableStatusWatcher();
 renderList();
+window.addEventListener('resize', applyResponsiveLayout);

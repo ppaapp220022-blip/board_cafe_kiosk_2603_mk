@@ -5,7 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>게임 요청 상세</title>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <link rel="stylesheet" th:href="@{/css/kiosk/game_detail.css}">
+  <link rel="stylesheet" th:href="@{/css/kiosk/game_detail.css(v='20260529b')}" href="/css/kiosk/game_detail.css?v=20260529b">
+  <style>
+    @media (min-width: 641px) and (max-width: 1024px) {
+      .layout {
+        grid-template-columns: minmax(170px, 0.58fr) minmax(0, 1.42fr) !important;
+      }
+
+      .list-card,
+      .detail-card {
+        min-width: 0 !important;
+      }
+
+      .game-image-frame {
+        width: min(100%, 260px) !important;
+        max-width: 100% !important;
+        aspect-ratio: 4 / 3 !important;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .layout {
+        display: flex !important;
+        flex-direction: column !important;
+      }
+
+      .list-card,
+      .detail-card {
+        width: 100% !important;
+        min-width: 0 !important;
+      }
+    }
+  </style>
 </head>
 <body>
 <div class="wrap">

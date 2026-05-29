@@ -92,10 +92,19 @@ public class OrderController {
             return "redirect:/kiosk/cart";
         }
 
-        List<OrderItemDTO> orderItems = order.getItems() == null ? List.of() : order.getItems();
-        List<OrderItemDTO> gameItems = orderItems.stream()
+        List<OrdersDTO> sessionOrders = orderService.getActiveSessionOrders(tableNumber);
+        List<OrderItemDTO> gameItems = sessionOrders.stream()
+                .filter(sessionOrder -> sessionOrder != null && sessionOrder.getItems() != null)
+                .flatMap(sessionOrder -> sessionOrder.getItems().stream())
                 .filter(item -> item != null && item.getPrice() == 0)
                 .toList();
+
+        if (gameItems.isEmpty()) {
+            List<OrderItemDTO> orderItems = order.getItems() == null ? List.of() : order.getItems();
+            gameItems = orderItems.stream()
+                    .filter(item -> item != null && item.getPrice() == 0)
+                    .toList();
+        }
 
         if (gameItems.isEmpty()) {
             return "redirect:/kiosk/order/" + orderId;
@@ -123,6 +132,7 @@ public class OrderController {
             row.put("maxPlayers", info != null ? info.getMaxPlayers() : null);
             row.put("playTime", info != null ? info.getPlayTime() : null);
             row.put("description", info != null ? info.getDescription() : null);
+            row.put("orderId", gameItem.getOrderId());
             requestedGames.add(row);
         }
 
