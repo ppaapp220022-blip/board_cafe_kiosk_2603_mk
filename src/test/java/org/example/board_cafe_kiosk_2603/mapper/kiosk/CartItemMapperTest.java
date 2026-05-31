@@ -1,10 +1,10 @@
 //package org.example.board_cafe_kiosk_2603.mapper.kiosk;
 //
 //import lombok.extern.log4j.Log4j2;
-//import org.example.board_cafe_kiosk_2603.domain.kiosk.cart.Cart;
-//import org.example.board_cafe_kiosk_2603.domain.kiosk.cart.CartItem;
-//import org.example.board_cafe_kiosk_2603.mapper.kiosk.cart.CartItemMapper;
-//import org.example.board_cafe_kiosk_2603.mapper.kiosk.cart.CartMapper;
+//import org.example.board_cafe_kiosk_2603.kiosk.cart.model.Cart;
+//import org.example.board_cafe_kiosk_2603.kiosk.cart.model.CartItem;
+//import org.example.board_cafe_kiosk_2603.kiosk.cart.mapper.CartItemMapper;
+//import org.example.board_cafe_kiosk_2603.kiosk.cart.mapper.CartMapper;
 //import org.junit.jupiter.api.BeforeEach;
 //import org.junit.jupiter.api.Disabled;
 //import org.junit.jupiter.api.Test;

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.example.board_cafe_kiosk_2603.mapper.kiosk.order.OrdersMapper">
+<mapper namespace="org.example.board_cafe_kiosk_2603.kiosk.order.mapper.OrdersMapper">
 
     <!-- 주문 생성 (PK 반환) -->
     <insert id="insertOrder"
@@ -26,7 +26,7 @@
 
     <!-- 주문 ID로 단건 조회 -->
     <select id="findByOrderId"
-            resultType="org.example.board_cafe_kiosk_2603.domain.kiosk.order.Orders">
+            resultType="org.example.board_cafe_kiosk_2603.kiosk.order.model.Orders">
         SELECT id, session_id, table_id, customer_phone, status, total_amount, ordered_at
         FROM orders
         WHERE id = #{orderId}
@@ -34,7 +34,7 @@
 
     <!-- 세션 ID로 주문 목록 조회 -->
     <select id="findBySessionId"
-            resultType="org.example.board_cafe_kiosk_2603.domain.kiosk.order.Orders">
+            resultType="org.example.board_cafe_kiosk_2603.kiosk.order.model.Orders">
         SELECT id, session_id, table_id, customer_phone, status, total_amount, ordered_at
         FROM orders
         WHERE session_id = #{sessionId}
@@ -43,7 +43,7 @@
 
     <!-- 테이블 ID로 최근 주문 조회 -->
     <select id="findLatestByTableId"
-            resultType="org.example.board_cafe_kiosk_2603.domain.kiosk.order.Orders">
+            resultType="org.example.board_cafe_kiosk_2603.kiosk.order.model.Orders">
         SELECT id, session_id, table_id, customer_phone, status, total_amount, ordered_at
         FROM orders
         WHERE table_id = #{tableId}
@@ -53,7 +53,7 @@
 
     <!-- 상태별 주문 목록 조회 (관리자용) -->
     <select id="findByStatus"
-            resultType="org.example.board_cafe_kiosk_2603.domain.kiosk.order.Orders">
+            resultType="org.example.board_cafe_kiosk_2603.kiosk.order.model.Orders">
         SELECT id, session_id, table_id, customer_phone, status, total_amount, ordered_at
         FROM orders
         WHERE status = #{status}
@@ -62,7 +62,7 @@
 
     <!-- 주문 ID로 아이템 목록 조회 -->
     <select id="findItemsByOrderId"
-            resultType="org.example.board_cafe_kiosk_2603.domain.kiosk.order.OrderItem">
+            resultType="org.example.board_cafe_kiosk_2603.kiosk.order.model.OrderItem">
         SELECT id, order_id, menu_id, menu_name, price, quantity
         FROM order_item
         WHERE order_id = #{orderId}

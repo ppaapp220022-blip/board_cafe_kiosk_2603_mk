@@ -1,8 +1,8 @@
-//package org.example.board_cafe_kiosk_2603.mapper.admin.table;
+//package org.example.board_cafe_kiosk_2603.admin.table.mapper;
 //
 //import lombok.extern.log4j.Log4j2;
-//import org.example.board_cafe_kiosk_2603.domain.admin.table.CafeTable;
-//import org.example.board_cafe_kiosk_2603.dto.kiosk.order.OrderItemDTO;
+//import org.example.board_cafe_kiosk_2603.admin.table.model.CafeTable;
+//import org.example.board_cafe_kiosk_2603.kiosk.order.dto.OrderItemDTO;
 //import org.junit.jupiter.api.Test;
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.boot.test.context.SpringBootTest;

@@ -2,8 +2,8 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.example.board_cafe_kiosk_2603.mapper.admin.table.CafeTableMapper">
-    <select id="selectAllTables" resultType="org.example.board_cafe_kiosk_2603.domain.admin.table.CafeTable">
+<mapper namespace="org.example.board_cafe_kiosk_2603.admin.table.mapper.CafeTableMapper">
+    <select id="selectAllTables" resultType="org.example.board_cafe_kiosk_2603.admin.table.model.CafeTable">
         /* DB의 스네이크 케이스 필드명을 Entity의 카멜케이스 속성에 매핑 */
         SELECT
         ct.id,
@@ -95,7 +95,7 @@
      기존 쿼리문에서의 변경 내역 id 값을 tableId로 변경 -->
 
     <!-- current_session_id 조회 -->
-    <!-- resultType="org.example.board_cafe_kiosk_2603.domain.admin.table.CafeTable" -->
+    <!-- resultType="org.example.board_cafe_kiosk_2603.admin.table.model.CafeTable" -->
     <select id="selectCurrentSessionId" resultType="java.lang.Long">
         SELECT current_session_id FROM cafe_table
         WHERE id = #{tableId}
@@ -149,7 +149,7 @@
         WHERE is_active = TRUE
     </update>
 
-    <select id="selectActiveOrderItems" resultType="org.example.board_cafe_kiosk_2603.dto.kiosk.order.OrderItemDTO">
+    <select id="selectActiveOrderItems" resultType="org.example.board_cafe_kiosk_2603.kiosk.order.dto.OrderItemDTO">
         SELECT
             oi.id,
             oi.order_id AS orderId,
@@ -183,7 +183,7 @@
     </select>
 
     <!-- 테이블 번호로 단건 조회 (로그인용) -->
-    <select id="findByTableNumber" resultType="org.example.board_cafe_kiosk_2603.domain.admin.table.CafeTable">
+    <select id="findByTableNumber" resultType="org.example.board_cafe_kiosk_2603.admin.table.model.CafeTable">
         SELECT id, table_number, password, status, access_token, current_session_id
         FROM cafe_table
         WHERE table_number = #{tableNumber}

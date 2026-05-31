@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.example.board_cafe_kiosk_2603.mapper.admin.statistics.StatMapper">
+<mapper namespace="org.example.board_cafe_kiosk_2603.admin.statistics.mapper.StatMapper">
 
     <delete id="deleteDailySummary">
         DELETE FROM daily_sales_summary WHERE stat_date = #{targetDate}
@@ -78,7 +78,7 @@
                              sales_amount = VALUES(sales_amount)
     </insert>
 
-    <select id="getWeeklyStats" resultType="org.example.board_cafe_kiosk_2603.dto.admin.statistics.DailySalesDTO">
+    <select id="getWeeklyStats" resultType="org.example.board_cafe_kiosk_2603.admin.statistics.dto.DailySalesDTO">
         SELECT
             DATE_FORMAT(stat_date, '%Y-%m-%d') as statDate,
             total_revenue as totalRevenue,
@@ -90,7 +90,7 @@
         ORDER BY stat_date
     </select>
 
-    <select id="getTopSellingMenuByDate" resultType="org.example.board_cafe_kiosk_2603.dto.admin.statistics.ItemSalesDTO">
+    <select id="getTopSellingMenuByDate" resultType="org.example.board_cafe_kiosk_2603.admin.statistics.dto.ItemSalesDTO">
         SELECT
             m.name as menuName,
             ish.sales_qty as salesQty,
@@ -102,7 +102,7 @@
         LIMIT #{limit}
     </select>
 
-    <select id="getTopSellingItems" resultType="org.example.board_cafe_kiosk_2603.dto.admin.statistics.ItemSalesDTO">
+    <select id="getTopSellingItems" resultType="org.example.board_cafe_kiosk_2603.admin.statistics.dto.ItemSalesDTO">
         SELECT m.name as menuName, SUM(ish.sales_qty) as salesQty
         FROM item_sales_history ish
                  INNER JOIN menu m ON ish.product_id = m.id
@@ -120,7 +120,7 @@
         GROUP BY category
     </select>
 
-    <select id="getTopGamesByMonth" resultType="org.example.board_cafe_kiosk_2603.dto.admin.statistics.GameStatsDTO">
+    <select id="getTopGamesByMonth" resultType="org.example.board_cafe_kiosk_2603.admin.statistics.dto.GameStatsDTO">
         SELECT
             g.name AS gameName,
             COUNT(gh.id) AS rentCount

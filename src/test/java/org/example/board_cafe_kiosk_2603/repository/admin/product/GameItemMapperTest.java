@@ -1,10 +1,10 @@
 //package org.example.board_cafe_kiosk_2603.repository.admin.product;
 //
 //import lombok.extern.log4j.Log4j2;
-//import org.example.board_cafe_kiosk_2603.domain.admin.product.GameItem;
-//import org.example.board_cafe_kiosk_2603.domain.admin.product.GameItemStatus;
-//import org.example.board_cafe_kiosk_2603.dto.admin.product.GameItemResponseDTO;
-//import org.example.board_cafe_kiosk_2603.mapper.admin.product.GameItemMapper;
+//import org.example.board_cafe_kiosk_2603.admin.product.model.GameItem;
+//import org.example.board_cafe_kiosk_2603.admin.product.model.GameItemStatus;
+//import org.example.board_cafe_kiosk_2603.admin.product.dto.GameItemResponseDTO;
+//import org.example.board_cafe_kiosk_2603.admin.product.mapper.GameItemMapper;
 //import org.junit.jupiter.api.Test;
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.boot.test.context.SpringBootTest;

@@ -3,17 +3,17 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="org.example.board_cafe_kiosk_2603.mapper.admin.manager.ManagerMapper">
+<mapper namespace="org.example.board_cafe_kiosk_2603.admin.manager.mapper.ManagerMapper">
 
     <!-- 전체 목록 조회 -->
-    <select id="findAll" resultType="org.example.board_cafe_kiosk_2603.domain.admin.manager.Manager">
+    <select id="findAll" resultType="org.example.board_cafe_kiosk_2603.admin.manager.model.Manager">
         SELECT id, login_id, password, name, email, role, is_active, created_at
         FROM manager
         ORDER BY is_active DESC, created_at DESC
     </select>
 
     <!-- 로그인 ID로 단건 조회 -->
-    <select id="findByLoginId" resultType="org.example.board_cafe_kiosk_2603.domain.admin.manager.Manager">
+    <select id="findByLoginId" resultType="org.example.board_cafe_kiosk_2603.admin.manager.model.Manager">
         SELECT id, login_id, password, name, email, role, is_active, created_at
         FROM manager
         WHERE login_id = #{loginId}
@@ -50,7 +50,7 @@
 
     <!--===================페이징====================-->
     <!-- 페이징 목록 조회 -->
-    <select id="selectList" resultType="org.example.board_cafe_kiosk_2603.domain.admin.manager.Manager">
+    <select id="selectList" resultType="org.example.board_cafe_kiosk_2603.admin.manager.model.Manager">
         SELECT id, login_id, password, name, role, is_active, created_at
         FROM manager
         WHERE 1=1

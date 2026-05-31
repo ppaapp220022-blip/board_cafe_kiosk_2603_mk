@@ -1,12 +1,12 @@
 //package org.example.board_cafe_kiosk_2603.mapper.kiosk;
 //
 //import lombok.extern.log4j.Log4j2;
-//import org.example.board_cafe_kiosk_2603.domain.common.cafeTableSession.CafeTableSession;
-//import org.example.board_cafe_kiosk_2603.domain.kiosk.order.OrderItem;
-//import org.example.board_cafe_kiosk_2603.domain.kiosk.order.Orders;
-//import org.example.board_cafe_kiosk_2603.mapper.common.cafeTableSession.CafeTableSessionMapper;
-//import org.example.board_cafe_kiosk_2603.mapper.kiosk.cart.CartMapper;
-//import org.example.board_cafe_kiosk_2603.mapper.kiosk.order.OrdersMapper;
+//import org.example.board_cafe_kiosk_2603.common.tableSession.model.CafeTableSession;
+//import org.example.board_cafe_kiosk_2603.kiosk.order.model.OrderItem;
+//import org.example.board_cafe_kiosk_2603.kiosk.order.model.Orders;
+//import org.example.board_cafe_kiosk_2603.common.tableSession.mapper.CafeTableSessionMapper;
+//import org.example.board_cafe_kiosk_2603.kiosk.cart.mapper.CartMapper;
+//import org.example.board_cafe_kiosk_2603.kiosk.order.mapper.OrdersMapper;
 //import org.junit.jupiter.api.BeforeEach;
 //import org.junit.jupiter.api.Disabled;
 //import org.junit.jupiter.api.Test;

@@ -3,7 +3,7 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="org.example.board_cafe_kiosk_2603.mapper.admin.point.CustomerMapper">
+<mapper namespace="org.example.board_cafe_kiosk_2603.admin.point.mapper.CustomerMapper">
 
     <!-- 신규 고객 등록 -->
     <insert id="insertCustomer">
@@ -12,7 +12,7 @@
     </insert>
 
     <!-- 전화번호로 고객 조회 -->
-    <select id="selectByPhone" resultType="org.example.board_cafe_kiosk_2603.domain.admin.point.Customer">
+    <select id="selectByPhone" resultType="org.example.board_cafe_kiosk_2603.admin.point.model.Customer">
         SELECT id, phone, is_active, created_at
         FROM board_cafe_kiosk_2603.customer
         WHERE phone = #{phone}

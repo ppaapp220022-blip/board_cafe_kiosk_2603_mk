@@ -1,9 +1,9 @@
 //package org.example.board_cafe_kiosk_2603.repository.admin.product;
 //
 //import lombok.extern.log4j.Log4j2;
-//import org.example.board_cafe_kiosk_2603.domain.admin.product.CategoryType;
-//import org.example.board_cafe_kiosk_2603.dto.admin.product.CategoryResponseDTO;
-//import org.example.board_cafe_kiosk_2603.mapper.admin.product.CategoryMapper;
+//import org.example.board_cafe_kiosk_2603.admin.product.model.CategoryType;
+//import org.example.board_cafe_kiosk_2603.admin.product.dto.CategoryResponseDTO;
+//import org.example.board_cafe_kiosk_2603.admin.product.mapper.CategoryMapper;
 //import org.junit.jupiter.api.Test;
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.boot.test.context.SpringBootTest;

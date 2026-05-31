@@ -1,10 +1,10 @@
-//package org.example.board_cafe_kiosk_2603.config;
+//package org.example.board_cafe_kiosk_2603.global.config;
 //
 //import lombok.extern.log4j.Log4j2;
-//import org.example.board_cafe_kiosk_2603.domain.admin.manager.Manager;
-//import org.example.board_cafe_kiosk_2603.domain.admin.manager.RoleType;
-//import org.example.board_cafe_kiosk_2603.mapper.admin.manager.ManagerMapper;
-//import org.example.board_cafe_kiosk_2603.mapper.admin.table.CafeTableMapper;
+//import org.example.board_cafe_kiosk_2603.admin.manager.model.Manager;
+//import org.example.board_cafe_kiosk_2603.admin.manager.model.RoleType;
+//import org.example.board_cafe_kiosk_2603.admin.manager.mapper.ManagerMapper;
+//import org.example.board_cafe_kiosk_2603.admin.table.mapper.CafeTableMapper;
 //import org.junit.jupiter.api.Assertions;
 //import org.junit.jupiter.api.Test;
 //import org.springframework.beans.factory.annotation.Autowired;

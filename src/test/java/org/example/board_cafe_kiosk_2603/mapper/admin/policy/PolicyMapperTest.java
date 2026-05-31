@@ -1,8 +1,8 @@
-//package org.example.board_cafe_kiosk_2603.mapper.admin.policy;
+//package org.example.board_cafe_kiosk_2603.admin.policy.mapper;
 //
 //import lombok.extern.log4j.Log4j2;
-//import org.example.board_cafe_kiosk_2603.domain.admin.policy.Policy;
-//import org.example.board_cafe_kiosk_2603.dto.common.pagination.PageRequestDTO;
+//import org.example.board_cafe_kiosk_2603.admin.policy.model.Policy;
+//import org.example.board_cafe_kiosk_2603.common.pagination.PageRequestDTO;
 //import org.junit.jupiter.api.Test;
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.boot.test.context.SpringBootTest;
